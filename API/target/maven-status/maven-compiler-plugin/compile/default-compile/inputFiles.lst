@@ -1,8 +1,11 @@
 D:\ruanv\Documentos\chamados\API\src\main\java\com\chamados\api\ChamadosApi.java
 D:\ruanv\Documentos\chamados\API\src\main\java\com\chamados\api\Controllers\FilialController.java
+D:\ruanv\Documentos\chamados\API\src\main\java\com\chamados\api\Controllers\SetorController.java
 D:\ruanv\Documentos\chamados\API\src\main\java\com\chamados\api\Controllers\UserController.java
 D:\ruanv\Documentos\chamados\API\src\main\java\com\chamados\api\Entities\Filial.java
+D:\ruanv\Documentos\chamados\API\src\main\java\com\chamados\api\Entities\Setor.java
 D:\ruanv\Documentos\chamados\API\src\main\java\com\chamados\api\Entities\User.java
 D:\ruanv\Documentos\chamados\API\src\main\java\com\chamados\api\Repositories\FilialRepository.java
+D:\ruanv\Documentos\chamados\API\src\main\java\com\chamados\api\Repositories\SetorRepository.java
 D:\ruanv\Documentos\chamados\API\src\main\java\com\chamados\api\Repositories\UserRepository.java
 D:\ruanv\Documentos\chamados\API\src\main\java\com\chamados\api\SwaggerConfig.java
