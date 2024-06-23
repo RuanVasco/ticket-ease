@@ -1,0 +1,13 @@
+.main_menu_item {
+    width: 17vw;
+    height: 25vh;
+    border: 2px solid var(--secondary-color);
+}
+
+.icon_main_menu_item {
+    font-size: 7rem;
+}
+
+.text_main_menu_item {
+    font-size: 1.4rem;
+}

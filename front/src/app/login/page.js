@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
+import { FaArrowLeft } from "react-icons/fa6";
 import "../components/login_form.css";
 
 export default function Login() {     
@@ -31,7 +32,6 @@ export default function Login() {
             })
 
             if (res.ok) {
-                console.log(res);
                 router.push('/'); 
             } else {
                 console.error('Erro ao enviar formulário:', res.status);
@@ -46,7 +46,7 @@ export default function Login() {
             <div className="d-flex justify-content-center align-items-center div_main_content">        
                 <div>    
                     <div className="p-2">
-                        <Link href="..">Voltar</Link> 
+                        <Link href=".."><FaArrowLeft /> Voltar</Link> 
                     </div> 
                     <form onSubmit={handleSubmit} className="border p-4 rounded form_">
                         <div>

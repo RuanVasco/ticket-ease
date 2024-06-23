@@ -1,6 +1,6 @@
 :root {
   --secondary-color: #f3f3f3;
-  --secondary-color-hover: #dddddd;
+  --secondary-color-hover: #c5c3c3;
   --primary-color: #2c2c2c;
 }
 
@@ -16,4 +16,8 @@ a {
 
 a:hover {
   color: #dddddd;
+}
+
+.div_main_content {
+  height: 70vh;
 }

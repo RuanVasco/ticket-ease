@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+
+import { FaArrowLeft } from "react-icons/fa6";
 import Link from "next/link";
 import "../../components/login_form.css";
 
@@ -46,7 +48,7 @@ export default function Rgister() {
             <div className="d-flex justify-content-center align-items-center div_main_content">        
                 <div>    
                     <div className="p-2">
-                        <Link href="..">Voltar</Link> 
+                        <Link href=".."><FaArrowLeft /> Voltar</Link>  
                     </div> 
                     <form onSubmit={handleSubmit} className="border p-4 rounded">
                         <div>
