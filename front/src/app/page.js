@@ -15,7 +15,7 @@ export default function Home() {
         <Link href="chamados/ver" className="main_menu_item d-flex flex-column justify-content-between align-items-center py-3 mx-2 rounded">
             <FaEye className="icon_main_menu_item" />
             <div className="text_main_menu_item">
-              Visualizar chamados
+              Ver chamados
             </div>
         </Link>
       </div>
