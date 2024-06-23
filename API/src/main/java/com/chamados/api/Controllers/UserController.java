@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.chamados.api.Entities.User;
 import com.chamados.api.Repositories.UserRepository;
+import com.chamados.api.Services.UserService;
 
 @RestController
 @RequestMapping("/user")
@@ -18,6 +19,9 @@ public class UserController {
 
     @Autowired
     UserRepository userRepository;
+    
+    @Autowired
+    UserService userService;
 
     @GetMapping
     public List<User> listAll(){
@@ -26,7 +30,7 @@ public class UserController {
 
     @PostMapping
     public User save(@RequestBody User usuario){
-        return userRepository.save(usuario);
+        return this.userService.save(usuario);
     }
 
 }
