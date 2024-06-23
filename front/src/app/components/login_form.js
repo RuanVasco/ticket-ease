@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import Link from "next/link";
 import "./login_form.css";
 
@@ -8,7 +9,9 @@ export default function LoginForm({ formType }) {
     let registerLabel = '';
     let textButton = '';
     let justifyContent = '';
-    let nameInput = '';    
+    let nameInput = ''; 
+    
+    const router = useRouter();
 
     const [formData, setFormData] = useState({
         name: '',
@@ -46,21 +49,19 @@ export default function LoginForm({ formType }) {
         e.preventDefault();
     
         try {
-          const res = await fetch('http://localhost:8080/user', {
-            method: 'POST',
-            body: JSON.stringify(formData),
-            headers: {
-              'content-type': 'application/json'
+            const res = await fetch('http://localhost:8080/user', {
+                method: 'POST',
+                body: JSON.stringify(formData),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            if (res.ok) {
+                router.push('/'); 
+            } else {
+                console.error('Erro ao enviar formulário:', res.status);
             }
-          })
-
-          console.log(res);
-
-          if (res.ok) {
-            console.log("Yeai!");
-          } else {
-            console.log("Oops! Something is wrong.");
-          }
         } catch (error) {
             console.log(error);
         }
