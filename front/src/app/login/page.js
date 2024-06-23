@@ -9,7 +9,6 @@ export default function Login() {
     const router = useRouter();
 
     const [formData, setFormData] = useState({
-        name: '',
         email: '',
         password: ''
     });
@@ -23,7 +22,7 @@ export default function Login() {
         e.preventDefault();
     
         try {
-            const res = await fetch('http://localhost:8080/user', {
+            const res = await fetch('http://localhost:8080/user/login', {
                 method: 'POST',
                 body: JSON.stringify(formData),
                 headers: {
@@ -32,6 +31,7 @@ export default function Login() {
             })
 
             if (res.ok) {
+                console.log(res);
                 router.push('/'); 
             } else {
                 console.error('Erro ao enviar formulário:', res.status);
@@ -50,10 +50,6 @@ export default function Login() {
                     </div> 
                     <form onSubmit={handleSubmit} className="border p-4 rounded form_">
                         <div>
-                            <label htmlFor="name" className="form-label">Nome</label>
-                            <input type="text" className="form-control" name="name" id="name" placeholder="Nome Sobrenome" value={formData.name} onChange={handleChange}></input>
-                        </div>
-                        <div className='mt-3'>
                             <label htmlFor="email" className="form-label">E-mail</label>
                             <input type="email" className="form-control" name="email" id="email" placeholder="nome@exemplo.com" value={formData.email} onChange={handleChange} required></input>
                         </div> 

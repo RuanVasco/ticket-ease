@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.chamados.api.Entities.User;
 import com.chamados.api.Repositories.UserRepository;
+import com.chamados.api.Exceptions.ServiceExc;
 
 @Service
 public class UserService {
@@ -22,5 +23,15 @@ public class UserService {
 		String encodedPassword = this.passwordEncoder.encode(user.getPassword());
 		user.setPassword(encodedPassword);
 		return this.userRepository.save(user);
+	}
+	
+	public User loginUser(String email, String rawPassword) throws ServiceExc {
+		User userLogin = userRepository.findByEmail(email);
+		
+		if (userLogin != null && passwordEncoder.matches(rawPassword, userLogin.getPassword())) {
+			return userLogin;
+		}
+		
+		throw new ServiceExc("Email ou senha inválidos");		
 	}
 }
