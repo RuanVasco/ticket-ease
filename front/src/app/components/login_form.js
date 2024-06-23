@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import "./login_form.css";
 
-export default function LoginForm({ formType }) {
+export default function LoginForm({ formType }) {  
     let registerLabel = '';
     let textButton = '';
     let justifyContent = '';
