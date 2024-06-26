@@ -1,5 +1,13 @@
 package com.chamados.api.Entities;
 
+import java.util.Collection;
+import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import com.chamados.api.Enums.UserRole;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,8 +27,21 @@ public class User {
     @Column(unique=true)
     private String email;
     private String password;
+    private UserRole role;
+    
+    public Collection<? extends GrantedAuthority> getAuthorities() {    	
+    	if (this.role == UserRole.ADMIN) return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
+    	else return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+    }
 
-    // Getters and Setters
+    public UserRole getRole() {
+		return role;
+	}
+
+	public void setRole(UserRole role) {
+		this.role = role;
+	}
+
     public Long getId() {
         return id;
     }
@@ -52,4 +73,6 @@ public class User {
 	public void setEmail(String email) {
 		this.email = email;
 	}
+	
+	
 }
