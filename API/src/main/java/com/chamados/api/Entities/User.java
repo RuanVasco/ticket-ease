@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.chamados.api.Enums.UserRole;
 
@@ -18,8 +19,9 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "Users")
-public class User {
-    @Id
+public class User implements UserDetails {
+	private static final long serialVersionUID = 1L;
+	@Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @NotNull(message = "Name may not be null")
@@ -72,6 +74,12 @@ public class User {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	@Override
+	public String getUsername() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	
