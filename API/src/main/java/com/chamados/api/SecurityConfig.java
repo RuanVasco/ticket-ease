@@ -14,8 +14,8 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfigurations {
-    @Bean
+public class SecurityConfig {
+	@Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 		return httpSecurity
 				.csrf(csrf-> csrf.disable())
@@ -23,12 +23,12 @@ public class SecurityConfigurations {
 						.frameOptions(frameOptions -> frameOptions.sameOrigin()) 
 	            )
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests(authorize -> authorize
-						.requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-						.requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-						.requestMatchers("/h2-console/**").permitAll()				
-						.anyRequest().authenticated()
-				)
+				// .authorizeHttpRequests(authorize -> authorize
+				// 		.requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+				// 		.requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+				// 		.requestMatchers("/h2-console/**").permitAll()				
+				// 		.anyRequest().authenticated()
+				// )
 				.build();
 	}
     
