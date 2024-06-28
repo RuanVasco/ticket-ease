@@ -27,8 +27,9 @@ public class AuthenticationController {
 	private UserRepository userRepository;
 	
 	@PostMapping("/login")
-    public ResponseEntity login(@RequestBody @Valid AuthenticationDTO data) {
-		var emailPassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
+    public ResponseEntity login(@RequestBody @Valid AuthenticationDTO data) {		
+		var emailPassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());	
+		System.out.println(emailPassword);
 		var auth = this.authenticationManager.authenticate(emailPassword);
 		
 		return ResponseEntity.ok().build();
@@ -40,5 +41,9 @@ public class AuthenticationController {
 		
 		String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
 		User newUser = new User(data.name(), data.email(), encryptedPassword, data.role());
+		
+		this.userRepository.save(newUser);
+		
+		return ResponseEntity.ok().build();
 	}
 }
