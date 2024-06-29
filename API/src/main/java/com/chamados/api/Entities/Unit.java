@@ -15,7 +15,11 @@ public class Unit {
 	private String name;
 	private String address;
 	
-	public Unit() {
+	public Unit() {}
+	
+	public Unit(String name, String address) {
+		this.name = name;
+		this.address = address;
     }
 	
 	public String getAddress() {

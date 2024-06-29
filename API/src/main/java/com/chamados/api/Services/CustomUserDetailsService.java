@@ -9,12 +9,6 @@ import com.chamados.api.Components.UserDetailsImpl;
 import com.chamados.api.Entities.User;
 import com.chamados.api.Repositories.UserRepository;
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
-import java.util.Set;
-import java.util.stream.Collectors;
-
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
     private UserRepository userRepository;
@@ -30,11 +24,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
         }
-
-        Set<GrantedAuthority> authorities = user
-                .getRoles()
-                .stream()
-                .map((role) -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toSet());
 
         return new UserDetailsImpl(user);
     }

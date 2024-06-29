@@ -34,6 +34,8 @@ public class SecurityConfig {
 				 		.requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
 				 		.requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
 				 		.requestMatchers(HttpMethod.POST, "/auth/validate").permitAll()
+				 		.requestMatchers(HttpMethod.GET, "/forms/**").permitAll()
+				 		.requestMatchers(HttpMethod.GET, "/**").permitAll()
 				 		.requestMatchers("/h2-console/**").permitAll()				
 				 		.anyRequest().authenticated()
 				)

@@ -21,8 +21,12 @@ public class Department {
 	@JoinColumn(name = "unit_id")
     private Unit unit;
 	
-	public Department() {
-		
+	 public Department() {}
+	
+	public Department(String name, boolean receivesRequests, Unit unit) {
+		this.name = name;
+		this.receivesRequests = receivesRequests;
+		this.unit = unit;
 	}
 
 	public String getName() {
