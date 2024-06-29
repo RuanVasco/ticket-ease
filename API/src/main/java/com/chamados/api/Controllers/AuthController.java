@@ -13,12 +13,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.chamados.api.Components.UserDetailsImpl;
 import com.chamados.api.DTO.LoginDTO;
+import com.chamados.api.DTO.LoginResponseDTO;
 import com.chamados.api.DTO.RegisterDTO;
 import com.chamados.api.Entities.Role;
 import com.chamados.api.Entities.User;
 import com.chamados.api.Repositories.RoleRepository;
 import com.chamados.api.Repositories.UserRepository;
+import com.chamados.api.Services.TokenService;
 
 import jakarta.validation.Valid;
 
@@ -40,13 +43,20 @@ public class AuthController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private TokenService tokenService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginDTO data) {		
-		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(data.email(), data.password()));
-		
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-		return ResponseEntity.ok().build();
+        var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
+        Authentication auth = authenticationManager.authenticate(usernamePassword);
+        
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        User user = userDetails.getUser();
+        var token = tokenService.generateToken(user);
+        
+        return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 
     @PostMapping("/register")
