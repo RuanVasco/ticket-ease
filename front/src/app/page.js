@@ -1,8 +1,11 @@
+"use client";
+
 import { FaPlus, FaEye } from "react-icons/fa6";
+import withAuth from './auth/withAuth';
 import Link from "next/link";
 import "./home.css"; 
 
-export default function Home() {
+const Home = () => {
   return (
     <main className='d-flex justify-content-center align-items-center div_main_content'>
       <div className="d-flex align-items-top">
@@ -21,4 +24,6 @@ export default function Home() {
       </div>
     </main>
   );
-}
+};
+
+export default withAuth(Home);

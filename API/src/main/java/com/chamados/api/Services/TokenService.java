@@ -19,6 +19,9 @@ public class TokenService {
 	@Value("${api.security.token.secret}")
 	public String secret;
 	
+	@Value("${jwt.refresh.expiration}")
+	private Long refreshExpiration;
+	
 	public String generateToken(User user) {
 		try {
 			Algorithm algorithm = Algorithm.HMAC256(secret);
@@ -32,6 +35,21 @@ public class TokenService {
 			throw new RuntimeException("error while generating token", exception);
 		}
 	}
+	
+	public String generateRefreshToken(User user){
+		try {
+			Algorithm algorithm = Algorithm.HMAC256(secret);
+			String refreshToken = JWT.create()
+					.withIssuer("auth-api")
+					.withSubject(user.getEmail())
+					.withExpiresAt(getExpirationDate())
+					.sign(algorithm);
+			
+			return refreshToken;
+		} catch (JWTCreationException exception) {
+			throw new RuntimeException("error while generating refresh token", exception);
+		}
+    }
 	
 	public String validateToken(String token) {
 		try {
@@ -49,4 +67,5 @@ public class TokenService {
 	private Instant getExpirationDate() {
 		return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
 	}
+	
 }
