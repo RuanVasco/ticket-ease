@@ -15,39 +15,33 @@ import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.Metamodel;
 import jakarta.persistence.metamodel.SingularAttribute;
 
-
 @RestController
 @RequestMapping("/forms")
 public class FormController {
-	
-	 @Autowired
-	 private EntityManagerFactory entityManagerFactory;
-	
-    @GetMapping("/{entityName}")
-    public List<String> getEntityFields(@PathVariable String entityName) {
-    	List<String> fields = new ArrayList<>();
-    	
-    	EntityManager entityManager = entityManagerFactory.createEntityManager();    
-		
-    	try {
-    		Metamodel metamodel = entityManager.getMetamodel();
-    		
-    		for (EntityType<?> entityType : metamodel.getEntities()) {
-    			if (entityType.getName().equals(entityName)) {
+
+	@Autowired
+	private EntityManagerFactory entityManagerFactory;
+
+	@GetMapping("/{entityName}")
+	public List<String> getEntityFields(@PathVariable String entityName) {
+		List<String> fields = new ArrayList<>();
+
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            Metamodel metamodel = entityManager.getMetamodel();
+
+            for (EntityType<?> entityType : metamodel.getEntities()) {
+				System.out.println(entityType.getJavaType().getSimpleName()+" = "+entityName);
+                if (entityType.getJavaType().getSimpleName().equalsIgnoreCase(entityName)) {
                     for (SingularAttribute<?, ?> attribute : entityType.getDeclaredSingularAttributes()) {
                         fields.add(attribute.getName() + " (" + attribute.getType().getJavaType().getSimpleName() + ")");
                     }
                     break;
                 }
-    		}
-    	} finally {
-            entityManager.close();
-        }	
-    	
-    	fields.add("sfa");
-    	
-    	System.out.println(fields);
-    	
-    	return fields;
-    }  
+            }
+        }
+
+		System.out.println(fields);
+
+		return fields;
+	}
 }
