@@ -51,7 +51,6 @@ public class FormController {
         String tableTicketName = javaType.getSimpleName();
 
         if (tableTicketName.endsWith("TicketForm")) {
-            tableTicketName = tableTicketName.replace("TicketForm", "");
             return tableTicketName.equalsIgnoreCase(entityName);
         }
 

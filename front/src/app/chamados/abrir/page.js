@@ -69,7 +69,7 @@ const AbrirChamado = () => {
                             <select id="selectSectors" className="form-select" value={selectedOption} onChange={handleChange}>
                                 <option default>Escolha um setor</option>
                                 {options.map(option => (
-                                    <option key={option.id} value={option.name}>{option.name}</option>
+                                    <option key={option.id} value={option.name+"TicketForm"}>{option.name}</option>
                                 ))}
                             </select>
                         </td>
