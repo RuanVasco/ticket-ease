@@ -6,15 +6,15 @@ const Header = ({ pageName }) => {
         <nav className="navbar navbar-expand-lg">
             <div className="container">
                 <div className="row w-100 py-2">
-                    <div className="col-2">
+                    <div className="col-3">
                         <Link href=".." className="btn btn-secondary">
                             <FaArrowLeft /> Voltar
                         </Link>
                     </div>
-                    <div className="col-8 d-flex justify-content-center align-items-center">
-                        <h3 className="text-center fw-bold">{pageName}</h3>
+                    <div className="col-6 d-flex justify-content-center align-items-center text-end">
+                        <h3 className=" fw-bold">{pageName}</h3>
                     </div>
-                    <div className="col-2"></div>
+                    <div className="col-3"></div>
                 </div>
             </div>
         </nav>
