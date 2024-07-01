@@ -62,7 +62,7 @@ const FormSchemaBased = ({ data, hiddenInputs }) => {
                 </tbody>
             </table>
             <div className='text-end pe-3'>
-                <button type="submit" className="btn btn-primary mt-3">Enviar</button>
+                <button type="submit" className="btn btn-custom mt-3">Enviar</button>
             </div>
 
         </form>

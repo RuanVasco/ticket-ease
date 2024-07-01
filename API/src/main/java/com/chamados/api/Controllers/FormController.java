@@ -11,7 +11,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.Metamodel;
-import jakarta.persistence.metamodel.SingularAttribute;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

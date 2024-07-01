@@ -1,19 +1,12 @@
 package com.chamados.api.Components;
 
+import com.chamados.api.Entities.*;
+import com.chamados.api.Repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.chamados.api.Entities.Department;
-import com.chamados.api.Entities.Role;
-import com.chamados.api.Entities.Unit;
-import com.chamados.api.Entities.User;
-import com.chamados.api.Repositories.DepartmentRepository;
-import com.chamados.api.Repositories.RoleRepository;
-import com.chamados.api.Repositories.UnitRepository;
-import com.chamados.api.Repositories.UserRepository;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -33,25 +26,35 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private UserThemePreferenceRepository userThemePreferenceRepository;
+
     @Override
     @Transactional
     public void run(String... args) throws Exception {
         if (roleRepository.findByName("ROLE_USER").isEmpty()) {
             roleRepository.save(new Role("ROLE_USER"));
         }
-        
+
         if (roleRepository.findByName("ROLE_ADMIN").isEmpty()) {
             roleRepository.save(new Role("ROLE_ADMIN"));
         }
-        
+
         if (userRepository.findByEmail("admin@admin") == null) {
             User user = new User();
             user.setName("Admin User");
             user.setEmail("admin@admin");
             user.setPassword(passwordEncoder.encode("1234"));
             userRepository.save(user);
+
+            if (userThemePreferenceRepository.findByUserId(user.getId()).isEmpty()) {
+                UserThemePreference preference = new UserThemePreference();
+                preference.setUserId(user.getId());
+                preference.setTheme("light");
+                userThemePreferenceRepository.save(preference);
+            }
         }
-        
+
         initializeUnits();
         initializeDepartments();
     }

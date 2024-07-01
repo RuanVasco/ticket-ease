@@ -25,12 +25,12 @@ public class TokenService {
 	public String generateToken(User user) {
 		try {
 			Algorithm algorithm = Algorithm.HMAC256(secret);
-			String token = JWT.create()
+            return JWT.create()
 					.withIssuer("auth-api")
+					.withClaim("userId", user.getId())
 					.withSubject(user.getEmail())
 					.withExpiresAt(getExpirationDate())
 					.sign(algorithm);
-			return token;
 		} catch (JWTCreationException exception) {
 			throw new RuntimeException("error while generating token", exception);
 		}
@@ -39,13 +39,12 @@ public class TokenService {
 	public String generateRefreshToken(User user){
 		try {
 			Algorithm algorithm = Algorithm.HMAC256(secret);
-			String refreshToken = JWT.create()
+
+            return JWT.create()
 					.withIssuer("auth-api")
 					.withSubject(user.getEmail())
 					.withExpiresAt(getExpirationDate())
 					.sign(algorithm);
-			
-			return refreshToken;
 		} catch (JWTCreationException exception) {
 			throw new RuntimeException("error while generating refresh token", exception);
 		}

@@ -1,5 +1,7 @@
 package com.chamados.api.Controllers;
 
+import com.chamados.api.Entities.UserThemePreference;
+import com.chamados.api.Repositories.UserThemePreferenceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +50,9 @@ public class AuthController {
     @Autowired
     private TokenService tokenService;
 
+    @Autowired
+    private UserThemePreferenceRepository userThemePreferenceRepository;
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginDTO data) {		
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
@@ -67,7 +72,6 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody RegisterDTO signUpDto){       
 
-        // add check for email exists in DB
         if (userRepository.existsByEmail(signUpDto.getEmail())){
             return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
         }
@@ -82,6 +86,13 @@ public class AuthController {
         user.setRoles(Collections.singleton(defaultRole.get()));
 
         userRepository.save(user);
+
+        if (userThemePreferenceRepository.findByUserId(user.getId()).isEmpty()) {
+            UserThemePreference preference = new UserThemePreference();
+            preference.setUserId(user.getId());
+            preference.setTheme("light");
+            userThemePreferenceRepository.save(preference);
+        }
 
         return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
 

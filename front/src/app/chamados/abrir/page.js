@@ -1,7 +1,7 @@
 "use client";
 
 import Header from '../../header';
-import FormSchemaBased from '../../../../forms/schemaBasedForm';
+import FormSchemaBased from '../../components/forms/schemaBasedForm';
 import withAuth from '../../auth/withAuth';
 import React, { useState, useEffect } from 'react';
 import axios from "axios";
