@@ -26,9 +26,6 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private UserThemePreferenceRepository userThemePreferenceRepository;
-
     @Override
     @Transactional
     public void run(String... args) throws Exception {
@@ -45,14 +42,7 @@ public class DataInitializer implements CommandLineRunner {
             user.setName("Admin User");
             user.setEmail("admin@admin");
             user.setPassword(passwordEncoder.encode("1234"));
-            userRepository.save(user);
-
-            if (userThemePreferenceRepository.findByUserId(user.getId()).isEmpty()) {
-                UserThemePreference preference = new UserThemePreference();
-                preference.setUserId(user.getId());
-                preference.setTheme("light");
-                userThemePreferenceRepository.save(preference);
-            }
+            userRepository.save(user);            
         }
 
         initializeUnits();
