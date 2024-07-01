@@ -4,9 +4,14 @@
   --primary-color: #1f1f1f;
 }
 
-body {
+.darkmode {
   background-color: var(--primary-color);
   color: var(--secondary-color);
+}
+
+body {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
 }
 
 a {
@@ -20,4 +25,14 @@ a:hover {
 
 .div_main_content {
   height: 70vh;
+}
+
+.btn-custom {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+}
+
+.btn-custom:hover {
+  background-color: var(--secondary-color-hover);
+  color: var(--primary-color);
 }
