@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { SiRetroarch } from 'react-icons/si';
 import { IoSunny, IoMoon } from 'react-icons/io5';
 import ThemeChange from './ThemeChange';
@@ -6,7 +6,7 @@ import ThemeChange from './ThemeChange';
 const ThemeSelector = () => {
     const [theme, setTheme] = useState([]);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         if (typeof window !== "undefined") {
             const savedTheme = localStorage.getItem("theme");
             if (savedTheme) {
