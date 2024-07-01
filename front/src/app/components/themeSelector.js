@@ -1,48 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { SiRetroarch } from 'react-icons/si';
 import { IoSunny, IoMoon } from 'react-icons/io5';
+import ThemeChange from './ThemeChange';
 
 const ThemeSelector = () => {
     const [theme, setTheme] = useState([]);
 
-    if (typeof window !== "undefined") {
-        useEffect(() => {
+    useLayoutEffect(() => {
+        if (typeof window !== "undefined") {
             const savedTheme = localStorage.getItem("theme");
-            setTheme(savedTheme || "light");
-        }, []);
-    }
+            if (savedTheme) {
+                setTheme(savedTheme);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        ThemeChange(theme);
+    }, [theme]);
 
     const handleThemeChange = (selectedTheme) => {
         setTheme(selectedTheme);
-        if (typeof window !== "undefined") {
-            theme = selectedTheme;
-            var r = document.querySelector(':root');
-            document.body.classList.remove('darkmode', 'retro');
-
-            const mainMenuItems = document.querySelectorAll('.main_menu_item');
-            mainMenuItems.forEach(item => {
-                item.classList.remove('main_menu_item_dark');
-            });
-
-            if (theme === 'dark') {
-                r.style.setProperty('--secondary-color', '#1f1f1f');
-                r.style.setProperty('--primary-color', '#f9f9f9');
-                r.style.setProperty('--primary-color-hover', '#e7e7e7');
-                r.style.setProperty('--secondary-color-hover', '#0e0e0e');
-
-                localStorage.setItem("theme", "dark");
-            } else if (theme === 'retro') {
-                localStorage.setItem("theme", "retro");
-                document.body.classList.add('retro');
-            } else {
-                r.style.setProperty('--secondary-color', '#f9f9f9');
-                r.style.setProperty('--primary-color', '#1f1f1f');
-                r.style.setProperty('--primary-color-hover', '#0e0e0e');
-                r.style.setProperty('--secondary-color-hover', '#e7e7e7');
-
-                localStorage.setItem("theme", "light");
-            }
-        }
     };
 
     return (
@@ -66,7 +44,7 @@ const ThemeSelector = () => {
                 name="theme"
                 id="radioLight"
                 autoComplete="off"
-                checked={theme === 'light'}
+                checked={theme !== 'retro' && theme !== 'dark'}
                 onChange={() => handleThemeChange('light')}
             />
             <label className="btn btn-custom" htmlFor="radioLight" title="Light Mode">
