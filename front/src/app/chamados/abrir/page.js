@@ -1,6 +1,6 @@
 "use client";
 
-import Header from '../../header';
+import Header from '../../components/header/header';
 import FormSchemaBased from '../../components/forms/schemaBasedForm';
 import withAuth from '../../auth/withAuth';
 import React, { useState, useEffect } from 'react';

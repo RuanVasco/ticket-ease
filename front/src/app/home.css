@@ -1,13 +1,13 @@
 .main_menu_item {
     width: 17vw;
     height: 25vh;
-    background-color: var(--secondary-color);
-    color: var(--primary-color);
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
 }
 
 .main_menu_item:hover {
-    background-color: #d4d4d4;
-    color: var(--primary-color);
+    background-color: var(--primary-color-hover);
+    color: var(--secondary-color-hover);
 }
 
 .icon_main_menu_item {

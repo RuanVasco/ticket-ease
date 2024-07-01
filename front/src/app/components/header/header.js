@@ -1,8 +1,9 @@
 import { FaArrowLeft } from "react-icons/fa";
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
+import styles from "./header.css";
 
-import ThemeSelector from "./components/themeSelector";
+import ThemeSelector from "../themeSelector";
 
 const Header = ({ pageName }) => {
     const router = useRouter();
@@ -18,14 +19,14 @@ const Header = ({ pageName }) => {
     }
 
     return (
-        <nav className="navbar navbar-expand-lg">
+        <nav className="navbar navbar-expand-lg header-style">
             <div className="container">
                 <div className="row w-100 py-2">
                     <div className="col-3">
                         {buttonBack}
                     </div>
-                    <div className="col-6 d-flex justify-content-center align-items-center text-end">
-                        <h3 className="fw-bold">{pageName}</h3>
+                    <div className="col-6 d-flex justify-content-center">
+                        <h3 className="fw-bold my-auto">{pageName}</h3>
                     </div>
                     <div className="col-3 text-end">
                         <ThemeSelector />                        

@@ -1,0 +1,6 @@
+.block_ {
+    width: 20vw;
+    border: 1px solid var(--secondary-color);
+    color: var(--primary-color);
+    background-color: var(--secondary-color);
+}

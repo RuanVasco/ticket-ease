@@ -3,24 +3,47 @@ import { SiRetroarch } from 'react-icons/si';
 import { IoSunny, IoMoon } from 'react-icons/io5';
 
 const ThemeSelector = () => {
-    const [theme, setTheme] = useState(localStorage.getItem("theme") ?? "light");
+    const [theme, setTheme] = useState([]);
+
+    if (typeof window !== "undefined") {
+        useEffect(() => {
+            const savedTheme = localStorage.getItem("theme");
+            setTheme(savedTheme || "light");
+        }, []);
+    }
 
     const handleThemeChange = (selectedTheme) => {
         setTheme(selectedTheme);
-    };
+        if (typeof window !== "undefined") {
+            theme = selectedTheme;
+            var r = document.querySelector(':root');
+            document.body.classList.remove('darkmode', 'retro');
 
-    useEffect(() => {
-        document.body.classList.remove('darkmode', 'retro');
-        if (theme === 'dark') {
-            localStorage.setItem("theme", "dark");
-            document.body.classList.add('darkmode');
-        } else if (theme === 'retro') {
-            localStorage.setItem("theme", "retro");
-            document.body.classList.add('retro');
-        } else {
-            localStorage.setItem("theme", "light");
+            const mainMenuItems = document.querySelectorAll('.main_menu_item');
+            mainMenuItems.forEach(item => {
+                item.classList.remove('main_menu_item_dark');
+            });
+
+            if (theme === 'dark') {
+                r.style.setProperty('--secondary-color', '#1f1f1f');
+                r.style.setProperty('--primary-color', '#f9f9f9');
+                r.style.setProperty('--primary-color-hover', '#e7e7e7');
+                r.style.setProperty('--secondary-color-hover', '#0e0e0e');
+
+                localStorage.setItem("theme", "dark");
+            } else if (theme === 'retro') {
+                localStorage.setItem("theme", "retro");
+                document.body.classList.add('retro');
+            } else {
+                r.style.setProperty('--secondary-color', '#f9f9f9');
+                r.style.setProperty('--primary-color', '#1f1f1f');
+                r.style.setProperty('--primary-color-hover', '#0e0e0e');
+                r.style.setProperty('--secondary-color-hover', '#e7e7e7');
+
+                localStorage.setItem("theme", "light");
+            }
         }
-    }, [theme]);
+    };
 
     return (
         <div className="btn-group" role="group" aria-label="Basic radio toggle button group">

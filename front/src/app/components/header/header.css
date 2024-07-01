@@ -1,0 +1,4 @@
+.header-style {
+    background-color: var(--static-primary-color);
+    color: var(--static-secondary-color);
+}
