@@ -1,0 +1,21 @@
+.table-custom, thead, tbody, td, tr, th {
+    background-color: var(--secondary-color);
+}
+
+.table-custom td {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border-bottom: 1px solid var(--primary-color);    
+}
+
+.table-custom th {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+}
+
+.col-auto-width {
+    width:1%;
+    white-space: nowrap;
+    text-align: center;
+}
+
