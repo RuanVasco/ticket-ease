@@ -49,11 +49,7 @@ public class FormController {
     private boolean isEntityMatch(Class<?> javaType, String entityName) {
         String tableTicketName = javaType.getSimpleName();
 
-        if (tableTicketName.endsWith("TicketForm")) {
-            return tableTicketName.equalsIgnoreCase(entityName);
-        }
-
-        return false;
+        return tableTicketName.equalsIgnoreCase(entityName);
     }
 
     private void collectAttributes(List<String> fields, Class<?> javaType) {

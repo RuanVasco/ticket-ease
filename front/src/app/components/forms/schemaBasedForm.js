@@ -26,7 +26,7 @@ const FormSchemaBased = ({ data, hiddenInputs }) => {
     }
 
     return (
-        <form className="w-50 mx-auto text-center">
+        <form className="text-center">
             <table className='form_table w-100'>
                 <tbody>
                     {data.map(field => {

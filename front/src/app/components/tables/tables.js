@@ -1,12 +1,41 @@
 import { FaUserPlus, FaUserMinus, FaEye } from "react-icons/fa";
 import { FaPencil, FaCircleXmark } from "react-icons/fa6";
+import FormSchemaBased from "../forms/schemaBasedForm";
+import axios from "axios";
 import styles from "./tables.css";
+import { useState } from "react";
 
-const Table = ({ columns, data }) => {
+const Table = ({ columns, data, entity }) => {
+    const [formStructure, setFormStructure] = useState([]);
+
+    const handleModalOpen = async (action) => {
+        const titleElement = document.getElementById("title_modal");
+        action = capitalizeFirstLetter(action);
+        titleElement.textContent = `${action} ${entity}`;
+
+        try {
+            const res = await axios.get(`http://localhost:8080/forms/${entity}`);
+
+            if (res.status === 200) {
+                if (res.data != "empty") {
+                    setFormStructure(res.data);
+                }
+            } else {
+                console.error('Erro', res.status);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
     return (
-        <div className="mt-4">
-            <div className="d-flex justify-content-center mb-3">
-                <button className="btn btn-go-back me-2"><FaUserPlus /></button>
+        <div>
+            <div className="d-flex justify-content-center mt-4 mb-3">
+                <button className="btn btn-go-back me-2" data-bs-toggle="modal" data-bs-target="#modal" onClick={() => handleModalOpen("Criar")}><FaUserPlus /></button>
                 <button className="btn btn-go-back me-2"><FaUserMinus /></button>
                 <div>
                     <input className="form-control" placeholder="Filtrar"></input>
@@ -40,6 +69,25 @@ const Table = ({ columns, data }) => {
                     ))}
                 </tbody>
             </table>
+
+            <div className="modal fade" id="modal" tabIndex="-1" aria-hidden="true">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h1 className="modal-title fs-5" id="title_modal">{entity}</h1>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            <FormSchemaBased data={formStructure} />
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" className="btn btn-primary">Save changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     );
 }

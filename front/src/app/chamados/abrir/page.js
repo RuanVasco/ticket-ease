@@ -76,7 +76,7 @@ const AbrirChamado = () => {
                     </tr>
                 </tbody>
             </table>
-            <div id="form_" className='mt-5'>
+            <div id="form_" className='mt-5 w-50 mx-auto'>
                 <FormSchemaBased data={formStructure} hiddenInputs={hiddenInputs} />
             </div>
 
