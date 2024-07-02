@@ -6,6 +6,8 @@
 
   --static-secondary-color: #f9f9f9;
   --static-primary-color: #1f1f1f;
+  --static-secondary-color-hover: #e7e7e7;
+  --static-primary-color-hover: #0e0e0e;
 }
 
 body {

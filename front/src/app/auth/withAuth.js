@@ -3,30 +3,49 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axiosInterceptor from './axiosInterceptor';
+import axios from 'axios';
 
 const withAuth = (WrappedComponent) => {
     return (props) => {
         const router = useRouter();
-        const [loading, setLoading] = useState(true); 
+        const [loading, setLoading] = useState(true);
 
         useEffect(() => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                router.push('/auth/login');
-            } else {
-                axiosInterceptor.post('/auth/validate', {token:token})
-                    .then(() => {
-                        setLoading(false); 
-                    })
-                    .catch(() => {
+            const checkAuth = async () => {
+                const token = localStorage.getItem('token');
+                const refreshToken = localStorage.getItem('refreshToken');
+
+                if (!token) {
+                    if (refreshToken) {
+                        try {
+                            const response = await axios.post('http://localhost:8080/auth/refresh', { refreshToken: refreshToken });
+                            localStorage.setItem('token', response.data.token);
+                            setLoading(false);
+                        } catch (error) {
+                            router.push('/auth/login');
+                        }
+                    } else {
+                        router.push('/auth/login');
+                    }
+                } else {
+                    try {
+                        await axiosInterceptor.post('/auth/validate', { token });
+                        setLoading(false);
+                    } catch (error) {
                         localStorage.removeItem('token');
                         router.push('/auth/login');
-                    })
-                    .finally(() => {
-                        setLoading(false); 
-                    });
-            }
-        }, []);
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+            };
+
+            checkAuth();
+        }, [router]);
+
+        if (loading) {
+            return <div></div>;
+        }
 
         return <WrappedComponent {...props} />;
     };

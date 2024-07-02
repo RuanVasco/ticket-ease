@@ -2,3 +2,13 @@
     background-color: var(--static-primary-color);
     color: var(--static-secondary-color);
 }
+
+.btn-go-back {
+    background-color: var(--static-secondary-color);
+    color: var(--static-primary-color);
+}
+
+.btn-go-back:hover {
+    background-color: var(--static-secondary-color-hover);
+    color: var(--static-primary-color-hover);
+}
