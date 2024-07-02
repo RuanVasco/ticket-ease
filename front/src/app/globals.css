@@ -15,11 +15,11 @@ body {
 
 a {
   text-decoration: none;
-  color: var(--secondary-color);
+  color: var(--primary-color);
 }
 
 a:hover {
-  color: #dddddd;
+  color: var(--primary-color-hover);
 }
 
 .div_main_content {

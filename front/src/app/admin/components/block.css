@@ -1,7 +1,9 @@
 .block_ {
     width: 20vw;
     border: 1px solid var(--primary-color);
-    color: var(--primary-color);
+    border-radius: 0.6rem;
+    padding: 10px;
+    margin: 5px;
 }
 
 .icon_block {

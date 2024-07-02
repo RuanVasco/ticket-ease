@@ -1,4 +1,4 @@
-const Table = (data) => {
+const Table = ({ columns, data }) => {
     return (
         <table>
             <thead>

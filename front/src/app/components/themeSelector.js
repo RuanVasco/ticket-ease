@@ -4,23 +4,15 @@ import { IoSunny, IoMoon } from 'react-icons/io5';
 import ThemeChange from './ThemeChange';
 
 const ThemeSelector = () => {
-    const [theme, setTheme] = useState([]);
+    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
     useEffect(() => {
-        if (typeof window !== "undefined") {
-            const savedTheme = localStorage.getItem("theme");
-            if (savedTheme) {
-                setTheme(savedTheme);
-            }
-        }
-    }, []);
-
-    useEffect(() => {
-        ThemeChange(theme);
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
     }, [theme]);
 
-    const handleThemeChange = (selectedTheme) => {
-        setTheme(selectedTheme);
+    const toggleTheme = (theme) => {
+        setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
     };
 
     return (

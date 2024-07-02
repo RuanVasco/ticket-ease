@@ -12,7 +12,7 @@ const Header = ({ pageName }) => {
 
     if (pathname !== '/') {
         buttonBack = (
-            <button onClick={() => router.back()} className="btn btn-secondary">
+            <button onClick={() => router.back()} className="btn btn-custom">
                 <FaArrowLeft /> Voltar
             </button>
         );

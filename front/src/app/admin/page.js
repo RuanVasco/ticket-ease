@@ -33,7 +33,7 @@ const HomeAdmin = () => {
     return (
         <main>
             <Header pageName="Administração" />
-            <div className="container d-flex align-items-start justify-content-start">
+            <div className="container d-flex align-items-start justify-content-center pt-4">
                 {blocks.map((block, index) => (
                     <Block key={index} text={block.text} icon={block.icon} link={block.link} description={block.description} />
                 ))}

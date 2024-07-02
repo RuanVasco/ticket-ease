@@ -1,6 +1,6 @@
 "use client"
 
-import Header from "../../header";
+import Header from "../../components/header/header";
 import Table from "../../components/tables/tables";
 
 const Users = () => {
