@@ -19,7 +19,7 @@ const HomeAdmin = () => {
         {
             text: "Unidades",
             icon: <SiHomeassistantcommunitystore />, 
-            link: "/branches",
+            link: "/admin/units",
             description: ""
         },
         {

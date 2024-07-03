@@ -1,31 +1,14 @@
 import { FaUserPlus, FaUserMinus, FaEye } from "react-icons/fa";
 import { FaPencil, FaCircleXmark } from "react-icons/fa6";
 import FormSchemaBased from "../forms/schemaBasedForm";
-import axios from "axios";
 import styles from "./tables.css";
 import { useState } from "react";
 
 const Table = ({ columns, data, entity }) => {
-    const [formStructure, setFormStructure] = useState([]);
-
-    const handleModalOpen = async (action) => {
+    const handleModalOpen = (action) => {
         const titleElement = document.getElementById("title_modal");
         action = capitalizeFirstLetter(action);
         titleElement.textContent = `${action} ${entity}`;
-
-        try {
-            const res = await axios.get(`http://localhost:8080/forms/${entity}`);
-
-            if (res.status === 200) {
-                if (res.data != "empty") {
-                    setFormStructure(res.data);
-                }
-            } else {
-                console.error('Erro', res.status);
-            }
-        } catch (error) {
-            console.log(error);
-        }
     }
 
     function capitalizeFirstLetter(string) {
@@ -78,7 +61,7 @@ const Table = ({ columns, data, entity }) => {
                             <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div className="modal-body">
-                            <FormSchemaBased data={formStructure} />
+                            <FormSchemaBased entity={entity} />
                         </div>
                         <div className="modal-footer">
                             <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -87,9 +70,8 @@ const Table = ({ columns, data, entity }) => {
                     </div>
                 </div>
             </div>
-
         </div>
     );
-}
+};
 
 export default Table;

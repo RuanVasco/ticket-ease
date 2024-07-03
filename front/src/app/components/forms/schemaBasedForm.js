@@ -1,15 +1,14 @@
-import React from 'react';
-import formStyle from './formStyle.css';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import './formStyle.css';
 
 const parseFieldString = (fieldString) => {
     const trimmedString = fieldString.trim();
-
     const lastParenIndex = trimmedString.lastIndexOf('(');
 
     if (lastParenIndex !== -1) {
         const label = trimmedString.substring(0, lastParenIndex).trim();
         const type = trimmedString.substring(lastParenIndex + 1, trimmedString.length - 1).trim();
-
         return { label, type };
     } else {
         return { label: trimmedString, type: undefined };
@@ -17,35 +16,54 @@ const parseFieldString = (fieldString) => {
 };
 
 const generateRandomKey = () => {
-    return Math.floor(Math.random() * 1000000); 
+    return Math.floor(Math.random() * 1000000);
 };
 
-const FormSchemaBased = ({ data, hiddenInputs }) => {
-    if (data.length < 1) {
-        return (<></>);
+const FormSchemaBased = ({ entity, hiddenInputs }) => {
+    const [formData, setFormData] = useState([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await axios.get(`http://localhost:8080/forms/${entity}`);
+                if (res.status === 200 && res.data !== "empty") {
+                    setFormData(res.data);
+                } else {
+                    console.error('Error', res.status);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        };
+
+        fetchData();
+    }, [entity]);
+
+    if (formData.length < 1) {
+        return null;
     }
 
     return (
         <form className="text-center">
             <table className='form_table w-100'>
                 <tbody>
-                    {data.map(field => {
+                    {formData.map(field => {
                         let { label, type } = parseFieldString(field);
                         let input;
 
-                        if ((hiddenInputs && hiddenInputs.includes(label)) || label == 'id') {
-                            return null; 
+                        if ((hiddenInputs && hiddenInputs.includes(label)) || label === 'id') {
+                            return null;
                         }
 
                         if (label === "descricao" && type === "String") {
-                            input = <div className="form-floating">
-                                        <textarea className="form-control" placeholder="Descrição" name={label} id={label}></textarea>
-                                        <label htmlFor={label}>Descrição</label>
-                                    </div>
-                        } else if (type === "String") {
-                            input = <input type="text" className="form-control" name={label} id={label}></input>
-                        } else if (type === "Long") {
-                            input = <input type="text" className="form-control" name={label} id={label}></input>
+                            input = (
+                                <div className="form-floating">
+                                    <textarea className="form-control" placeholder="Descrição" name={label} id={label}></textarea>
+                                    <label htmlFor={label}>Descrição</label>
+                                </div>
+                            );
+                        } else if (type === "String" || type === "Long") {
+                            input = <input type="text" className="form-control" name={label} id={label}></input>;
                         }
 
                         return (
@@ -54,7 +72,7 @@ const FormSchemaBased = ({ data, hiddenInputs }) => {
                                     <label htmlFor={label}>{label.charAt(0).toUpperCase() + label.slice(1) + ":"}</label>
                                 </td>
                                 <td>
-                                    { input }
+                                    {input}
                                 </td>
                             </tr>
                         );
@@ -64,7 +82,6 @@ const FormSchemaBased = ({ data, hiddenInputs }) => {
             <div className='text-end pe-3'>
                 <button type="submit" className="btn btn-custom mt-3">Enviar</button>
             </div>
-
         </form>
     );
 };
