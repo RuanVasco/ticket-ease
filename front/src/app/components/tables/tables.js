@@ -4,7 +4,7 @@ import FormSchemaBased from "../forms/schemaBasedForm";
 import styles from "./tables.css";
 import { useState } from "react";
 
-const Table = ({ columns, data, entity }) => {
+const Table = ({ columns, data, entity, mode = "admin" }) => {
     const handleModalOpen = (action) => {
         const titleElement = document.getElementById("title_modal");
         action = capitalizeFirstLetter(action);
@@ -18,8 +18,12 @@ const Table = ({ columns, data, entity }) => {
     return (
         <div>
             <div className="d-flex justify-content-center mt-4 mb-3">
-                <button className="btn btn-go-back me-2" data-bs-toggle="modal" data-bs-target="#modal" onClick={() => handleModalOpen("Criar")}><FaUserPlus /></button>
-                <button className="btn btn-go-back me-2"><FaUserMinus /></button>
+                {mode !== "readonly" && (
+                    <>
+                        <button className="btn btn-go-back me-2" data-bs-toggle="modal" data-bs-target="#modal" onClick={() => handleModalOpen("Criar")}><FaUserPlus /></button>
+                        <button className="btn btn-go-back me-2"><FaUserMinus /></button>
+                    </>
+                )}
                 <div>
                     <input className="form-control" placeholder="Filtrar"></input>
                 </div>
@@ -42,8 +46,12 @@ const Table = ({ columns, data, entity }) => {
                             </td>
                             <td className="col-auto-width">
                                 <button className="btn btn-warning me-1"><FaEye /></button>
-                                <button className="btn btn-secondary me-1"><FaPencil /></button>
-                                <button className="btn btn-danger"><FaCircleXmark /></button>
+                                {mode !== "readonly" && (
+                                    <>
+                                        <button className="btn btn-secondary me-1"><FaPencil /></button>
+                                        <button className="btn btn-danger"><FaCircleXmark /></button>
+                                    </>
+                                )}
                             </td>
                             {columns.map((column, colIndex) => (
                                 <td key={colIndex}><span>{row[column.value]}</span></td>
