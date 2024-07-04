@@ -35,7 +35,7 @@ const Users = () => {
         <main>
             <Header pageName="Gerenciar Usuários" />
             <div className="container">
-                <Table columns={columns} data={data} entity="User" />
+                <Table columns={columns} data={data} entity="User" hiddenInputs={["roles", "departament"]} />
             </div>
         </main>
     );

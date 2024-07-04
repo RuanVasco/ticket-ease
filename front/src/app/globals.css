@@ -29,8 +29,8 @@ a:hover {
 }
 
 .btn-custom {
-  background-color: var(--primary-color);
-  color: var(--secondary-color);
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
 }
 
 .btn-custom:hover {

@@ -1,15 +1,16 @@
 .table-custom, thead, tbody, td, tr, th {
-    background-color: var(--secondary-color);
+    background-color: rgba(0, 0, 0, 0);
+    color: var(--secondary-color);
 }
 
 .table-custom td {
-    background-color: var(--secondary-color);
+    background-color: rgba(0, 0, 0, 0);
     color: var(--primary-color);
     border-bottom: 1px solid var(--primary-color);    
 }
 
 .table-custom th {
-    background-color: var(--secondary-color);
+    background-color: rgba(0, 0, 0, 0);
     color: var(--primary-color);
 }
 

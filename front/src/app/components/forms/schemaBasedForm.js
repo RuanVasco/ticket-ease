@@ -19,8 +19,11 @@ const generateRandomKey = () => {
     return Math.floor(Math.random() * 1000000);
 };
 
-const FormSchemaBased = ({ entity, hiddenInputs }) => {
+const FormSchemaBased = ({ entity, hiddenInputs, mode = "" }) => {
     const [formData, setFormData] = useState([]);
+    const readonly = mode === "readonly";
+
+    console.log(mode);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -39,7 +42,7 @@ const FormSchemaBased = ({ entity, hiddenInputs }) => {
         fetchData();
     }, [entity]);
 
-    if (formData.length < 1) {
+    if (formData.length === 0) {
         return null;
     }
 
@@ -48,22 +51,47 @@ const FormSchemaBased = ({ entity, hiddenInputs }) => {
             <table className='form_table w-100'>
                 <tbody>
                     {formData.map(field => {
-                        let { label, type } = parseFieldString(field);
+                        const { label, type } = parseFieldString(field);
                         let input;
 
-                        if ((hiddenInputs && hiddenInputs.includes(label)) || label === 'id') {
+                        if ((hiddenInputs && hiddenInputs.includes(label)) || label === 'id' || (label === "password" && readonly)) {
                             return null;
                         }
 
                         if (label === "descricao" && type === "String") {
                             input = (
                                 <div className="form-floating">
-                                    <textarea className="form-control" placeholder="Descrição" name={label} id={label}></textarea>
+                                    <textarea 
+                                        className="form-control" 
+                                        placeholder="Descrição" 
+                                        name={label} 
+                                        id={label}
+                                        readOnly={readonly}
+                                    ></textarea>
                                     <label htmlFor={label}>Descrição</label>
                                 </div>
                             );
                         } else if (type === "String" || type === "Long") {
-                            input = <input type="text" className="form-control" name={label} id={label}></input>;
+                            if (label === "password") {
+                                input = (
+                                    <input 
+                                        type="password" 
+                                        className={`form-control ${readonly ? 'd-none' : ''}`} 
+                                        name={label} 
+                                        id={label} 
+                                    />
+                                );
+                            } else {
+                                input = (
+                                    <input 
+                                        type="text" 
+                                        className="form-control" 
+                                        name={label} 
+                                        id={label}
+                                        readOnly={readonly}
+                                    />
+                                );
+                            }
                         }
 
                         return (
@@ -79,9 +107,11 @@ const FormSchemaBased = ({ entity, hiddenInputs }) => {
                     })}
                 </tbody>
             </table>
-            <div className='text-end pe-3'>
-                <button type="submit" className="btn btn-custom mt-3">Enviar</button>
-            </div>
+            {!readonly && (
+                <div className='text-end pe-3'>
+                    <button type="submit" className="btn btn-custom mt-3">Enviar</button>
+                </div>
+            )}
         </form>
     );
 };
