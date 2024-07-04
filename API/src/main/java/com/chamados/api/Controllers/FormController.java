@@ -40,7 +40,7 @@ public class FormController {
         }
 
         if (fields.isEmpty() || entityName.isEmpty()) {
-            fields.add("");
+            return null;
         }
 
         return fields;

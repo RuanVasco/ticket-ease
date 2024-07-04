@@ -1,6 +1,6 @@
 .main_menu_item {
-    width: 17vw;
-    height: 25vh;
+    width: 240px;
+    height: 150px;
     background-color: var(--primary-color);
     color: var(--secondary-color);
 }

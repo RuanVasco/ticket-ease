@@ -13,6 +13,7 @@ public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Getter
     @Column(nullable = false, unique = true, length = 60)
     private String name;
 
@@ -23,7 +24,4 @@ public class Role {
         this.name = name;
     }
 
-	public String getName() {
-		return this.name;
-	}    
 }

@@ -21,19 +21,26 @@ const generateRandomKey = () => {
 
 const FormSchemaBased = ({ entity, hiddenInputs, mode = "" }) => {
     const [formData, setFormData] = useState([]);
+    const [isEmpty, setIsEmpty] = useState(false);
     const readonly = mode === "readonly";
-
-    console.log(mode);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const res = await axios.get(`http://localhost:8080/forms/${entity}`);
-                if (res.status === 200 && res.data !== "empty") {
-                    setFormData(res.data);
-                } else {
-                    console.error('Error', res.status);
+
+                if (!res.data) {
+                    setIsEmpty(true);            
                 }
+
+                if (res.status === 200) {
+                    setFormData(res.data);
+                    setIsEmpty(false);
+                } else {                    
+                    console.error('Error', res.status);
+                    setIsEmpty(true);
+                }
+
             } catch (error) {
                 console.log(error);
             }
@@ -42,12 +49,12 @@ const FormSchemaBased = ({ entity, hiddenInputs, mode = "" }) => {
         fetchData();
     }, [entity]);
 
-    if (formData.length === 0) {
-        return null;
+    if (isEmpty || formData.length === 0) {
+        return <></>;
     }
-
+    
     return (
-        <form className="text-center">
+        <form className="text-center" id="form-box">
             <table className='form_table w-100'>
                 <tbody>
                     {formData.map(field => {
