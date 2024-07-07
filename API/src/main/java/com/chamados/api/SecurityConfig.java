@@ -38,8 +38,7 @@ public class SecurityConfig {
 				 		.requestMatchers(HttpMethod.POST, "/auth/validate").permitAll()
 				 		.requestMatchers(HttpMethod.GET, "/forms/**").permitAll()
 				 		.requestMatchers(HttpMethod.GET, "/**").permitAll()
-				 		.requestMatchers("/h2-console/**").permitAll()				
-				 		.anyRequest().authenticated()
+				 		.requestMatchers("/h2-console/**").permitAll()
 				)
 				.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
 				.build();
