@@ -46,4 +46,20 @@ public class User {
     @JoinColumn(name = "department_id")
     private Department departament;
 
+	public String getEmail() {
+		return this.email;
+	}
+	
+	public Long getId() {
+		return this.id;
+	}
+
+	public Object getRoles() {
+		return this.roles;
+	}
+
+	public String getPassword() {		
+		return this.password;
+	}
+
 }
