@@ -6,7 +6,7 @@ import axiosInterceptor from './axiosInterceptor';
 import axios from 'axios';
 
 const withAuth = (WrappedComponent) => {
-    return (props) => {
+    const WithAuth = (props) => {
         const router = useRouter();
         const [loading, setLoading] = useState(true);
 
@@ -49,6 +49,14 @@ const withAuth = (WrappedComponent) => {
 
         return <WrappedComponent {...props} />;
     };
+
+    WithAuth.displayName = `WithAuth(${getDisplayName(WrappedComponent)})`;
+
+    return WithAuth;
+};
+
+const getDisplayName = (WrappedComponent) => {
+    return WrappedComponent.displayName || WrappedComponent.name || 'Component';
 };
 
 export default withAuth;
