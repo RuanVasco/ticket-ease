@@ -25,18 +25,7 @@ const ThemeSelector = () => {
 
     return (
         <div className="btn-group" role="group" aria-label="Basic radio toggle button group">
-            <input
-                type="radio"
-                className="btn-check"
-                name="theme"
-                id="radioRetro"
-                autoComplete="off"
-                checked={theme === 'retro'}
-                onChange={() => handleThemeChange('retro')}
-            />
-            <label className="btn btn-custom" htmlFor="radioRetro" title="Retro Mode">
-                <SiRetroarch />
-            </label>
+
 
             <input
                 type="radio"
