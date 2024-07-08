@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "HrTickets")
+@Table(name = "RhTickets")
 @Getter
 @Setter
 public class RhTicketForm extends Ticket {

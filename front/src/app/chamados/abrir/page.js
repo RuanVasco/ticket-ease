@@ -41,7 +41,7 @@ const AbrirChamado = () => {
         try {
             const res = await axios.post('http://localhost:8080/tickets/', formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
+                    'Content-Type': 'application/json',
                 },
             });
             if (res.status === 200) {

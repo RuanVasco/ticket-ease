@@ -2,6 +2,7 @@ package com.chamados.api.Components;
 
 import java.io.IOException;
 
+import com.chamados.api.Services.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -10,7 +11,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.chamados.api.Entities.User;
 import com.chamados.api.Repositories.UserRepository;
-import com.chamados.api.Services.TokenService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

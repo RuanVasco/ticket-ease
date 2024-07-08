@@ -39,17 +39,16 @@ public class FormController {
             }
         }
 
-        if (fields.isEmpty() || entityName.isEmpty()) {
-            return null;
+        if (fields.isEmpty()) {
+            return null; // Return null or handle appropriately if no fields found
         }
 
         return fields;
     }
 
     private boolean isEntityMatch(Class<?> javaType, String entityName) {
-        String tableTicketName = javaType.getSimpleName();
-
-        return tableTicketName.equalsIgnoreCase(entityName);
+        String tableName = javaType.getSimpleName();
+        return tableName.equalsIgnoreCase(entityName.trim()); // Adjust for case and trim spaces
     }
 
     private void collectAttributes(List<String> fields, Class<?> javaType) {
@@ -58,13 +57,7 @@ public class FormController {
 
     private void collectAttributesRecursively(List<String> fields, Class<?> javaType) {
         for (Field field : javaType.getDeclaredFields()) {
-            if (field.getName().equals("assunto")) {
-                fields.addFirst(field.getName() + " (" + field.getType().getSimpleName() + ")");
-            } else if (field.getName().equals("descricao")) {
-                fields.add(1, field.getName() + " (" + field.getType().getSimpleName() + ")");
-            } else {
-                fields.add(field.getName() + " (" + field.getType().getSimpleName() + ")");
-            }
+            fields.add(field.getName() + " (" + field.getType().getSimpleName() + ")");
         }
 
         // Check for superclasses and collect their attributes recursively
