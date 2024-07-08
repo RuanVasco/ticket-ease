@@ -19,7 +19,7 @@ const generateRandomKey = () => {
     return Math.floor(Math.random() * 1000000);
 };
 
-const FormSchemaBased = ({ entity, hiddenInputs, mode = "" }) => {
+const FormSchemaBased = ({ entity, hiddenInputs, mode = "", onSubmit="" }) => {
     const [formData, setFormData] = useState([]);
     const [isEmpty, setIsEmpty] = useState(false);
     const readonly = mode === "readonly";
@@ -54,7 +54,7 @@ const FormSchemaBased = ({ entity, hiddenInputs, mode = "" }) => {
     }
     
     return (
-        <form className="text-center" id="form-box">
+        <form className="text-center" id="form-box" onSubmit={onSubmit}>
             <table className='form_table w-100'>
                 <tbody>
                     {formData.map(field => {

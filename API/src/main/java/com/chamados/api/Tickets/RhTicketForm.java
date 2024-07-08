@@ -5,10 +5,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "ItTickets")
+@Table(name = "HrTickets")
 @Getter
 @Setter
-public class ItTicketForm extends Ticket {
+public class RhTicketForm extends Ticket {
     @Column(nullable = false)
-    private String teste;
+    private String aaaaa;
 }

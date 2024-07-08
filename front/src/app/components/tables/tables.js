@@ -29,7 +29,7 @@ const Table = ({ columns, data, entity, mode = "admin", hiddenInputs }) => {
     return (
         <div>
             <div className="d-flex justify-content-center mt-4 mb-3">
-                {mode !== "readonly" && (
+                {mode == "admin" && (
                     <>
                         <button className="btn btn-go-back me-2" data-bs-toggle="modal" data-bs-target="#modal" onClick={() => handleModalOpen("Criar", "")}><FaUserPlus /></button>
                         <button className="btn btn-go-back me-2"><FaUserMinus /></button>

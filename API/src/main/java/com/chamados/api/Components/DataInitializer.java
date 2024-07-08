@@ -63,10 +63,10 @@ public class DataInitializer implements CommandLineRunner {
         Unit unitC = unitRepository.findByName("Unit C").orElseThrow(() -> new RuntimeException("Unit C not found"));
 
         if (departmentRepository.findAll().isEmpty()) {
-            departmentRepository.save(new Department("IT", true, unitA));
-            departmentRepository.save(new Department("HR", true, unitB));
-            departmentRepository.save(new Department("Finance", true, unitC));
-            departmentRepository.save(new Department("Legal", false, unitA));
+            departmentRepository.save(new Department("TI", true, unitA));
+            departmentRepository.save(new Department("RH", true, unitB));
+            departmentRepository.save(new Department("Financeiro", true, unitC));
+            departmentRepository.save(new Department("Fiscal", false, unitA));
             departmentRepository.save(new Department("Marketing", false, unitB));
         }
     }

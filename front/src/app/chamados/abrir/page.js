@@ -34,6 +34,26 @@ const AbrirChamado = () => {
         }
     };
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+
+        try {
+            const res = await axios.post('http://localhost:8080/tickets/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            if (res.status === 200) {
+                alert('Chamado aberto com sucesso!');
+            } else {
+                console.error('Erro', res.status);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     return (
         <main>
             <Header pageName="Abrir Chamado" />
@@ -47,7 +67,7 @@ const AbrirChamado = () => {
                             <select id="selectSectors" className="form-select" value={selectedOption} onChange={handleChange}>
                                 <option defaultValue="">Escolha um setor</option>
                                 {options.map(option => (
-                                    <option key={option.id} value={option.name+"TicketForm"}>{option.name}</option>
+                                    <option key={option.id} value={option.name + "TicketForm"}>{option.name}</option>
                                 ))}
                             </select>
                         </td>
@@ -55,7 +75,7 @@ const AbrirChamado = () => {
                 </tbody>
             </table>
             <div id="form_" className='mt-5 w-50 mx-auto'>
-                {selectedOption && <FormSchemaBased entity={selectedOption} hiddenInputs={hiddenInputs} />}
+                {selectedOption && <FormSchemaBased entity={selectedOption} hiddenInputs={hiddenInputs} onSubmit={handleSubmit} />}
             </div>
         </main>
     );
