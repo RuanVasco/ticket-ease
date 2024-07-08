@@ -7,11 +7,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.Metamodel;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +42,7 @@ public class FormController {
         }
 
         if (fields.isEmpty()) {
-            return null; // Return null or handle appropriately if no fields found
+            return null;
         }
 
         return fields;
@@ -48,7 +50,7 @@ public class FormController {
 
     private boolean isEntityMatch(Class<?> javaType, String entityName) {
         String tableName = javaType.getSimpleName();
-        return tableName.equalsIgnoreCase(entityName.trim()); // Adjust for case and trim spaces
+        return tableName.equalsIgnoreCase(entityName.trim());
     }
 
     private void collectAttributes(List<String> fields, Class<?> javaType) {
@@ -56,13 +58,14 @@ public class FormController {
     }
 
     private void collectAttributesRecursively(List<String> fields, Class<?> javaType) {
+        // Add fields of the current class
         for (Field field : javaType.getDeclaredFields()) {
             fields.add(field.getName() + " (" + field.getType().getSimpleName() + ")");
         }
 
-        // Check for superclasses and collect their attributes recursively
+        // Check and add fields from the superclass if annotated with @MappedSuperclass or if it is an entity
         Class<?> superclass = javaType.getSuperclass();
-        if (superclass != null && superclass.isAnnotationPresent(MappedSuperclass.class)) {
+        if (superclass != null && (superclass.isAnnotationPresent(MappedSuperclass.class) || superclass.isAnnotationPresent((Class<? extends Annotation>) Entity.class))) {
             collectAttributesRecursively(fields, superclass);
         }
     }
