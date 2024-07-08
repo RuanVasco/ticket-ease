@@ -16,4 +16,5 @@
 
 .text_main_menu_item {
     font-size: 1.4rem;
+    color: var(--secondary-color-hover);
 }
