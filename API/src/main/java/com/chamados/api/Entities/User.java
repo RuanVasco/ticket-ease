@@ -1,65 +1,41 @@
 package com.chamados.api.Entities;
 
-import java.util.Set;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.GenerationType;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity(name="User")
-@Table(name="users")
+import jakarta.persistence.*;
+import java.util.Set;
+
+@Getter
+@Entity(name = "User")
+@Table(name = "users")
 public class User {
-    @Getter
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Getter
+
     @Setter
+    @Column(nullable = false)
     private String name;
 
     @Setter
-    @Getter
-    @Column(unique=true)
+    @Column(unique = true, nullable = false)
     private String email;
+
     @Setter
-    @Getter
+    @Column(nullable = false)
     private String password;
 
     @Setter
-    @Getter
     @ManyToMany
     @JoinTable(name = "user_roles",
-        joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private Set<Role> roles;
-    
+
+    @Setter
     @ManyToOne
     @JoinColumn(name = "department_id")
-    private Department departament;
-
-	public String getEmail() {
-		return this.email;
-	}
-	
-	public Long getId() {
-		return this.id;
-	}
-
-	public Object getRoles() {
-		return this.roles;
-	}
-
-	public String getPassword() {		
-		return this.password;
-	}
-
+    private Department department;
 }

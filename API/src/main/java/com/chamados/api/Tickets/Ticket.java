@@ -1,26 +1,28 @@
 package com.chamados.api.Tickets;
 
 import com.chamados.api.Entities.User;
-import jakarta.persistence.*;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
+import java.io.Serializable;
+
 @Setter
-@MappedSuperclass
-public abstract class Ticket {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+@Getter
+@Entity
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+public abstract class Ticket implements Serializable {
+    
+    @Id    
     private Long id;
-
-    @Column
     private String assunto;
-
-    @Lob
-    @Column
-    private String descricao;
-
+    private String descricao; 
+    
     @ManyToOne
-    @JoinColumn(name = "users_id")
     private User user;
 }
