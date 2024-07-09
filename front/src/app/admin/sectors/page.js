@@ -6,18 +6,18 @@ import Table from "../../components/tables/tables";
 import axios from "axios";
 import { useState } from 'react';
 
-const Units = () => {
+const Sectors = () => {
     const [data, setData] = useState([]);
 
     const columns = [
         { label: 'Nome', value: 'name' },
-        { label: 'Endereço', value: 'endereco' }
+        { label: 'Unidade', value: 'unidade' }
     ];
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await axios.get('http://localhost:8080/units/');
+                const res = await axios.get('http://localhost:8080/sectors/');
                 if (res.status === 200) {
                     console.log(res.data);
                     setData(res.data);
@@ -34,12 +34,12 @@ const Units = () => {
 
     return (
         <main>
-            <Header pageName="Gerenciar Unidades" />
+            <Header pageName="Gerenciar Setores" />
             <div className="container">
-                <Table columns={columns} data={data} entity="Unit" />
+                <Table columns={columns} data={data} entity="Sector" />
             </div>
         </main>
     );
 }
 
-export default Units;
+export default Sectors;

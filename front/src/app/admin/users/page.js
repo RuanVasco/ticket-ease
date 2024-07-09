@@ -11,7 +11,8 @@ const Users = () => {
 
     const columns = [
         { label: 'Nome', value: 'name' },
-        { label: 'Email', value: 'email' }
+        { label: 'Email', value: 'email' },
+        { label: 'Setor', value: 'setor' }
     ];
 
     useEffect(() => {
