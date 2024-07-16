@@ -13,10 +13,6 @@ const User = () => {
         setFilterText(e.target.value);
     };
 
-    const filteredData = data.filter(row =>
-        columns.some(column => row[column.value].toLowerCase().includes(filterText.toLowerCase()))
-    );
-
     return (
         <div>
             <div className="d-flex justify-content-center mt-4 mb-3">
