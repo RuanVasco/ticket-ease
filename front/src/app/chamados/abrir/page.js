@@ -1,9 +1,9 @@
 "use client";
 
 import Header from '../../components/header/header';
-import FormSchemaBased from '../../components/forms/schemaBasedForm';
-import withAuth from '../../auth/withAuth';
+// import FormSchemaBased from '../../components/forms/schemaBasedForm';
 import React, { useState, useEffect } from 'react';
+import AttachmentsForm from '../../components/attachmentsForm/attachmentsForm';
 import axios from "axios";
 import style from "./style.css";
 
@@ -57,11 +57,11 @@ const AbrirChamado = () => {
     return (
         <main>
             <Header pageName="Abrir Chamado" />
-            <table className='mx-auto form_table'>
+            {/* <table className='mx-auto form_table'>
                 <tbody>
                     <tr>
                         <td>
-                            <label>Setor Responsável:</label>
+                            <label htmlFor="selectSectors">Setor Responsável:</label>
                         </td>
                         <td>
                             <select id="selectSectors" className="form-select" value={selectedOption} onChange={handleChange}>
@@ -73,12 +73,26 @@ const AbrirChamado = () => {
                         </td>
                     </tr>
                 </tbody>
-            </table>
+            </table> */}
             <div id="form_" className='mt-5 w-50 mx-auto'>
-                {selectedOption && <FormSchemaBased entity={selectedOption} hiddenInputs={hiddenInputs} onSubmit={handleSubmit} />}
+                <form className="form_">
+                    <label htmlFor="selectSectors">Setor Responsável:</label>
+                    <select id="selectSectors" class="form-select" value={selectedOption} onChange={handleChange}>
+                        {options.map(option => (
+                            <option key={option.id} value={option.name + "TicketForm"}>{option.name}</option>
+                        ))}
+                    </select>
+                    <label htmlFor="titleTicket" className="mt-2">Assunto: </label>
+                    <input type="text" id="titleTicket" name="title" className="form-control" />
+                    <label htmlFor="descriptionTicket" className="mt-2">Descrição: </label>
+                    <textarea id="descriptionTicket" name="description" className="form-control" rows="5"></textarea>
+                    <AttachmentsForm />
+                    <buttom type="submit" className="btn btn-primary mt-3">Abrir Chamado</buttom>
+                </form>
+                {/* {selectedOption && <FormSchemaBased entity={selectedOption} hiddenInputs={hiddenInputs} onSubmit={handleSubmit} />} */}
             </div>
         </main>
     );
 };
 
-export default withAuth(AbrirChamado);
+export default AbrirChamado;

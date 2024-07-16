@@ -6,9 +6,25 @@
 .btn-go-back {
     background-color: var(--static-secondary-color);
     color: var(--static-primary-color);
+    padding: 4px 5px;
 }
 
 .btn-go-back:hover {
     background-color: var(--static-secondary-color-hover);
     color: var(--static-primary-color-hover);
+}
+
+.modal-content {
+    color: var(--primary-color);
+    background-color: var(--secondary-color);
+}
+
+.btn-settings {
+    font-size: 22px;
+    color: var(--static-secondary-color);
+    display: inline-flex;
+    align-items: center;
+    padding: 5px;
+    outline: 0 !important;
+    border: 0;
 }

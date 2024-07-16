@@ -1,4 +1,5 @@
 import { FaArrowLeft } from "react-icons/fa";
+import { FaGear } from "react-icons/fa6";
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import styles from "./header.css";
@@ -29,10 +30,28 @@ const Header = ({ pageName }) => {
                         <h3 className="fw-bold my-auto">{pageName}</h3>
                     </div>
                     <div className="col-3 text-end">
-                        <ThemeSelector />                        
+                        <button className="btn btn-settings" data-bs-toggle="modal" data-bs-target="#configModal">
+                            <FaGear />
+                        </button>
                     </div>
                 </div>
             </div>
+            <div className="modal fade" id="configModal" tabIndex="-1">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Configurações</h5>
+                            <div className="ms-auto"><ThemeSelector /></div>
+                        </div>
+                        <div className="modal-body">
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </nav>
     );
 };

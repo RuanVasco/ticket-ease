@@ -1,0 +1,10 @@
+.btn-theme-selector {
+    background-color: var(--static-primary-color) !important;
+    color: var(--static-secondary-color) !important;
+    border: 1px solid var(--primary-color) !important;
+}
+
+input[type="radio"]:checked + .btn-theme-selector {
+    background-color: var(--static-secondary-color) !important;
+    color: var(--static-primary-color) !important;
+}

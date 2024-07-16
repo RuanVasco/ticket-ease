@@ -42,4 +42,4 @@ const HomeAdmin = () => {
     );
 };
 
-export default withAuth(HomeAdmin);
+export default HomeAdmin;
