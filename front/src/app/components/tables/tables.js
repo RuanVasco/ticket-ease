@@ -1,4 +1,4 @@
-import { FaUserPlus, FaUserMinus, FaEye } from "react-icons/fa";
+import { FaPlus, FaMinus, FaEye } from "react-icons/fa";
 import { FaPencil, FaCircleXmark } from "react-icons/fa6";
 import FormSchemaBased from "../forms/schemaBasedForm";
 import styles from "./tables.css";
@@ -31,8 +31,8 @@ const Table = ({ columns, data, entity, mode = "admin", hiddenInputs }) => {
             <div className="d-flex justify-content-center mt-4 mb-3">
                 {mode == "admin" && (
                     <>
-                        <button className="btn btn-go-back me-2" data-bs-toggle="modal" data-bs-target="#modal" onClick={() => handleModalOpen("Criar", "")}><FaUserPlus /></button>
-                        <button className="btn btn-go-back me-2"><FaUserMinus /></button>
+                        <button className="btn btn-massive-actions me-2" data-bs-toggle="modal" data-bs-target="#modal" onClick={() => handleModalOpen("Criar", "")}><FaPlus /></button>
+                        <button className="btn btn-massive-actions me-2"><FaMinus /></button>
                     </>
                 )}
                 <div>

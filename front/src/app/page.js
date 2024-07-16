@@ -1,7 +1,6 @@
 "use client";
 
 import { FaPlus, FaEye, FaListCheck } from "react-icons/fa6";
-import withAuth from './auth/withAuth';
 import Link from "next/link";
 import "./home.css";
 import Header from "./components/header/header";
@@ -36,4 +35,4 @@ const Home = () => {
   );
 };
 
-export default withAuth(Home);
+export default Home;
