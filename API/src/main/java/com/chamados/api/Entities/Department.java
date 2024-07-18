@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
 @Entity
 @Table(name="departments")
 public class Department {
@@ -18,7 +19,6 @@ public class Department {
 	private Long id;
 
 	@Setter
-    @Getter
     private String name;
 	private boolean receivesRequests;
 	

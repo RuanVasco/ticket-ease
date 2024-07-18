@@ -1,22 +1,21 @@
 package com.chamados.api.DTO;
 
+import com.chamados.api.Entities.Cargo;
+import com.chamados.api.Entities.Department;
 import lombok.Data;
+import lombok.Getter;
 
 @Data
 public class RegisterDTO {
     private String name;
     private String email;
     private String password;
-    
-	public String getEmail() {
-		return this.email;
-	}
+	@Getter
+    private Long cargo_id;
+    @Getter
+	private Long department_id;
 
-	public String getName() {
-		return this.name;
-	}
-
-	public CharSequence getPassword() {		
+    public CharSequence getPassword() {
 		return this.password;
 	}
 }

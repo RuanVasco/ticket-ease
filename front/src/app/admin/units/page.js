@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Header from "../../components/header/header";
-import Table from "../../components/tables/tables";
+import Table from "../../components/table/table";
 import axios from "axios";
 import { useState } from 'react';
 

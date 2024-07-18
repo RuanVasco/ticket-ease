@@ -1,0 +1,8 @@
+.btn-massive-actions {
+    background-color: var(--static-secondary-color);
+}
+
+.btn-massive-actions:hover {
+    background-color: var(--static-secondary-color-hover);
+    color: var(--static-primary-color-hover);
+}

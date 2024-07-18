@@ -1,5 +1,9 @@
 package com.chamados.api.Controllers;
 
+import com.chamados.api.Entities.Cargo;
+import com.chamados.api.Entities.Department;
+import com.chamados.api.Repositories.CargoRepository;
+import com.chamados.api.Repositories.DepartmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +47,12 @@ public class AuthController {
     private RoleRepository roleRepository;
 
     @Autowired
+    private CargoRepository cargoRepository;
+
+    @Autowired
+    private DepartmentRepository departmentRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
     
     @Autowired
@@ -65,7 +75,10 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterDTO signUpDto){       
+    public ResponseEntity<?> registerUser(@RequestBody RegisterDTO signUpDto){
+
+        Long cargoId = signUpDto.getCargo_id();
+        Long departmentId = signUpDto.getDepartment_id();
 
         if (userRepository.existsByEmail(signUpDto.getEmail())){
             return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
@@ -75,7 +88,17 @@ public class AuthController {
         user.setName(signUpDto.getName());
         user.setEmail(signUpDto.getEmail());
         user.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
-        
+
+        if (cargoId != null) {
+            Optional<Cargo> cargo = cargoRepository.findById(cargoId);
+            cargo.ifPresent(user::setCargo);
+        }
+
+        if (departmentId != null) {
+            Optional<Department> department = departmentRepository.findById(departmentId);
+            department.ifPresent(user::setDepartment);
+        }
+
         Optional<Role> defaultRole = roleRepository.findByName("ROLE_USER");
         
         user.setRoles(Collections.singleton(defaultRole.get()));
