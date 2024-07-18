@@ -38,4 +38,9 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "department_id")
     private Department department;
+
+    @Setter
+    @ManyToOne
+    @JoinColumn(name = "cargo_id")
+    private Cargo cargo;
 }

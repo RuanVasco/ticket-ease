@@ -11,7 +11,7 @@ const columns = [
     { value: "name", label: "Nome" },
     { value: "email", label: "E-mail" },
     { value: "department.name", label: "Setor" },
-    { value: "role", label: "Função" },
+    { value: "cargo.name", label: "Cargo" },
     { value: "profile", label: "Perfil" },
 ];
 
@@ -25,7 +25,7 @@ const User = () => {
         name: "",
         email: "",
         department: { id: "", name: "" },
-        role: "",
+        cargo: {id: "", name: ""},
         profile: "",
         password: "",
     });
@@ -59,7 +59,7 @@ const User = () => {
                 name: "",
                 email: "",
                 department: { id: "", name: "" },
-                role: "",
+                cargo: {id: "", name: ""},
                 profile: "",
                 password: "",
             });
@@ -273,8 +273,13 @@ const User = () => {
                                             name="role"
                                             className="form-control"
                                             readOnly={modeModal === "readonly"}
-                                            value={currentUser.role}
+                                            value={currentUser.cargo.name}
                                             onChange={handleInputChange}
+                                        />
+                                        <input
+                                            name="departmentId"
+                                            type="hidden"
+                                            value={currentUser.cargo.id}
                                         />
                                     </div>
                                     <div className="mt-2">
@@ -304,9 +309,11 @@ const User = () => {
                                     )}
                                 </div>
                                 <div className="modal-footer">
-                                    <button type="submit" className="btn btn-primary">
-                                        {updateModal ? "Atualizar Usuário" : "Criar Usuário"}
-                                    </button>
+                                    {modeModal !== "readonly" && (
+                                        <button type="submit" className="btn btn-primary">
+                                            {updateModal ? "Atualizar Usuário" : "Criar Usuário"}
+                                        </button>
+                                    )}
                                     <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
                                         Cancelar
                                     </button>

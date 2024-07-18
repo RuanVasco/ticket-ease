@@ -19,16 +19,21 @@ public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private UnitRepository unitRepository;
-    
+
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private CargoRepository cargoRepository;
+
     @Override
     @Transactional
     public void run(String... args) throws Exception {
+        cargoRepository.save(new Cargo("BOT"));
+
         if (unitRepository.count() == 0) {
             unitRepository.save(new Unit("Unit A", "Address A"));
             unitRepository.save(new Unit("Unit B", "Address B"));
@@ -61,6 +66,7 @@ public class DataInitializer implements CommandLineRunner {
             user.setEmail("admin@admin");
             user.setPassword(passwordEncoder.encode("1234"));
             user.setDepartment(departmentRepository.findByName("TI"));
+            user.setCargo(cargoRepository.findByName("BOT"));
             userRepository.save(user);
         }
     }

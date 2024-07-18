@@ -1,5 +1,6 @@
 package com.chamados.api.DTO;
 
+import com.chamados.api.Entities.Cargo;
 import com.chamados.api.Entities.Department;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,12 +12,14 @@ public class UserDTO {
     private String name;
     private String email;
     private Department department;
+    private Cargo cargo;
 
-    public UserDTO(Long id, String name, String email, Department department) {
+    public UserDTO(Long id, String name, String email, Department department, Cargo cargo) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.department = department;
+        this.cargo = cargo;
     }
 
 }
