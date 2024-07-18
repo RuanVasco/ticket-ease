@@ -7,6 +7,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name="departments")
@@ -14,14 +16,17 @@ public class Department {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private String name;
+
+	@Setter
+    @Getter
+    private String name;
 	private boolean receivesRequests;
 	
 	@ManyToOne
 	@JoinColumn(name = "unit_id")
     private Unit unit;
 	
-	 public Department() {}
+	public Department() {}
 	
 	public Department(String name, boolean receivesRequests, Unit unit) {
 		this.name = name;
@@ -29,15 +34,7 @@ public class Department {
 		this.unit = unit;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public boolean isReceivesRequests() {
+    public boolean isReceivesRequests() {
 		return receivesRequests;
 	}
 

@@ -29,6 +29,24 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
+        if (unitRepository.count() == 0) {
+            unitRepository.save(new Unit("Unit A", "Address A"));
+            unitRepository.save(new Unit("Unit B", "Address B"));
+            unitRepository.save(new Unit("Unit C", "Address C"));
+        }
+
+        Unit unitA = unitRepository.findByName("Unit A").orElseThrow(() -> new RuntimeException("Unit A not found"));
+        Unit unitB = unitRepository.findByName("Unit B").orElseThrow(() -> new RuntimeException("Unit B not found"));
+        Unit unitC = unitRepository.findByName("Unit C").orElseThrow(() -> new RuntimeException("Unit C not found"));
+
+        if (departmentRepository.findAll().isEmpty()) {
+            departmentRepository.save(new Department("TI", true, unitA));
+            departmentRepository.save(new Department("RH", true, unitB));
+            departmentRepository.save(new Department("Financeiro", true, unitC));
+            departmentRepository.save(new Department("Fiscal", false, unitA));
+            departmentRepository.save(new Department("Marketing", false, unitB));
+        }
+
         if (roleRepository.findByName("ROLE_USER").isEmpty()) {
             roleRepository.save(new Role("ROLE_USER"));
         }
@@ -42,32 +60,8 @@ public class DataInitializer implements CommandLineRunner {
             user.setName("Admin User");
             user.setEmail("admin@admin");
             user.setPassword(passwordEncoder.encode("1234"));
-            userRepository.save(user);            
-        }
-
-        initializeUnits();
-        initializeDepartments();
-    }
-
-    private void initializeUnits() {
-        if (unitRepository.count() == 0) {
-            unitRepository.save(new Unit("Unit A", "Address A"));
-            unitRepository.save(new Unit("Unit B", "Address B"));
-            unitRepository.save(new Unit("Unit C", "Address C"));
-        }
-    }
-
-    private void initializeDepartments() {
-        Unit unitA = unitRepository.findByName("Unit A").orElseThrow(() -> new RuntimeException("Unit A not found"));
-        Unit unitB = unitRepository.findByName("Unit B").orElseThrow(() -> new RuntimeException("Unit B not found"));
-        Unit unitC = unitRepository.findByName("Unit C").orElseThrow(() -> new RuntimeException("Unit C not found"));
-
-        if (departmentRepository.findAll().isEmpty()) {
-            departmentRepository.save(new Department("TI", true, unitA));
-            departmentRepository.save(new Department("RH", true, unitB));
-            departmentRepository.save(new Department("Financeiro", true, unitC));
-            departmentRepository.save(new Department("Fiscal", false, unitA));
-            departmentRepository.save(new Department("Marketing", false, unitB));
+            user.setDepartment(departmentRepository.findByName("TI"));
+            userRepository.save(user);
         }
     }
 }

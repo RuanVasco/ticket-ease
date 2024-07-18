@@ -10,7 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    @Query("SELECT new com.chamados.api.DTO.UserDTO(u.id, u.name, u.email) FROM User u")
+    @Query("SELECT new com.chamados.api.DTO.UserDTO(u.id, u.name, u.email, d) " +
+            "FROM User u LEFT JOIN u.department d")
     List<UserDTO> findAllWithoutPassword();
 
     User findByEmail(String email);
