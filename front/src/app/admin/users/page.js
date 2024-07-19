@@ -85,12 +85,20 @@ const User = () => {
             try {
                 const res = await axios.get(`http://localhost:8080/users/${idUser}`);
                 if (res.status === 200) {
+                    const department = { 
+                        id: res.data.department?.id ?? -1, 
+                        name: res.data.department?.name ?? "" 
+                    };
+                    const cargos = {
+                        id: res.data.cargo?.id ?? -1,
+                        name: res.data.cargo?.name ?? ""
+                    };
                     setCurrentUser({
                         id: res.data.id,
                         name: res.data.name,
                         email: res.data.email,
-                        department: { id: res.data.department.id, name: res.data.department.name },
-                        cargo: { id: res.data.cargo.id, name: res.data.cargo.name },
+                        department: department,
+                        cargo: cargos,
                         profile: '',
                         password: '',
                     });
