@@ -38,6 +38,7 @@ public class SecurityConfig {
 				 		.requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
 						.requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
 				 		.requestMatchers(HttpMethod.POST, "/auth/validate").permitAll()
+								.requestMatchers(HttpMethod.DELETE, "/users/**").permitAll()
 				 		.requestMatchers(HttpMethod.GET, "/forms/**").permitAll()
 				 		.requestMatchers(HttpMethod.GET, "/**").permitAll()
 								.requestMatchers(HttpMethod.POST, "/**").permitAll()

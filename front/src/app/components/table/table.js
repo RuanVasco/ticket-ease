@@ -40,7 +40,7 @@ const Table = ({
                                     className="btn btn-warning me-1"
                                     data-bs-toggle="modal"
                                     data-bs-target={`#${modalID}`}
-                                    onClick={() => handleModalOpen("Visualizar", "readonly", row)}
+                                    onClick={() => handleModalOpen("Visualizar", "readonly", row.id)}
                                 >
                                     <FaEye />
                                 </button>
@@ -50,11 +50,16 @@ const Table = ({
                                             className="btn btn-secondary me-1"
                                             data-bs-toggle="modal"
                                             data-bs-target={`#${modalID}`}
-                                            onClick={() => handleModalOpen("Editar", "update", row)}
+                                            onClick={() => handleModalOpen("Editar", "update", row.id)}
                                         >
                                             <FaPencil />
                                         </button>
-                                        <button className="btn btn-danger">
+                                        <button
+                                            className="btn btn-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target={`#${modalID}`}
+                                            onClick={() => handleModalOpen("Excluir", "delete", row.id)}
+                                        >
                                             <FaCircleXmark />
                                         </button>
                                     </>

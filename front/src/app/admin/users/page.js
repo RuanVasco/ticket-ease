@@ -22,6 +22,7 @@ const User = () => {
     const [updateModal, setUpdateModal] = useState(false);
     const [data, setData] = useState([]);
     const [currentUser, setCurrentUser] = useState({
+        id: '',
         name: '',
         email: '',
         department: { id: '', name: '' },
@@ -31,6 +32,7 @@ const User = () => {
     });
     const [cargos, setCargos] = useState([]);
     const [departments, setDepartments] = useState([]);
+    const [submitType, setSubmitType] = useState('');
 
     useEffect(() => {
         const fetchUsersData = async () => {
@@ -77,17 +79,23 @@ const User = () => {
         fetchDepartmentsData();
     }, []);
 
-    const handleModalOpen = (action, mode, user) => {
+    const handleModalOpen = async (action, mode, idUser) => {
         setModalTitle(`${action} Usuário`);
         setModeModal(mode);
-        if (mode === 'update') {
-            setCurrentUser(user);
-            setUpdateModal(true);
-        } else if (mode === 'readonly') {
-            setCurrentUser(user);
-            setUpdateModal(true);
+        if (mode != "add") {
+            try {
+                const res = await axios.get(`http://localhost:8080/users/${idUser}`);
+                if (res.status === 200) {
+                    setCurrentUser(res.data); 
+                } else {
+                    console.error('Error', res.status);
+                }
+            } catch (error) {
+                console.error(error);
+            }
         } else {
             setCurrentUser({
+                id: '',
                 name: '',
                 email: '',
                 department: { id: '', name: '' },
@@ -126,30 +134,51 @@ const User = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const { department, cargo, ...postData } = currentUser;
+            const { department, cargo, ...postData } = currentUser;            
+
             const postDataWithIds = {
                 ...postData,
                 department_id: department.id,
                 cargo_id: cargo.id,
             };
 
-            const res = await axios.post('http://localhost:8080/auth/register', postDataWithIds);
+            let res;
+            switch (submitType) {
+                case 'add':
+                    if (!department || !cargo) {
+                        console.error('Department or cargo is null');
+                        return;
+                    }
 
-            if (res.status === 200 || res.status === 201) {
-                setData(
-                    updateModal
-                        ? data.map((user) => (user.id === currentUser.id ? res.data : user))
-                        : [...data, res.data]
-                );
+                    res = await axios.post('http://localhost:8080/auth/register', postDataWithIds);
+                    break;
+                case 'update':
+                    if (!department || !cargo) {
+                        console.error('Department or cargo is null');
+                        return;
+                    }
+
+                    res = await axios.put(`http://localhost:8080/users/${currentUser.id}`, postDataWithIds);
+                    break;
+                case 'delete':
+                    const userID = document.getElementById('userID').value;
+                    res = await axios.delete(`http://localhost:8080/users/${userID}`);
+                    break;
+                default:
+                    console.error('Invalid submit type');
+                    return;
+            }
+
+            if (res.status === 200 || res.status === 201) {                
                 setCurrentUser({
+                    id: '',
                     name: '',
                     email: '',
                     department: { id: '', name: '' },
-                    role: '',
+                    cargo: { id: '', name: '' },
                     profile: '',
                     password: '',
                 });
-                document.querySelector('#modal .btn-close').click();
             } else {
                 console.error('Error', res.status);
             }
@@ -166,20 +195,21 @@ const User = () => {
                     modalTargetId="modal"
                     addIcon={FaUserPlus}
                     removeIcon={FaUserMinus}
-                    onCreate={() => handleModalOpen('Criar', '')}
+                    onCreate={() => handleModalOpen('Criar', 'add')}
                     onDelete={() => { }}
                     onFilterChange={handleFilterChange}
                     filterText={filterText}
                 />
-                <Table 
-                    columns={columns} 
-                    data={data} 
+                <Table
+                    columns={columns}
+                    data={data}
                     modalID="modal"
-                    mode={modeModal}
+                    mode="admin"
                     handleModalOpen={handleModalOpen}
                     filterText={filterText}
                 />
             </div>
+
             <div className="modal fade" id="modal" tabIndex="-1" aria-hidden="true">
                 <div className="modal-dialog">
                     <div className="modal-content">
@@ -191,104 +221,141 @@ const User = () => {
                         </div>
                         <form onSubmit={handleSubmit}>
                             <div className="modal-body">
-                                <div>
-                                    <label htmlFor="name" className="form-label">
-                                        Nome
-                                    </label>
-                                    <input
-                                        name="name"
-                                        className="form-control"
-                                        readOnly={modeModal === "readonly"}
-                                        value={currentUser.name}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
-                                <div className="mt-2">
-                                    <label htmlFor="email" className="form-label">
-                                        E-mail
-                                    </label>
-                                    <input
-                                        name="email"
-                                        className="form-control"
-                                        readOnly={modeModal === "readonly"}
-                                        value={currentUser.email}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
+                                {modeModal === "update" || modeModal === "delete" && (
+                                    <input type="hidden" id="userID" name="id" value={currentUser.id} />
+                                )}
+                                {modeModal != "delete" && (
+                                    <>
+                                        <div>
+                                            <label htmlFor="name" className="form-label">
+                                                Nome
+                                            </label>
+                                            <input
+                                                name="name"
+                                                className="form-control"
+                                                readOnly={modeModal === "readonly"}
+                                                value={currentUser.name}
+                                                onChange={handleInputChange}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="mt-2">
+                                            <label htmlFor="email" className="form-label">
+                                                E-mail
+                                            </label>
+                                            <input
+                                                name="email"
+                                                className="form-control"
+                                                readOnly={modeModal === "readonly"}
+                                                value={currentUser.email}
+                                                onChange={handleInputChange}
+                                                required
+                                            />
+                                        </div>
 
-                                <div className="mt-2">
-                                    <label htmlFor="department" className="form-label">
-                                        Setor
-                                    </label>
-                                    <select
-                                        className="form-select"
-                                        name="department"
-                                        id="department"
-                                        value={currentUser.department?.id || ""}
-                                        onChange={handleInputChange}
-                                        disabled={modeModal === "readonly"}
-                                    >
-                                        <option value="">---</option>
-                                        {departments.map((department) => (
-                                            <option key={department.id} value={department.id}>
-                                                {department.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+                                        <div className="mt-2">
+                                            <label htmlFor="department" className="form-label">
+                                                Setor
+                                            </label>
+                                            <select
+                                                className="form-select"
+                                                name="department"
+                                                id="department"
+                                                value={currentUser.department?.id || ""}
+                                                onChange={handleInputChange}
+                                                disabled={modeModal === "readonly"}
+                                                required
+                                            >
+                                                {departments.map((department) => (
+                                                    <option key={department.id} value={department.id}>
+                                                        {department.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="mt-2">
+                                            <label htmlFor="cargo" className="form-label">
+                                                Cargo
+                                            </label>
+                                            <select
+                                                className="form-select"
+                                                name="cargo"
+                                                id="cargo"
+                                                value={currentUser.cargo?.id || ""}
+                                                onChange={handleInputChange}
+                                                disabled={modeModal === "readonly"}
+                                                required
+                                            >
+                                                {cargos.map((cargo) => (
+                                                    <option key={cargo.id} value={cargo.id}>
+                                                        {cargo.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="mt-2">
+                                            <label htmlFor="profile" className="form-label">
+                                                Perfil
+                                            </label>
+                                            <input
+                                                name="profile"
+                                                className="form-control"
+                                                readOnly={modeModal === "readonly"}
+                                                value={currentUser.profile}
+                                                onChange={handleInputChange}
+                                            />
+                                        </div>
+                                        {modeModal !== "readonly" && (
+                                            <div className="mt-2">
+                                                <label htmlFor="password" className="form-label">
+                                                    Senha
+                                                </label>
+                                                <input
+                                                    type="password"
+                                                    name="password"
+                                                    className="form-control"
+                                                    readOnly={modeModal === "readonly"}
+                                                    value={currentUser.password}
+                                                    onChange={handleInputChange}
+                                                    required
+                                                />
+                                            </div>
+                                        )}
+                                    </>
+                                )}
 
-                                <div className="mt-2">
-                                    <label htmlFor="cargo" className="form-label">
-                                        Cargo
-                                    </label>
-                                    <select
-                                        className="form-select"
-                                        name="cargo"
-                                        id="cargo"
-                                        value={currentUser.cargo?.id || ""}
-                                        onChange={handleInputChange}
-                                        disabled={modeModal === "readonly"}
-                                    >
-                                        <option value="">---</option>
-                                        {cargos.map((cargo) => (
-                                            <option key={cargo.id} value={cargo.id}>
-                                                {cargo.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div className="mt-2">
-                                    <label htmlFor="profile" className="form-label">
-                                        Perfil
-                                    </label>
-                                    <input
-                                        name="profile"
-                                        className="form-control"
-                                        readOnly={modeModal === "readonly"}
-                                        value={currentUser.profile}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
-                                {modeModal !== "readonly" && (
-                                    <div className="mt-2">
-                                        <label htmlFor="password" className="form-label">
-                                            Senha
-                                        </label>
-                                        <input
-                                            name="password"
-                                            type="password"
-                                            className="form-control"
-                                            placeholder="*****"
-                                            onChange={handleInputChange}
-                                        />
-                                    </div>
+                                {modeModal === "delete" && (
+                                    <>
+                                        Deseja excluir o usuário {currentUser.name}?
+                                    </>
                                 )}
                             </div>
                             <div className="modal-footer">
-                                {modeModal !== "readonly" && (
-                                    <button type="submit" className="btn btn-primary">
-                                        {updateModal ? "Atualizar Usuário" : "Criar Usuário"}
+                                {modeModal === "update" && (
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary"
+                                        onClick={() => setSubmitType('update')}
+                                    >
+                                        Atualizar
+                                    </button>
+                                )}
+                                {modeModal === "add" && (
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary"
+                                        onClick={() => setSubmitType('add')}
+                                    >
+                                        Criar
+                                    </button>
+                                )}
+                                {modeModal === "delete" && (
+                                    <button
+                                        type="submit"
+                                        className="btn btn-danger"
+                                        onClick={() => setSubmitType('delete')}
+                                    >
+                                        Excluir
                                     </button>
                                 )}
                                 <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">

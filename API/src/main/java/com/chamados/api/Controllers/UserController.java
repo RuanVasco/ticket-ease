@@ -28,4 +28,10 @@ public class UserController {
     public UserDTO getUser(@PathVariable Long userID) {
         return userService.getUser(userID);
     }
+
+    @DeleteMapping("/{userID}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long userID) {
+       userRepository.deleteById(userID);
+       return ResponseEntity.noContent().build();
+    }
 }
