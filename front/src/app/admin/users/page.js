@@ -19,7 +19,6 @@ const User = () => {
     const [filterText, setFilterText] = useState('');
     const [modeModal, setModeModal] = useState('');
     const [modalTitle, setModalTitle] = useState('');
-    const [updateModal, setUpdateModal] = useState(false);
     const [data, setData] = useState([]);
     const [currentUser, setCurrentUser] = useState({
         id: '',
@@ -86,7 +85,15 @@ const User = () => {
             try {
                 const res = await axios.get(`http://localhost:8080/users/${idUser}`);
                 if (res.status === 200) {
-                    setCurrentUser(res.data); 
+                    setCurrentUser({
+                        id: res.data.id,
+                        name: res.data.name,
+                        email: res.data.email,
+                        department: { id: res.data.department.id, name: res.data.department.name },
+                        cargo: { id: res.data.cargo.id, name: res.data.cargo.name },
+                        profile: '',
+                        password: '',
+                    });
                 } else {
                     console.error('Error', res.status);
                 }
@@ -103,7 +110,6 @@ const User = () => {
                 profile: '',
                 password: '',
             });
-            setUpdateModal(false);
         }
     };
 
@@ -134,42 +140,42 @@ const User = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const { department, cargo, ...postData } = currentUser;            
-
-            const postDataWithIds = {
-                ...postData,
-                department_id: department.id,
-                cargo_id: cargo.id,
-            };
-
             let res;
-            switch (submitType) {
-                case 'add':
-                    if (!department || !cargo) {
-                        console.error('Department or cargo is null');
-                        return;
-                    }
+            const { department, cargo, ...postData } = currentUser;
 
-                    res = await axios.post('http://localhost:8080/auth/register', postDataWithIds);
-                    break;
-                case 'update':
-                    if (!department || !cargo) {
-                        console.error('Department or cargo is null');
-                        return;
-                    }
+            if (submitType === "delete") {
+                res = await axios.delete(`http://localhost:8080/users/${currentUser.id}`);
+            } else {
+                const postDataWithIds = {
+                    ...postData,
+                    department_id: department.id,
+                    cargo_id: cargo.id,
+                };
 
-                    res = await axios.put(`http://localhost:8080/users/${currentUser.id}`, postDataWithIds);
-                    break;
-                case 'delete':
-                    const userID = document.getElementById('userID').value;
-                    res = await axios.delete(`http://localhost:8080/users/${userID}`);
-                    break;
-                default:
-                    console.error('Invalid submit type');
-                    return;
+                switch (submitType) {
+                    case 'add':
+                        if (!department || !cargo) {
+                            console.error('Department or cargo is null');
+                            return;
+                        }
+
+                        res = await axios.post('http://localhost:8080/auth/register', postDataWithIds);
+                        break;
+                    case 'update':
+                        if (!department || !cargo) {
+                            console.error('Department or cargo is null');
+                            return;
+                        }
+
+                        res = await axios.put(`http://localhost:8080/users/${currentUser.id}`, postDataWithIds);
+                        break;
+                    default:
+                        console.error('Invalid submit type');
+                        return;
+                }
             }
 
-            if (res.status === 200 || res.status === 201) {                
+            if (res.status === 200 || res.status === 201) {
                 setCurrentUser({
                     id: '',
                     name: '',
@@ -179,6 +185,8 @@ const User = () => {
                     profile: '',
                     password: '',
                 });
+
+                window.location.reload();
             } else {
                 console.error('Error', res.status);
             }
@@ -221,9 +229,6 @@ const User = () => {
                         </div>
                         <form onSubmit={handleSubmit}>
                             <div className="modal-body">
-                                {modeModal === "update" || modeModal === "delete" && (
-                                    <input type="hidden" id="userID" name="id" value={currentUser.id} />
-                                )}
                                 {modeModal != "delete" && (
                                     <>
                                         <div>
@@ -266,6 +271,7 @@ const User = () => {
                                                 disabled={modeModal === "readonly"}
                                                 required
                                             >
+                                                <option selected value="">----</option>
                                                 {departments.map((department) => (
                                                     <option key={department.id} value={department.id}>
                                                         {department.name}
@@ -286,6 +292,7 @@ const User = () => {
                                                 disabled={modeModal === "readonly"}
                                                 required
                                             >
+                                                <option selected value="">----</option>
                                                 {cargos.map((cargo) => (
                                                     <option key={cargo.id} value={cargo.id}>
                                                         {cargo.name}
@@ -317,7 +324,7 @@ const User = () => {
                                                     readOnly={modeModal === "readonly"}
                                                     value={currentUser.password}
                                                     onChange={handleInputChange}
-                                                    required
+                                                    required={modeModal === "add"}
                                                 />
                                             </div>
                                         )}

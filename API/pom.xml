@@ -124,7 +124,7 @@
 		            <skipTests>false</skipTests>
 		            <testFailureIgnore>true</testFailureIgnore>
 		        </configuration>
-			</plugin> 
+			</plugin>
 		</plugins>
 	</build>
 
