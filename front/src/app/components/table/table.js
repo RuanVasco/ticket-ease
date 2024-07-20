@@ -33,7 +33,7 @@ const Table = ({
                     {filteredData.map((row, rowIndex) => (
                         <tr key={rowIndex} scope="row" valign="middle">
                             <td className="col-auto-width">
-                                <input type="checkbox" className="massive-actions" />
+                                <input type="checkbox" className="massive-actions" value={row.id} />
                             </td>
                             <td className="col-auto-width">
                                 <button

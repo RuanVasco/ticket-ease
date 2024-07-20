@@ -85,9 +85,9 @@ const User = () => {
             try {
                 const res = await axios.get(`http://localhost:8080/users/${idUser}`);
                 if (res.status === 200) {
-                    const department = { 
-                        id: res.data.department?.id ?? -1, 
-                        name: res.data.department?.name ?? "" 
+                    const department = {
+                        id: res.data.department?.id ?? -1,
+                        name: res.data.department?.name ?? ""
                     };
                     const cargos = {
                         id: res.data.cargo?.id ?? -1,
@@ -144,6 +144,19 @@ const User = () => {
             });
         }
     };
+
+    const handleDelMassiveAction = () => {
+        const items = document.querySelectorAll(".massive-actions:checked");
+
+        if (items.length <= 0) {
+            alert("Selecione pelo menos um item!");
+            return;
+        }
+
+        Array.from(items).forEach(item => {
+            console.log(item.value);
+        });
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -212,7 +225,7 @@ const User = () => {
                     addIcon={FaUserPlus}
                     removeIcon={FaUserMinus}
                     onCreate={() => handleModalOpen('Criar', 'add')}
-                    onDelete={() => { }}
+                    onDelete={handleDelMassiveAction}
                     onFilterChange={handleFilterChange}
                     filterText={filterText}
                 />
@@ -279,7 +292,7 @@ const User = () => {
                                                 disabled={modeModal === "readonly"}
                                                 required
                                             >
-                                                <option selected value="">----</option>
+                                                <option value="">----</option>
                                                 {departments.map((department) => (
                                                     <option key={department.id} value={department.id}>
                                                         {department.name}
@@ -300,7 +313,7 @@ const User = () => {
                                                 disabled={modeModal === "readonly"}
                                                 required
                                             >
-                                                <option selected value="">----</option>
+                                                <option value="">----</option>
                                                 {cargos.map((cargo) => (
                                                     <option key={cargo.id} value={cargo.id}>
                                                         {cargo.name}
