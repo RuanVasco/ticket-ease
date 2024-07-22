@@ -1,6 +1,5 @@
 import { FaEye, FaPencil, FaCircleXmark } from "react-icons/fa6";
 import styles from "./table.css";
-import { useState } from "react";
 
 const Table = ({
     columns,

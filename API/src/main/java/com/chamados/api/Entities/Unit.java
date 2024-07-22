@@ -10,15 +10,16 @@ import lombok.Setter;
 
 @Entity
 @Table(name="units")
+@Getter
 public class Unit {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
 	@Setter
-    @Getter
     private String name;
+
 	@Setter
-    @Getter
     private String address;
 	
 	public Unit() {}

@@ -6,6 +6,7 @@ import Header from "../../components/header/header";
 import Table from "../../components/table/table";
 import ActionBar from "../../components/actionBar/actionBar";
 import { FaUserMinus, FaUserPlus } from "react-icons/fa6";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const columns = [
     { value: "name", label: "Nome" },
@@ -36,7 +37,7 @@ const User = () => {
     useEffect(() => {
         const fetchUsersData = async () => {
             try {
-                const res = await axios.get('http://localhost:8080/users/');
+                const res = await axios.get(`${API_BASE_URL}/users/`);
                 if (res.status === 200) {
                     setData(res.data);
                 } else {
@@ -49,7 +50,7 @@ const User = () => {
 
         const fetchCargosData = async () => {
             try {
-                const res = await axios.get('http://localhost:8080/cargos/');
+                const res = await axios.get(`${API_BASE_URL}/cargos/`);
                 if (res.status === 200) {
                     setCargos(res.data);
                 } else {
@@ -62,7 +63,7 @@ const User = () => {
 
         const fetchDepartmentsData = async () => {
             try {
-                const res = await axios.get('http://localhost:8080/departments/');
+                const res = await axios.get(`${API_BASE_URL}/departments/`);
                 if (res.status === 200) {
                     setDepartments(res.data);
                 } else {
@@ -83,7 +84,7 @@ const User = () => {
         setModeModal(mode);
         if (mode != "add") {
             try {
-                const res = await axios.get(`http://localhost:8080/users/${idUser}`);
+                const res = await axios.get(`${API_BASE_URL}/users/${idUser}`);
                 if (res.status === 200) {
                     const department = {
                         id: res.data.department?.id ?? -1,
@@ -152,7 +153,7 @@ const User = () => {
             const { department, cargo, ...postData } = currentUser;
 
             if (submitType === "delete") {
-                res = await axios.delete(`http://localhost:8080/users/${currentUser.id}`);
+                res = await axios.delete(`${API_BASE_URL}/users/${currentUser.id}`);
             } else {
                 const postDataWithIds = {
                     ...postData,
@@ -167,7 +168,7 @@ const User = () => {
                             return;
                         }
 
-                        res = await axios.post('http://localhost:8080/auth/register', postDataWithIds);
+                        res = await axios.post(`${API_BASE_URL}/auth/register`, postDataWithIds);
                         break;
                     case 'update':
                         if (!department || !cargo) {
@@ -175,7 +176,7 @@ const User = () => {
                             return;
                         }
 
-                        res = await axios.put(`http://localhost:8080/users/${currentUser.id}`, postDataWithIds);
+                        res = await axios.put(`${API_BASE_URL}/users/${currentUser.id}`, postDataWithIds);
                         break;
                     default:
                         console.error('Invalid submit type');
@@ -209,6 +210,7 @@ const User = () => {
             <div className="container">
                 <ActionBar
                     modalTargetId="modal"
+                    delEntityEndPoint={`${API_BASE_URL}/users`}
                     addIcon={FaUserPlus}
                     removeIcon={FaUserMinus}
                     onCreate={() => handleModalOpen('Criar', 'add')}

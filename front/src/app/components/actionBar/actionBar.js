@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 
 const ActionBar = ({
     modalTargetId,
+    delEntityEndPoint,
     onCreate,
     onFilterChange,
     filterText,
@@ -26,7 +27,7 @@ const ActionBar = ({
 
     const deleteItem = async (itemID) => {
         try {
-            const res = await axios.delete(`http://localhost:8080/users/${itemID}`);
+            await axios.delete(`${delEntityEndPoint}/${itemID}`);
         } catch (error) {
             console.log(error);
         }
