@@ -143,20 +143,7 @@ const User = () => {
                 [name]: value,
             });
         }
-    };
-
-    const handleDelMassiveAction = () => {
-        const items = document.querySelectorAll(".massive-actions:checked");
-
-        if (items.length <= 0) {
-            alert("Selecione pelo menos um item!");
-            return;
-        }
-
-        Array.from(items).forEach(item => {
-            console.log(item.value);
-        });
-    }
+    };    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -225,7 +212,6 @@ const User = () => {
                     addIcon={FaUserPlus}
                     removeIcon={FaUserMinus}
                     onCreate={() => handleModalOpen('Criar', 'add')}
-                    onDelete={handleDelMassiveAction}
                     onFilterChange={handleFilterChange}
                     filterText={filterText}
                 />
