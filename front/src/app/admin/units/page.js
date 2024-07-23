@@ -91,6 +91,11 @@ const Units = () => {
                 res = await axios.delete(`${API_BASE_URL}/units/${currentUnit.id}`);
             } else if (submitType === "add") {
                 res = await axios.post(`${API_BASE_URL}/units/`, currentUnit);
+            } else if (submitType === "update") {
+                res = await axios.put(`${API_BASE_URL}/units/${currentUnit.id}`, currentUnit);
+            } else {
+                console.error('Invalid submit type');
+                return;
             }
 
             if (res.status === 200 || res.status === 201) {

@@ -55,5 +55,22 @@ public class UnitController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/{unitID}")
+    public ResponseEntity<?> updateUnit(@PathVariable Long unitID, @RequestBody UnitCreateDTO unitCreateDTO) {
+        Optional<Unit> optionalUnit = unitRepository.findById(unitID);
+
+        if (optionalUnit.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Unit unit = optionalUnit.get();
+        unit.setName(unitCreateDTO.name());
+        unit.setAddress(unitCreateDTO.address());
+        unitRepository.save(unit);
+
+        return ResponseEntity.ok().build();
+    }
+
+
 
 }

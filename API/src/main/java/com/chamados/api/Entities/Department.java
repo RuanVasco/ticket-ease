@@ -20,10 +20,13 @@ public class Department {
 
 	@Setter
     private String name;
+
+	@Setter
 	private boolean receivesRequests;
 	
 	@ManyToOne
 	@JoinColumn(name = "unit_id")
+	@Setter
     private Unit unit;
 	
 	public Department() {}
@@ -33,14 +36,5 @@ public class Department {
 		this.receivesRequests = receivesRequests;
 		this.unit = unit;
 	}
-
-    public boolean isReceivesRequests() {
-		return receivesRequests;
-	}
-
-	public void setReceivesRequests(boolean receivesRequests) {
-		this.receivesRequests = receivesRequests;
-	}
-	
 	
 }

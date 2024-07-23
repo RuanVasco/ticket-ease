@@ -1,37 +1,7 @@
 package com.chamados.api.DTO;
 
-public class DepartmentDTO {
-    private Long id;
-    private String name;
-    private boolean receivesRequests;
+import com.chamados.api.Entities.Unit;
 
-    public DepartmentDTO(Long id, String name, boolean receivesRequests) {
-        this.id = id;
-        this.name = name;
-        this.receivesRequests = receivesRequests;
-    }
+public record DepartmentDTO (String name, boolean receivesRequests, Unit unit) {
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public boolean isReceivesRequests() {
-        return receivesRequests;
-    }
-
-    public void setReceivesRequests(boolean receivesRequests) {
-        this.receivesRequests = receivesRequests;
-    }
 }

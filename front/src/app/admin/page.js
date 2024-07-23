@@ -25,7 +25,7 @@ const HomeAdmin = () => {
         {
             text: "Setores",
             icon: <IoMdPeople />,
-            link: "/admin/sectors",
+            link: "/admin/departments",
             description: ""
         }
     ];
