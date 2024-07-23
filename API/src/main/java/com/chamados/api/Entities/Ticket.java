@@ -9,7 +9,7 @@ import java.awt.*;
 @Getter
 @Entity
 @Table(name="ticket")
-public class TIcket {
+public class Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
