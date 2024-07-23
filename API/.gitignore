@@ -5,6 +5,7 @@ target/
 ### Eclipse ###
 
 .metadata
+bkp/
 bin/
 tmp/
 *.tmp
