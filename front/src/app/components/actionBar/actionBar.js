@@ -26,6 +26,8 @@ const ActionBar = ({
     };
 
     const deleteItem = async (itemID) => {
+        console.log(itemID);
+
         try {
             await axios.delete(`${delEntityEndPoint}/${itemID}`);
         } catch (error) {

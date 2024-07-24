@@ -1,6 +1,6 @@
 "use client"
 
-import Table from "../../components/tables/tables";
+import Table from "../../components/table/table";
 import Header from "../../components/header/header";
 import React, { useState, useEffect } from 'react';
 import axios from "axios";

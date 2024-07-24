@@ -71,6 +71,4 @@ public class UnitController {
         return ResponseEntity.ok().build();
     }
 
-
-
 }
