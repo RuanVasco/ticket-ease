@@ -13,6 +13,7 @@ const ActionBar = ({
     removeIcon: RemoveIcon = FaMinus
 }) => {
     const [items, setItems] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     const handleDelMassiveAction = () => {
         const checkedItems = Array.from(document.querySelectorAll(".massive-actions:checked"));
@@ -26,22 +27,20 @@ const ActionBar = ({
     };
 
     const deleteItem = async (itemID) => {
-        console.log(itemID);
-
         try {
             await axios.delete(`${delEntityEndPoint}/${itemID}`);
         } catch (error) {
-            console.log(error);
+            console.error(`Error deleting item ${itemID}:`, error);
         }
     };
 
-    const submitMassiveActions = (e) => {
+    const submitMassiveActions = async (e) => {
         e.preventDefault();
-        
-        items.forEach(item => {
-            deleteItem(item);
-        });
+        setLoading(true);
 
+        await Promise.all(items.map(item => deleteItem(item)));
+
+        setLoading(false);
         window.location.reload();
     };
 
@@ -83,7 +82,7 @@ const ActionBar = ({
                                 )}
                             </div>
                             <div className="modal-footer">
-                                {items.length > 0 && (
+                                {items.length > 0 && !loading && (
                                     <button
                                         type="submit"
                                         className="btn btn-danger"
@@ -92,12 +91,15 @@ const ActionBar = ({
                                     </button>
                                 )}
                                 <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
-                                    {items.length > 0 ? (
+                                    {items.length > 0 && !loading ? (
                                         <>Cancelar</>
                                     ) : (
                                         <>Fechar</>
                                     )}
                                 </button>
+                                {loading && (
+                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                )}
                             </div>
                         </form>
                     </div>

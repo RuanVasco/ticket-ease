@@ -1,10 +1,8 @@
 "use client";
 
 import React from 'react';
-import { FaUser } from 'react-icons/fa';
-import { FaSuitcase } from "react-icons/fa6";
+import { FaSuitcase, FaUser, FaUsers, FaStore } from "react-icons/fa6";
 import { SiHomeassistantcommunitystore } from 'react-icons/si';
-import { IoMdPeople } from 'react-icons/io';
 import Header from '../components/header/header';
 import withAuth from '../auth/withAuth';
 import Block from './components/block';
@@ -19,13 +17,13 @@ const HomeAdmin = () => {
         },
         {
             text: "Setores",
-            icon: <IoMdPeople />,
+            icon: <FaUsers />,
             link: "/admin/departments",
             description: "Gerenciar Setores"
         },
         {
             text: "Unidades",
-            icon: <SiHomeassistantcommunitystore />,
+            icon: <FaStore />,
             link: "/admin/units",
             description: "Gerenciar Unidades"
         },
@@ -42,7 +40,7 @@ const HomeAdmin = () => {
             <Header pageName="Administração" />
             <div className="container">
                 <div className="d-block pt-4">
-                    <h4 className='border-bottom text-center fw-bold pb-2'>Cadastros</h4>
+                    <h4 className='border-bottom text-center fw-semibold pb-2'>Cadastros</h4>
                 </div>
                 <div className="d-flex align-items-start justify-content-center">
                     {blocks.map((block, index) => (
