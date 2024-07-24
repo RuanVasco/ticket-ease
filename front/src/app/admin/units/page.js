@@ -5,6 +5,7 @@ import axios from 'axios';
 import Header from "../../components/header/header";
 import Table from "../../components/table/table";
 import ActionBar from "../../components/actionBar/actionBar";
+import Pagination from '../../components/pagination/pagination';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const columns = [
@@ -18,6 +19,9 @@ const Units = () => {
     const [modalTitle, setModalTitle] = useState('');
     const [data, setData] = useState([]);
     const [submitType, setSubmitType] = useState('');
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
     const [currentUnit, setCurrentUnit] = useState({
         id: '',
         name: '',
@@ -27,9 +31,10 @@ const Units = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/units/`);
+                const res = await axios.get(`${API_BASE_URL}/units/pageable?page=${currentPage}&size=${pageSize}`);
                 if (res.status === 200) {
-                    setData(res.data);
+                    setData(res.data.content);
+                    setTotalPages(res.data.totalPages);
                 } else {
                     console.error('Error', res.status);
                 }
@@ -39,7 +44,7 @@ const Units = () => {
         };
 
         fetchData();
-    }, []);
+    }, [currentPage, pageSize]);
 
     const handleModalOpen = async (action, mode, idUnit) => {
         setModalTitle(`${action} Unidade`);
@@ -71,6 +76,13 @@ const Units = () => {
 
     const handleFilterChange = (e) => {
         setFilterText(e.target.value);
+    };
+
+    const handlePageChange = (page) => setCurrentPage(page);
+
+    const handlePageSizeChange = (size) => {
+        setPageSize(size);
+        setCurrentPage(0);
     };
 
     const handleInputChange = (e) => {
@@ -124,6 +136,8 @@ const Units = () => {
                     onCreate={() => handleModalOpen('Criar', 'add')}
                     onFilterChange={handleFilterChange}
                     filterText={filterText}
+                    onPageSizeChange={handlePageSizeChange}
+                    pageSize={pageSize}
                 />
                 <Table
                     columns={columns}
@@ -132,6 +146,11 @@ const Units = () => {
                     mode="admin"
                     handleModalOpen={handleModalOpen}
                     filterText={filterText}
+                />
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
                 />
             </div>
 

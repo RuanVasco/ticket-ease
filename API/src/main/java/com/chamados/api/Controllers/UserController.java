@@ -10,15 +10,14 @@ import com.chamados.api.Repositories.CargoRepository;
 import com.chamados.api.Repositories.DepartmentRepository;
 import com.chamados.api.Repositories.RoleRepository;
 import com.chamados.api.Services.CustomUserDetailsService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.chamados.api.Repositories.UserRepository;
 
-import javax.swing.text.html.Option;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -44,6 +43,14 @@ public class UserController {
     @GetMapping("/")
     public ResponseEntity<?> getAll() {
         return ResponseEntity.ok(userRepository.findAllWithoutPassword());
+    }
+
+    @GetMapping("/pageable")
+    public ResponseEntity<Page<User>> getAllPageable(Pageable pageable) {
+        Page<User> users = userRepository.findAll(pageable);
+        users.forEach(user -> user.setPassword(null));
+
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping("/{userID}")

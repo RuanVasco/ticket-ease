@@ -5,6 +5,9 @@ import axios from 'axios';
 import Header from "../../components/header/header";
 import Table from "../../components/table/table";
 import ActionBar from "../../components/actionBar/actionBar";
+import Pagination from '../../components/pagination/pagination';
+import ItemsPerPage from '../../components/pagination/itemsPerPage';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const columns = [
@@ -19,6 +22,9 @@ const Departments = () => {
     const [modalTitle, setModalTitle] = useState('');
     const [data, setData] = useState([]);
     const [submitType, setSubmitType] = useState('');
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
     const [units, setUnits] = useState([]);
     const [currentDepartment, setCurrentDepartment] = useState({
         id: '',
@@ -26,48 +32,54 @@ const Departments = () => {
         unit: { id: '', name: '', address: '' },
         receivesRequests: '',
     });
+    const [loading, setLoading] = useState(false);
 
+    // Fetch data and units when pageSize or currentPage changes
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
             try {
-                const res = await axios.get(`${API_BASE_URL}/departments/`);
+                const res = await axios.get(`${API_BASE_URL}/departments/pageable?page=${currentPage}&size=${pageSize}`);
                 if (res.status === 200) {
-                    const departments = res.data.map(dept => ({
+                    const departments = res.data.content.map(dept => ({
                         ...dept,
-                        receivesRequests: dept.receivesRequests === true ? 'Sim' : 'Não',
+                        receivesRequests: dept.receivesRequests ? 'Sim' : 'Não',
                     }));
                     setData(departments);
+                    setTotalPages(res.data.totalPages);
                 } else {
-                    console.error('Error', res.status);
+                    console.error('Error fetching departments:', res.status);
                 }
             } catch (error) {
-                console.log(error);
+                console.error('Error fetching departments:', error);
             }
+            setLoading(false);
         };
 
         const fetchUnits = async () => {
+            setLoading(true);
             try {
                 const res = await axios.get(`${API_BASE_URL}/units/`);
                 if (res.status === 200) {
                     setUnits(res.data);
                 } else {
-                    console.error('Error', res.status);
+                    console.error('Error fetching units:', res.status);
                 }
             } catch (error) {
-                console.log(error);
+                console.error('Error fetching units:', error);
             }
+            setLoading(false);
         }
 
         fetchData();
         fetchUnits();
-    }, []);
-
+    }, [currentPage, pageSize]);
 
     const handleModalOpen = async (action, mode, idUnit) => {
         setModalTitle(`${action} Departamento`);
         setModeModal(mode);
 
-        if (mode != "add") {
+        if (mode !== "add") {
             try {
                 const res = await axios.get(`${API_BASE_URL}/departments/${idUnit}`);
                 if (res.status === 200) {
@@ -78,16 +90,16 @@ const Departments = () => {
                         receivesRequests: res.data.receivesRequests
                     });
                 } else {
-                    console.error('Error', res.status);
+                    console.error('Error fetching department:', res.status);
                 }
             } catch (error) {
-                console.error(error);
+                console.error('Error fetching department:', error);
             }
         } else {
             setCurrentDepartment({
                 id: '',
                 name: '',
-                unit: '',
+                unit: { id: '', name: '', address: '' },
                 receivesRequests: ''
             });
         }
@@ -95,6 +107,13 @@ const Departments = () => {
 
     const handleFilterChange = (e) => {
         setFilterText(e.target.value);
+    };
+
+    const handlePageChange = (page) => setCurrentPage(page);
+
+    const handlePageSizeChange = (size) => {
+        setPageSize(size);
+        setCurrentPage(0);
     };
 
     const handleInputChange = (e) => {
@@ -117,9 +136,9 @@ const Departments = () => {
         }
     };
 
-
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
 
         try {
             let res;
@@ -139,17 +158,19 @@ const Departments = () => {
                 setCurrentDepartment({
                     id: '',
                     name: '',
-                    unit: '',
+                    unit: { id: '', name: '', address: '' },
                     receivesRequests: ''
                 });
-
+                
+                setCurrentPage(0);
                 window.location.reload();
             } else {
-                console.error('Error', res.status);
+                console.error('Error submitting department:', res.status);
             }
         } catch (error) {
-            console.error(error);
+            console.error('Error submitting department:', error);
         }
+        setLoading(false);
     };
 
     return (
@@ -162,6 +183,8 @@ const Departments = () => {
                     onCreate={() => handleModalOpen('Criar', 'add')}
                     onFilterChange={handleFilterChange}
                     filterText={filterText}
+                    onPageSizeChange={handlePageSizeChange}
+                    pageSize={pageSize}
                 />
                 <Table
                     columns={columns}
@@ -170,6 +193,12 @@ const Departments = () => {
                     mode="admin"
                     handleModalOpen={handleModalOpen}
                     filterText={filterText}
+                    loading={loading}  // Optionally pass loading state to Table if needed
+                />
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
                 />
             </div>
 
@@ -184,7 +213,7 @@ const Departments = () => {
                         </div>
                         <form onSubmit={handleSubmit}>
                             <div className="modal-body">
-                                {modeModal != "delete" && (
+                                {modeModal !== "delete" && (
                                     <>
                                         <div>
                                             <label htmlFor="name" className="form-label">
@@ -237,14 +266,12 @@ const Departments = () => {
                                                 <option value="true">Sim</option>
                                             </select>
                                         </div>
-
                                     </>
                                 )}
-
                                 {modeModal === "delete" && (
-                                    <>
-                                        Deseja excluir a unidade {currentDepartment.name}?
-                                    </>
+                                    <p>
+                                        Deseja excluir o departamento {currentDepartment.name}?
+                                    </p>
                                 )}
                             </div>
                             <div className="modal-footer">

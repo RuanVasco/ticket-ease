@@ -5,6 +5,8 @@ import com.chamados.api.DTO.UnitCreateDTO;
 import com.chamados.api.Entities.Department;
 import com.chamados.api.Entities.Unit;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +24,12 @@ public class DepartmentController {
 	@GetMapping("/")
     public ResponseEntity<?> getAll() {
 		return ResponseEntity.ok(departmentRepository.findAll());
+	}
+
+	@GetMapping("/pageable")
+	public ResponseEntity<Page<Department>> getAllPageable(Pageable pageable) {
+		Page<Department> department = departmentRepository.findAll(pageable);
+		return ResponseEntity.ok(department);
 	}
 
 	@GetMapping("/{departmentID}")

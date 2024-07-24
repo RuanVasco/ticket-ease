@@ -2,6 +2,7 @@ import styles from "./actionBar.css";
 import { FaPlus, FaMinus } from "react-icons/fa";
 import axios from 'axios';
 import React, { useState } from 'react';
+import ItemsPerPage from '../../components/pagination/itemsPerPage';
 
 const ActionBar = ({
     modalTargetId,
@@ -10,7 +11,9 @@ const ActionBar = ({
     onFilterChange,
     filterText,
     addIcon: AddIcon = FaPlus,
-    removeIcon: RemoveIcon = FaMinus
+    removeIcon: RemoveIcon = FaMinus,
+    onPageSizeChange,
+    pageSize
 }) => {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -45,31 +48,43 @@ const ActionBar = ({
     };
 
     return (
-        <div className={`d-flex justify-content-center mt-4 mb-3 ${styles.actionBar}`}>
-            <button
-                className="btn btn-massive-actions me-2"
-                data-bs-toggle="modal"
-                data-bs-target={`#${modalTargetId}`}
-                onClick={onCreate}
-            >
-                <AddIcon />
-            </button>
-            <button
-                className="btn btn-massive-actions me-2"
-                onClick={handleDelMassiveAction}
-                data-bs-toggle="modal"
-                data-bs-target="#modalDelete"
-            >
-                <RemoveIcon />
-            </button>
-            <div>
-                <input
-                    className="form-control"
-                    placeholder="Filtrar"
-                    value={filterText}
-                    onChange={onFilterChange}
-                />
+        <div>
+            <div className="mt-4 mb-3 row">
+                <div className="col"></div>
+                <div className="d-flex justify-content-center col">
+                    <div className="d-flex align-items-center">
+                        <button
+                            className="btn btn-massive-actions me-2"
+                            data-bs-toggle="modal"
+                            data-bs-target={`#${modalTargetId}`}
+                            onClick={onCreate}
+                        >
+                            <AddIcon />
+                        </button>
+                        <button
+                            className="btn btn-massive-actions me-2"
+                            onClick={handleDelMassiveAction}
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalDelete"
+                        >
+                            <RemoveIcon />
+                        </button>
+                        <input
+                            className="form-control"
+                            placeholder="Filtrar"
+                            value={filterText}
+                            onChange={onFilterChange}
+                        />
+                    </div>
+                </div>
+                <div className="col text-end mt-auto">
+                    <ItemsPerPage
+                        onPageSizeChange={onPageSizeChange}
+                        pageSize={pageSize}
+                    />
+                </div>
             </div>
+
             <div className="modal fade" id="modalDelete" tabIndex="-1" aria-hidden="true">
                 <div className="modal-dialog">
                     <div className="modal-content">

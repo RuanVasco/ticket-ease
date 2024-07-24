@@ -5,6 +5,8 @@ import com.chamados.api.Entities.User;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -19,4 +21,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     User findByEmail(String email);
     Boolean existsByEmail(String email);
     void deleteById(Long id);
+
+    Page<User> findAll(Pageable pageable);
 }

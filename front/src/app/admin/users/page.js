@@ -5,6 +5,7 @@ import axios from 'axios';
 import Header from "../../components/header/header";
 import Table from "../../components/table/table";
 import ActionBar from "../../components/actionBar/actionBar";
+import Pagination from '../../components/pagination/pagination';
 import { FaUserMinus, FaUserPlus } from "react-icons/fa6";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -21,6 +22,9 @@ const User = () => {
     const [modeModal, setModeModal] = useState('');
     const [modalTitle, setModalTitle] = useState('');
     const [data, setData] = useState([]);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalPages, setTotalPages] = useState(1);
     const [currentUser, setCurrentUser] = useState({
         id: '',
         name: '',
@@ -37,9 +41,10 @@ const User = () => {
     useEffect(() => {
         const fetchUsersData = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/users/`);
+                const res = await axios.get(`${API_BASE_URL}/users/pageable?page=${currentPage}&size=${pageSize}`);
                 if (res.status === 200) {
-                    setData(res.data);
+                    setData(res.data.content);
+                    setTotalPages(res.data.totalPages);
                 } else {
                     console.error('Error', res.status);
                 }
@@ -77,7 +82,7 @@ const User = () => {
         fetchUsersData();
         fetchCargosData();
         fetchDepartmentsData();
-    }, []);
+    }, [currentPage, pageSize]);
 
     const handleModalOpen = async (action, mode, idUser) => {
         setModalTitle(`${action} Usuário`);
@@ -126,6 +131,13 @@ const User = () => {
         setFilterText(e.target.value);
     };
 
+    const handlePageChange = (page) => setCurrentPage(page);
+
+    const handlePageSizeChange = (size) => {
+        setPageSize(size);
+        setCurrentPage(0);
+    };
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         if (name === 'department') {
@@ -144,7 +156,7 @@ const User = () => {
                 [name]: value,
             });
         }
-    };    
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -216,6 +228,8 @@ const User = () => {
                     onCreate={() => handleModalOpen('Criar', 'add')}
                     onFilterChange={handleFilterChange}
                     filterText={filterText}
+                    onPageSizeChange={handlePageSizeChange}
+                    pageSize={pageSize}
                 />
                 <Table
                     columns={columns}
@@ -224,6 +238,11 @@ const User = () => {
                     mode="admin"
                     handleModalOpen={handleModalOpen}
                     filterText={filterText}
+                />
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
                 />
             </div>
 

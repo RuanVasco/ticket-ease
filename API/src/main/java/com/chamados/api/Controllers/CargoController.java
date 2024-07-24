@@ -3,9 +3,12 @@ package com.chamados.api.Controllers;
 import com.chamados.api.DTO.CargoDTO;
 import com.chamados.api.DTO.UnitCreateDTO;
 import com.chamados.api.Entities.Cargo;
+import com.chamados.api.Entities.Department;
 import com.chamados.api.Entities.Unit;
 import com.chamados.api.Repositories.CargoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +24,12 @@ public class CargoController {
     @GetMapping("/")
     public ResponseEntity<?> getAll() {
         return ResponseEntity.ok(cargoRepository.findAll());
+    }
+
+    @GetMapping("/pageable")
+    public ResponseEntity<Page<Cargo>> getAllPageable(Pageable pageable) {
+        Page<Cargo> cargo = cargoRepository.findAll(pageable);
+        return ResponseEntity.ok(cargo);
     }
 
     @GetMapping("/{cargoID}")
