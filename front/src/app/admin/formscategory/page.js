@@ -295,7 +295,7 @@ const FormsCategory = () => {
                                                     <option value="">----</option>
                                                     {data.map((i) => (
                                                         <option key={i.id} value={i.id}>
-                                                            {i.name}
+                                                            {i.path}
                                                         </option>
                                                     ))}
                                                 </select>

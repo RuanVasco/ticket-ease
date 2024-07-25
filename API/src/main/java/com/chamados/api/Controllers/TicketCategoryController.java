@@ -40,19 +40,21 @@ public class TicketCategoryController {
 
     @PostMapping("/")
     public ResponseEntity<?> createTicketCategory(@RequestBody TicketCategoryDTO ticketCategoryDTO) {
-        Department department;
+        Department department = null;
 
         if (ticketCategoryDTO.department_id().isPresent()) {
             Optional<Department> optionalDepartment = departmentRepository.findById(ticketCategoryDTO.department_id().get());
-            department = optionalDepartment.get();
+            if (optionalDepartment.isPresent()) {
+                department = optionalDepartment.get();
+            }
         }
 
+        TicketCategory ticketCategory = null;
 
-        Optional<TicketCategory> optionalTicketCategory = ticketCategoryRepository.findById(ticketCategoryDTO.father_id());
-        TicketCategory ticketCategory;
-
-
-        ticketCategory = optionalTicketCategory.orElse(null);
+        if (ticketCategoryDTO.father_id().isPresent()) {
+            Optional<TicketCategory> optionalTicketCategory = ticketCategoryRepository.findById(ticketCategoryDTO.father_id().get());
+            ticketCategory = optionalTicketCategory.orElse(null);
+        }
 
         ticketCategoryService.addCategory(ticketCategoryDTO.name(), department, ticketCategory);
 

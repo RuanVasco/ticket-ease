@@ -20,7 +20,7 @@ public class TicketCategoryService {
     @Transactional
     public void addCategory(String name, Department department, TicketCategory father) {
         try {
-            String path = buildPath(father, department);
+            String path = buildPath(father, department, name);
             TicketCategory category = new TicketCategory();
             category.setName(name);
             category.setDepartment(department);
@@ -32,25 +32,30 @@ public class TicketCategoryService {
         }
     }
 
-    private String buildPath(TicketCategory father, Department department) {
+    private String buildPath(TicketCategory father, Department department, String name) {
         StringBuilder pathBuilder = new StringBuilder();
 
-        if (department != null) {
-            pathBuilder.append(department.getName());
-            if (father != null) {
-                pathBuilder.append(" > ");
+        TicketCategory current = father;
+
+        if (current != null) {
+            Department temp = current.getDepartment();
+            while (current != null) {
+                pathBuilder.insert(0, current.getName());
+                if (current.getFather() != null) {
+                    pathBuilder.insert(0, " > ");
+                }
+                temp = current.getDepartment();
+                current = current.getFather();
             }
+
+            pathBuilder.insert(0, temp.getName() + " > ");
+        } else {
+            pathBuilder.insert(0, department.getName());
         }
 
-        TicketCategory current = father;
-        while (current != null) {
-            if (!pathBuilder.isEmpty()) {
-                pathBuilder.append(" > ");
-            }
-            pathBuilder.append(current.getName());
-            current = current.getFather();
-        }
+        pathBuilder.append(" > ").append(name);
 
         return pathBuilder.toString();
     }
+
 }
