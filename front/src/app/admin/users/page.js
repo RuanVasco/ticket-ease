@@ -307,6 +307,7 @@ const User = () => {
                                                 ))}
                                             </select>
                                         </div>
+                                        
                                         <div className="mt-2">
                                             <label htmlFor="cargo" className="form-label">
                                                 Cargo

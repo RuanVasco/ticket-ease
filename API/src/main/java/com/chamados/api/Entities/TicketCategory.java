@@ -16,12 +16,15 @@ public class TicketCategory {
     private String name;
 
     @Setter
+    private String path;
+
+    @Setter
     @ManyToOne
-    @JoinColumn(name = "department_id")
+    @JoinColumn(name = "department_id", nullable = true)
     private Department department;
 
     @Setter
     @ManyToOne
-    @JoinColumn(name = "father_id")
+    @JoinColumn(name = "father_id", nullable = true)
     private TicketCategory father;
 }

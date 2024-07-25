@@ -33,8 +33,7 @@ const Departments = () => {
         receivesRequests: '',
     });
     const [loading, setLoading] = useState(false);
-
-    // Fetch data and units when pageSize or currentPage changes
+    
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
@@ -193,7 +192,7 @@ const Departments = () => {
                     mode="admin"
                     handleModalOpen={handleModalOpen}
                     filterText={filterText}
-                    loading={loading}  // Optionally pass loading state to Table if needed
+                    loading={loading} 
                 />
                 <Pagination
                     currentPage={currentPage}

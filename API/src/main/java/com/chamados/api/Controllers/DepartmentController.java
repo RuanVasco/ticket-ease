@@ -1,9 +1,7 @@
 package com.chamados.api.Controllers;
 
 import com.chamados.api.DTO.DepartmentDTO;
-import com.chamados.api.DTO.UnitCreateDTO;
 import com.chamados.api.Entities.Department;
-import com.chamados.api.Entities.Unit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
