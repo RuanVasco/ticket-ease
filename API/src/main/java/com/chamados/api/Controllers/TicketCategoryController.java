@@ -85,7 +85,22 @@ public class TicketCategoryController {
         TicketCategory ticketCategory = optionalTicketCategory.get();
 
         ticketCategoryService.updateCategory(ticketCategory, ticketCategoryDTO);
-        
+
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{categoryID}")
+    public ResponseEntity<?> deleteTicketCategory(@PathVariable Long categoryID) {
+        Optional<TicketCategory> optionalTicketCategory = ticketCategoryRepository.findById(categoryID);
+
+        if (optionalTicketCategory.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        TicketCategory ticketCategory = optionalTicketCategory.get();
+
+        ticketCategoryRepository.delete(ticketCategory);
+
         return ResponseEntity.ok().build();
     }
 

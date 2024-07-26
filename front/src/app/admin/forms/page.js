@@ -11,11 +11,10 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const columns = [
     { value: "name", label: "Nome" },
-    { value: "unit.name", label: "Unidade" },
-    { value: "receivesRequests", label: "Recebe Chamados" }
+    { value: "ticketCategory.name", label: "Categoria" },
 ];
 
-const Departments = () => {
+const Forms = () => {
     const [filterText, setFilterText] = useState('');
     const [modeModal, setModeModal] = useState('');
     const [modalTitle, setModalTitle] = useState('');
@@ -24,81 +23,75 @@ const Departments = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    const [units, setUnits] = useState([]);
-    const [currentDepartment, setCurrentDepartment] = useState({
+    const [categories, setCategories] = useState([]);
+    const [currentForm, setCurrentForm] = useState({
         id: '',
         name: '',
-        unit: { id: '', name: '', address: '' },
-        receivesRequests: '',
+        ticketCategory: { id: '', name: '', path: '' },
     });
     const [loading, setLoading] = useState(false);
-    
+
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const res = await axios.get(`${API_BASE_URL}/departments/pageable?page=${currentPage}&size=${pageSize}`);
+                const res = await axios.get(`${API_BASE_URL}/forms/pageable?page=${currentPage}&size=${pageSize}`);
                 if (res.status === 200) {
-                    const departments = res.data.content.map(dept => ({
-                        ...dept,
-                        receivesRequests: dept.receivesRequests ? 'Sim' : 'Não',
-                    }));
-                    setData(departments);
+                    console.log(res.data.content);
+                    setData(res.data.content);
                     setTotalPages(res.data.totalPages);
                 } else {
-                    console.error('Error fetching departments:', res.status);
+                    console.error('Error fetching forms:', res.status);
                 }
             } catch (error) {
-                console.error('Error fetching departments:', error);
+                console.error('Error fetching forms:', error);
             }
             setLoading(false);
         };
 
-        const fetchUnits = async () => {
+        const fetchCategories = async () => {
             setLoading(true);
             try {
-                const res = await axios.get(`${API_BASE_URL}/units/`);
+                const res = await axios.get(`${API_BASE_URL}/tickets-category/`);
                 if (res.status === 200) {
-                    setUnits(res.data);
+                    setCategories(res.data);
                 } else {
-                    console.error('Error fetching units:', res.status);
+                    console.error('Error fetching categories:', res.status);
                 }
             } catch (error) {
-                console.error('Error fetching units:', error);
+                console.error('Error fetching categories:', error);
             }
             setLoading(false);
-        }
+        };
 
         fetchData();
-        fetchUnits();
+        fetchCategories();
     }, [currentPage, pageSize]);
 
-    const handleModalOpen = async (action, mode, idUnit) => {
-        setModalTitle(`${action} Departamento`);
+    const handleModalOpen = async (action, mode, idForm) => {
+        setModalTitle(`${action} Formulário`);
         setModeModal(mode);
 
         if (mode !== "add") {
             try {
-                const res = await axios.get(`${API_BASE_URL}/departments/${idUnit}`);
+                const res = await axios.get(`${API_BASE_URL}/forms/${idForm}`);
                 if (res.status === 200) {
-                    setCurrentDepartment({
+                    setCurrentForm({
                         id: res.data.id,
                         name: res.data.name,
-                        unit: { id: res.data.unit.id, name: res.data.unit.name, address: res.data.unit.address },
-                        receivesRequests: res.data.receivesRequests
+                        ticketCategory: { id: res.data.ticketCategory.id, name: res.data.ticketCategory.name, path: res.data.ticketCategory.path }
                     });
                 } else {
-                    console.error('Error fetching department:', res.status);
+                    console.error('Error fetching form:', res.status);
                 }
             } catch (error) {
-                console.error('Error fetching department:', error);
+                console.error('Error fetching form:', error);
             }
         } else {
-            setCurrentDepartment({
+            setCurrentForm({
                 id: '',
                 name: '',
-                unit: { id: '', name: '', address: '' },
-                receivesRequests: ''
+                ticketCategory: { id: '', name: '', path: '' },
             });
         }
     };
@@ -116,22 +109,19 @@ const Departments = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        if (name === 'unit') {
-            setCurrentDepartment({
-                ...currentDepartment,
-                unit: { ...currentDepartment.unit, id: parseInt(value, 10) },
-            });
-        } else if (name === 'receivesRequests') {
-            setCurrentDepartment({
-                ...currentDepartment,
-                receivesRequests: value === 'true',
+        if (name === 'ticketCategory') {
+            setCurrentForm({
+                ...currentForm,
+                ticketCategory: { ...currentForm.ticketCategory, id: parseInt(value, 10) },
             });
         } else {
-            setCurrentDepartment({
-                ...currentDepartment,
+            setCurrentForm({
+                ...currentForm,
                 [name]: value,
             });
         }
+
+        console.log(currentForm);
     };
 
     const handleSubmit = async (e) => {
@@ -140,44 +130,43 @@ const Departments = () => {
 
         try {
             let res;
+            const formId = currentForm.id;
 
             if (submitType === "delete") {
-                res = await axios.delete(`${API_BASE_URL}/departments/${currentDepartment.id}`);
+                res = await axios.delete(`${API_BASE_URL}/forms/${formId}`);
             } else if (submitType === "add") {
-                res = await axios.post(`${API_BASE_URL}/departments/`, currentDepartment);
+                res = await axios.post(`${API_BASE_URL}/forms/`, currentForm);
             } else if (submitType === "update") {
-                res = await axios.put(`${API_BASE_URL}/departments/${currentDepartment.id}`, currentDepartment);
+                res = await axios.put(`${API_BASE_URL}/forms/${formId}`, currentForm);
             } else {
                 console.error('Invalid submit type');
                 return;
             }
 
             if (res.status === 200 || res.status === 201) {
-                setCurrentDepartment({
+                setCurrentForm({
                     id: '',
                     name: '',
-                    unit: { id: '', name: '', address: '' },
-                    receivesRequests: ''
+                    ticketCategory: { id: '', name: '', path: '' },
                 });
-                
                 setCurrentPage(0);
                 window.location.reload();
             } else {
-                console.error('Error submitting department:', res.status);
+                console.error('Error submitting form:', res.status);
             }
         } catch (error) {
-            console.error('Error submitting department:', error);
+            console.error('Error submitting form:', error);
         }
         setLoading(false);
     };
 
     return (
         <main>
-            <Header pageName="Gerenciar Setores" />
+            <Header pageName="Gerenciar Formulários" />
             <div className="container">
                 <ActionBar
                     modalTargetId="modal"
-                    delEntityEndPoint={`${API_BASE_URL}/departments`}
+                    delEntityEndPoint={`${API_BASE_URL}/forms`}
                     onCreate={() => handleModalOpen('Criar', 'add')}
                     onFilterChange={handleFilterChange}
                     filterText={filterText}
@@ -191,7 +180,7 @@ const Departments = () => {
                     mode="admin"
                     handleModalOpen={handleModalOpen}
                     filterText={filterText}
-                    loading={loading} 
+                    loading={loading}
                 />
                 <Pagination
                     currentPage={currentPage}
@@ -221,54 +210,37 @@ const Departments = () => {
                                                 name="name"
                                                 className="form-control"
                                                 readOnly={modeModal === "readonly"}
-                                                value={currentDepartment.name}
+                                                value={currentForm.name}
                                                 onChange={handleInputChange}
                                                 required
                                             />
                                         </div>
                                         <div className="mt-2">
-                                            <label htmlFor="unit" className="form-label">
-                                                Unidade
+                                            <label htmlFor="ticketCategory" className="form-label">
+                                                Categoria de Formulários
                                             </label>
                                             <select
                                                 className="form-select"
-                                                name="unit"
-                                                id="unit"
-                                                value={currentDepartment.unit?.id || ""}
+                                                name="ticketCategory"
+                                                id="ticketCategory"
+                                                value={currentForm.ticketCategory?.id || ""}
                                                 onChange={handleInputChange}
                                                 disabled={modeModal === "readonly"}
                                                 required
                                             >
                                                 <option value="">---</option>
-                                                {units.map((unit) => (
-                                                    <option key={unit.id} value={unit.id}>
-                                                        {unit.name}
+                                                {categories.map((category) => (
+                                                    <option key={category.id} value={category.id}>
+                                                        {category.path}
                                                     </option>
                                                 ))}
-                                            </select>
-                                        </div>
-                                        <div className="mt-2">
-                                            <label htmlFor="receivesRequests" className="form-label">
-                                                Recebe Chamados
-                                            </label>
-                                            <select
-                                                className="form-select"
-                                                name="receivesRequests"
-                                                id="receivesRequests"
-                                                value={currentDepartment.receivesRequests === true ? "true" : "false"}
-                                                onChange={handleInputChange}
-                                                disabled={modeModal === "readonly"}
-                                                required
-                                            >
-                                                <option value="false">Não</option>
-                                                <option value="true">Sim</option>
                                             </select>
                                         </div>
                                     </>
                                 )}
                                 {modeModal === "delete" && (
                                     <p>
-                                        Deseja excluir o departamento {currentDepartment.name}?
+                                        Deseja excluir o formulário {currentForm.name}?
                                     </p>
                                 )}
                             </div>
@@ -312,4 +284,4 @@ const Departments = () => {
     );
 };
 
-export default Departments;
+export default Forms;

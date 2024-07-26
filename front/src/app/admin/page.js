@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { FaSuitcase, FaUser, FaUsers, FaStore, FaFolderOpen } from "react-icons/fa6";
+import { FaSuitcase, FaUser, FaUsers, FaStore, FaFolderOpen, FaClipboardList } from "react-icons/fa6";
 import Header from '../components/header/header';
 import withAuth from '../auth/withAuth';
 import Block from './components/block';
@@ -36,6 +36,12 @@ const HomeAdmin = () => {
             text: "Categorias de Formulário",
             icon: <FaFolderOpen />,
             link: "/admin/formscategory",
+            description: "Gerenciar Categorias"
+        },
+        {
+            text: "Formulários",
+            icon: <FaClipboardList />,
+            link: "/admin/forms",
             description: "Gerenciar Formulários"
         },
     ];

@@ -195,7 +195,7 @@ const FormsCategory = () => {
             <div className="container">
                 <ActionBar
                     modalTargetId="modal"
-                    delEntityEndPoint={`${API_BASE_URL}/departments`}
+                    delEntityEndPoint={`${API_BASE_URL}/tickets-category`}
                     onCreate={() => handleModalOpen('Criar', 'add')}
                     onFilterChange={handleFilterChange}
                     filterText={filterText}
