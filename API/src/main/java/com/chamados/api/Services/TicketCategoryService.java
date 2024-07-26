@@ -1,13 +1,17 @@
 package com.chamados.api.Services;
 
+import com.chamados.api.DTO.TicketCategoryDTO;
 import com.chamados.api.Entities.Department;
 import com.chamados.api.Entities.TicketCategory;
+import com.chamados.api.Repositories.DepartmentRepository;
 import com.chamados.api.Repositories.TicketCategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 @Service
 public class TicketCategoryService {
@@ -16,6 +20,9 @@ public class TicketCategoryService {
 
     @Autowired
     private TicketCategoryRepository ticketCategoryRepository;
+
+    @Autowired
+    private DepartmentRepository departmentRepository;
 
     @Transactional
     public void addCategory(String name, Department department, TicketCategory father) {
@@ -30,6 +37,33 @@ public class TicketCategoryService {
         } catch (Exception e) {
             logger.error("Error adding category", e);
         }
+    }
+
+    @Transactional
+    public void updateCategory(TicketCategory ticketCategory, TicketCategoryDTO ticketCategoryDTO) {
+        Department department = null;
+
+        if (ticketCategoryDTO.department_id().isPresent()) {
+            Optional<Department> optionalDepartment = departmentRepository.findById(ticketCategoryDTO.department_id().get());
+            if (optionalDepartment.isPresent()) {
+                department = optionalDepartment.get();
+            }
+        }
+
+        TicketCategory father = null;
+
+        if (ticketCategoryDTO.father_id().isPresent()) {
+            Optional<TicketCategory> optionalFather = ticketCategoryRepository.findById(ticketCategoryDTO.father_id().get());
+            father = optionalFather.orElse(null);
+        }
+
+        String path = buildPath(father, department, ticketCategoryDTO.name());
+
+        ticketCategory.setName(ticketCategoryDTO.name());
+        ticketCategory.setDepartment(department);
+        ticketCategory.setFather(father);
+        ticketCategory.setPath(path);
+        ticketCategoryRepository.save(ticketCategory);
     }
 
     private String buildPath(TicketCategory father, Department department, String name) {

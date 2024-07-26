@@ -82,6 +82,12 @@ const FormsCategory = () => {
             try {
                 const res = await axios.get(`${API_BASE_URL}/tickets-category/${idCategory}`);
                 if (res.status === 200) {
+                    if (res.data.father === null) {
+                        setRootCategory(true);
+                    } else {
+                        setRootCategory(false);
+                    }
+
                     setCurrentCategory({
                         id: res.data.id,
                         name: res.data.name,
@@ -249,8 +255,8 @@ const FormsCategory = () => {
                                                 disabled={modeModal === "readonly"}
                                                 required
                                             >
-                                                <option value="true">Sim</option>
                                                 <option value="false">Não</option>
+                                                <option value="true">Sim</option>
                                             </select>
                                         </div>
 

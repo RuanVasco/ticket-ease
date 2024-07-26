@@ -38,6 +38,19 @@ public class TicketCategoryController {
         return ResponseEntity.ok(ticketCategories);
     }
 
+    @GetMapping("/{categoryID}")
+    public ResponseEntity<TicketCategory> getTicketCategory(@PathVariable Long categoryID) {
+        Optional<TicketCategory> optionalTicketCategory = ticketCategoryRepository.findById(categoryID);
+
+        if (optionalTicketCategory.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        TicketCategory ticketCategory = optionalTicketCategory.get();
+
+        return ResponseEntity.ok(ticketCategory);
+    }
+
     @PostMapping("/")
     public ResponseEntity<?> createTicketCategory(@RequestBody TicketCategoryDTO ticketCategoryDTO) {
         Department department = null;
@@ -60,4 +73,20 @@ public class TicketCategoryController {
 
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/{categoryID}")
+    public ResponseEntity<?> updateTicketCategory(@PathVariable Long categoryID, @RequestBody TicketCategoryDTO ticketCategoryDTO) {
+        Optional<TicketCategory> optionalTicketCategory = ticketCategoryRepository.findById(categoryID);
+
+        if (optionalTicketCategory.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        TicketCategory ticketCategory = optionalTicketCategory.get();
+
+        ticketCategoryService.updateCategory(ticketCategory, ticketCategoryDTO);
+        
+        return ResponseEntity.ok().build();
+    }
+
 }
