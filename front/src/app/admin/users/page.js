@@ -287,6 +287,20 @@ const User = () => {
                                         </div>
 
                                         <div className="mt-2">
+                                            <label htmlFor="phone" className="form-label">
+                                                Telefone
+                                            </label>
+                                            <input
+                                                name="phone"
+                                                className="form-control"
+                                                readOnly={modeModal === "readonly"}
+                                                value={currentUser.phone}
+                                                onChange={handleInputChange}
+                                                required
+                                            />
+                                        </div>
+
+                                        <div className="mt-2">
                                             <label htmlFor="department" className="form-label">
                                                 Setor
                                             </label>
