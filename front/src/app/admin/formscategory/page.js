@@ -59,7 +59,7 @@ const FormsCategory = () => {
 
         const fetchDepartments = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/departments/`);
+                const res = await axios.get(`${API_BASE_URL}/departments/receiveRequests`, {params:{ receiveRequests: true }});
                 if (res.status === 200) {
                     setDepartments(res.data);
                 } else {
