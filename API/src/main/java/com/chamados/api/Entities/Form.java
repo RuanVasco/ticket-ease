@@ -21,6 +21,8 @@ public class Form {
     private TicketCategory ticketCategory;
 
     public Form(String name, TicketCategory ticketCategory) {
+        this.name = name;
+        this.ticketCategory = ticketCategory;
     }
 
     public Form() {

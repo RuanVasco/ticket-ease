@@ -11,7 +11,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const columns = [
     { value: "name", label: "Nome" },
-    { value: "ticketCategory.name", label: "Categoria" },
+    { value: "ticketCategory.path", label: "Categoria" },
 ];
 
 const Forms = () => {
