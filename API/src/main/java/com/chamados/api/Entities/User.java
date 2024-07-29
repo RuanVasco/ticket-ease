@@ -20,6 +20,9 @@ public class User {
     private String name;
 
     @Setter
+    private String phone;
+
+    @Setter
     @Column(unique = true, nullable = false)
     private String email;
 

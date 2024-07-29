@@ -96,6 +96,7 @@ public class UserController {
 
         user.setName(userUpdateDTO.name());
         user.setEmail(userUpdateDTO.email());
+        user.setPhone(userUpdateDTO.phone());
         user.setCargo(cargo);
         user.setDepartment(department);
 

@@ -38,7 +38,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new RuntimeException("User not found");
         }
         User user = optionalUser.get();
-        return new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getDepartment(), user.getCargo());
+        return new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(),user.getDepartment(), user.getCargo());
     }
 
 }

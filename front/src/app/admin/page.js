@@ -7,7 +7,22 @@ import withAuth from '../auth/withAuth';
 import Block from './components/block';
 
 const HomeAdmin = () => {
-    const blocks = [
+    const blocksForms = [
+        {
+            text: "Formulários",
+            icon: <FaClipboardList />,
+            link: "/admin/forms",
+            description: "Gerenciar Formulários"
+        },
+        {
+            text: "Categorias de Formulário",
+            icon: <FaFolderOpen />,
+            link: "/admin/formscategory",
+            description: "Gerenciar Categorias"
+        },        
+    ];
+
+    const blocksCadastro = [
         {
             text: "Usuários",
             icon: <FaUser />,
@@ -32,29 +47,25 @@ const HomeAdmin = () => {
             link: "/admin/cargos",
             description: "Gerenciar Cargos"
         },
-        {
-            text: "Categorias de Formulário",
-            icon: <FaFolderOpen />,
-            link: "/admin/formscategory",
-            description: "Gerenciar Categorias"
-        },
-        {
-            text: "Formulários",
-            icon: <FaClipboardList />,
-            link: "/admin/forms",
-            description: "Gerenciar Formulários"
-        },
     ];
 
     return (
         <main>
             <Header pageName="Administração" />
             <div className="container mt-4">
-                {/* <div className="d-block pt-4">
-                    <h4 className='border-bottom text-center fw-semibold pb-2'>Cadastros</h4>
-                </div> */}
-                <div className="d-flex align-items-start justify-content-center flex-wrap">
-                    {blocks.map((block, index) => (
+                <div className="d-block pt-4">
+                    <h5 className='border-bottom fw-semibold pb-1 ps-3'>Cadastros</h5>
+                </div>
+                <div className="d-flex align-items-start flex-wrap">
+                    {blocksCadastro.map((block, index) => (
+                        <Block key={index} text={block.text} icon={block.icon} link={block.link} description={block.description} />
+                    ))}
+                </div>
+                <div className="d-block pt-4">
+                    <h5 className='border-bottom fw-semibold pb-1 ps-3'>Formulários</h5>
+                </div>
+                <div className="d-flex align-items-start flex-wrap">
+                    {blocksForms.map((block, index) => (
                         <Block key={index} text={block.text} icon={block.icon} link={block.link} description={block.description} />
                     ))}
                 </div>
