@@ -1,6 +1,5 @@
 const ThemeChange = (theme) => {
     if (typeof window !== "undefined") {
-        console.log(theme);
         const r = document.querySelector(':root');       
 
         if (theme === 'dark') {

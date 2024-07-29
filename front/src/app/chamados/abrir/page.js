@@ -1,98 +1,136 @@
 "use client";
 
-import Header from '../../components/header/header';
-// import FormSchemaBased from '../../components/forms/schemaBasedForm';
 import React, { useState, useEffect } from 'react';
-import AttachmentsForm from '../../components/attachmentsForm/attachmentsForm';
-import axios from "axios";
+import axios from 'axios';
+import Header from '../../components/header/header';
 import style from "./style.css";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 const AbrirChamado = () => {
-    const [selectedOption, setSelectedOption] = useState('');
-    const [options, setOptions] = useState([]);
-    const [hiddenInputs, setHiddenInputs] = useState(["user"]);
+    const [categories, setCategories] = useState([]);
+    const [forms, setForms] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchDepartments();
+        const fetchData = async () => {
+            try {
+                const res = await axios.get(`${API_BASE_URL}/tickets-category/`);
+                if (res.status === 200) {
+                    setCategories(res.data);
+                } else {
+                    console.error('Error fetching data:', res.status);
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+
+            setLoading(false);
+        };
+
+        const fetchForms = async () => {
+            try {
+                const res = await axios.get(`${API_BASE_URL}/forms/`);
+                if (res.status === 200) {
+                    setForms(res.data);
+                } else {
+                    console.error('Error fetching data:', res.status);
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+
+            setLoading(false);
+        }
+
+        fetchData();
+        fetchForms();
     }, []);
 
-    const handleChange = (e) => {
-        const selectedValue = e.target.value;
-        setSelectedOption(selectedValue);
-    };
+    const organizeData = () => {
+        let data = [];
 
-    const fetchDepartments = async () => {
-        try {
-            const res = await axios.get('http://localhost:8080/departments/receiveRequests?receiveRequests=true');
-            if (res.status === 200) {
-                setOptions(res.data);
-            } else {
-                console.error('Erro', res.status);
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    };
+        const categoryMap = new Map();
+        const departmentMap = new Map();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-
-        try {
-            const res = await axios.post('http://localhost:8080/tickets/', formData, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+        categories.forEach(category => {
+            categoryMap.set(category.id, {
+                ...category,
+                children: []
             });
-            if (res.status === 200) {
-                alert('Chamado aberto com sucesso!');
-            } else {
-                console.error('Erro', res.status);
+            if (category.department) {
+                let departmentId = category.department.id;
+                if (!departmentMap.has(departmentId)) {
+                    departmentMap.set(departmentId, {
+                        ...category.department,
+                        children: []
+                    });
+                }
             }
-        } catch (error) {
-            console.log(error);
-        }
+        });
+
+        categories.forEach(category => {
+            if (category.father) {
+                let parentCategory = categoryMap.get(category.father.id);
+                if (parentCategory) {
+                    parentCategory.children.push(categoryMap.get(category.id));
+                }
+            } else {
+                if (category.department) {
+                    let department = departmentMap.get(category.department.id);
+                    if (department) {
+                        department.children.push(categoryMap.get(category.id));
+                    }
+                }
+            }
+        });
+
+        forms.forEach(form => {
+            let category = categoryMap.get(form.ticketCategory.id);
+            if (category) {
+                category.children.push(form);
+            }
+        });
+
+        departmentMap.forEach(department => {
+            data.push(department);
+        });
+
+        return data;
+    };
+
+    const renderTreeNavigation = (data) => {
+        return data.map((item) => (
+            <li key={item.id} className="list-tree-item">
+                <a className="toggle-tree-nav" data-bs-toggle="collapse" href={`#collapseItem_${item.name}_${item.id}`} role="button" aria-expanded="false" aria-controls={`collapseItem_${item.id}`}>
+                    {item.name}
+                </a>
+                {item.children && item.children.length > 0 && (
+                    <div className="collapse" id={`collapseItem_${item.name}_${item.id}`}>
+                        <ul className="list-tree ps-4">
+                            {renderTreeNavigation(item.children)}
+                        </ul>
+                    </div>
+                )}
+            </li>
+        ));
     };
 
     return (
         <main>
             <Header pageName="Abrir Chamado" />
-            {/* <table className='mx-auto form_table'>
-                <tbody>
-                    <tr>
-                        <td>
-                            <label htmlFor="selectSectors">Setor Responsável:</label>
-                        </td>
-                        <td>
-                            <select id="selectSectors" className="form-select" value={selectedOption} onChange={handleChange}>
-                                <option defaultValue="">Escolha um setor</option>
-                                {options.map(option => (
-                                    <option key={option.id} value={option.name + "TicketForm"}>{option.name}</option>
-                                ))}
-                            </select>
-                        </td>
-                    </tr>
-                </tbody>
-            </table> */}
-            <div id="form_" className='mt-5 w-50 mx-auto'>
-                <form className="form_">
-                    <label htmlFor="selectSectors">Setor Responsável:</label>
-                    <select id="selectSectors" class="form-select" value={selectedOption} onChange={handleChange}>
-                        {options.map(option => (
-                            <option key={option.id} value={option.name + "TicketForm"}>{option.name}</option>
-                        ))}
-                    </select>
-                    <label htmlFor="titleTicket" className="mt-2">Assunto: </label>
-                    <input type="text" id="titleTicket" name="title" className="form-control" />
-                    <label htmlFor="descriptionTicket" className="mt-2">Descrição: </label>
-                    <textarea id="descriptionTicket" name="description" className="form-control" rows="5"></textarea>
-                    <AttachmentsForm />
-                    <buttom type="submit" className="btn btn-primary mt-3">Abrir Chamado</buttom>
-                </form>
-                {/* {selectedOption && <FormSchemaBased entity={selectedOption} hiddenInputs={hiddenInputs} onSubmit={handleSubmit} />} */}
+            <div className="container">
+                <div className="row">
+                    <div className="col-2 p-0 border-end">
+                        <ul className="list-tree">
+                            {renderTreeNavigation(organizeData())}
+                        </ul>
+                    </div>
+                    <div className="col"></div>
+                </div>
             </div>
         </main>
-    );
-};
+    )
+}
 
 export default AbrirChamado;

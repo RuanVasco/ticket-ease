@@ -3,3 +3,13 @@
     color: var(--primary-color) !important;
 }
 
+.list-tree {
+    width: 100%;
+    color: var(--primary-color);
+    list-style: none;
+}
+
+.list-tree-item {
+    
+}
+

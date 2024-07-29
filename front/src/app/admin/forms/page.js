@@ -37,7 +37,6 @@ const Forms = () => {
             try {
                 const res = await axios.get(`${API_BASE_URL}/forms/pageable?page=${currentPage}&size=${pageSize}`);
                 if (res.status === 200) {
-                    console.log(res.data.content);
                     setData(res.data.content);
                     setTotalPages(res.data.totalPages);
                 } else {
@@ -121,7 +120,6 @@ const Forms = () => {
             });
         }
 
-        console.log(currentForm);
     };
 
     const handleSubmit = async (e) => {

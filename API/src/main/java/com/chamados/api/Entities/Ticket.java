@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.awt.*;
+import java.util.Date;
 
 @Getter
 @Entity
@@ -21,5 +22,29 @@ public class Ticket {
     private TextArea description;
 
     @Setter
-    private Long urgency;
+    @Column(nullable = true)
+    private TextArea observation;
+
+    @Setter
+    @Column(nullable = true)
+    private TextArea procedure;
+
+    @Setter
+    private String status;
+
+    @Setter
+    private String urgency;
+
+    @Setter
+    private Boolean receiveEmail;
+
+    @Setter
+    private Date created_at;
+
+    @Setter
+    private Date updated_at;
+
+    @Setter
+    @Column(nullable = true)
+    private Date closed_at;
 }

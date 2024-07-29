@@ -183,9 +183,6 @@ const FormsCategory = () => {
                 ...currentCategory,
                 [name]: value,
             });
-
-
-            console.log(currentCategory)
         }
     };
 
