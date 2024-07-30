@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Header from '../../components/header/header';
+import { FaAngleRight, FaAngleLeft } from "react-icons/fa6";
 import style from "./style.css";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -10,7 +11,11 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const AbrirChamado = () => {
     const [categories, setCategories] = useState([]);
     const [forms, setForms] = useState([]);
+    const [currentForm, setCurrentForm] = useState(null);
+    const [form, setForm] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [currentCategory, setCurrentCategory] = useState(null);
+    const [categoryPath, setCategoryPath] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -24,8 +29,6 @@ const AbrirChamado = () => {
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
-
-            setLoading(false);
         };
 
         const fetchForms = async () => {
@@ -39,19 +42,46 @@ const AbrirChamado = () => {
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
-
-            setLoading(false);
         }
 
         fetchData();
         fetchForms();
     }, []);
 
-    const organizeData = () => {
-        let data = [];
+    useEffect(() => {
+        if (categories.length > 0) {
+            const data = organizeData();
+            setCurrentCategory(data);
+        }
+    }, [categories]);
 
+    useEffect(() => {
+        if (currentForm) {
+            const fetchForm = async () => {
+                try {
+                    const res = await axios.get(`${API_BASE_URL}/forms/${currentForm.id}`);
+                    if (res.status === 200) {
+                        setForm(res.data);
+                    } else {
+                        console.error('Error fetching form:', res.status);
+                    }
+                } catch (error) {
+                    console.error('Error fetching form:', error);
+                }
+            }
+
+            fetchForm();
+        }
+    }, [currentForm]);
+
+    const organizeData = () => {
         const categoryMap = new Map();
         const departmentMap = new Map();
+        let root = {
+            id: 'root',
+            name: 'Root Category',
+            children: []
+        };
 
         categories.forEach(category => {
             categoryMap.set(category.id, {
@@ -93,27 +123,70 @@ const AbrirChamado = () => {
         });
 
         departmentMap.forEach(department => {
-            data.push(department);
+            root.children.push(department);
         });
 
-        return data;
+        return root;
+    };
+
+    const handleCategoryClick = (category) => {
+        console.log(categoryPath);
+        setCurrentCategory(category);
+        setCategoryPath([...categoryPath, category]);
+    };
+
+    const handleBack = () => {
+        const newPath = [...categoryPath];
+        
+        newPath.pop();
+        setCurrentCategory(newPath.length > 0 ? newPath[newPath.length - 1] : organizeData());        
+        setCategoryPath(newPath);
     };
 
     const renderTreeNavigation = (data) => {
-        return data.map((item) => (
-            <li key={item.id} className="list-tree-item">
-                <a className="toggle-tree-nav" data-bs-toggle="collapse" href={`#collapseItem_${item.name}_${item.id}`} role="button" aria-expanded="false" aria-controls={`collapseItem_${item.id}`}>
-                    {item.name}
-                </a>
-                {item.children && item.children.length > 0 && (
-                    <div className="collapse" id={`collapseItem_${item.name}_${item.id}`}>
-                        <ul className="list-tree ps-4">
-                            {renderTreeNavigation(item.children)}
-                        </ul>
-                    </div>
-                )}
-            </li>
-        ));
+        return data.children.map((item) => {
+            return (
+                <li key={item.id} className="list-tree-item">
+                    {categoryPath.length > 0 && (
+                        <div>
+                            <button onClick={handleBack} className="btn btn-link">
+                                <FaAngleLeft className="me-2" /> Voltar
+                            </button>
+                            {categoryPath.map((category, index) => (
+                                <span key={index}>{category.name} / </span>
+                            ))}
+                        </div>
+                    )}
+
+                    {item.children ? (
+                        <div>
+                            <a
+                                onClick={() => handleCategoryClick(item)}
+                                className="toggle-tree-nav"
+                                role="button"
+                                style={{ cursor: 'pointer' }}
+                            >
+                                {item.name}
+                                <FaAngleRight className="ms-3" />
+                            </a>
+                            {currentCategory === item && (
+                                <ul className="list-tree ps-4">
+                                    {renderTreeNavigation(item)}
+                                </ul>
+                            )}
+                        </div>
+                    ) : (
+                        <a
+                            style={{ cursor: 'pointer' }}
+                            value={item.id}
+                            onClick={() => setCurrentForm(item)}
+                        >
+                            {item.name} (é formulário)
+                        </a>
+                    )}
+                </li>
+            );
+        });
     };
 
     return (
@@ -123,14 +196,25 @@ const AbrirChamado = () => {
                 <div className="row">
                     <div className="col-2 p-0 border-end">
                         <ul className="list-tree">
-                            {renderTreeNavigation(organizeData())}
+                            {currentCategory ? renderTreeNavigation(currentCategory) : null}
                         </ul>
                     </div>
-                    <div className="col"></div>
+                    <div className="col">
+                        {form && (
+                            <div>
+                                <h2>{form.name}</h2>
+                                <form>
+                                    <input type="text" placeholder="Assunto" className="form-control mb-3" />
+                                    <textarea className="form-control mb-3" placeholder="Descrição"></textarea>
+                                    <button type="submit" className="btn btn-primary">Abrir Chamado</button>
+                                </form>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </main>
-    )
-}
+    );
+};
 
 export default AbrirChamado;
