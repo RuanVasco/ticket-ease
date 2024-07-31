@@ -1,8 +1,6 @@
 package com.chamados.api.Controllers;
 
-import com.chamados.api.DTO.DepartmentDTO;
 import com.chamados.api.DTO.FormDTO;
-import com.chamados.api.Entities.Department;
 import com.chamados.api.Entities.Form;
 import com.chamados.api.Repositories.FormRepository;
 import org.springframework.beans.factory.annotation.Autowired;

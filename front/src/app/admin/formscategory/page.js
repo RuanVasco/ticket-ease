@@ -55,7 +55,7 @@ const FormsCategory = () => {
 
         const fetchCategories = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/tickets-category/hide`, { params: {"hide": false} } );
+                const res = await axios.get(`${API_BASE_URL}/tickets-category/hide`, { params: { "hide": false } });
                 if (res.status === 200) {
                     setCategories(res.data);
                 } else {
@@ -136,7 +136,7 @@ const FormsCategory = () => {
                 name: currentCategory.name,
                 department_id: rootCategory ? currentCategory.department.id : null,
                 father_id: !rootCategory ? currentCategory.father.id : null,
-                hide: currentCategory.hide, 
+                hide: currentCategory.hide,
             };
 
             let res;
@@ -200,7 +200,7 @@ const FormsCategory = () => {
                 [name]: value,
             }));
         }
-        
+
     };
 
     return (
@@ -299,7 +299,7 @@ const FormsCategory = () => {
                                                 </div>
 
                                                 <div className="mt-2">
-                                                    <label htmlFor="hide" className="form-label">
+                                                    <label htmlFor="hide" className="form-label" title={`Categorias escondidas atribuem seus formulários ao departamento pai. \nUse para atribuir um formulário diretamente ao setor.`}>
                                                         Esconder
                                                     </label>
                                                     <select

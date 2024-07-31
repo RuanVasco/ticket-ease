@@ -17,6 +17,7 @@ const AbrirChamado = () => {
     const [currentCategory, setCurrentCategory] = useState(null);
     const [categoryPath, setCategoryPath] = useState([]);
     const [ticket, setTicket] = useState({
+        form_id: '',
         name: '',
         description: '',
         observation: '',
@@ -123,9 +124,9 @@ const AbrirChamado = () => {
         });
 
         forms.forEach(form => {
-            let category = categoryMap.get(form.ticketCategory.id);       
+            let category = categoryMap.get(form.ticketCategory.id);
             if (category) {
-                if (category.hide) {                    
+                if (category.hide) {
                     let dep = departmentMap.get(category.department.id);
                     dep.children.push(form);
                 } else {
@@ -223,8 +224,18 @@ const AbrirChamado = () => {
     const handleSubmitForm = async (e) => {
         e.preventDefault();
 
+        if (!form) {
+            console.error('Form is not loaded.');
+            return;
+        }
+
+        const ticketData = {
+            ...ticket,
+            form_id: form.id 
+        };
+
         try {
-            const res = await axios.post(`${API_BASE_URL}/tickets/`, ticket);
+            const res = await axios.post(`${API_BASE_URL}/tickets/`, ticketData);
 
             if (res.status === 200 || res.status === 201) {
                 window.location.href = `http://localhost:3000/chamados/ver/${res.data.id}`;
@@ -235,6 +246,7 @@ const AbrirChamado = () => {
             console.error('Error', error);
         }
     };
+
 
     return (
         <main>
@@ -248,8 +260,7 @@ const AbrirChamado = () => {
                         {form ? (
                             <div>
                                 <h4 className="fw-semibold border-bottom pb-1 ps-2">{form.ticketCategory.name + " / " + form.name}</h4>
-                                <form onSubmit={handleSubmitForm}>
-                                    <input className="d-none" readOnly value={form.id}></input>
+                                <form onSubmit={handleSubmitForm}>                                    
                                     <div className="row">
                                         <div className="col">
                                             <label htmlFor="ticket-name" className="form-label mb-1">Assunto: </label>

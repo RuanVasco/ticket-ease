@@ -16,6 +16,11 @@ public class Ticket {
     private Long id;
 
     @Setter
+    @ManyToOne
+    @JoinColumn(name = "form_id")
+    Form form;
+
+    @Setter
     private String name;
 
     @Setter
