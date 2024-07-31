@@ -5,5 +5,5 @@ import com.chamados.api.Entities.TicketCategory;
 
 import java.util.Optional;
 
-public record TicketCategoryDTO(String name, Optional<Long> department_id, Optional<Long> father_id) {
+public record TicketCategoryDTO(String name, Optional<Long> department_id, Optional<Long> father_id, Boolean hide) {
 }

@@ -27,17 +27,13 @@ const FormsCategory = () => {
     const [pageSize, setPageSize] = useState(10);
     const [departments, setDepartments] = useState([]);
     const [rootCategory, setRootCategory] = useState(false);
+    const [categories, setCategories] = useState([]);
     const [currentCategory, setCurrentCategory] = useState({
         id: '',
         name: '',
-        department: {
-            id: '',
-            name: '',
-        },
-        father: {
-            id: '',
-            name: '',
-        },
+        department: { id: '', name: '' },
+        father: { id: '', name: '' },
+        hide: false,
     });
 
     useEffect(() => {
@@ -49,29 +45,43 @@ const FormsCategory = () => {
                     setData(res.data.content);
                     setTotalPages(res.data.totalPages);
                 } else {
+                    console.error('Error fetching data:', res.status);
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+            setLoading(false);
+        };
+
+        const fetchCategories = async () => {
+            try {
+                const res = await axios.get(`${API_BASE_URL}/tickets-category/hide`, { params: {"hide": false} } );
+                if (res.status === 200) {
+                    setCategories(res.data);
+                } else {
+                    console.error('Error fetching categories:', res.status);
+                }
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            }
+        }
+
+        const fetchDepartments = async () => {
+            try {
+                const res = await axios.get(`${API_BASE_URL}/departments/receiveRequests`, { params: { receiveRequests: true } });
+                if (res.status === 200) {
+                    setDepartments(res.data);
+                } else {
                     console.error('Error fetching departments:', res.status);
                 }
             } catch (error) {
                 console.error('Error fetching departments:', error);
             }
-            setLoading(false);
-        };
-
-        const fetchDepartments = async () => {
-            try {
-                const res = await axios.get(`${API_BASE_URL}/departments/receiveRequests`, {params:{ receiveRequests: true }});
-                if (res.status === 200) {
-                    setDepartments(res.data);
-                } else {
-                    console.error('Error', res.status);
-                }
-            } catch (error) {
-                console.error(error);
-            }
         };
 
         fetchData();
         fetchDepartments();
+        fetchCategories();
     }, [currentPage, pageSize]);
 
     const handleModalOpen = async (action, mode, idCategory) => {
@@ -82,37 +92,33 @@ const FormsCategory = () => {
             try {
                 const res = await axios.get(`${API_BASE_URL}/tickets-category/${idCategory}`);
                 if (res.status === 200) {
-                    if (res.data.father === null) {
-                        setRootCategory(true);
-                    } else {
-                        setRootCategory(false);
-                    }
-
+                    const { father, department, ...category } = res.data;
+                    setRootCategory(father === null);
                     setCurrentCategory({
-                        id: res.data.id,
-                        name: res.data.name,
-                        father: res.data.father,
-                        department: res.data.department,
+                        id: category.id,
+                        name: category.name,
+                        father: father || { id: '', name: '' },
+                        department: department || { id: '', name: '' },
+                        hide: category.hide,
                     });
                 } else {
-                    console.error('Error fetching department:', res.status);
+                    console.error('Error fetching category:', res.status);
                 }
             } catch (error) {
-                console.error('Error fetching department:', error);
+                console.error('Error fetching category:', error);
             }
         } else {
             setCurrentCategory({
                 id: '',
                 name: '',
-                father: '',
-                department: '',
+                department: { id: '', name: '' },
+                father: { id: '', name: '' },
+                hide: false,
             });
         }
     };
 
-    const handleFilterChange = (e) => {
-        setFilterText(e.target.value);
-    };
+    const handleFilterChange = (e) => setFilterText(e.target.value);
 
     const handlePageChange = (page) => setCurrentPage(page);
 
@@ -126,40 +132,45 @@ const FormsCategory = () => {
         setLoading(true);
 
         try {
-            let res;
-
             const payload = {
                 name: currentCategory.name,
                 department_id: rootCategory ? currentCategory.department.id : null,
                 father_id: !rootCategory ? currentCategory.father.id : null,
+                hide: currentCategory.hide, 
             };
 
-            if (submitType === "delete") {
-                res = await axios.delete(`${API_BASE_URL}/tickets-category/${currentCategory.id}`);
-            } else if (submitType === "add") {
-                res = await axios.post(`${API_BASE_URL}/tickets-category/`, payload);
-            } else if (submitType === "update") {
-                res = await axios.put(`${API_BASE_URL}/tickets-category/${currentCategory.id}`, payload);
-            } else {
-                console.error('Invalid submit type');
-                return;
+            let res;
+            switch (submitType) {
+                case "delete":
+                    res = await axios.delete(`${API_BASE_URL}/tickets-category/${currentCategory.id}`);
+                    break;
+                case "add":
+                    res = await axios.post(`${API_BASE_URL}/tickets-category/`, payload);
+                    break;
+                case "update":
+                    res = await axios.put(`${API_BASE_URL}/tickets-category/${currentCategory.id}`, payload);
+                    break;
+                default:
+                    console.error('Invalid submit type');
+                    return;
             }
 
             if (res.status === 200 || res.status === 201) {
                 setCurrentCategory({
                     id: '',
                     name: '',
-                    path: '',
-                    department: '',
+                    department: { id: '', name: '' },
+                    father: { id: '', name: '' },
+                    hide: false,
                 });
 
                 setCurrentPage(0);
                 window.location.reload();
             } else {
-                console.error('Error submitting department:', res.status);
+                console.error('Error submitting data:', res.status);
             }
         } catch (error) {
-            console.error('Error submitting department:', error);
+            console.error('Error submitting data:', error);
         }
         setLoading(false);
     };
@@ -169,21 +180,27 @@ const FormsCategory = () => {
         if (name === 'rootCategory') {
             setRootCategory(value === 'true');
         } else if (name === 'department') {
-            setCurrentCategory({
-                ...currentCategory,
-                department: { ...currentCategory.department, id: parseInt(value, 10) },
-            });
+            setCurrentCategory(prev => ({
+                ...prev,
+                department: { ...prev.department, id: parseInt(value, 10) },
+            }));
         } else if (name === "father") {
-            setCurrentCategory({
-                ...currentCategory,
-                father: { ...currentCategory.father, id: parseInt(value, 10) },
-            });
+            setCurrentCategory(prev => ({
+                ...prev,
+                father: { ...prev.father, id: parseInt(value, 10) },
+            }));
+        } else if (name === "hide") {
+            setCurrentCategory(prev => ({
+                ...prev,
+                hide: value === 'true',
+            }));
         } else {
-            setCurrentCategory({
-                ...currentCategory,
+            setCurrentCategory(prev => ({
+                ...prev,
                 [name]: value,
-            });
+            }));
         }
+        
     };
 
     return (
@@ -258,27 +275,47 @@ const FormsCategory = () => {
                                         </div>
 
                                         {rootCategory && (
-                                            <div className="mt-2">
-                                                <label htmlFor="department" className="form-label">
-                                                    Setor
-                                                </label>
-                                                <select
-                                                    className="form-select"
-                                                    name="department"
-                                                    id="department"
-                                                    value={currentCategory.department?.id || ""}
-                                                    onChange={handleInputChange}
-                                                    disabled={modeModal === "readonly"}
-                                                    required
-                                                >
-                                                    <option value="">----</option>
-                                                    {departments.map((department) => (
-                                                        <option key={department.id} value={department.id}>
-                                                            {department.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
+                                            <>
+                                                <div className="mt-2">
+                                                    <label htmlFor="department" className="form-label">
+                                                        Setor
+                                                    </label>
+                                                    <select
+                                                        className="form-select"
+                                                        name="department"
+                                                        id="department"
+                                                        value={currentCategory.department?.id || ""}
+                                                        onChange={handleInputChange}
+                                                        disabled={modeModal === "readonly"}
+                                                        required
+                                                    >
+                                                        <option value="">----</option>
+                                                        {departments.map((department) => (
+                                                            <option key={department.id} value={department.id}>
+                                                                {department.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+
+                                                <div className="mt-2">
+                                                    <label htmlFor="hide" className="form-label">
+                                                        Esconder
+                                                    </label>
+                                                    <select
+                                                        className="form-select"
+                                                        name="hide"
+                                                        id="hide"
+                                                        value={currentCategory.hide ? "true" : "false"}
+                                                        onChange={handleInputChange}
+                                                        disabled={modeModal === "readonly"}
+                                                        required
+                                                    >
+                                                        <option value="false">Não</option>
+                                                        <option value="true">Sim</option>
+                                                    </select>
+                                                </div>
+                                            </>
                                         )}
 
                                         {!rootCategory && (
@@ -296,9 +333,9 @@ const FormsCategory = () => {
                                                     required
                                                 >
                                                     <option value="">----</option>
-                                                    {data.map((i) => (
-                                                        <option key={i.id} value={i.id}>
-                                                            {i.path}
+                                                    {categories.map((item) => (
+                                                        <option key={item.id} value={item.id}>
+                                                            {item.path}
                                                         </option>
                                                     ))}
                                                 </select>

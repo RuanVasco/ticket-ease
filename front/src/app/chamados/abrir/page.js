@@ -14,9 +14,15 @@ const AbrirChamado = () => {
     const [forms, setForms] = useState([]);
     const [currentForm, setCurrentForm] = useState(null);
     const [form, setForm] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [currentCategory, setCurrentCategory] = useState(null);
     const [categoryPath, setCategoryPath] = useState([]);
+    const [ticket, setTicket] = useState({
+        name: '',
+        description: '',
+        observation: '',
+        urgency: "Média",
+        receiveEmail: false,
+    });
 
     useEffect(() => {
         const fetchData = async () => {
@@ -117,9 +123,14 @@ const AbrirChamado = () => {
         });
 
         forms.forEach(form => {
-            let category = categoryMap.get(form.ticketCategory.id);
+            let category = categoryMap.get(form.ticketCategory.id);       
             if (category) {
-                category.children.push(form);
+                if (category.hide) {                    
+                    let dep = departmentMap.get(category.department.id);
+                    dep.children.push(form);
+                } else {
+                    category.children.push(form);
+                }
             }
         });
 
@@ -156,7 +167,7 @@ const AbrirChamado = () => {
                             <span className="ms-2">{categoryPath.length > 0 && categoryPath[categoryPath.length - 1].name}</span>
                         </button>
                     ) : (
-                        <span>/</span>
+                        <span>Departamentos</span>
                     )}
                 </div>
 
@@ -200,6 +211,31 @@ const AbrirChamado = () => {
         );
     };
 
+    const handleInputChange = (event) => {
+        const { name, value, type, checked } = event.target;
+
+        setTicket({
+            ...ticket,
+            [name]: type === 'checkbox' ? checked : value,
+        });
+    };
+
+    const handleSubmitForm = async (e) => {
+        e.preventDefault();
+
+        try {
+            const res = await axios.post(`${API_BASE_URL}/tickets/`, ticket);
+
+            if (res.status === 200 || res.status === 201) {
+                window.location.href = `http://localhost:3000/chamados/ver/${res.data.id}`;
+            } else {
+                console.error('Error', res.status);
+            }
+        } catch (error) {
+            console.error('Error', error);
+        }
+    };
+
     return (
         <main>
             <Header pageName="Abrir Chamado" />
@@ -211,25 +247,25 @@ const AbrirChamado = () => {
                     <div className="col border-start ps-4">
                         {form ? (
                             <div>
-                                <h4 className="fw-semibold border-bottom pb-1 ps-2">{currentCategory.name + " / " + form.name}</h4>
-                                <form>
+                                <h4 className="fw-semibold border-bottom pb-1 ps-2">{form.ticketCategory.name + " / " + form.name}</h4>
+                                <form onSubmit={handleSubmitForm}>
                                     <input className="d-none" readOnly value={form.id}></input>
                                     <div className="row">
                                         <div className="col">
                                             <label htmlFor="ticket-name" className="form-label mb-1">Assunto: </label>
-                                            <input type="text" name="ticket-name" className="form-control" required />
+                                            <input type="text" name="name" className="form-control" required onChange={handleInputChange} />
                                         </div>
                                     </div>
                                     <div className="row mt-2">
                                         <div className="col">
                                             <label htmlFor="ticket-description" className="form-label mb-1">Descrição: </label>
-                                            <textarea className="form-control" name="ticket-description" required></textarea>
+                                            <textarea className="form-control" name="description" required onChange={handleInputChange}></textarea>
                                         </div>
                                     </div>
                                     <div className="row mt-2">
                                         <div className="col">
                                             <label htmlFor="ticket-observation" className="form-label mb-1">Observação: </label>
-                                            <textarea className="form-control" name="ticket-observation"></textarea>
+                                            <textarea className="form-control" name="observation" onChange={handleInputChange}></textarea>
                                         </div>
                                     </div>
                                     <div className="row mt-2">
@@ -241,19 +277,19 @@ const AbrirChamado = () => {
                                     <div className="row mt-2">
                                         <div className="col">
                                             <label htmlFor="ticket-urgency" className="form-label">Urgência: </label>
-                                            <select className="ms-3" name="ticket-urgency" required>
-                                                <option>Alta</option>
-                                                <option selected>Média</option>
-                                                <option>Baixa</option>
+                                            <select className="ms-3" name="urgency" defaultValue={"Média"} required onChange={handleInputChange}>
+                                                <option value="Alta">Alta</option>
+                                                <option value="Média">Média</option>
+                                                <option value="Baixa">Baixa</option>
                                             </select>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="" id="ticket-receiveEmail" name="ticket-receiveEmail" />
-                                                <label class="form-check-label" htmlFor="ticket-receiveEmail">
+                                            <div className="form-check">
+                                                <input className="form-check-input" type="checkbox" value="" id="receiveEmail" name="receiveEmail" onChange={handleInputChange} />
+                                                <label className="form-check-label" htmlFor="receiveEmail">
                                                     Receber Atualizações por E-mail
                                                 </label>
                                             </div>
                                         </div>
-                                    </div>                                    
+                                    </div>
                                     <button type="submit" className="btn btn-primary mt-3">Abrir Chamado</button>
                                 </form>
                             </div>

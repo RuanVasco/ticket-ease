@@ -19,15 +19,15 @@ public class Ticket {
     private String name;
 
     @Setter
-    private TextArea description;
+    private String description;
 
     @Setter
     @Column(nullable = true)
-    private TextArea observation;
+    private String observation;
 
     @Setter
     @Column(nullable = true)
-    private TextArea procedure;
+    private String procedure;
 
     @Setter
     private String status;
@@ -42,6 +42,7 @@ public class Ticket {
     private Date created_at;
 
     @Setter
+    @Column(nullable = true)
     private Date updated_at;
 
     @Setter

@@ -27,4 +27,7 @@ public class TicketCategory {
     @ManyToOne
     @JoinColumn(name = "father_id", nullable = true)
     private TicketCategory father;
+
+    @Setter
+    private Boolean hide;
 }

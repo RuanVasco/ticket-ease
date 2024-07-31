@@ -38,6 +38,11 @@ public class TicketCategoryController {
         return ResponseEntity.ok(ticketCategories);
     }
 
+    @GetMapping("/hide")
+    public ResponseEntity<?> getByHide(@RequestParam(name = "hide") boolean option) {
+        return ResponseEntity.ok(ticketCategoryRepository.findByHide(option));
+    }
+
     @GetMapping("/{categoryID}")
     public ResponseEntity<TicketCategory> getTicketCategory(@PathVariable Long categoryID) {
         Optional<TicketCategory> optionalTicketCategory = ticketCategoryRepository.findById(categoryID);
@@ -69,7 +74,7 @@ public class TicketCategoryController {
             ticketCategory = optionalTicketCategory.orElse(null);
         }
 
-        ticketCategoryService.addCategory(ticketCategoryDTO.name(), department, ticketCategory);
+        ticketCategoryService.addCategory(ticketCategoryDTO.name(), department, ticketCategory, ticketCategoryDTO.hide());
 
         return ResponseEntity.ok().build();
     }
