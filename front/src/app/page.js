@@ -13,19 +13,19 @@ const Home = () => {
         <div className="d-flex align-items-top">
           <Link href="chamados/abrir" className="main_menu_item d-flex flex-column justify-content-between align-items-center py-3 mx-2 rounded">
             <FaPlus className="icon_main_menu_item" />
-            <div className="text_main_menu_item">
+            <div className="text_main_menu_item fw-semibold">
               Abrir
             </div>
           </Link>
           <Link href="chamados/ver" className="main_menu_item d-flex flex-column justify-content-between align-items-center py-3 mx-2 rounded">
             <FaEye className="icon_main_menu_item" />
-            <div className="text_main_menu_item">
+            <div className="text_main_menu_item fw-semibold">
               Acompanhar
             </div>
           </Link>
           <Link href="chamados/gerenciar" className="main_menu_item d-flex flex-column justify-content-between align-items-center py-3 mx-2 rounded">
             <FaListCheck className="icon_main_menu_item" />
-            <div className="text_main_menu_item">
+            <div className="text_main_menu_item fw-semibold">
               Gerenciar
             </div>
           </Link>

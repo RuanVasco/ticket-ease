@@ -241,7 +241,7 @@ const AbrirChamado = () => {
             const res = await axios.post(`${API_BASE_URL}/tickets/`, ticketData);
 
             if (res.status === 200 || res.status === 201) {
-                window.location.href = `http://localhost:3000/chamados/ver/${res.data.id}`;
+                window.location.href = `http://localhost:3000/chamados/ver/${res.data}`;
             } else {
                 console.error('Error', res.status);
             }

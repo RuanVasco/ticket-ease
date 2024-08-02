@@ -11,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("tickets")
 public class TicketController {
@@ -38,4 +40,18 @@ public class TicketController {
         Page<Ticket> ticket = ticketRepository.findAll(pageable);
         return ResponseEntity.ok(ticket);
     }
+
+    @GetMapping("/{ticketID}")
+    public ResponseEntity<Ticket> getTicket(@PathVariable Long ticketID) {
+        Optional<Ticket> optionalTicket = ticketRepository.findById(ticketID);
+
+        if (optionalTicket.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Ticket ticket = optionalTicket.get();
+
+        return ResponseEntity.ok(ticket);
+    }
+
 }
