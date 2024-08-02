@@ -4,8 +4,10 @@ import com.chamados.api.DTO.FormDTO;
 import com.chamados.api.Entities.Form;
 import com.chamados.api.Repositories.FormRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,8 +57,14 @@ public class FormController {
         if (optionalForm.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        formRepository.deleteById(formID);
-        return ResponseEntity.ok().build();
+
+        try {
+            formRepository.deleteById(formID);
+            return ResponseEntity.ok().build();
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Não é possível excluir o formulário devido a registros associados.");
+        }
     }
 
     @PutMapping("/{formID}")

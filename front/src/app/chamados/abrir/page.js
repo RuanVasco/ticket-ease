@@ -5,6 +5,7 @@ import axios from 'axios';
 import Header from '../../components/header/header';
 import AttachmentsForm from '../../components/attachmentsForm/attachmentsForm';
 import { FaAngleRight, FaAngleLeft, FaFolderOpen, FaClipboardList } from "react-icons/fa6";
+import { v4 as uuidv4 } from 'uuid';
 import style from "./style.css";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -156,6 +157,8 @@ const AbrirChamado = () => {
     };
 
     const renderTreeNavigation = (data) => {
+        if (!data || !data.children) return null;
+
         return (
             <div>
                 <div className='nav_forms_cat_head'>
@@ -165,19 +168,19 @@ const AbrirChamado = () => {
                             className="nav_forms_cat_btn_back"
                         >
                             <FaAngleLeft />
-                            <span className="ms-2">{categoryPath.length > 0 && categoryPath[categoryPath.length - 1].name}</span>
+                            <span className="ms-2">{categoryPath[categoryPath.length - 1]?.name}</span>
                         </button>
                     ) : (
                         <span>Departamentos</span>
                     )}
                 </div>
 
-                <ul className="mt-2 nav_forms_cat_list">
-                    {data.children
-                        .filter(item => item.children && item.children.length > 0 || !item.children)
-                        .map((item) => (
-                            <li key={item.id} className={`nav_forms_cat_item${currentForm === item ? ' item_selected' : ''}`}>
-                                {item.children && item.children.length > 0 ? (
+                <ul className="mt-2 nav_forms_cat_list" id="nav_forms_cat_list">
+                    {data.children                    
+                        .filter(item => (item.children && item.children.length > 0 || item.ticketCategory))
+                        .map((item) => (                            
+                            <li key={uuidv4()} className={`nav_forms_cat_item${currentForm === item ? ' item_selected' : ''}`}>
+                                {(item.children && item.children.length > 0) ? (                                    
                                     <div>
                                         <a
                                             onClick={() => handleCategoryClick(item)}
@@ -195,7 +198,7 @@ const AbrirChamado = () => {
                                             </div>
                                         )}
                                     </div>
-                                ) : !item.children ? (
+                                ) : item.ticketCategory ? (
                                     <a
                                         style={{ cursor: 'pointer' }}
                                         onClick={() => setCurrentForm(item)}
@@ -231,7 +234,7 @@ const AbrirChamado = () => {
 
         const ticketData = {
             ...ticket,
-            form_id: form.id 
+            form_id: form.id
         };
 
         try {
@@ -260,7 +263,7 @@ const AbrirChamado = () => {
                         {form ? (
                             <div>
                                 <h4 className="fw-semibold border-bottom pb-1 ps-2">{form.ticketCategory.name + " / " + form.name}</h4>
-                                <form onSubmit={handleSubmitForm}>                                    
+                                <form onSubmit={handleSubmitForm}>
                                     <div className="row">
                                         <div className="col">
                                             <label htmlFor="ticket-name" className="form-label mb-1">Assunto: </label>

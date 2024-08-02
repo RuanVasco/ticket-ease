@@ -7,8 +7,10 @@ import com.chamados.api.Repositories.DepartmentRepository;
 import com.chamados.api.Repositories.TicketCategoryRepository;
 import com.chamados.api.Services.TicketCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -102,11 +104,16 @@ public class TicketCategoryController {
             return ResponseEntity.notFound().build();
         }
 
-        TicketCategory ticketCategory = optionalTicketCategory.get();
+        try {
+            TicketCategory ticketCategory = optionalTicketCategory.get();
+            ticketCategoryRepository.delete(ticketCategory);
 
-        ticketCategoryRepository.delete(ticketCategory);
+            return ResponseEntity.ok().build();
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Não é possível excluir a categoria de formulário devido a registros associados.");
+        }
 
-        return ResponseEntity.ok().build();
     }
 
 }
