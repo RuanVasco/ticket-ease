@@ -22,6 +22,15 @@ public class FileStorageService {
         }
     }
 
+    public void save(MultipartFile file) {
+        try {
+            Files.copy(file.getInputStream(), this.rootLocation.resolve(file.getOriginalFilename()));
+        } catch (Exception e) {
+            throw new RuntimeException("Could not store the file. Error: " + e.getMessage());
+        }
+    }
+
+
     public String store(MultipartFile file) {
         try {
             String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
