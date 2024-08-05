@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.awt.*;
+import java.util.List;
 import java.util.Date;
 
 @Getter
@@ -29,6 +29,12 @@ public class Ticket {
     @Setter
     @Column(nullable = true)
     private String observation;
+
+    @Setter
+    @ElementCollection
+    @CollectionTable(name = "ticket_files", joinColumns = @JoinColumn(name = "ticket_id"))
+    @Column(name = "file_path")
+    private List<String> filePaths;
 
     @Setter
     @Column(nullable = true)

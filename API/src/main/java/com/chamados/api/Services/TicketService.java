@@ -7,7 +7,10 @@ import com.chamados.api.Repositories.FormRepository;
 import com.chamados.api.Repositories.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Date;
 import java.util.Optional;
 
@@ -19,6 +22,9 @@ public class TicketService {
 
     @Autowired
     FormRepository formRepository;
+
+    @Autowired
+    FileStorageService fileStorageService;
 
     public Ticket openTicket(TicketDTO ticketDTO) {
         Ticket ticket = new Ticket();
@@ -41,6 +47,15 @@ public class TicketService {
         if (ticketDTO.observation() != null) {
             ticket.setObservation(ticketDTO.observation());
         }
+
+        List<String> filePaths = new ArrayList<>();
+        if (ticketDTO.files() != null) {
+            for (MultipartFile file : ticketDTO.files()) {
+                String filePath = fileStorageService.store(file);
+                filePaths.add(filePath);
+            }
+        }
+        ticket.setFilePaths(filePaths);
 
         return ticketRepository.save(ticket);
     }

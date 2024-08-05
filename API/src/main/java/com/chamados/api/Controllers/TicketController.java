@@ -24,10 +24,13 @@ public class TicketController {
     TicketRepository ticketRepository;
 
     @PostMapping("/")
-    public ResponseEntity<?> openTicket(@RequestBody TicketDTO ticketDTO) {
+    public ResponseEntity<?> openTicket(@ModelAttribute TicketDTO ticketDTO) {
         Ticket ticket = ticketService.openTicket(ticketDTO);
-
-        return ResponseEntity.ok(ticket.getId());
+        if (ticket != null) {
+            return ResponseEntity.ok(ticket.getId());
+        } else {
+            return ResponseEntity.badRequest().body("Invalid form ID");
+        }
     }
 
     @GetMapping("/")

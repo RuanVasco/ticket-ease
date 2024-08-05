@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -25,6 +25,7 @@ const AbrirChamado = () => {
         urgency: "Média",
         receiveEmail: false,
     });
+    const [attachments, setAttachments] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -176,11 +177,11 @@ const AbrirChamado = () => {
                 </div>
 
                 <ul className="mt-2 nav_forms_cat_list" id="nav_forms_cat_list">
-                    {data.children                    
+                    {data.children
                         .filter(item => (item.children && item.children.length > 0 || item.ticketCategory))
-                        .map((item) => (                            
+                        .map((item) => (
                             <li key={uuidv4()} className={`nav_forms_cat_item${currentForm === item ? ' item_selected' : ''}`}>
-                                {(item.children && item.children.length > 0) ? (                                    
+                                {(item.children && item.children.length > 0) ? (
                                     <div>
                                         <a
                                             onClick={() => handleCategoryClick(item)}
@@ -224,6 +225,10 @@ const AbrirChamado = () => {
         });
     };
 
+    const handleFilesChange = (files) => {
+        setAttachments(files);
+    };
+
     const handleSubmitForm = async (e) => {
         e.preventDefault();
 
@@ -232,13 +237,24 @@ const AbrirChamado = () => {
             return;
         }
 
-        const ticketData = {
-            ...ticket,
-            form_id: form.id
-        };
+        const formData = new FormData();
+        formData.append("form_id", form.id);
+        formData.append("name", ticket.name);
+        formData.append("description", ticket.description);
+        formData.append("observation", ticket.observation);
+        formData.append("urgency", ticket.urgency);
+        formData.append("receiveEmail", ticket.receiveEmail);
+
+        for (let i = 0; i < attachments.length; i++) {
+            formData.append("files", attachments[i]);
+        }
 
         try {
-            const res = await axios.post(`${API_BASE_URL}/tickets/`, ticketData);
+            const res = await axios.post(`${API_BASE_URL}/tickets/`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            });
 
             if (res.status === 200 || res.status === 201) {
                 window.location.href = `http://localhost:3000/chamados/ver/${res.data}`;
@@ -249,7 +265,6 @@ const AbrirChamado = () => {
             console.error('Error', error);
         }
     };
-
 
     return (
         <main>
@@ -262,56 +277,73 @@ const AbrirChamado = () => {
                     <div className="col border-start ps-4">
                         {form ? (
                             <div>
-                                <h4 className="fw-semibold border-bottom pb-1 ps-2">{form.ticketCategory.name + " / " + form.name}</h4>
+                                <h2>{form.name}</h2>
                                 <form onSubmit={handleSubmitForm}>
-                                    <div className="row">
-                                        <div className="col">
-                                            <label htmlFor="ticket-name" className="form-label mb-1">Assunto: </label>
-                                            <input type="text" name="name" className="form-control" required onChange={handleInputChange} />
-                                        </div>
+                                    <div className="mb-3">
+                                        <label htmlFor="name" className="form-label">Nome</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            id="name"
+                                            name="name"
+                                            value={ticket.name}
+                                            onChange={handleInputChange}
+                                        />
                                     </div>
-                                    <div className="row mt-2">
-                                        <div className="col">
-                                            <label htmlFor="ticket-description" className="form-label mb-1">Descrição: </label>
-                                            <textarea className="form-control" name="description" required onChange={handleInputChange}></textarea>
-                                        </div>
+                                    <div className="mb-3">
+                                        <label htmlFor="description" className="form-label">Descrição</label>
+                                        <textarea
+                                            className="form-control"
+                                            id="description"
+                                            name="description"
+                                            rows="3"
+                                            value={ticket.description}
+                                            onChange={handleInputChange}
+                                        ></textarea>
                                     </div>
-                                    <div className="row mt-2">
-                                        <div className="col">
-                                            <label htmlFor="ticket-observation" className="form-label mb-1">Observação: </label>
-                                            <textarea className="form-control" name="observation" onChange={handleInputChange}></textarea>
-                                        </div>
+                                    <div className="mb-3">
+                                        <label htmlFor="observation" className="form-label">Observações</label>
+                                        <textarea
+                                            className="form-control"
+                                            id="observation"
+                                            name="observation"
+                                            rows="3"
+                                            value={ticket.observation}
+                                            onChange={handleInputChange}
+                                        ></textarea>
                                     </div>
-                                    <div className="row mt-2">
-                                        <div className="col">
-                                            <label htmlFor="ticket-attachments" className="form-label">Anexos: </label>
-                                            <AttachmentsForm />
-                                        </div>
+                                    <div className="mb-3">
+                                        <label htmlFor="urgency" className="form-label">Urgência</label>
+                                        <select
+                                            className="form-select"
+                                            id="urgency"
+                                            name="urgency"
+                                            value={ticket.urgency}
+                                            onChange={handleInputChange}
+                                        >
+                                            <option value="Baixa">Baixa</option>
+                                            <option value="Média">Média</option>
+                                            <option value="Alta">Alta</option>
+                                        </select>
                                     </div>
-                                    <div className="row mt-2">
-                                        <div className="col">
-                                            <label htmlFor="ticket-urgency" className="form-label">Urgência: </label>
-                                            <select className="ms-3" name="urgency" defaultValue={"Média"} required onChange={handleInputChange}>
-                                                <option value="Alta">Alta</option>
-                                                <option value="Média">Média</option>
-                                                <option value="Baixa">Baixa</option>
-                                            </select>
-                                            <div className="form-check">
-                                                <input className="form-check-input" type="checkbox" value="" id="receiveEmail" name="receiveEmail" onChange={handleInputChange} />
-                                                <label className="form-check-label" htmlFor="receiveEmail">
-                                                    Receber Atualizações por E-mail
-                                                </label>
-                                            </div>
-                                        </div>
+                                    <div className="mb-3 form-check">
+                                        <input
+                                            type="checkbox"
+                                            className="form-check-input"
+                                            id="receiveEmail"
+                                            name="receiveEmail"
+                                            checked={ticket.receiveEmail}
+                                            onChange={handleInputChange}
+                                        />
+                                        <label className="form-check-label" htmlFor="receiveEmail">Receber E-mail</label>
                                     </div>
-                                    <button type="submit" className="btn btn-primary mt-3">Abrir Chamado</button>
+                                    <AttachmentsForm onFilesChange={handleFilesChange} />
+                                    <button type="submit" className="btn btn-primary">Abrir Chamado</button>
                                 </form>
                             </div>
                         ) : (
-                            <p>Selecione uma categoria ou formulário para abrir um chamado.</p>
+                            <div>Selecione um formulário</div>
                         )}
-                    </div>
-                    <div className="col-2">
                     </div>
                 </div>
             </div>
