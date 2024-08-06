@@ -49,12 +49,14 @@ public class TicketService {
         }
 
         List<String> filePaths = new ArrayList<>();
+
         if (files != null && !files.isEmpty()) {
             for (MultipartFile file : files) {
                 String filePath = fileStorageService.store(file);
                 filePaths.add(filePath);
             }
         }
+
         ticket.setFilePaths(filePaths);
 
         return ticketRepository.save(ticket);

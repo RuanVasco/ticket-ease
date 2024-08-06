@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { FaCircleXmark } from "react-icons/fa6";
 
-const AttachmentsForm = () => {
+const AttachmentsForm = ({ onFilesChange }) => {
     const [fileInputs, setFileInputs] = useState([0]);
 
     const handleFileChange = (index) => (event) => {
         const files = event.target.files;
+
         if (files.length > 0) {
             setFileInputs([...fileInputs, fileInputs.length]);
+            onFilesChange(files);
         }
     };
 

@@ -26,7 +26,10 @@ public class TicketController {
     TicketRepository ticketRepository;
 
     @PostMapping("/")
-    public ResponseEntity<?> openTicket(@RequestParam("files") List<MultipartFile> files, @RequestParam("ticketDTO") TicketDTO ticketDTO) {
+    public ResponseEntity<?> openTicket(
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+            @RequestPart TicketDTO ticketDTO
+    ) {
         Ticket ticket = ticketService.openTicket(ticketDTO, files);
         if (ticket != null) {
             return ResponseEntity.ok(ticket.getId());
@@ -34,6 +37,7 @@ public class TicketController {
             return ResponseEntity.badRequest().body("Invalid form ID");
         }
     }
+
 
     @GetMapping("/")
     public ResponseEntity<?> getAll() {

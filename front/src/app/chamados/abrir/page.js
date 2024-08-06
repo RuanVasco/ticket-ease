@@ -225,8 +225,8 @@ const AbrirChamado = () => {
         });
     };
 
-    const handleFilesChange = (files) => {
-        setAttachments(files);
+    const handleFilesChange = (newFiles) => {
+        setAttachments(prevAttachments => [...prevAttachments, ...newFiles]);
     };
 
     const handleSubmitForm = async (e) => {
@@ -238,12 +238,17 @@ const AbrirChamado = () => {
         }
 
         const formData = new FormData();
-        formData.append("form_id", form.id);
-        formData.append("name", ticket.name);
-        formData.append("description", ticket.description);
-        formData.append("observation", ticket.observation || ''); // Handle null observation
-        formData.append("urgency", ticket.urgency);
-        formData.append("receiveEmail", ticket.receiveEmail);
+
+        const ticketDTO = {
+            form_id: form.id,
+            name: ticket.name,
+            description: ticket.description,
+            observation: ticket.observation || '',
+            urgency: ticket.urgency,
+            receiveEmail: ticket.receiveEmail
+        };
+
+        formData.append("ticketDTO", new Blob([JSON.stringify(ticketDTO)], { type: "application/json" }));
 
         for (let i = 0; i < attachments.length; i++) {
             formData.append("files", attachments[i]);
