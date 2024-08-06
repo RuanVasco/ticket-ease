@@ -10,7 +10,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -24,8 +26,8 @@ public class TicketController {
     TicketRepository ticketRepository;
 
     @PostMapping("/")
-    public ResponseEntity<?> openTicket(@ModelAttribute TicketDTO ticketDTO) {
-        Ticket ticket = ticketService.openTicket(ticketDTO);
+    public ResponseEntity<?> openTicket(@RequestParam("files") List<MultipartFile> files, @RequestParam("ticketDTO") TicketDTO ticketDTO) {
+        Ticket ticket = ticketService.openTicket(ticketDTO, files);
         if (ticket != null) {
             return ResponseEntity.ok(ticket.getId());
         } else {

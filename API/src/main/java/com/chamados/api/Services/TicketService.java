@@ -26,7 +26,7 @@ public class TicketService {
     @Autowired
     FileStorageService fileStorageService;
 
-    public Ticket openTicket(TicketDTO ticketDTO) {
+    public Ticket openTicket(TicketDTO ticketDTO, List<MultipartFile> files) {
         Ticket ticket = new Ticket();
 
         Optional<Form> optionalForm = formRepository.findById(ticketDTO.form_id());
@@ -49,8 +49,8 @@ public class TicketService {
         }
 
         List<String> filePaths = new ArrayList<>();
-        if (ticketDTO.files() != null) {
-            for (MultipartFile file : ticketDTO.files()) {
+        if (files != null && !files.isEmpty()) {
+            for (MultipartFile file : files) {
                 String filePath = fileStorageService.store(file);
                 filePaths.add(filePath);
             }

@@ -241,7 +241,7 @@ const AbrirChamado = () => {
         formData.append("form_id", form.id);
         formData.append("name", ticket.name);
         formData.append("description", ticket.description);
-        formData.append("observation", ticket.observation);
+        formData.append("observation", ticket.observation || ''); // Handle null observation
         formData.append("urgency", ticket.urgency);
         formData.append("receiveEmail", ticket.receiveEmail);
 
@@ -280,7 +280,7 @@ const AbrirChamado = () => {
                                 <h2>{form.name}</h2>
                                 <form onSubmit={handleSubmitForm}>
                                     <div className="mb-3">
-                                        <label htmlFor="name" className="form-label">Nome</label>
+                                        <label htmlFor="name" className="form-label">Assunto</label>
                                         <input
                                             type="text"
                                             className="form-control"
