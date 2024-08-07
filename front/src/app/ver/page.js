@@ -1,7 +1,7 @@
 "use client";
 
 import TableTicket from "../components/tableTicket";
-import Header from "../../components/header/header";
+import Header from "../components/header/header";
 
 export default function VerChamados() {
 

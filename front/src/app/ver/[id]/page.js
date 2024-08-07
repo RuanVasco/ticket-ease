@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import Header from "../../../components/header/header";
+import Header from "../../components/header/header";
 import axios from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -65,7 +65,7 @@ const ChamadoDetalhes = ({ params: { id } }) => {
             <div className="container">
                 <h4 className="text-center border-bottom pb-2">{data?.id || ''} - {data?.name || ''}</h4>
                 <div className="row">
-                    <div className="col-9 border rounded">
+                    <div className="col-9">
                         <div className="d-flex flex-column">
                             {data?.description || ''}
                             <form className="mt-3 input-group" onSubmit={handleSubmit}>

@@ -7,13 +7,12 @@ import com.chamados.api.Repositories.MessageRepository;
 import com.chamados.api.Repositories.TicketRepository;
 import com.chamados.api.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -28,6 +27,16 @@ public class MessageController {
 
     @Autowired
     MessageRepository messageRepository;
+
+    @GetMapping("/messages/{ticketID}")
+    public ResponseEntity<?> getMessages(@PathVariable Long ticketID) {
+        List<Message> listMessage = messageRepository.findByTicketId(ticketID);
+        if (listMessage.isEmpty()) {
+            return ResponseEntity.badRequest().body("No messages found for this ticket ID");
+        } else {
+            return ResponseEntity.ok(listMessage);
+        }
+    }
 
     @PostMapping("/")
     public ResponseEntity<?> createMessage(@RequestBody MessageDTO messageDTO) {

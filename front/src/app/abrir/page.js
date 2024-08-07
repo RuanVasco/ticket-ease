@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Header from '../../components/header/header';
-import AttachmentsForm from '../../components/attachmentsForm/attachmentsForm';
+import Header from '../components/header/header';
+import AttachmentsForm from '../components/attachmentsForm/attachmentsForm';
 import { FaAngleRight, FaAngleLeft, FaFolderOpen, FaClipboardList } from "react-icons/fa6";
 import { v4 as uuidv4 } from 'uuid';
 import style from "./style.css";
@@ -212,7 +212,7 @@ const AbrirChamado = () => {
             });
 
             if (res.status === 200 || res.status === 201) {
-                window.location.href = `http://localhost:3000/chamados/ver/${res.data}`;
+                window.location.href = `http://localhost:3000/ver/${res.data}`;
             } else {
                 console.error('Error', res.status);
             }

@@ -12,7 +12,6 @@ const TableTicket = ({ viewMode = 'readonly' }) => {
     const pages = [...Array(totalPages).keys()];
 
     const columns = [
-        { label: 'Formulário', value: 'form.name' },
         { label: 'Assunto', value: 'name' },
         { label: 'Status', value: 'status' },
         { label: 'Data de Criação', value: 'created_at' },
