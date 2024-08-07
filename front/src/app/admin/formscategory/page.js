@@ -11,6 +11,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const columns = [
     { value: "name", label: "Nome" },
     { value: "path", label: "Diretório" },
+    { value: "receiveTickets", label: "Recebe Chamado" },
     { value: "father.name", label: "Categoria Pai" },
     { value: "department.name", label: "Setor" },
 ];
@@ -31,9 +32,9 @@ const FormsCategory = () => {
     const [currentCategory, setCurrentCategory] = useState({
         id: '',
         name: '',
+        receiveTickets: false,
         department: { id: '', name: '' },
         father: { id: '', name: '' },
-        hide: false,
     });
 
     useEffect(() => {
@@ -55,7 +56,7 @@ const FormsCategory = () => {
 
         const fetchCategories = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/tickets-category/hide`, { params: { "hide": false } });
+                const res = await axios.get(`${API_BASE_URL}/tickets-category/`);
                 if (res.status === 200) {
                     setCategories(res.data);
                 } else {
@@ -97,6 +98,7 @@ const FormsCategory = () => {
                     setCurrentCategory({
                         id: category.id,
                         name: category.name,
+                        receiveTickets: category.receiveTickets,
                         father: father || { id: '', name: '' },
                         department: department || { id: '', name: '' },
                         hide: category.hide,
@@ -111,6 +113,7 @@ const FormsCategory = () => {
             setCurrentCategory({
                 id: '',
                 name: '',
+                receiveTickets: false,
                 department: { id: '', name: '' },
                 father: { id: '', name: '' },
                 hide: false,
@@ -134,6 +137,7 @@ const FormsCategory = () => {
         try {
             const payload = {
                 name: currentCategory.name,
+                receiveTickets: currentCategory.receiveTickets,
                 department_id: rootCategory ? currentCategory.department.id : null,
                 father_id: !rootCategory ? currentCategory.father.id : null,
                 hide: currentCategory.hide,
@@ -159,6 +163,7 @@ const FormsCategory = () => {
                 setCurrentCategory({
                     id: '',
                     name: '',
+                    receiveTickets: false,
                     department: { id: '', name: '' },
                     father: { id: '', name: '' },
                     hide: false,
@@ -189,10 +194,10 @@ const FormsCategory = () => {
                 ...prev,
                 father: { ...prev.father, id: parseInt(value, 10) },
             }));
-        } else if (name === "hide") {
+        } else if (name === "receiveTickets") {
             setCurrentCategory(prev => ({
                 ...prev,
-                hide: value === 'true',
+                receiveTickets: value === 'true',
             }));
         } else {
             setCurrentCategory(prev => ({
@@ -259,6 +264,22 @@ const FormsCategory = () => {
                                         </div>
 
                                         <div className="mt-2">
+                                            <label htmlFor="receiveTickets" className="form-label">Recebe Chamado</label>
+                                            <select
+                                                className="form-select"
+                                                name="receiveTickets"
+                                                id="receiveTickets"
+                                                value={currentCategory.receiveTickets}
+                                                onChange={handleInputChange}
+                                                disabled={modeModal === "readonly"}
+                                                required
+                                            >
+                                                <option value="false">Não</option>
+                                                <option value="true">Sim</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="mt-2">
                                             <label htmlFor="rootCategory" className="form-label">Categoria Raiz</label>
                                             <select
                                                 className="form-select"
@@ -295,24 +316,6 @@ const FormsCategory = () => {
                                                                 {department.name}
                                                             </option>
                                                         ))}
-                                                    </select>
-                                                </div>
-
-                                                <div className="mt-2">
-                                                    <label htmlFor="hide" className="form-label" title={`Categorias escondidas atribuem seus formulários ao departamento pai. \nUse para atribuir um formulário diretamente ao setor.`}>
-                                                        Esconder
-                                                    </label>
-                                                    <select
-                                                        className="form-select"
-                                                        name="hide"
-                                                        id="hide"
-                                                        value={currentCategory.hide ? "true" : "false"}
-                                                        onChange={handleInputChange}
-                                                        disabled={modeModal === "readonly"}
-                                                        required
-                                                    >
-                                                        <option value="false">Não</option>
-                                                        <option value="true">Sim</option>
                                                     </select>
                                                 </div>
                                             </>

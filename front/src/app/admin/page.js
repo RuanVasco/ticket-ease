@@ -7,13 +7,7 @@ import withAuth from '../auth/withAuth';
 import Block from './components/block';
 
 const HomeAdmin = () => {
-    const blocksForms = [
-        {
-            text: "Formulários",
-            icon: <FaClipboardList />,
-            link: "/admin/forms",
-            description: "Gerenciar Formulários"
-        },
+    const blocksForms = [        
         {
             text: "Categorias de Formulário",
             icon: <FaFolderOpen />,

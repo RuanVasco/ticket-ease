@@ -1,9 +1,9 @@
 package com.chamados.api.Services;
 
 import com.chamados.api.DTO.TicketDTO;
-import com.chamados.api.Entities.Form;
 import com.chamados.api.Entities.Ticket;
-import com.chamados.api.Repositories.FormRepository;
+import com.chamados.api.Entities.TicketCategory;
+import com.chamados.api.Repositories.TicketCategoryRepository;
 import com.chamados.api.Repositories.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class TicketService {
     TicketRepository ticketRepository;
 
     @Autowired
-    FormRepository formRepository;
+    TicketCategoryRepository ticketCategoryRepository;
 
     @Autowired
     FileStorageService fileStorageService;
@@ -29,13 +29,13 @@ public class TicketService {
     public Ticket openTicket(TicketDTO ticketDTO, List<MultipartFile> files) {
         Ticket ticket = new Ticket();
 
-        Optional<Form> optionalForm = formRepository.findById(ticketDTO.form_id());
+        Optional<TicketCategory> optionalTicketCategory = ticketCategoryRepository.findById(ticketDTO.ticketCategory_id());
 
-        if (optionalForm.isEmpty()) {
+        if (optionalTicketCategory.isEmpty()) {
             return null;
         }
 
-        ticket.setForm(optionalForm.get());
+        ticket.setTicketCategory(optionalTicketCategory.get());
         ticket.setName(ticketDTO.name());
         ticket.setDescription(ticketDTO.description());
         ticket.setStatus("Novo");

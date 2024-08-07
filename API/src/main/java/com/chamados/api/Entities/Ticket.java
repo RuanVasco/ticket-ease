@@ -15,10 +15,15 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+//    @Setter
+//    @ManyToOne
+//    @JoinColumn(name = "form_id")
+//    Form form;
+
     @Setter
     @ManyToOne
-    @JoinColumn(name = "form_id")
-    Form form;
+    @JoinColumn(name = "category_id")
+    TicketCategory ticketCategory;
 
     @Setter
     private String name;

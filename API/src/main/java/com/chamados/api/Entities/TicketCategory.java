@@ -19,6 +19,9 @@ public class TicketCategory {
     private String path;
 
     @Setter
+    private Boolean receiveTickets;
+
+    @Setter
     @ManyToOne
     @JoinColumn(name = "department_id", nullable = true)
     private Department department;
@@ -27,7 +30,4 @@ public class TicketCategory {
     @ManyToOne
     @JoinColumn(name = "father_id", nullable = true)
     private TicketCategory father;
-
-    @Setter
-    private Boolean hide;
 }

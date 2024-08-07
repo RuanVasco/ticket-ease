@@ -10,6 +10,11 @@ const ChamadoDetalhes = ({ params: { id } }) => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [message, setMessage] = useState({
+        text: "",
+        user_id: 1,
+        ticket_id: parseInt(id, 10),
+    });
 
     useEffect(() => {
         const fetchData = async () => {
@@ -33,6 +38,27 @@ const ChamadoDetalhes = ({ params: { id } }) => {
     if (loading) return <div>Loading...</div>;
     if (error) return <div>{error}</div>;
 
+    const handleInputChange = (event) => {
+        const { name, value } = event.target;
+        setMessage({ ...message, [name]: value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        try {
+            const res = await axios.post(`${API_BASE_URL}/messages/`, { text: message.text, user_id: message.user_id, ticket_id: message.ticket_id });
+
+            if (res.status === 200 || res.status === 201) {
+                window.location.reload();
+            } else {
+                console.error('Error', res.status);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     return (
         <main>
             <Header pageName="Visualizar Chamados" />
@@ -40,8 +66,12 @@ const ChamadoDetalhes = ({ params: { id } }) => {
                 <h4 className="text-center border-bottom pb-2">{data?.id || ''} - {data?.name || ''}</h4>
                 <div className="row">
                     <div className="col-9 border rounded">
-                        <div>
+                        <div className="d-flex flex-column">
                             {data?.description || ''}
+                            <form className="mt-3 input-group" onSubmit={handleSubmit}>
+                                <input type="text" className="form-control" name="text" onChange={handleInputChange}></input>
+                                <button type="submit" className="btn btn-primary">Responder</button>
+                            </form>
                         </div>
                     </div>
                     <div className="col">

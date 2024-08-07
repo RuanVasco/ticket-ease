@@ -1,7 +1,6 @@
 package com.chamados.api.Controllers;
 
 import com.chamados.api.DTO.TicketDTO;
-import com.chamados.api.Entities.Form;
 import com.chamados.api.Entities.Ticket;
 import com.chamados.api.Repositories.TicketRepository;
 import com.chamados.api.Services.TicketService;

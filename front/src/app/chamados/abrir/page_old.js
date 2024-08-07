@@ -12,11 +12,13 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const AbrirChamado = () => {
     const [categories, setCategories] = useState([]);
+    const [forms, setForms] = useState([]);
+    const [currentForm, setCurrentForm] = useState(null);
+    const [form, setForm] = useState(null);
     const [currentCategory, setCurrentCategory] = useState(null);
     const [categoryPath, setCategoryPath] = useState([]);
-    const [category, setCategory] = useState(null);
     const [ticket, setTicket] = useState({
-        ticketCategory_id: '',
+        form_id: '',
         name: '',
         description: '',
         observation: '',
@@ -39,7 +41,21 @@ const AbrirChamado = () => {
             }
         };
 
+        const fetchForms = async () => {
+            try {
+                const res = await axios.get(`${API_BASE_URL}/forms/`);
+                if (res.status === 200) {
+                    setForms(res.data);
+                } else {
+                    console.error('Error fetching data:', res.status);
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
         fetchData();
+        fetchForms();
     }, []);
 
     useEffect(() => {
@@ -48,6 +64,25 @@ const AbrirChamado = () => {
             setCurrentCategory(data);
         }
     }, [categories]);
+
+    useEffect(() => {
+        if (currentForm) {
+            const fetchForm = async () => {
+                try {
+                    const res = await axios.get(`${API_BASE_URL}/forms/${currentForm.id}`);
+                    if (res.status === 200) {
+                        setForm(res.data);
+                    } else {
+                        console.error('Error fetching form:', res.status);
+                    }
+                } catch (error) {
+                    console.error('Error fetching form:', error);
+                }
+            }
+
+            fetchForm();
+        }
+    }, [currentForm]);
 
     const organizeData = () => {
         const categoryMap = new Map();
@@ -90,6 +125,18 @@ const AbrirChamado = () => {
             }
         });
 
+        forms.forEach(form => {
+            let category = categoryMap.get(form.ticketCategory.id);
+            if (category) {
+                if (category.hide) {
+                    let dep = departmentMap.get(category.department.id);
+                    dep.children.push(form);
+                } else {
+                    category.children.push(form);
+                }
+            }
+        });
+
         departmentMap.forEach(department => {
             root.children.push(department);
         });
@@ -97,16 +144,9 @@ const AbrirChamado = () => {
         return root;
     };
 
-    const handleCategoryClick = (cat) => {
-
-        if (cat.receiveTickets) {
-            setCategory(cat);
-        }
-
-        if (cat.children.length > 0) {
-            setCurrentCategory(cat);
-            setCategoryPath([...categoryPath, cat]);
-        }
+    const handleCategoryClick = (category) => {
+        setCurrentCategory(category);
+        setCategoryPath([...categoryPath, category]);
     };
 
     const handleBack = () => {
@@ -118,6 +158,8 @@ const AbrirChamado = () => {
     };
 
     const renderTreeNavigation = (data) => {
+        if (!data || !data.children) return null;
+
         return (
             <div>
                 <div className='nav_forms_cat_head'>
@@ -136,29 +178,37 @@ const AbrirChamado = () => {
 
                 <ul className="mt-2 nav_forms_cat_list" id="nav_forms_cat_list">
                     {data.children
+                        .filter(item => (item.children && item.children.length > 0 || item.ticketCategory))
                         .map((item) => (
-                            <li key={uuidv4()} className={`nav_forms_cat_item${category === item ? ' item_selected' : ''}`}>
-                                <div>
-                                    <a
-                                        onClick={() => handleCategoryClick(item)}
-                                        className="d-flex align-items-center"
-                                        role="button"
-                                        style={{ cursor: 'pointer' }}
-                                    >
-                                        {item.receiveTickets ? (
-                                            <FaClipboardList />
-                                        ) : (
+                            <li key={uuidv4()} className={`nav_forms_cat_item${currentForm === item ? ' item_selected' : ''}`}>
+                                {(item.children && item.children.length > 0) ? (
+                                    <div>
+                                        <a
+                                            onClick={() => handleCategoryClick(item)}
+                                            className="d-flex align-items-center"
+                                            role="button"
+                                            style={{ cursor: 'pointer' }}
+                                        >
                                             <FaFolderOpen />
-                                        )}                             
-                                        <span className="ms-2">{item.name}</span>                                        
-                                        {item.children.length > 0 && <FaAngleRight className='ms-auto' />}
+                                            <span className="ms-2">{item.name}</span>
+                                            <FaAngleRight className='ms-auto' />
+                                        </a>
+                                        {currentCategory === item && (
+                                            <div>
+                                                {renderTreeNavigation(item)}
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : item.ticketCategory ? (
+                                    <a
+                                        style={{ cursor: 'pointer' }}
+                                        onClick={() => setCurrentForm(item)}
+                                        className="d-flex align-items-center"
+                                    >
+                                        <FaClipboardList />
+                                        <span className="ms-2">{item.name}</span>
                                     </a>
-                                    {currentCategory === item && (
-                                        <div>
-                                            {renderTreeNavigation(item)}
-                                        </div>
-                                    )}
-                                </div>
+                                ) : null}
                             </li>
                         ))}
                 </ul>
@@ -182,7 +232,7 @@ const AbrirChamado = () => {
     const handleSubmitForm = async (e) => {
         e.preventDefault();
 
-        if (!category) {
+        if (!form) {
             console.error('Form is not loaded.');
             return;
         }
@@ -190,7 +240,7 @@ const AbrirChamado = () => {
         const formData = new FormData();
 
         const ticketDTO = {
-            ticketCategory_id: category.id,
+            form_id: form.id,
             name: ticket.name,
             description: ticket.description,
             observation: ticket.observation || '',
@@ -230,9 +280,9 @@ const AbrirChamado = () => {
                         {currentCategory ? renderTreeNavigation(currentCategory) : null}
                     </div>
                     <div className="col border-start ps-4">
-                        {category ? (
+                        {form ? (
                             <div>
-                                <h2>{category.name}</h2>
+                                <h2>{form.name}</h2>
                                 <form onSubmit={handleSubmitForm}>
                                     <div className="mb-3">
                                         <label htmlFor="name" className="form-label">Assunto</label>

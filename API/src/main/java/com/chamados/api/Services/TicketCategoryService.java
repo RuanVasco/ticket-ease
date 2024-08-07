@@ -25,15 +25,15 @@ public class TicketCategoryService {
     private DepartmentRepository departmentRepository;
 
     @Transactional
-    public void addCategory(String name, Department department, TicketCategory father, Boolean hide) {
+    public void addCategory(String name, Boolean receiveTickets, Department department, TicketCategory father) {
         try {
             String path = buildPath(father, department, name);
             TicketCategory category = new TicketCategory();
             category.setName(name);
+            category.setReceiveTickets(receiveTickets);
             category.setDepartment(department);
             category.setFather(father);
             category.setPath(path);
-            category.setHide(hide);
             ticketCategoryRepository.save(category);
         } catch (Exception e) {
             logger.error("Error adding category", e);
@@ -61,10 +61,10 @@ public class TicketCategoryService {
         String path = buildPath(father, department, ticketCategoryDTO.name());
 
         ticketCategory.setName(ticketCategoryDTO.name());
+        ticketCategory.setReceiveTickets(ticketCategoryDTO.receiveTickets());
         ticketCategory.setDepartment(department);
         ticketCategory.setFather(father);
         ticketCategory.setPath(path);
-        ticketCategory.setHide(ticketCategoryDTO.hide());
         ticketCategoryRepository.save(ticketCategory);
     }
 
