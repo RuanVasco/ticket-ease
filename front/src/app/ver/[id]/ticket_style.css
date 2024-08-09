@@ -2,3 +2,32 @@
     height: 65vh;
     overflow-y: scroll;
 }
+
+.message-box {
+    display: block;
+    margin-right: 20px;
+    text-align: end;
+}
+
+.message-bubble {
+    position: relative;
+    display: inline-block;
+    padding: 10px;
+    background-color: var(--secondary-color);
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.message-bubble::after {
+    content: "";
+    position: absolute;
+    top: 35%;
+    right: -20px; 
+    transform: translateY(-50%);
+    border-width: 10px;
+    border-style: solid;
+    border-color: transparent transparent transparent #f1f1f1;
+    width: 0;
+    height: 0;
+}

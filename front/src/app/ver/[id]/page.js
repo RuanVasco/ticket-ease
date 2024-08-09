@@ -19,7 +19,7 @@ const ChamadoDetalhes = ({ params: { id } }) => {
 
     useEffect(() => {
         const fetchData = async () => {
-            setLoading(true); // Set loading to true
+            setLoading(true);
             try {
                 const response = await axios.get(`${API_BASE_URL}/tickets/${id}`);
                 setData(response.data);
@@ -27,7 +27,7 @@ const ChamadoDetalhes = ({ params: { id } }) => {
                 setError('Erro ao buscar dados.');
                 console.error('Erro ao buscar dados:', error);
             } finally {
-                setLoading(false); // Set loading to false after data is fetched
+                setLoading(false);
             }
         };
 
@@ -38,7 +38,6 @@ const ChamadoDetalhes = ({ params: { id } }) => {
 
     useEffect(() => {
         const fetchMessages = async () => {
-            setLoading(true); // Set loading to true
             try {
                 const response = await axios.get(`${API_BASE_URL}/messages/${id}`);
 
@@ -49,8 +48,6 @@ const ChamadoDetalhes = ({ params: { id } }) => {
                 }
             } catch (error) {
                 console.error('Erro ao buscar mensagens:', error);
-            } finally {
-                setLoading(false); // Set loading to false after messages are fetched
             }
         };
 
@@ -64,6 +61,10 @@ const ChamadoDetalhes = ({ params: { id } }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (message.text.trim() === "") {
+            return;
+        }
 
         try {
             const res = await axios.post(`${API_BASE_URL}/messages/`, { text: message.text, user_id: message.user_id, ticket_id: message.ticket_id });
@@ -101,9 +102,9 @@ const ChamadoDetalhes = ({ params: { id } }) => {
                             <div className="chat_content px-2">
                                 {messages && messages.length > 0 ? (
                                     messages.map((msg) => (
-                                        <div key={msg.id} className="card mt-3">
-                                            <div className="card-body">
-                                                <p className="card-text">{msg.text}</p>
+                                        <div key={msg.id} className="mt-3 message-box">
+                                            <div className="message-bubble">
+                                                {msg.text}
                                             </div>
                                         </div>
                                     ))
@@ -123,7 +124,7 @@ const ChamadoDetalhes = ({ params: { id } }) => {
                         <label htmlFor="department" className="col-form-label">Setor</label>
                         <input id="department" className="input-text" type="text" value="TI" readOnly />
                         <label htmlFor="created_at" className="col-form-label">Data de Abertura</label>
-                        <input id="created_at" className="input-text" type="text" value={`${data?.created_at || ''}`} readOnly />
+                        <input id="created_at" className="input-text" type="text" value={`${new Date(data?.created_at).toLocaleDateString('pt-BR') || ''}`} readOnly />
                         <label htmlFor="observation" className="col-form-label">Observação</label>
                         <textarea id="observation" className="input-text" value={`${data?.observation || ''}`} readOnly />
                         <label htmlFor="observation" className="col-form-label">Status</label>
