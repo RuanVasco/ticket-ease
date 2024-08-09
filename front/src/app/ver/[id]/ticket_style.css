@@ -1,0 +1,4 @@
+.chat_content {
+    height: 65vh;
+    overflow-y: scroll;
+}

@@ -37,3 +37,14 @@ a:hover {
   background-color: var(--secondary-color-hover);
   color: var(--primary-color);
 }
+
+.input-text {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--primary-color);
+  border-radius: 4.5px;
+  padding: 4px;
+  padding-left: 7px;
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+}

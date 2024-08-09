@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -28,11 +29,11 @@ public class MessageController {
     @Autowired
     MessageRepository messageRepository;
 
-    @GetMapping("/messages/{ticketID}")
+    @GetMapping("/{ticketID}")
     public ResponseEntity<?> getMessages(@PathVariable Long ticketID) {
         List<Message> listMessage = messageRepository.findByTicketId(ticketID);
         if (listMessage.isEmpty()) {
-            return ResponseEntity.badRequest().body("No messages found for this ticket ID");
+            return ResponseEntity.ok(new ArrayList<>());
         } else {
             return ResponseEntity.ok(listMessage);
         }
