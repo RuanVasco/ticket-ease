@@ -128,7 +128,7 @@ const TicketDetails = ({ id, mode }) => {
                         <label htmlFor="department" className="col-form-label">Setor</label>
                         <input id="department" className="input-text" type="text" value="TI" readOnly />
                         <label htmlFor="created_at" className="col-form-label">Data de Abertura</label>
-                        <input id="created_at" className="input-text" type="text" value={`${new Date(data?.created_at).toLocaleDateString('pt-BR') || ''}`} readOnly />
+                        <input id="created_at" className="input-text" type="text" value={`${new Date(data?.createdAt).toLocaleDateString('pt-BR') || ''}`} readOnly />
                         <label htmlFor="observation" className="col-form-label">Observação</label>
                         <textarea id="observation" className="input-text" value={`${data?.observation || ''}`} readOnly />
                         <label htmlFor="status" className="col-form-label">Status</label>
