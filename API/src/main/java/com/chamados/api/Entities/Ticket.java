@@ -42,10 +42,6 @@ public class Ticket {
     private List<String> filePaths;
 
     @Setter
-    @Column(nullable = true)
-    private String procedure;
-
-    @Setter
     private String status;
 
     @Setter
@@ -55,13 +51,17 @@ public class Ticket {
     private Boolean receiveEmail;
 
     @Setter
-    private Date created_at;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "createdAt")
+    private Date createdAt;
 
     @Setter
-    @Column(nullable = true)
-    private Date updated_at;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "updatedAt", nullable = true)
+    private Date updatedAt;
 
     @Setter
-    @Column(nullable = true)
-    private Date closed_at;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "closedAt", nullable = true)
+    private Date closedAt;
 }

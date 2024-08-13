@@ -41,8 +41,8 @@ public class TicketService {
         ticket.setStatus("Novo");
         ticket.setUrgency(ticketDTO.urgency());
         ticket.setReceiveEmail(ticketDTO.receiveEmail());
-        ticket.setCreated_at(new Date());
-        ticket.setUpdated_at(new Date());
+        ticket.setCreatedAt(new Date());
+        ticket.setUpdatedAt(new Date());
 
         if (ticketDTO.observation() != null) {
             ticket.setObservation(ticketDTO.observation());

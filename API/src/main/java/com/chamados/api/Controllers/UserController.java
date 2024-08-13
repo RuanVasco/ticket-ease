@@ -1,6 +1,7 @@
 package com.chamados.api.Controllers;
 
 import com.chamados.api.DTO.UserDTO;
+import com.chamados.api.DTO.UserRegisterDTO;
 import com.chamados.api.DTO.UserUpdateDTO;
 import com.chamados.api.Entities.Cargo;
 import com.chamados.api.Entities.Department;
@@ -13,11 +14,14 @@ import com.chamados.api.Services.CustomUserDetailsService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import com.chamados.api.Repositories.UserRepository;
 
+import java.util.Collections;
 import java.util.Optional;
 
 @RestController
@@ -38,6 +42,9 @@ public class UserController {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
 
     @GetMapping("/")
@@ -80,8 +87,8 @@ public class UserController {
 
         User user = optionalUser.get();
 
-        Optional<Cargo> optionalCargo = cargoRepository.findById(userUpdateDTO.cargo_id());
-        Optional<Department> optionalDepartment = departmentRepository.findById(userUpdateDTO.department_id());
+        Optional<Cargo> optionalCargo = cargoRepository.findById(userUpdateDTO.cargoId());
+        Optional<Department> optionalDepartment = departmentRepository.findById(userUpdateDTO.departmentId());
 
         if (optionalCargo.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -103,5 +110,39 @@ public class UserController {
         userRepository.save(user);
 
         return ResponseEntity.ok("User updated successfully");
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@RequestBody UserRegisterDTO signUpDto){
+
+        Long cargoId = signUpDto.cargoId();
+        Long departmentId = signUpDto.departmentId();
+
+        if (userRepository.existsByEmail(signUpDto.email())){
+            return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
+        }
+
+        User user = new User();
+        user.setName(signUpDto.name());
+        user.setEmail(signUpDto.email());
+        user.setPhone(signUpDto.phone());
+        user.setPassword(passwordEncoder.encode(signUpDto.password()));
+
+        if (cargoId != null) {
+            Optional<Cargo> cargo = cargoRepository.findById(cargoId);
+            cargo.ifPresent(user::setCargo);
+        }
+
+        if (departmentId != null) {
+            Optional<Department> department = departmentRepository.findById(departmentId);
+            department.ifPresent(user::setDepartment);
+        }
+
+        Optional<Role> defaultRole = roleRepository.findByName("ROLE_USER");
+        user.setRoles(Collections.singleton(defaultRole.get()));
+
+        userRepository.save(user);
+
+        return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
     }
 }

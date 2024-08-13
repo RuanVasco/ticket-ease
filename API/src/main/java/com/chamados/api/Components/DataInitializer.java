@@ -29,6 +29,9 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private CargoRepository cargoRepository;
 
+    @Autowired
+    private TicketCategoryRepository ticketCategoryRepository;
+
     @Override
     @Transactional
     public void run(String... args) throws Exception {

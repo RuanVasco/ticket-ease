@@ -62,4 +62,10 @@ public class TicketController {
         return ResponseEntity.ok(ticket);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<?> searchTickets(@RequestParam String query) {
+        List<Ticket> tickets = ticketRepository.findBySearch(query);
+        return ResponseEntity.ok(tickets);
+    }
+
 }

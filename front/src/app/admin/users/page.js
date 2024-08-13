@@ -172,8 +172,8 @@ const User = () => {
             } else {
                 const postDataWithIds = {
                     ...postData,
-                    department_id: department.id,
-                    cargo_id: cargo.id,
+                    departmentId: department.id,
+                    cargoId: cargo.id,
                 };
 
                 switch (submitType) {
@@ -183,7 +183,7 @@ const User = () => {
                             return;
                         }
 
-                        res = await axios.post(`${API_BASE_URL}/auth/register`, postDataWithIds);
+                        res = await axios.post(`${API_BASE_URL}/users/register`, postDataWithIds);
                         break;
                     case 'update':
                         if (!department || !cargo) {

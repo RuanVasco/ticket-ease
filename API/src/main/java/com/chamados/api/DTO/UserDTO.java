@@ -2,6 +2,7 @@ package com.chamados.api.DTO;
 
 import com.chamados.api.Entities.Cargo;
 import com.chamados.api.Entities.Department;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 

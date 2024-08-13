@@ -1,7 +1,5 @@
 package com.chamados.api.Controllers;
 
-import com.chamados.api.Entities.Cargo;
-import com.chamados.api.Entities.Department;
 import com.chamados.api.Repositories.CargoRepository;
 import com.chamados.api.Repositories.DepartmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.chamados.api.Components.UserDetailsImpl;
 import com.chamados.api.DTO.LoginDTO;
 import com.chamados.api.DTO.LoginResponseDTO;
-import com.chamados.api.DTO.RegisterDTO;
 import com.chamados.api.DTO.ValidateDTO;
-import com.chamados.api.Entities.Role;
 import com.chamados.api.Entities.User;
 import com.chamados.api.Repositories.RoleRepository;
 import com.chamados.api.Repositories.UserRepository;
@@ -29,9 +25,7 @@ import com.chamados.api.Services.TokenService;
 
 import jakarta.validation.Valid;
 
-import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("auth")
@@ -72,41 +66,6 @@ public class AuthController {
         var refreshToken = tokenService.generateRefreshToken(user);
         
         return ResponseEntity.ok(new LoginResponseDTO(token, refreshToken));        
-    }
-
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterDTO signUpDto){
-
-        Long cargoId = signUpDto.getCargo_id();
-        Long departmentId = signUpDto.getDepartment_id();
-
-        if (userRepository.existsByEmail(signUpDto.getEmail())){
-            return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
-        }
-
-        User user = new User();
-        user.setName(signUpDto.getName());
-        user.setEmail(signUpDto.getEmail());
-        user.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
-
-        if (cargoId != null) {
-            Optional<Cargo> cargo = cargoRepository.findById(cargoId);
-            cargo.ifPresent(user::setCargo);
-        }
-
-        if (departmentId != null) {
-            Optional<Department> department = departmentRepository.findById(departmentId);
-            department.ifPresent(user::setDepartment);
-        }
-
-        Optional<Role> defaultRole = roleRepository.findByName("ROLE_USER");
-        
-        user.setRoles(Collections.singleton(defaultRole.get()));
-
-        userRepository.save(user);        
-
-        return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
-
     }
     
     @PostMapping("/refresh")

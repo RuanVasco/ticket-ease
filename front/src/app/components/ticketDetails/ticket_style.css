@@ -15,7 +15,7 @@
     padding: 10px;
     background-color: var(--secondary-color);
     border-radius: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--primary-color);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -27,7 +27,7 @@
     transform: translateY(-50%);
     border-width: 10px;
     border-style: solid;
-    border-color: transparent transparent transparent #f1f1f1;
+    border-color: transparent transparent transparent var(--primary-color);
     width: 0;
     height: 0;
 }

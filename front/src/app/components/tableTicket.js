@@ -14,39 +14,59 @@ const TableTicket = ({ viewMode = 'readonly' }) => {
     const [pageSize, setPageSize] = useState(10);
 
     const columns = [
-        { label: 'ID', value: 'id'},
+        { label: 'ID', value: 'id' },
         { label: 'Assunto', value: 'name' },
         { label: 'Status', value: 'status' },
-        { label: 'Data de Criação', value: 'created_at' },
-        { label: 'Última Atualização', value: 'updated_at' },
-        { label: 'Urgência', value: 'urgency' }
+        { label: 'Urgência', value: 'urgency' },
+        { label: 'Data de Criação', value: 'createdAt' },
+        { label: 'Última Atualização', value: 'updatedAt' }
     ];
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                let res = '';
-                switch (viewMode) {
-                    case "readonly":
-                        res = await axios.get(`${API_BASE_URL}/tickets/pageable?page=${currentPage}&size=${pageSize}`);
-                        break;
-                    default:
-                        break;
-                }
-
-                if (res.status === 200) {
-                    setData(res.data.content);
-                    setTotalPages(res.data.totalPages);
-                } else {
-                    console.error('Erro:', res.status);
-                }
-            } catch (error) {
-                console.log('Error:', error);
+    const fetchData = async () => {
+        try {
+            let url = `${API_BASE_URL}/tickets/pageable?page=${currentPage}&size=${pageSize}`;
+            if (viewMode === "edit") {
+                // Adicione lógica específica para 'edit' se necessário
             }
-        };
 
+            const res = await axios.get(url);
+
+            if (res.status === 200) {
+                setData(res.data.content);
+                setTotalPages(res.data.totalPages);
+            } else {
+                console.error('Erro:', res.status);
+            }
+        } catch (error) {
+            console.log('Error:', error);
+        }
+    };
+
+    useEffect(() => {
         fetchData();
     }, [currentPage, pageSize, viewMode]);
+
+    const handleSearch = async (e) => {
+        const query = e.target.value;
+
+        if (query.length >= 3) {
+            try {
+                const res = await axios.get(`${API_BASE_URL}/tickets/search`, {
+                    params: { query },
+                });
+
+                if (res.status === 200) {
+                    setData(res.data);
+                } else {
+                    console.error('Erro na pesquisa:', res.status);
+                }
+            } catch (error) {
+                console.log('Search Error:', error);
+            }
+        } else {
+            fetchData();
+        }
+    };
 
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
@@ -66,13 +86,23 @@ const TableTicket = ({ viewMode = 'readonly' }) => {
 
     return (
         <div className="container">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-                <ItemsPerPage
-                    onPageSizeChange={handlePageSizeChange}
-                    pageSize={pageSize}
-                />
+            <div className="row align-items-center my-3">
+                <div className="col">
+                    <ItemsPerPage
+                        onPageSizeChange={handlePageSizeChange}
+                        pageSize={pageSize}
+                    />
+                </div>
+                <div className="col-2">
+                    <input
+                        type="text"
+                        placeholder="Pesquisar"
+                        className="input-text"
+                        onChange={handleSearch}
+                    />
+                </div>
             </div>
-            <table className='w-100 table table-custom'>
+            <table className='w-100 table table-custom table-hover'>
                 <thead>
                     <tr>
                         {columns.map((column, index) => (
@@ -86,12 +116,12 @@ const TableTicket = ({ viewMode = 'readonly' }) => {
                             {columns.map((column, colIndex) => (
                                 <td key={colIndex}>
                                     {column.value === 'name' ? (
-                                        <a href={`ver/${item.id}`}>
+                                        <a href={`chamados/${item.id}`} className="fw-semibold text-decoration-underline">
                                             {getNestedValue(item, column.value)}
                                         </a>
-                                    ) : column.value.includes('created_at') ||
-                                        column.value.includes('updated_at') ||
-                                        column.value.includes('closed_at') ? (
+                                    ) : column.value.includes('createdAt') ||
+                                        column.value.includes('updatedAt') ||
+                                        column.value.includes('closedAt') ? (
                                         formatDate(item[column.value])
                                     ) : (
                                         getNestedValue(item, column.value) || 'N/A'
@@ -108,7 +138,6 @@ const TableTicket = ({ viewMode = 'readonly' }) => {
                 onPageChange={handlePageChange}
             />
         </div>
-
     );
 };
 

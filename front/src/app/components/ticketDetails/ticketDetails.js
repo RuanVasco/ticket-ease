@@ -1,13 +1,14 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
+import { FaPaperclip } from "react-icons/fa6";
 import Header from "../../components/header/header";
 import axios from 'axios';
 import styles from "./ticket_style.css";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-const ChamadoDetalhes = ({ params: { id } }) => {
+const TicketDetails = ({ id, mode }) => {
     const [data, setData] = useState(null);
     const [messages, setMessages] = useState([]);
     const [message, setMessage] = useState({
@@ -15,7 +16,7 @@ const ChamadoDetalhes = ({ params: { id } }) => {
         user_id: 1,
         ticket_id: parseInt(id, 10),
     });
-    const [loading, setLoading] = useState(true); // Loading state
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -93,11 +94,14 @@ const ChamadoDetalhes = ({ params: { id } }) => {
         <main>
             <Header pageName={`Chamado ${data?.id || ''} - ${data?.name || ''}`} />
             <div className="container">
-                <div className="row">
+                <div className="row mt-3">
                     <div className="col-9">
                         <div className="d-flex flex-column">
-                            <div className="border p-2 rounded mb-2 bg-secondary fw-semibold">
-                                {data?.description || ''}
+                            <div className="border p-2 rounded mb-2 d-flex">
+                                <div className="fw-semibold">{data?.description || ''}</div>
+                                {data.filePaths && data.filePaths.length > 0 ? (
+                                    <button type="button" className="btn-clean ms-auto" data-bs-toggle="modal" data-bs-target="#attachmentsModal">Anexos <FaPaperclip /></button>
+                                ) : (<></>)}
                             </div>
                             <div className="chat_content px-2">
                                 {messages && messages.length > 0 ? (
@@ -127,15 +131,47 @@ const ChamadoDetalhes = ({ params: { id } }) => {
                         <input id="created_at" className="input-text" type="text" value={`${new Date(data?.created_at).toLocaleDateString('pt-BR') || ''}`} readOnly />
                         <label htmlFor="observation" className="col-form-label">Observação</label>
                         <textarea id="observation" className="input-text" value={`${data?.observation || ''}`} readOnly />
-                        <label htmlFor="observation" className="col-form-label">Status</label>
-                        <input id="observation" className="input-text" type="text" value={`${data?.status || ''}`} readOnly />
+                        <label htmlFor="status" className="col-form-label">Status</label>
+                        <input id="status" className="input-text" type="text" value={`${data?.status || ''}`} readOnly />
                         <label htmlFor="urgency" className="col-form-label">Urgência</label>
                         <input id="urgency" className="input-text" type="text" value={`${data?.urgency || ''}`} readOnly />
                     </div>
                 </div>
             </div>
-        </main >
+            <div className="modal fade" id="attachmentsModal" tabIndex="-1">
+                <div className="modal-dialog modal-xl">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            <div id="carouselExample" className="carousel slide">
+                                <div className="carousel-inner">
+                                    {data.filePaths && data.filePaths.length > 0 ? (
+                                        data.filePaths.map((file, index) => (
+                                            <div className={`carousel-item ${index === 0 ? 'active' : ''}`} key={index}>
+                                                <img src={`${API_BASE_URL}/images/${file}`} className="d-block w-100" />
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p>Nenhum anexo encontrado.</p>
+                                    )}
+                                </div>
+                                <button className="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+                                    <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span className="visually-hidden">Previous</span>
+                                </button>
+                                <button className="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+                                    <span className="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span className="visually-hidden">Next</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
     );
 };
 
-export default ChamadoDetalhes;
+export default TicketDetails;

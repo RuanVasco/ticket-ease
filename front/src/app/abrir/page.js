@@ -212,7 +212,7 @@ const AbrirChamado = () => {
             });
 
             if (res.status === 200 || res.status === 201) {
-                window.location.href = `http://localhost:3000/ver/${res.data}`;
+                window.location.href = `http://localhost:3000/chamados/${res.data}`;
             } else {
                 console.error('Error', res.status);
             }
