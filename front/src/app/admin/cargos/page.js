@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axiosInstance from "../../components/axiosConfig";
 import Header from "../../components/header/header";
 import Table from "../../components/table/table";
 import ActionBar from "../../components/actionBar/actionBar";
@@ -29,7 +29,7 @@ const Cargos = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/cargos/pageable?page=${currentPage}&size=${pageSize}`);
+                const res = await axiosInstance.get(`${API_BASE_URL}/cargos/pageable?page=${currentPage}&size=${pageSize}`);
                 if (res.status === 200) {
                     setData(res.data.content);
                     setTotalPages(res.data.totalPages);
@@ -50,7 +50,7 @@ const Cargos = () => {
 
         if (mode != "add") {
             try {
-                const res = await axios.get(`${API_BASE_URL}/cargos/${idUnit}`);
+                const res = await axiosInstance.get(`${API_BASE_URL}/cargos/${idUnit}`);
                 if (res.status === 200) {
                     setCurrentCargo({
                         id: res.data.id,
@@ -96,11 +96,11 @@ const Cargos = () => {
             let res;
 
             if (submitType === "delete") {
-                res = await axios.delete(`${API_BASE_URL}/cargos/${currentCargo.id}`);
+                res = await axiosInstance.delete(`${API_BASE_URL}/cargos/${currentCargo.id}`);
             } else if (submitType === "add") {
-                res = await axios.post(`${API_BASE_URL}/cargos/`, currentCargo);
+                res = await axiosInstance.post(`${API_BASE_URL}/cargos/`, currentCargo);
             } else if (submitType === "update") {
-                res = await axios.put(`${API_BASE_URL}/cargos/${currentCargo.id}`, currentCargo);
+                res = await axiosInstance.put(`${API_BASE_URL}/cargos/${currentCargo.id}`, currentCargo);
             } else {
                 console.error('Invalid submit type');
                 return;

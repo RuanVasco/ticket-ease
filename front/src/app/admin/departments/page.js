@@ -6,6 +6,7 @@ import Header from "../../components/header/header";
 import Table from "../../components/table/table";
 import ActionBar from "../../components/actionBar/actionBar";
 import Pagination from '../../components/pagination/pagination';
+import axiosInstance from "../../components/axiosConfig";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -37,7 +38,7 @@ const Departments = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const res = await axios.get(`${API_BASE_URL}/departments/pageable?page=${currentPage}&size=${pageSize}`);
+                const res = await axiosInstance.get(`${API_BASE_URL}/departments/pageable?page=${currentPage}&size=${pageSize}`);
                 if (res.status === 200) {
                     const departments = res.data.content.map(dept => ({
                         ...dept,
@@ -57,7 +58,7 @@ const Departments = () => {
         const fetchUnits = async () => {
             setLoading(true);
             try {
-                const res = await axios.get(`${API_BASE_URL}/units/`);
+                const res = await axiosInstance.get(`${API_BASE_URL}/units/`);
                 if (res.status === 200) {
                     setUnits(res.data);
                 } else {
@@ -79,7 +80,7 @@ const Departments = () => {
 
         if (mode !== "add") {
             try {
-                const res = await axios.get(`${API_BASE_URL}/departments/${idUnit}`);
+                const res = await axiosInstance.get(`${API_BASE_URL}/departments/${idUnit}`);
                 if (res.status === 200) {
                     setCurrentDepartment({
                         id: res.data.id,
@@ -142,11 +143,11 @@ const Departments = () => {
             let res;
 
             if (submitType === "delete") {
-                res = await axios.delete(`${API_BASE_URL}/departments/${currentDepartment.id}`);
+                res = await axiosInstance.delete(`${API_BASE_URL}/departments/${currentDepartment.id}`);
             } else if (submitType === "add") {
-                res = await axios.post(`${API_BASE_URL}/departments/`, currentDepartment);
+                res = await axiosInstance.post(`${API_BASE_URL}/departments/`, currentDepartment);
             } else if (submitType === "update") {
-                res = await axios.put(`${API_BASE_URL}/departments/${currentDepartment.id}`, currentDepartment);
+                res = await axiosInstance.put(`${API_BASE_URL}/departments/${currentDepartment.id}`, currentDepartment);
             } else {
                 console.error('Invalid submit type');
                 return;

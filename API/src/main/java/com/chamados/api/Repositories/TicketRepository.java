@@ -1,10 +1,12 @@
 package com.chamados.api.Repositories;
 
 import com.chamados.api.Entities.Ticket;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
@@ -14,4 +16,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
             "LOWER(t.observation) LIKE LOWER(CONCAT('%', :searchText, '%')) OR " +
             "LOWER(t.ticketCategory.name) LIKE LOWER(CONCAT('%', :searchText, '%')) ")
     List<Ticket> findBySearch(@Param("searchText") String searchText);
+
+    Page<Ticket> findByUserId(Long userId, Pageable pageable);
 }

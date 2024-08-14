@@ -1,6 +1,7 @@
 package com.chamados.api.Services;
 
 import com.chamados.api.DTO.UserDTO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,11 +16,9 @@ import java.util.Optional;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
-    private final UserRepository userRepository;
 
-    public CustomUserDetailsService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    @Autowired
+    UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -33,12 +32,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     public UserDTO getUser(Long userID) {
-        Optional<User> optionalUser = userRepository.findById(userID);
-        if (optionalUser.isEmpty()) {
-            throw new RuntimeException("User not found");
-        }
-        User user = optionalUser.get();
-        return new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(),user.getDepartment(), user.getCargo());
+        User user = userRepository.findById(userID)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getDepartment(), user.getCargo());
     }
 
 }

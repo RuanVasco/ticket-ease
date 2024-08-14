@@ -3,31 +3,28 @@
     overflow-y: scroll;
 }
 
-.message-box {
+.message-box-sent {
     display: block;
     margin-right: 20px;
     text-align: end;
 }
 
+.message-box-received {
+    display: block;
+    margin-right: 20px;
+    text-align: start;
+}
+
 .message-bubble {
     position: relative;
     display: inline-block;
-    padding: 10px;
+    padding: 8px;
     background-color: var(--secondary-color);
-    border-radius: 10px;
+    border-radius: 6px;
     border: 1px solid var(--primary-color);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.message-bubble::after {
-    content: "";
-    position: absolute;
-    top: 35%;
-    right: -20px; 
-    transform: translateY(-50%);
-    border-width: 10px;
-    border-style: solid;
-    border-color: transparent transparent transparent var(--primary-color);
-    width: 0;
-    height: 0;
+.box_description {
+    border: 1px solid var(--primary-color);
 }

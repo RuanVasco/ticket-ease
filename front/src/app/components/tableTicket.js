@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Pagination from './pagination/pagination';
 import ItemsPerPage from './pagination/itemsPerPage';
-import axios from "axios";
+import axiosInstance from "../components/axiosConfig";
 import { format } from 'date-fns';
 import styles from "./table/table.css";
 
@@ -29,7 +29,7 @@ const TableTicket = ({ viewMode = 'readonly' }) => {
                 // Adicione lógica específica para 'edit' se necessário
             }
 
-            const res = await axios.get(url);
+            const res = await axiosInstance.get(url);
 
             if (res.status === 200) {
                 setData(res.data.content);
@@ -51,7 +51,7 @@ const TableTicket = ({ viewMode = 'readonly' }) => {
 
         if (query.length >= 3) {
             try {
-                const res = await axios.get(`${API_BASE_URL}/tickets/search`, {
+                const res = await axiosInstance.get(`${API_BASE_URL}/tickets/search`, {
                     params: { query },
                 });
 

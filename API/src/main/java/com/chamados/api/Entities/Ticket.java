@@ -16,6 +16,11 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Setter
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    User user;
+
 //    @Setter
 //    @ManyToOne
 //    @JoinColumn(name = "form_id")

@@ -62,7 +62,7 @@ public class AuthController {
         
         if (user == null) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Usuário não encontrado");
         
-        var token = tokenService.generateToken(user);
+        var token = tokenService.generateAccessToken(user);
         var refreshToken = tokenService.generateRefreshToken(user);
         
         return ResponseEntity.ok(new LoginResponseDTO(token, refreshToken));        
@@ -83,7 +83,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not found");
         }
 
-        var newToken = tokenService.generateToken(user);
+        var newToken = tokenService.generateAccessToken(user);
 
         return ResponseEntity.ok(new LoginResponseDTO(newToken, refreshToken));
     }

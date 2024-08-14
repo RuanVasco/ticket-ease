@@ -15,40 +15,44 @@ import com.chamados.api.Entities.User;
 
 @Service
 public class TokenService {
-	
+
 	@Value("${api.security.token.secret}")
-	public String secret;
-	
+	private String secret;
+
+	@Value("${jwt.access.expiration}")
+	private Long accessExpiration;
+
 	@Value("${jwt.refresh.expiration}")
 	private Long refreshExpiration;
-	
-	public String generateToken(User user) {
+
+	public String generateAccessToken(User user) {
 		try {
 			Algorithm algorithm = Algorithm.HMAC256(secret);
-            return JWT.create()
+			return JWT.create()
 					.withIssuer("auth-api")
-					.withClaim("id", user.getId())
 					.withSubject(user.getEmail())
-					.withExpiresAt(getExpirationDate())
+					.withClaim("id", user.getId())
+					.withClaim("name", user.getName())
+					.withExpiresAt(getExpirationDate(accessExpiration))
 					.sign(algorithm);
 		} catch (JWTCreationException exception) {
-			throw new RuntimeException("error while generating token", exception);
+			throw new RuntimeException("Error while generating access token", exception);
 		}
 	}
-	
-	public String generateRefreshToken(User user){
+
+	public String generateRefreshToken(User user) {
 		try {
 			Algorithm algorithm = Algorithm.HMAC256(secret);
-            return JWT.create()
+			return JWT.create()
 					.withIssuer("auth-api")
 					.withSubject(user.getEmail())
-					.withExpiresAt(getExpirationDate())
+					.withExpiresAt(getExpirationDate(refreshExpiration))
 					.sign(algorithm);
 		} catch (JWTCreationException exception) {
-			throw new RuntimeException("error while generating refresh token", exception);
+			throw new RuntimeException("Error while generating refresh token", exception);
 		}
-    }
-	
+	}
+
 	public String validateToken(String token) {
 		try {
 			Algorithm algorithm = Algorithm.HMAC256(secret);
@@ -58,12 +62,11 @@ public class TokenService {
 					.verify(token)
 					.getSubject();
 		} catch (JWTVerificationException exception) {
-			return "";
+			return null;
 		}
 	}
-	
-	private Instant getExpirationDate() {
-		return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
+
+	private Instant getExpirationDate(Long expirationHours) {
+		return LocalDateTime.now().plusHours(expirationHours).toInstant(ZoneOffset.of("-03:00"));
 	}
-	
 }

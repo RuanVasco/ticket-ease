@@ -29,11 +29,10 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Set<Role> roles = getUser().getRoles(); // Assuming getUser() retrieves the User object
+        Set<Role> roles = getUser().getRoles();
         List<GrantedAuthority> authorities = new ArrayList<>();
         for (Role role : roles) {
-            authorities.add(new SimpleGrantedAuthority(role.getName())); // Replace with your logic to extract authority
-                                                                         // from Role
+            authorities.add(new SimpleGrantedAuthority(role.getName()));
         }
         return authorities;
     }

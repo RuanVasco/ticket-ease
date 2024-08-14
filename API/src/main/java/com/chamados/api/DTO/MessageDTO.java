@@ -1,4 +1,6 @@
 package com.chamados.api.DTO;
 
-public record MessageDTO(String text, Long user_id, Long ticket_id) {
+import java.util.Optional;
+
+public record MessageDTO(Optional<Long> id, String text, Long user_id, Long ticket_id) {
 }

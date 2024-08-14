@@ -22,7 +22,9 @@ import org.springframework.web.bind.annotation.*;
 import com.chamados.api.Repositories.UserRepository;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("users")
@@ -122,10 +124,20 @@ public class UserController {
             return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
         }
 
+        Optional<Role> optionalRoleUser = roleRepository.findByName("ROLE_USER");
+
         User user = new User();
         user.setName(signUpDto.name());
         user.setEmail(signUpDto.email());
         user.setPhone(signUpDto.phone());
+
+        if (optionalRoleUser.isPresent()) {
+            Role role = optionalRoleUser.get();
+            Set<Role> roles = new HashSet<>();
+            roles.add(role);
+            user.setRoles(roles);
+        }
+
         user.setPassword(passwordEncoder.encode(signUpDto.password()));
 
         if (cargoId != null) {

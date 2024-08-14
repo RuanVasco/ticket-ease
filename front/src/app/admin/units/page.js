@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axiosInstance from "../../components/axiosConfig";
 import Header from "../../components/header/header";
 import Table from "../../components/table/table";
 import ActionBar from "../../components/actionBar/actionBar";
@@ -31,7 +31,7 @@ const Units = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/units/pageable?page=${currentPage}&size=${pageSize}`);
+                const res = await axiosInstance.get(`${API_BASE_URL}/units/pageable?page=${currentPage}&size=${pageSize}`);
                 if (res.status === 200) {
                     setData(res.data.content);
                     setTotalPages(res.data.totalPages);
@@ -52,7 +52,7 @@ const Units = () => {
 
         if (mode != "add") {
             try {
-                const res = await axios.get(`${API_BASE_URL}/units/${idUnit}`);
+                const res = await axiosInstance.get(`${API_BASE_URL}/units/${idUnit}`);
                 if (res.status === 200) {
                     setCurrentUnit({
                         id: res.data.id,
@@ -100,11 +100,11 @@ const Units = () => {
             let res;
 
             if (submitType === "delete") {
-                res = await axios.delete(`${API_BASE_URL}/units/${currentUnit.id}`);
+                res = await axiosInstance.delete(`${API_BASE_URL}/units/${currentUnit.id}`);
             } else if (submitType === "add") {
-                res = await axios.post(`${API_BASE_URL}/units/`, currentUnit);
+                res = await axiosInstance.post(`${API_BASE_URL}/units/`, currentUnit);
             } else if (submitType === "update") {
-                res = await axios.put(`${API_BASE_URL}/units/${currentUnit.id}`, currentUnit);
+                res = await axiosInstance.put(`${API_BASE_URL}/units/${currentUnit.id}`, currentUnit);
             } else {
                 console.error('Invalid submit type');
                 return;

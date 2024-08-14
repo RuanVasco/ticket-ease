@@ -1,28 +1,29 @@
-"use client"
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaPaperclip } from "react-icons/fa6";
 import Header from "../../components/header/header";
-import axios from 'axios';
+import axiosInstance from "../axiosConfig";
+import getUserData from "../getUserData";
 import styles from "./ticket_style.css";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const TicketDetails = ({ id, mode }) => {
+    const userData = getUserData();
     const [data, setData] = useState(null);
     const [messages, setMessages] = useState([]);
     const [message, setMessage] = useState({
         text: "",
-        user_id: 1,
+        user_id: userData ? userData.id : null,
         ticket_id: parseInt(id, 10),
     });
     const [loading, setLoading] = useState(true);
 
+    const chatEndRef = useRef(null); 
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const response = await axios.get(`${API_BASE_URL}/tickets/${id}`);
+                const response = await axiosInstance.get(`${API_BASE_URL}/tickets/${id}`);
                 setData(response.data);
             } catch (error) {
                 setError('Erro ao buscar dados.');
@@ -40,7 +41,7 @@ const TicketDetails = ({ id, mode }) => {
     useEffect(() => {
         const fetchMessages = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/messages/${id}`);
+                const response = await axiosInstance.get(`${API_BASE_URL}/messages/${id}`);
 
                 if (response.status === 200 || response.status === 201) {
                     setMessages(response.data);
@@ -55,6 +56,11 @@ const TicketDetails = ({ id, mode }) => {
         fetchMessages();
     }, [message]);
 
+    // Scroll to bottom whenever messages change
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
+
     const handleInputChange = (event) => {
         const { name, value } = event.target;
         setMessage({ ...message, [name]: value });
@@ -68,7 +74,7 @@ const TicketDetails = ({ id, mode }) => {
         }
 
         try {
-            const res = await axios.post(`${API_BASE_URL}/messages/`, { text: message.text, user_id: message.user_id, ticket_id: message.ticket_id });
+            const res = await axiosInstance.post(`${API_BASE_URL}/messages/`, { text: message.text, user_id: message.user_id, ticket_id: message.ticket_id });
 
             if (res.status === 200 || res.status === 201) {
                 setMessage({ ...message, text: "" });
@@ -97,24 +103,43 @@ const TicketDetails = ({ id, mode }) => {
                 <div className="row mt-3">
                     <div className="col-9">
                         <div className="d-flex flex-column">
-                            <div className="border p-2 rounded mb-2 d-flex">
+                            <div className="box_description p-2 rounded mb-2 d-flex">
                                 <div className="fw-semibold">{data?.description || ''}</div>
                                 {data.filePaths && data.filePaths.length > 0 ? (
                                     <button type="button" className="btn-clean ms-auto" data-bs-toggle="modal" data-bs-target="#attachmentsModal">Anexos <FaPaperclip /></button>
                                 ) : (<></>)}
                             </div>
-                            <div className="chat_content px-2">
+                            <div className="chat_content px-2 pb-3">
                                 {messages && messages.length > 0 ? (
                                     messages.map((msg) => (
-                                        <div key={msg.id} className="mt-3 message-box">
-                                            <div className="message-bubble">
-                                                {msg.text}
+                                        msg.user.id === userData.id ? (
+                                            <div key={msg.id} className="mt-3 message-box-sent">
+                                                <div className="message-bubble">
+                                                    <div className="border-bottom mb-2">
+                                                        {msg.user.name}
+                                                        <span> - </span>
+                                                        {new Date(msg.sent_at).toLocaleDateString('pt-BR')}
+                                                    </div>
+                                                    {msg.text}
+                                                </div>
                                             </div>
-                                        </div>
+                                        ) : (
+                                            <div key={msg.id} className="mt-3 message-box-received">
+                                                <div className="message-bubble">
+                                                    <div className="border-bottom mb-2">
+                                                        {msg.user.name}
+                                                        <span> - </span>
+                                                        {new Date(msg.sent_at).toLocaleDateString('pt-BR')}
+                                                    </div>
+                                                    {msg.text}
+                                                </div>
+                                            </div>
+                                        )
                                     ))
                                 ) : (
                                     <p>Envie uma mensagem para iniciar o chamado.</p>
                                 )}
+                                <div ref={chatEndRef} /> {/* This div is used to scroll to the bottom */}
                             </div>
                             <form className="mt-3 input-group" onSubmit={handleSubmit}>
                                 <input type="text" className="input-text form-control" name="text" value={message.text} onChange={handleInputChange}></input>
@@ -170,7 +195,7 @@ const TicketDetails = ({ id, mode }) => {
                     </div>
                 </div>
             </div>
-        </main>
+        </main >
     );
 };
 

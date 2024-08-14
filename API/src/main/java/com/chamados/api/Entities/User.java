@@ -1,5 +1,7 @@
 package com.chamados.api.Entities;
 
+import com.chamados.api.DTO.UserDTO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,11 +29,12 @@ public class User {
     private String email;
 
     @Setter
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
     @Setter
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
@@ -46,4 +49,15 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "cargo_id")
     private Cargo cargo;
+
+    public UserDTO toDTO() {
+        return new UserDTO(
+                this.id,
+                this.name,
+                this.email,
+                this.phone,
+                this.department,
+                this.cargo
+        );
+    }
 }
