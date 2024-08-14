@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Header from '../components/header/header';
 import AttachmentsForm from '../components/attachmentsForm/attachmentsForm';
-import { FaAngleRight, FaAngleLeft, FaFolderOpen, FaClipboardList } from "react-icons/fa6";
+import { FaAngleRight, FaAngleLeft, FaFolderOpen, FaClipboardList, FaPlus } from "react-icons/fa6";
 import { v4 as uuidv4 } from 'uuid';
 import style from "./style.css";
 
@@ -175,8 +175,8 @@ const AbrirChamado = () => {
         });
     };
 
-    const handleFilesChange = (newFiles) => {
-        setAttachments(prevAttachments => [...prevAttachments, ...newFiles]);
+    const handleFilesChange = (files) => {
+        setAttachments(files);
     };
 
     const handleSubmitForm = async (e) => {
@@ -229,13 +229,13 @@ const AbrirChamado = () => {
                     <div className="col-2">
                         {currentCategory ? renderTreeNavigation(currentCategory) : null}
                     </div>
-                    <div className="col border-start ps-4">
+                    <div className="col border-start ps-4 form_box">
                         {category ? (
                             <div>
                                 <h2>{category.name}</h2>
                                 <form onSubmit={handleSubmitForm}>
                                     <div className="mb-3">
-                                        <label htmlFor="name" className="form-label">Assunto</label>
+                                        <label htmlFor="name" className="form-label">Assunto *</label>
                                         <input
                                             type="text"
                                             className="form-control"
@@ -243,10 +243,11 @@ const AbrirChamado = () => {
                                             name="name"
                                             value={ticket.name}
                                             onChange={handleInputChange}
+                                            required
                                         />
                                     </div>
                                     <div className="mb-3">
-                                        <label htmlFor="description" className="form-label">Descrição</label>
+                                        <label htmlFor="description" className="form-label">Descrição *</label>
                                         <textarea
                                             className="form-control"
                                             id="description"
@@ -254,6 +255,7 @@ const AbrirChamado = () => {
                                             rows="3"
                                             value={ticket.description}
                                             onChange={handleInputChange}
+                                            required
                                         ></textarea>
                                     </div>
                                     <div className="mb-3">
@@ -268,13 +270,14 @@ const AbrirChamado = () => {
                                         ></textarea>
                                     </div>
                                     <div className="mb-3">
-                                        <label htmlFor="urgency" className="form-label">Urgência</label>
+                                        <label htmlFor="urgency" className="form-label">Urgência *</label>
                                         <select
                                             className="form-select"
                                             id="urgency"
                                             name="urgency"
                                             value={ticket.urgency}
                                             onChange={handleInputChange}
+                                            required
                                         >
                                             <option value="Baixa">Baixa</option>
                                             <option value="Média">Média</option>
@@ -292,8 +295,9 @@ const AbrirChamado = () => {
                                         />
                                         <label className="form-check-label" htmlFor="receiveEmail">Receber E-mail</label>
                                     </div>
+                                    <label className="form-label">Anexos</label>
                                     <AttachmentsForm onFilesChange={handleFilesChange} />
-                                    <button type="submit" className="btn btn-primary">Abrir Chamado</button>
+                                    <button type="submit" className="btn btn-send mt-3 d-block mx-auto"><FaPlus /> Enviar</button>
                                 </form>
                             </div>
                         ) : (

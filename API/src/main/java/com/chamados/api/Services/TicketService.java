@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class TicketService {
@@ -32,6 +29,14 @@ public class TicketService {
         Optional<TicketCategory> optionalTicketCategory = ticketCategoryRepository.findById(ticketDTO.ticketCategory_id());
 
         if (optionalTicketCategory.isEmpty()) {
+            return null;
+        }
+
+        if (ticketDTO.name().isEmpty()) {
+            return null;
+        }
+
+        if (ticketDTO.description().isEmpty()) {
             return null;
         }
 

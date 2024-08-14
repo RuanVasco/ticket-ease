@@ -38,7 +38,8 @@ a:hover {
 
 .btn-custom:hover {
   background-color: var(--secondary-color-hover);
-  color: var(--primary-color);
+  color: var(--primary-color-hover);
+  border: 1px solid var(--primary-color-hover);
 }
 
 .input-text {
@@ -51,8 +52,25 @@ a:hover {
   background-color: var(--secondary-color);
   color: var(--primary-color);
 }
+
 .btn-clean {
   border: 0;
   background-color: var(--secondary-color);
   color: var(--primary-color);
+}
+
+.btn-send {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  border-radius: 6px;
+  padding: 5px;
+  width: 10vw;
+  height: 40px;
+}
+
+.btn-send:hover {
+  background-color: var(--secondary-color-hover);
+  color: var(--primary-color-hover);
+  border: 1px solid var(--primary-color-hover);
 }

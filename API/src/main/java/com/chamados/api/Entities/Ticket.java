@@ -1,6 +1,7 @@
 package com.chamados.api.Entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,12 +24,17 @@ public class Ticket {
     @Setter
     @ManyToOne
     @JoinColumn(name = "category_id")
+    @NotNull(message = "Name cannot be null")
     TicketCategory ticketCategory;
 
     @Setter
+    @NotNull(message = "Name cannot be null")
+    @Column(nullable = false)
     private String name;
 
     @Setter
+    @NotNull(message = "Name cannot be null")
+    @Column(nullable = false)
     private String description;
 
     @Setter

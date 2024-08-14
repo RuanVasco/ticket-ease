@@ -32,3 +32,9 @@
 .item_selected {
     background-color: var(--secondary-color-hover);
 }
+
+.form_box {
+    height: 85vh;
+    overflow-y: scroll;
+    padding-bottom: 20px;
+}
