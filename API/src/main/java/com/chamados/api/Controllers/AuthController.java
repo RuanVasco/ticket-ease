@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.chamados.api.Components.UserDetailsImpl;
 import com.chamados.api.DTO.LoginDTO;
 import com.chamados.api.DTO.LoginResponseDTO;
 import com.chamados.api.DTO.ValidateDTO;
@@ -57,9 +56,8 @@ public class AuthController {
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
         Authentication auth = authenticationManager.authenticate(usernamePassword);
         
-        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
-        User user = userDetails.getUser();
-        
+        User user = (User) auth.getPrincipal();
+
         if (user == null) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Usuário não encontrado");
         
         var token = tokenService.generateAccessToken(user);

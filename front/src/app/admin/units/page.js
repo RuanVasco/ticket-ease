@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import axiosInstance from "../../components/axiosConfig";
+import withAdmin from '../../auth/withAdmin';
 import Header from "../../components/header/header";
 import Table from "../../components/table/table";
 import ActionBar from "../../components/actionBar/actionBar";
@@ -242,4 +243,4 @@ const Units = () => {
     );
 };
 
-export default Units;
+export default withAdmin(Units);

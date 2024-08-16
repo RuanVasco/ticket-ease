@@ -17,5 +17,17 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
             "LOWER(t.ticketCategory.name) LIKE LOWER(CONCAT('%', :searchText, '%')) ")
     List<Ticket> findBySearch(@Param("searchText") String searchText);
 
+    @Query("SELECT t FROM Ticket t WHERE (:status = 'ALL' OR t.status = :status)")
+    Page<Ticket> findByStatus(@Param("status") String status, Pageable pageable);
+
     Page<Ticket> findByUserId(Long userId, Pageable pageable);
+
+    @Query("SELECT t FROM Ticket t WHERE " +
+            "(:userId IS NULL OR t.user.id = :userId) AND " +
+            "(:status = 'ALL' OR LOWER(t.status) = LOWER(:status))")
+    Page<Ticket> findByUserIdAndStatus(
+            @Param("userId") Long userId,
+            @Param("status") String status,
+            Pageable pageable
+    );
 }

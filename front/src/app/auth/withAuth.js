@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import axiosInterceptor from './axiosInterceptor';
-import axios from 'axios';
+import axios from "axios";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const withAuth = (WrappedComponent) => {
     const WithAuth = (props) => {
@@ -18,7 +19,7 @@ const withAuth = (WrappedComponent) => {
                 if (!token) {
                     if (refreshToken) {
                         try {
-                            const response = await axios.post('http://localhost:8080/auth/refresh', { refreshToken: refreshToken });
+                            const response = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken: refreshToken });
                             localStorage.setItem('token', response.data.token);
                             setLoading(false);
                         } catch (error) {
@@ -29,7 +30,7 @@ const withAuth = (WrappedComponent) => {
                     }
                 } else {
                     try {
-                        await axiosInterceptor.post('/auth/validate', { token });
+                        await axios.post(`${API_BASE_URL}/auth/validate`, { token });
                         setLoading(false);
                     } catch (error) {
                         localStorage.removeItem('token');

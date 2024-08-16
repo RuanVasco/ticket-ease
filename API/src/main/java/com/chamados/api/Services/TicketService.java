@@ -74,7 +74,7 @@ public class TicketService {
         return ticketRepository.save(ticket);
     }
 
-    public Page<Ticket> getTicketsByUserId(Long userId, Pageable pageable) {
-        return ticketRepository.findByUserId(userId, pageable);
+    public Page<Ticket> getTicketsByUserId(Long userId, String status, Pageable pageable) {
+        return ticketRepository.findByUserIdAndStatus(userId, status, pageable);
     }
 }

@@ -12,6 +12,7 @@ const TableTicket = ({ viewMode = 'readonly' }) => {
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
     const [pageSize, setPageSize] = useState(10);
+    const [status, setStatus] = useState('Aberto');
 
     const columns = [
         { label: 'ID', value: 'id' },
@@ -22,11 +23,23 @@ const TableTicket = ({ viewMode = 'readonly' }) => {
         { label: 'Última Atualização', value: 'updatedAt' }
     ];
 
+    if (viewMode === 'edit') {
+        columns.push({ label: 'Usuário', value: 'user.name' });
+    }
+
     const fetchData = async () => {
         try {
-            let url = `${API_BASE_URL}/tickets/pageable?page=${currentPage}&size=${pageSize}`;
-            if (viewMode === "edit") {
-                // Adicione lógica específica para 'edit' se necessário
+            let url;
+
+            switch (viewMode) {
+                case 'edit':
+                    url = `${API_BASE_URL}/tickets/pageable?page=${currentPage}&size=${pageSize}&status=${status}`;
+                    break;
+                case 'readonly':
+                    url = `${API_BASE_URL}/tickets/user?page=${currentPage}&size=${pageSize}&status=${status}`;
+                    break;
+                default:
+                    break;
             }
 
             const res = await axiosInstance.get(url);
@@ -44,7 +57,7 @@ const TableTicket = ({ viewMode = 'readonly' }) => {
 
     useEffect(() => {
         fetchData();
-    }, [currentPage, pageSize, viewMode]);
+    }, [currentPage, pageSize, status, viewMode]);
 
     const handleSearch = async (e) => {
         const query = e.target.value;
@@ -66,6 +79,11 @@ const TableTicket = ({ viewMode = 'readonly' }) => {
         } else {
             fetchData();
         }
+    };
+
+    const handleStatusChange = (e) => {
+        setStatus(e.target.value);
+        setCurrentPage(0);
     };
 
     const formatDate = (dateString) => {
@@ -92,6 +110,14 @@ const TableTicket = ({ viewMode = 'readonly' }) => {
                         onPageSizeChange={handlePageSizeChange}
                         pageSize={pageSize}
                     />
+                </div>
+                <div className="col">
+                    <select value={status} onChange={handleStatusChange}>
+                        <option value="Novo">Abertos</option>
+                        <option value="Em Andamento">Em Andamento</option>
+                        <option value="Fechado">Fechados</option>
+                        <option value="ALL">Todos</option>
+                    </select>
                 </div>
                 <div className="col-2">
                     <input

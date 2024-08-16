@@ -52,6 +52,16 @@ public class MessageController {
         User user = optionalUser.get();
         Ticket ticket = optionalTicket.get();
 
+        String ticketStatus = ticket.getStatus();
+
+        if (ticketStatus.equals("Novo")) {
+            ticket.setStatus("Em Andamento");
+        }
+
+        if (Boolean.TRUE.equals(messageDTO.closeTicket())) {
+            ticket.setStatus("Fechado");
+        }
+
         Message message = new Message();
         message.setText(messageDTO.text());
         message.setUser(user);

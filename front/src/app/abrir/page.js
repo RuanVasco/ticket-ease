@@ -6,6 +6,7 @@ import Header from '../components/header/header';
 import AttachmentsForm from '../components/attachmentsForm/attachmentsForm';
 import { FaAngleRight, FaAngleLeft, FaFolderOpen, FaClipboardList, FaPlus } from "react-icons/fa6";
 import { v4 as uuidv4 } from 'uuid';
+import withAuth from '../auth/withAuth';
 import style from "./style.css";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -310,4 +311,4 @@ const AbrirChamado = () => {
     );
 };
 
-export default AbrirChamado;
+export default withAuth(AbrirChamado);

@@ -6,7 +6,7 @@ const ChamadoDetalhes = ({ params: { id } }) => {
 
     return (
         <main>
-            <TicketDetails id={id} mode="view" />
+            <TicketDetails id={id} />
         </main>
     );
 };

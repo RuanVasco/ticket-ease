@@ -16,15 +16,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import com.chamados.api.Repositories.UserRepository;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("users")
@@ -103,6 +104,23 @@ public class UserController {
         Cargo cargo = optionalCargo.get();
         Department department = optionalDepartment.get();
 
+        Set<Role> roles = new HashSet<>();
+
+        Optional<Role> optionalRoleUser = roleRepository.findByName("ROLE_USER");
+
+        if (optionalRoleUser.isEmpty()) {
+            return new ResponseEntity<>("Default role not found", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        roles.add(optionalRoleUser.get());
+
+        if (userUpdateDTO.isAdmin()) {
+            Optional<Role> optionalRoleAdmin = roleRepository.findByName("ROLE_ADMIN");
+            optionalRoleAdmin.ifPresent(roles::add);
+        }
+
+        user.setRoles(roles);
+
         user.setName(userUpdateDTO.name());
         user.setEmail(userUpdateDTO.email());
         user.setPhone(userUpdateDTO.phone());
@@ -115,46 +133,57 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserRegisterDTO signUpDto){
+    public ResponseEntity<?> registerUser(@RequestBody UserRegisterDTO signUpDto) {
 
         Long cargoId = signUpDto.cargoId();
         Long departmentId = signUpDto.departmentId();
 
-        if (userRepository.existsByEmail(signUpDto.email())){
+        if (userRepository.existsByEmail(signUpDto.email())) {
             return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
         }
 
         Optional<Role> optionalRoleUser = roleRepository.findByName("ROLE_USER");
+        if (optionalRoleUser.isEmpty()) {
+            return new ResponseEntity<>("Default role not found", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
         User user = new User();
         user.setName(signUpDto.name());
         user.setEmail(signUpDto.email());
         user.setPhone(signUpDto.phone());
 
-        if (optionalRoleUser.isPresent()) {
-            Role role = optionalRoleUser.get();
-            Set<Role> roles = new HashSet<>();
-            roles.add(role);
-            user.setRoles(roles);
+        Set<Role> roles = new HashSet<>();
+        roles.add(optionalRoleUser.get());
+        if (signUpDto.isAdmin()) {
+            Optional<Role> optionalRoleAdmin = roleRepository.findByName("ROLE_ADMIN");
+            optionalRoleAdmin.ifPresent(roles::add);
         }
+        user.setRoles(roles);
 
         user.setPassword(passwordEncoder.encode(signUpDto.password()));
 
         if (cargoId != null) {
-            Optional<Cargo> cargo = cargoRepository.findById(cargoId);
-            cargo.ifPresent(user::setCargo);
+            cargoRepository.findById(cargoId).ifPresent(user::setCargo);
         }
-
         if (departmentId != null) {
-            Optional<Department> department = departmentRepository.findById(departmentId);
-            department.ifPresent(user::setDepartment);
+            departmentRepository.findById(departmentId).ifPresent(user::setDepartment);
         }
-
-        Optional<Role> defaultRole = roleRepository.findByName("ROLE_USER");
-        user.setRoles(Collections.singleton(defaultRole.get()));
 
         userRepository.save(user);
 
         return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
+    }
+
+    @GetMapping("/isAdmin")
+    public ResponseEntity<Boolean> isAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
+        }
+
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        boolean isAdmin = authorities.contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        return ResponseEntity.ok(isAdmin);
     }
 }

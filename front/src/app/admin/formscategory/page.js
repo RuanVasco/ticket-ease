@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import axiosInstance from "../../components/axiosConfig";
+import withAdmin from '../../auth/withAdmin';
 import Header from "../../components/header/header";
 import ActionBar from "../../components/actionBar/actionBar";
 import Pagination from '../../components/pagination/pagination';
@@ -368,4 +369,4 @@ const FormsCategory = () => {
     );
 };
 
-export default FormsCategory;
+export default withAdmin(FormsCategory);

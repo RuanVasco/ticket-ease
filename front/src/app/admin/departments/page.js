@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import Header from "../../components/header/header";
 import Table from "../../components/table/table";
 import ActionBar from "../../components/actionBar/actionBar";
+import withAdmin from '../../auth/withAdmin';
 import Pagination from '../../components/pagination/pagination';
 import axiosInstance from "../../components/axiosConfig";
 
@@ -313,4 +313,4 @@ const Departments = () => {
     );
 };
 
-export default Departments;
+export default withAdmin(Departments);

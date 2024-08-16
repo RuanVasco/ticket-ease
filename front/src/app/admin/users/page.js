@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import withAdmin from '../../auth/withAdmin';
 import axiosInstance from "../../components/axiosConfig";
 import Header from "../../components/header/header";
 import Table from "../../components/table/table";
@@ -31,7 +32,7 @@ const User = () => {
         phone: '',
         department: { id: '', name: '' },
         cargo: { id: '', name: '' },
-        profile: '',
+        isAdmin: false,
         password: '',
     });
     const [cargos, setCargos] = useState([]);
@@ -106,7 +107,7 @@ const User = () => {
                         phone: res.data.phone,
                         department: department,
                         cargo: cargos,
-                        profile: '',
+                        isAdmin: res.data.isAdmin,
                         password: '',
                     });
                 } else {
@@ -123,7 +124,7 @@ const User = () => {
                 phone: '',
                 department: { id: '', name: '' },
                 cargo: { id: '', name: '' },
-                profile: '',
+                isAdmin: false,
                 password: '',
             });
         }
@@ -206,7 +207,7 @@ const User = () => {
                     phone: '',
                     department: { id: '', name: '' },
                     cargo: { id: '', name: '' },
-                    profile: '',
+                    isAdmin: false,
                     password: '',
                 });
 
@@ -258,7 +259,7 @@ const User = () => {
                             </h1>
                             <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <form onSubmit={handleSubmit}>
+                        <form onSubmit={handleSubmit} disabled={modeModal === "readonly"}>
                             <div className="modal-body">
                                 {modeModal != "delete" && (
                                     <>
@@ -324,7 +325,7 @@ const User = () => {
                                                 ))}
                                             </select>
                                         </div>
-                                        
+
                                         <div className="mt-2">
                                             <label htmlFor="cargo" className="form-label">
                                                 Cargo
@@ -346,18 +347,6 @@ const User = () => {
                                                 ))}
                                             </select>
                                         </div>
-                                        <div className="mt-2">
-                                            <label htmlFor="profile" className="form-label">
-                                                Perfil
-                                            </label>
-                                            <input
-                                                name="profile"
-                                                className="form-control"
-                                                readOnly={modeModal === "readonly"}
-                                                value={currentUser.profile}
-                                                onChange={handleInputChange}
-                                            />
-                                        </div>
                                         {modeModal !== "readonly" && (
                                             <div className="mt-2">
                                                 <label htmlFor="password" className="form-label">
@@ -374,6 +363,22 @@ const User = () => {
                                                 />
                                             </div>
                                         )}
+                                        <div className="mt-2">
+                                            <input
+                                                name="isAdmin"
+                                                id="isAdmin"
+                                                type="checkbox"
+                                                className="form-check-input"
+                                                readOnly={modeModal === "readonly"}
+                                                checked={currentUser.isAdmin}
+                                                onChange={(e) =>
+                                                    setCurrentUser({ ...currentUser, isAdmin: e.target.checked })
+                                                }
+                                            />
+                                            <label htmlFor="isAdmin" className="form-label ms-2">
+                                                Administrador
+                                            </label>
+                                        </div>
                                     </>
                                 )}
 
@@ -423,4 +428,4 @@ const User = () => {
     );
 };
 
-export default User;
+export default withAdmin(User);

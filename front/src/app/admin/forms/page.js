@@ -6,6 +6,7 @@ import Header from "../../components/header/header";
 import Table from "../../components/table/table";
 import ActionBar from "../../components/actionBar/actionBar";
 import Pagination from '../../components/pagination/pagination';
+import withAdmin from '../../auth/withAdmin';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -282,4 +283,4 @@ const Forms = () => {
     );
 };
 
-export default Forms;
+export default withAdmin(Forms);

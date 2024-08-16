@@ -4,8 +4,12 @@ import { FaPlus, FaEye, FaListCheck } from "react-icons/fa6";
 import Link from "next/link";
 import "./home.css";
 import Header from "./components/header/header";
+import useIsAdmin from "./components/checkAdmin";
+import withAuth from "./auth/withAuth";
 
 const Home = () => {
+  const { isAdmin, loading } = useIsAdmin();
+
   return (
     <main>
       <Header pageName="Chamados" />
@@ -23,16 +27,18 @@ const Home = () => {
               Acompanhar
             </div>
           </Link>
-          <Link href="gerenciar" className="main_menu_item d-flex flex-column justify-content-between align-items-center py-3 mx-2 rounded">
-            <FaListCheck className="icon_main_menu_item" />
-            <div className="text_main_menu_item fw-semibold">
-              Gerenciar
-            </div>
-          </Link>
+          {isAdmin && (
+            <Link href="gerenciar" className="main_menu_item d-flex flex-column justify-content-between align-items-center py-3 mx-2 rounded">
+              <FaListCheck className="icon_main_menu_item" />
+              <div className="text_main_menu_item fw-semibold">
+                Gerenciar
+              </div>
+            </Link>
+          )}
         </div>
       </div>
     </main>
   );
 };
 
-export default Home;
+export default withAuth(Home);
