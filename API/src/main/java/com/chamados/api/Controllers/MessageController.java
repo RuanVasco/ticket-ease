@@ -54,6 +54,10 @@ public class MessageController {
 
         String ticketStatus = ticket.getStatus();
 
+        if (ticketStatus.equals("Fechado")) {
+            return ResponseEntity.badRequest().build();
+        }
+
         if (ticketStatus.equals("Novo") && user != ticket.getUser()) {
             ticket.setStatus("Em Andamento");
         }
