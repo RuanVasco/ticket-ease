@@ -1,6 +1,8 @@
 .chat_content {
     height: 65vh;
     overflow-y: scroll;
+    border: 1px solid var(--primary-color);
+    padding: 10px 20px;
 }
 
 .message-box-sent {
@@ -22,7 +24,6 @@
     background-color: var(--secondary-color);
     border-radius: 6px;
     border: 1px solid var(--primary-color);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .box_description {

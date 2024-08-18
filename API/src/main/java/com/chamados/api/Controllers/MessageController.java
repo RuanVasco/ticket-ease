@@ -54,7 +54,7 @@ public class MessageController {
 
         String ticketStatus = ticket.getStatus();
 
-        if (ticketStatus.equals("Novo")) {
+        if (ticketStatus.equals("Novo") && user != ticket.getUser()) {
             ticket.setStatus("Em Andamento");
         }
 

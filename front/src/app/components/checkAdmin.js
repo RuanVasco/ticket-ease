@@ -15,7 +15,7 @@ const useIsAdmin = () => {
                 const res = await axiosInstance.get(`${API_BASE_URL}/users/isAdmin`);
 
                 if (res.status === 200) {
-                    setIsAdmin(true);
+                    setIsAdmin(res.data);
                 } else {
                     setIsAdmin(false);
                 }

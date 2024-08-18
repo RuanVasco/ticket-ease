@@ -179,7 +179,7 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
+            return ResponseEntity.ok(false);
         }
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();

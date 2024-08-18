@@ -12,7 +12,7 @@ const TableTicket = ({ viewMode = 'readonly' }) => {
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    const [status, setStatus] = useState('Aberto');
+    const [status, setStatus] = useState('Novo');
 
     const columns = [
         { label: 'ID', value: 'id' },

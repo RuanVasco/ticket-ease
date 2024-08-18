@@ -17,7 +17,7 @@ export default function GerenciarChamados() {
     }, [isAdmin, loading, router]);
 
     if (loading) {
-        return <div>Loading...</div>;
+        return <></>;
     }
 
     return (
