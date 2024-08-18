@@ -69,6 +69,7 @@
     background-color: var(--secondary-color);
     border-radius: 6px;
     border: 1px solid var(--primary-color);
+    max-width: 50%;
 }
 
 .box_description {

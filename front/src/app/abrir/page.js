@@ -227,7 +227,7 @@ const AbrirChamado = () => {
             <Header pageName="Abrir Chamado" />
             <div className="container">
                 <div className="row mt-3">
-                    <div className="col-2">
+                    <div className="col-3">
                         {currentCategory ? renderTreeNavigation(currentCategory) : null}
                     </div>
                     <div className="col border-start ps-4 form_box">
