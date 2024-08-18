@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axiosInstance from "../../components/axiosConfig";
+import withAdmin from '../../auth/withAdmin';
 import Header from "../../components/header/header";
 import ActionBar from "../../components/actionBar/actionBar";
 import Pagination from '../../components/pagination/pagination';
@@ -41,7 +42,7 @@ const FormsCategory = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const res = await axios.get(`${API_BASE_URL}/tickets-category/pageable?page=${currentPage}&size=${pageSize}`);
+                const res = await axiosInstance.get(`${API_BASE_URL}/tickets-category/pageable?page=${currentPage}&size=${pageSize}`);
                 if (res.status === 200) {
                     setData(res.data.content);
                     setTotalPages(res.data.totalPages);
@@ -56,7 +57,7 @@ const FormsCategory = () => {
 
         const fetchCategories = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/tickets-category/`);
+                const res = await axiosInstance.get(`${API_BASE_URL}/tickets-category/`);
                 if (res.status === 200) {
                     setCategories(res.data);
                 } else {
@@ -69,7 +70,7 @@ const FormsCategory = () => {
 
         const fetchDepartments = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/departments/receiveRequests`, { params: { receiveRequests: true } });
+                const res = await axiosInstance.get(`${API_BASE_URL}/departments/receiveRequests`, { params: { receiveRequests: true } });
                 if (res.status === 200) {
                     setDepartments(res.data);
                 } else {
@@ -91,7 +92,7 @@ const FormsCategory = () => {
 
         if (mode !== "add") {
             try {
-                const res = await axios.get(`${API_BASE_URL}/tickets-category/${idCategory}`);
+                const res = await axiosInstance.get(`${API_BASE_URL}/tickets-category/${idCategory}`);
                 if (res.status === 200) {
                     const { father, department, ...category } = res.data;
                     setRootCategory(father === null);
@@ -146,13 +147,13 @@ const FormsCategory = () => {
             let res;
             switch (submitType) {
                 case "delete":
-                    res = await axios.delete(`${API_BASE_URL}/tickets-category/${currentCategory.id}`);
+                    res = await axiosInstance.delete(`${API_BASE_URL}/tickets-category/${currentCategory.id}`);
                     break;
                 case "add":
-                    res = await axios.post(`${API_BASE_URL}/tickets-category/`, payload);
+                    res = await axiosInstance.post(`${API_BASE_URL}/tickets-category/`, payload);
                     break;
                 case "update":
-                    res = await axios.put(`${API_BASE_URL}/tickets-category/${currentCategory.id}`, payload);
+                    res = await axiosInstance.put(`${API_BASE_URL}/tickets-category/${currentCategory.id}`, payload);
                     break;
                 default:
                     console.error('Invalid submit type');
@@ -368,4 +369,4 @@ const FormsCategory = () => {
     );
 };
 
-export default FormsCategory;
+export default withAdmin(FormsCategory);

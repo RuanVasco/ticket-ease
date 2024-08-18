@@ -6,6 +6,8 @@ import axios from "axios";
 import Link from "next/link";
 import "../../components/login_form.css";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export default function Login() {     
     const router = useRouter();
     const [emailUser, setEmail] = useState("");
@@ -15,7 +17,7 @@ export default function Login() {
         e.preventDefault();
     
         try {
-            const res = await axios.post('http://localhost:8080/auth/login', { email: emailUser, password: passwordUser });
+            const res = await axios.post(`${API_BASE_URL}/auth/login`, { email: emailUser, password: passwordUser });
 
             if (res.status === 200) {
                 localStorage.setItem('token', res.data.token);

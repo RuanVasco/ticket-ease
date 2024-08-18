@@ -53,6 +53,18 @@ a:hover {
   color: var(--primary-color);
 }
 
+.input-text::placeholder {
+  color: var(--primary-color);
+}
+
+.input-text:focus {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color); 
+  box-shadow: 0 0 0 1px var(--primary-color); 
+  outline: none;
+}
+
 .btn-clean {
   border: 0;
   background-color: var(--secondary-color);
@@ -74,3 +86,4 @@ a:hover {
   color: var(--primary-color-hover);
   border: 1px solid var(--primary-color-hover);
 }
+

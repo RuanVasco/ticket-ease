@@ -20,7 +20,7 @@ import com.chamados.api.Components.SecurityFilter;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-	
+
 	@Autowired
 	SecurityFilter securityFilter;
 	
@@ -32,18 +32,35 @@ public class SecurityConfig {
 						.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
 	            )
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-						.authorizeHttpRequests(authorize -> authorize
-						.requestMatchers(HttpMethod.POST, "/theme/**").permitAll()
-				 		.requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-				 		.requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-						.requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
-				 		.requestMatchers(HttpMethod.POST, "/auth/validate").permitAll()
-								.requestMatchers(HttpMethod.DELETE, "/**").permitAll()
-								.requestMatchers(HttpMethod.PUT, "/**").permitAll()
-				 		.requestMatchers(HttpMethod.GET, "/forms/**").permitAll()
-				 		.requestMatchers(HttpMethod.GET, "/**").permitAll()
-								.requestMatchers(HttpMethod.POST, "/**").permitAll()
-				 		.requestMatchers("/h2-console/**").permitAll()
+							.authorizeHttpRequests(authorize -> authorize
+				 			.requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+							.requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
+							.requestMatchers(HttpMethod.POST, "/auth/validate").permitAll()
+							.requestMatchers("/h2-console/**").permitAll()
+							.requestMatchers(HttpMethod.POST, "/departments/**").hasRole("ADMIN")
+							.requestMatchers(HttpMethod.POST, "/tickets-category/**").hasRole("ADMIN")
+							.requestMatchers(HttpMethod.POST, "/units/**").hasRole("ADMIN")
+							.requestMatchers(HttpMethod.POST, "/tickets/**").hasRole("USER")
+							.requestMatchers(HttpMethod.POST, "/messages/**").hasRole("USER")
+							.requestMatchers(HttpMethod.POST, "/users/**").hasRole("ADMIN")
+							.requestMatchers(HttpMethod.POST, "/cargos/**").hasRole("ADMIN")
+							.requestMatchers(HttpMethod.PUT, "/cargos/**").hasRole("ADMIN")
+							.requestMatchers(HttpMethod.PUT, "/users/**").hasRole("ADMIN")
+							.requestMatchers(HttpMethod.PUT, "/units/**").hasRole("ADMIN")
+							.requestMatchers(HttpMethod.DELETE, "/cargos/**").hasRole("ADMIN")
+							.requestMatchers(HttpMethod.DELETE, "/units/**").hasRole("ADMIN")
+							.requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
+							.requestMatchers(HttpMethod.GET, "/cargos/**").hasRole("ADMIN")
+							.requestMatchers(HttpMethod.GET, "/departments/**").hasRole("USER")
+							.requestMatchers(HttpMethod.GET, "/units/**").hasRole("USER")
+							.requestMatchers(HttpMethod.GET, "/tickets-category/**").hasRole("USER")
+							.requestMatchers(HttpMethod.GET, "/tickets/user").hasRole("USER")
+							.requestMatchers(HttpMethod.GET, "/tickets/pageable").hasRole("ADMIN")
+							.requestMatchers(HttpMethod.GET, "/messages/**").hasRole("USER")
+							.requestMatchers(HttpMethod.GET, "/users/isAdmin").hasRole("USER")
+							.requestMatchers(HttpMethod.GET, "/users/**").hasRole("ADMIN")
+							.requestMatchers(HttpMethod.GET, "/images/**").permitAll()
+							.anyRequest().authenticated()
 				)
 				.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
 				.build();

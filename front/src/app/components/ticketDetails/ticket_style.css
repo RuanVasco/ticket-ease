@@ -1,33 +1,80 @@
 .chat_content {
     height: 65vh;
     overflow-y: scroll;
+    border: 1px solid var(--primary-color);
+    padding: 10px 20px;
 }
 
-.message-box {
+.btn_send_message {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    border-radius: 6px;
+    padding: 5px 15px;
+}
+
+.btn_send_message:hover {
+    background-color: var(--secondary-color-hover);
+    color: var(--primary-color-hover);
+    border: 1px solid var(--primary-color-hover);
+}
+
+.btn_send_message_dropdown_togle {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    border-radius: 0 6px 6px 0;
+    padding: 5px 10px;
+}
+
+.btn_send_message_dropdown_togle:hover {
+    background-color: var(--secondary-color-hover);
+    color: var(--primary-color-hover);
+    border: 1px solid var(--primary-color-hover);
+}
+
+.dropdown_options_message {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    padding: 1px;
+}
+
+.dropdown_options_message>li>button {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+}
+
+.dropdown_options_message>li>button:hover {
+    background-color: var(--secondary-color-hover);
+    color: var(--primary-color-hover);
+}
+
+.message-box-sent {
     display: block;
     margin-right: 20px;
     text-align: end;
 }
 
+.message-box-received {
+    display: block;
+    margin-right: 20px;
+    text-align: start;
+}
+
 .message-bubble {
     position: relative;
     display: inline-block;
-    padding: 10px;
+    padding: 8px;
     background-color: var(--secondary-color);
-    border-radius: 10px;
+    border-radius: 6px;
     border: 1px solid var(--primary-color);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.message-bubble::after {
-    content: "";
-    position: absolute;
-    top: 35%;
-    right: -20px; 
-    transform: translateY(-50%);
-    border-width: 10px;
-    border-style: solid;
-    border-color: transparent transparent transparent var(--primary-color);
-    width: 0;
-    height: 0;
+.box_description {
+    border: 1px solid var(--primary-color);
+}
+
+.box_user_identity {
+    border: 1px solid var(--primary-color);
 }

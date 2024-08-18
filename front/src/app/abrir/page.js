@@ -1,11 +1,12 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from "../components/axiosConfig";
 import Header from '../components/header/header';
 import AttachmentsForm from '../components/attachmentsForm/attachmentsForm';
 import { FaAngleRight, FaAngleLeft, FaFolderOpen, FaClipboardList, FaPlus } from "react-icons/fa6";
 import { v4 as uuidv4 } from 'uuid';
+import withAuth from '../auth/withAuth';
 import style from "./style.css";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -28,7 +29,7 @@ const AbrirChamado = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/tickets-category/`);
+                const res = await axiosInstance.get(`${API_BASE_URL}/tickets-category/`);
                 if (res.status === 200) {
                     setCategories(res.data);
                 } else {
@@ -205,7 +206,7 @@ const AbrirChamado = () => {
         }
 
         try {
-            const res = await axios.post(`${API_BASE_URL}/tickets/`, formData, {
+            const res = await axiosInstance.post(`${API_BASE_URL}/tickets/`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 }
@@ -310,4 +311,4 @@ const AbrirChamado = () => {
     );
 };
 
-export default AbrirChamado;
+export default withAuth(AbrirChamado);

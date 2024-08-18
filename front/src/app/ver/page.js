@@ -2,8 +2,9 @@
 
 import TableTicket from "../components/tableTicket";
 import Header from "../components/header/header";
+import withAuth from "../auth/withAuth";
 
-export default function VerChamados() {
+const VerChamados = () => {
 
     return (
         <main>
@@ -12,3 +13,5 @@ export default function VerChamados() {
         </main>
     );
 }
+
+export default withAuth(VerChamados);

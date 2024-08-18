@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import withAdmin from '../../auth/withAdmin';
+import axiosInstance from "../../components/axiosConfig";
 import Header from "../../components/header/header";
 import Table from "../../components/table/table";
 import ActionBar from "../../components/actionBar/actionBar";
@@ -14,7 +15,6 @@ const columns = [
     { value: "email", label: "E-mail" },
     { value: "department.name", label: "Setor" },
     { value: "cargo.name", label: "Cargo" },
-    { value: "profile", label: "Perfil" },
 ];
 
 const User = () => {
@@ -32,7 +32,7 @@ const User = () => {
         phone: '',
         department: { id: '', name: '' },
         cargo: { id: '', name: '' },
-        profile: '',
+        isAdmin: false,
         password: '',
     });
     const [cargos, setCargos] = useState([]);
@@ -42,7 +42,7 @@ const User = () => {
     useEffect(() => {
         const fetchUsersData = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/users/pageable?page=${currentPage}&size=${pageSize}`);
+                const res = await axiosInstance.get(`${API_BASE_URL}/users/pageable?page=${currentPage}&size=${pageSize}`);
                 if (res.status === 200) {
                     setData(res.data.content);
                     setTotalPages(res.data.totalPages);
@@ -56,7 +56,7 @@ const User = () => {
 
         const fetchCargosData = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/cargos/`);
+                const res = await axiosInstance.get(`${API_BASE_URL}/cargos/`);
                 if (res.status === 200) {
                     setCargos(res.data);
                 } else {
@@ -69,7 +69,7 @@ const User = () => {
 
         const fetchDepartmentsData = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/departments/`);
+                const res = await axiosInstance.get(`${API_BASE_URL}/departments/`);
                 if (res.status === 200) {
                     setDepartments(res.data);
                 } else {
@@ -90,7 +90,7 @@ const User = () => {
         setModeModal(mode);
         if (mode != "add") {
             try {
-                const res = await axios.get(`${API_BASE_URL}/users/${idUser}`);
+                const res = await axiosInstance.get(`${API_BASE_URL}/users/${idUser}`);
                 if (res.status === 200) {
                     const department = {
                         id: res.data.department?.id ?? -1,
@@ -107,7 +107,7 @@ const User = () => {
                         phone: res.data.phone,
                         department: department,
                         cargo: cargos,
-                        profile: '',
+                        isAdmin: res.data.isAdmin,
                         password: '',
                     });
                 } else {
@@ -124,7 +124,7 @@ const User = () => {
                 phone: '',
                 department: { id: '', name: '' },
                 cargo: { id: '', name: '' },
-                profile: '',
+                isAdmin: false,
                 password: '',
             });
         }
@@ -168,7 +168,7 @@ const User = () => {
             const { department, cargo, ...postData } = currentUser;
 
             if (submitType === "delete") {
-                res = await axios.delete(`${API_BASE_URL}/users/${currentUser.id}`);
+                res = await axiosInstance.delete(`${API_BASE_URL}/users/${currentUser.id}`);
             } else {
                 const postDataWithIds = {
                     ...postData,
@@ -183,7 +183,7 @@ const User = () => {
                             return;
                         }
 
-                        res = await axios.post(`${API_BASE_URL}/users/register`, postDataWithIds);
+                        res = await axiosInstance.post(`${API_BASE_URL}/users/register`, postDataWithIds);
                         break;
                     case 'update':
                         if (!department || !cargo) {
@@ -191,7 +191,7 @@ const User = () => {
                             return;
                         }
 
-                        res = await axios.put(`${API_BASE_URL}/users/${currentUser.id}`, postDataWithIds);
+                        res = await axiosInstance.put(`${API_BASE_URL}/users/${currentUser.id}`, postDataWithIds);
                         break;
                     default:
                         console.error('Invalid submit type');
@@ -207,7 +207,7 @@ const User = () => {
                     phone: '',
                     department: { id: '', name: '' },
                     cargo: { id: '', name: '' },
-                    profile: '',
+                    isAdmin: false,
                     password: '',
                 });
 
@@ -259,7 +259,7 @@ const User = () => {
                             </h1>
                             <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <form onSubmit={handleSubmit}>
+                        <form onSubmit={handleSubmit} disabled={modeModal === "readonly"}>
                             <div className="modal-body">
                                 {modeModal != "delete" && (
                                     <>
@@ -325,7 +325,7 @@ const User = () => {
                                                 ))}
                                             </select>
                                         </div>
-                                        
+
                                         <div className="mt-2">
                                             <label htmlFor="cargo" className="form-label">
                                                 Cargo
@@ -347,18 +347,6 @@ const User = () => {
                                                 ))}
                                             </select>
                                         </div>
-                                        <div className="mt-2">
-                                            <label htmlFor="profile" className="form-label">
-                                                Perfil
-                                            </label>
-                                            <input
-                                                name="profile"
-                                                className="form-control"
-                                                readOnly={modeModal === "readonly"}
-                                                value={currentUser.profile}
-                                                onChange={handleInputChange}
-                                            />
-                                        </div>
                                         {modeModal !== "readonly" && (
                                             <div className="mt-2">
                                                 <label htmlFor="password" className="form-label">
@@ -375,6 +363,22 @@ const User = () => {
                                                 />
                                             </div>
                                         )}
+                                        <div className="mt-2">
+                                            <input
+                                                name="isAdmin"
+                                                id="isAdmin"
+                                                type="checkbox"
+                                                className="form-check-input"
+                                                readOnly={modeModal === "readonly"}
+                                                checked={currentUser.isAdmin}
+                                                onChange={(e) =>
+                                                    setCurrentUser({ ...currentUser, isAdmin: e.target.checked })
+                                                }
+                                            />
+                                            <label htmlFor="isAdmin" className="form-label ms-2">
+                                                Administrador
+                                            </label>
+                                        </div>
                                     </>
                                 )}
 
@@ -424,4 +428,4 @@ const User = () => {
     );
 };
 
-export default User;
+export default withAdmin(User);
