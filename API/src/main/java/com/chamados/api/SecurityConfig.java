@@ -57,6 +57,7 @@ public class SecurityConfig {
 							.requestMatchers(HttpMethod.GET, "/tickets/user").hasRole("USER")
 							.requestMatchers(HttpMethod.GET, "/tickets/pageable").hasRole("ADMIN")
 							.requestMatchers(HttpMethod.GET, "/messages/**").hasRole("USER")
+							.requestMatchers(HttpMethod.GET, "/users/isAdmin").hasRole("USER")
 							.requestMatchers(HttpMethod.GET, "/users/**").hasRole("ADMIN")
 							.requestMatchers(HttpMethod.GET, "/images/**").permitAll()
 							.anyRequest().authenticated()
