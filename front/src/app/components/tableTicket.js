@@ -18,6 +18,7 @@ const TableTicket = ({ viewMode = "readonly" }) => {
 	const columns = [
 		{ label: "ID", value: "id" },
 		{ label: "Assunto", value: "name" },
+		{ label: "Categoria", value: "ticketCategory.path" },
 		{ label: "Status", value: "status" },
 		{ label: "Urgência", value: "urgency" },
 		{ label: "Data de Criação", value: "createdAt" },
