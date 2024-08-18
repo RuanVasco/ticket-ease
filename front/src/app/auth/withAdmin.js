@@ -5,7 +5,7 @@ import axiosInstance from '../components/axiosConfig';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const withAdmin = (WrappedComponent) => {
-    return (props) => {
+    const ComponentWithAdmin = (props) => {
         const [isAdmin, setIsAdmin] = useState(false);
         const [loading, setLoading] = useState(true);
         const router = useRouter();
@@ -15,7 +15,7 @@ const withAdmin = (WrappedComponent) => {
                 try {
                     const res = await axiosInstance.get(`${API_BASE_URL}/users/isAdmin`);
 
-                    if (res.status === 200 && res.data === true) { 
+                    if (res.status === 200 && res.data === true) {
                         setIsAdmin(true);
                     } else {
                         setIsAdmin(false);
@@ -32,16 +32,16 @@ const withAdmin = (WrappedComponent) => {
             checkAdmin();
         }, [router]);
 
-        if (loading) {
-            return <></>;
-        }
-
         if (!isAdmin) {
             return null; 
         }
 
         return <WrappedComponent {...props} />;
     };
+
+    ComponentWithAdmin.displayName = `WithAdmin(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
+
+    return ComponentWithAdmin;
 };
 
 export default withAdmin;
