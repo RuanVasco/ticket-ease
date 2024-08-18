@@ -128,7 +128,10 @@ public class TicketController {
 
     @GetMapping("/search")
     public ResponseEntity<?> searchTickets(@RequestParam String query) {
-        List<Ticket> tickets = ticketRepository.findBySearch(query);
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        List<Ticket> tickets = ticketRepository.findBySearch(query, user);
+
         return ResponseEntity.ok(tickets);
     }
 
