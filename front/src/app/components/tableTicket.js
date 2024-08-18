@@ -115,7 +115,7 @@ const TableTicket = ({ viewMode = "readonly" }) => {
 							className="form-select"
 							id="statusSelect"
 						>
-							<option value="Novo">Abertos</option>
+							<option value="Novo">Novos</option>
 							<option value="Em Andamento">Em Andamento</option>
 							<option value="Fechado">Fechados</option>
 							<option value="ALL">Todos</option>
