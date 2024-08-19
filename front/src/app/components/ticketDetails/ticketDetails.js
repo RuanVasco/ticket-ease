@@ -26,6 +26,10 @@ const TicketDetails = ({ id }) => {
 
 	const chatEndRef = useRef(null);
 
+	function getFirstName(fullName) {
+		return fullName.split(' ')[0];
+	}
+
 	useEffect(() => {
 		const fetchData = async () => {
 			setLoading(true);
@@ -138,8 +142,8 @@ const TicketDetails = ({ id }) => {
 										msg.user.id === userData.id ? (
 											<div key={msg.id} className="mt-3 message-box-sent">
 												<div className="message-bubble">
-													<div className="border-bottom mb-2">
-														{msg.user.name}
+													<div className="box_message_details mb-2">
+														{getFirstName(msg.user.name)}
 														<span> - </span>
 														{new DateFormatter(msg.sent_at).toDateTime()}
 													</div>
@@ -149,8 +153,8 @@ const TicketDetails = ({ id }) => {
 										) : (
 											<div key={msg.id} className="mt-3 message-box-received">
 												<div className="message-bubble">
-													<div className="border-bottom mb-2">
-														{msg.user.name}
+													<div className="box_message_details mb-2">
+														{getFirstName(msg.user.name)}
 														<span> - </span>
 														{new DateFormatter(msg.sent_at).toDateTime()}
 													</div>

@@ -52,13 +52,11 @@
 
 .message-box-sent {
     display: block;
-    margin-right: 20px;
     text-align: end;
 }
 
 .message-box-received {
     display: block;
-    margin-right: 20px;
     text-align: start;
 }
 
@@ -78,4 +76,8 @@
 
 .box_user_identity {
     border: 1px solid var(--primary-color);
+}
+
+.box_message_details {
+    border-bottom: 1px solid var(--primary-color);
 }
