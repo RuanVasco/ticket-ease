@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { BsSendCheck } from "react-icons/bs";
-import { BsSend } from "react-icons/bs";
+import { BsSendCheck, BsSend } from "react-icons/bs";
 import { FaPaperclip } from "react-icons/fa6";
 import Header from "../../components/header/header";
 import axiosInstance from "../axiosConfig";
@@ -25,6 +24,7 @@ const TicketDetails = ({ id }) => {
 	const [loading, setLoading] = useState(true);
 
 	const chatEndRef = useRef(null);
+	const intervalRef = useRef(null);
 
 	function getFirstName(fullName) {
 		return fullName.split(' ')[0];
@@ -34,9 +34,7 @@ const TicketDetails = ({ id }) => {
 		const fetchData = async () => {
 			setLoading(true);
 			try {
-				const response = await axiosInstance.get(
-					`${API_BASE_URL}/tickets/${id}`
-				);
+				const response = await axiosInstance.get(`${API_BASE_URL}/tickets/${id}`);
 				setData(response.data);
 			} catch (error) {
 				if (error.response && error.response.status === 403) {
@@ -57,11 +55,15 @@ const TicketDetails = ({ id }) => {
 	useEffect(() => {
 		const fetchMessages = async () => {
 			try {
-				const response = await axiosInstance.get(
-					`${API_BASE_URL}/messages/${id}`
-				);
+				const response = await axiosInstance.get(`${API_BASE_URL}/messages/${id}`);
 				if (response.status === 200 || response.status === 201) {
 					setMessages(response.data);
+
+					const lastMessage = response.data.length > 0 ? response.data[response.data.length - 1] : null;
+					if (lastMessage && lastMessage.ticket.status === "Fechado") {
+						clearInterval(intervalRef.current);
+						setData((prevData) => ({ ...prevData, status: "Fechado" }));
+					}
 				} else {
 					console.error("Erro ao buscar mensagens:", response.status);
 				}
@@ -70,10 +72,15 @@ const TicketDetails = ({ id }) => {
 			}
 		};
 
-		if (id) {
-			fetchMessages();
+		fetchMessages();
+
+		if (data?.status !== "Fechado") {
+			intervalRef.current = setInterval(fetchMessages, 5000);
 		}
-	}, [id]);
+
+		return () => clearInterval(intervalRef.current);
+
+	}, [id, data?.status]);
 
 	useEffect(() => {
 		chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -103,7 +110,12 @@ const TicketDetails = ({ id }) => {
 			});
 
 			if (res.status === 200 || res.status === 201) {
-				location.reload();
+				if (res.data.ticket.status === "Fechado") {
+					location.reload();
+				}
+
+				setMessages((prevMessages) => [...prevMessages, res.data]);
+				setMessage({ ...message, text: "" });
 			} else {
 				console.error("Erro ao enviar mensagem:", res.status);
 			}
@@ -275,67 +287,6 @@ const TicketDetails = ({ id }) => {
 							value={data?.status || ""}
 							readOnly
 						/>
-					</div>
-				</div>
-			</div>
-			<div className="modal fade" id="attachmentsModal" tabIndex="-1">
-				<div className="modal-dialog modal-xl">
-					<div className="modal-content">
-						<div className="modal-header">
-							<button
-								type="button"
-								className="btn-close"
-								data-bs-dismiss="modal"
-								aria-label="Close"
-							></button>
-						</div>
-						<div className="modal-body">
-							<div id="carouselExample" className="carousel slide">
-								<div className="carousel-inner">
-									{data.filePaths && data.filePaths.length > 0 ? (
-										data.filePaths.map((file, index) => (
-											<div
-												className={`carousel-item ${index === 0 ? "active" : ""
-													}`}
-												key={index}
-											>
-												<img
-													src={`${API_BASE_URL}/images/${file}`}
-													className="d-block w-100"
-													alt={`Attachment ${index}`}
-												/>
-											</div>
-										))
-									) : (
-										<p>Nenhum anexo encontrado.</p>
-									)}
-								</div>
-								<button
-									className="carousel-control-prev"
-									type="button"
-									data-bs-target="#carouselExample"
-									data-bs-slide="prev"
-								>
-									<span
-										className="carousel-control-prev-icon"
-										aria-hidden="true"
-									></span>
-									<span className="visually-hidden">Anterior</span>
-								</button>
-								<button
-									className="carousel-control-next"
-									type="button"
-									data-bs-target="#carouselExample"
-									data-bs-slide="next"
-								>
-									<span
-										className="carousel-control-next-icon"
-										aria-hidden="true"
-									></span>
-									<span className="visually-hidden">Próximo</span>
-								</button>
-							</div>
-						</div>
 					</div>
 				</div>
 			</div>

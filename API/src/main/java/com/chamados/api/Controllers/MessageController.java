@@ -74,6 +74,6 @@ public class MessageController {
 
         messageRepository.save(message);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(message);
     }
 }
