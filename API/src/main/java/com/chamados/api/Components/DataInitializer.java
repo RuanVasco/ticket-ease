@@ -29,12 +29,16 @@ public class DataInitializer implements CommandLineRunner {
             Role roleAdmin = roleRepository.findByName("ADMIN")
                     .orElseGet(() -> roleRepository.save(new Role("ADMIN")));
 
+            Role roleSuperAdmin = roleRepository.findByName("SUPERADMIN")
+                    .orElseGet(() -> roleRepository.save(new Role("SUPERADMIN")));
+
             Role roleUser = roleRepository.findByName("USER")
                     .orElseGet(() -> roleRepository.save(new Role("USER")));
 
             Set<Role> roles = new HashSet<>();
             roles.add(roleAdmin);
             roles.add(roleUser);
+            roles.add(roleSuperAdmin);
 
             User user = new User();
             user.setPassword("admin", passwordEncoder);

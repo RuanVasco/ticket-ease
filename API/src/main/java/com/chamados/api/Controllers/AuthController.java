@@ -52,7 +52,7 @@ public class AuthController {
     private TokenService tokenService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid LoginDTO data) {		
+    public ResponseEntity<?> login(@RequestBody @Valid LoginDTO data) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
         Authentication auth = authenticationManager.authenticate(usernamePassword);
         
