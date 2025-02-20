@@ -5,6 +5,9 @@ import lombok.Setter;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Setter
 @Getter
 @Entity(name="Role")
@@ -13,12 +16,18 @@ public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Getter
     @Column(nullable = false, unique = true, length = 60)
     private String name;
 
-    public Role() {
-    }
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "role_permissions",
+            joinColumns = @JoinColumn(name = "role_id"),
+            inverseJoinColumns = @JoinColumn(name = "permission_id")
+    )
+    private Set<Permission> permissions = new HashSet<>();
 
     public Role(String name) {
         if (!name.startsWith("ROLE_")) {
@@ -26,5 +35,4 @@ public class Role {
         }
         this.name = name;
     }
-
 }

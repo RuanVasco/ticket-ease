@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { FaSuitcase, FaUser, FaUsers, FaStore, FaFolderOpen } from "react-icons/fa6";
+import { FaSuitcase, FaUser, FaUsers, FaStore, FaFolderOpen, FaIdBadge } from "react-icons/fa6";
 import Header from '../components/header/header';
 import withAdmin from '../auth/withAdmin';
 import Block from './components/block';
@@ -22,6 +22,12 @@ const HomeAdmin = () => {
             icon: <FaUser />,
             link: "/admin/users",
             description: "Gerenciar usuários"
+        },
+        {
+            text: "Perfis",
+            icon: <FaIdBadge />,
+            link: "/admin/profiles",
+            description: "Gerenciar perfis."
         },
         {
             text: "Setores",
