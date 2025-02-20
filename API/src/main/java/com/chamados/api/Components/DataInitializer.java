@@ -1,18 +1,14 @@
 package com.chamados.api.Components;
 
-import com.chamados.api.Entities.Cargo;
-import com.chamados.api.Entities.Department;
-import com.chamados.api.Entities.Unit;
-import com.chamados.api.Entities.User;
-import com.chamados.api.Repositories.CargoRepository;
-import com.chamados.api.Repositories.DepartmentRepository;
-import com.chamados.api.Repositories.UnitRepository;
-import com.chamados.api.Repositories.UserRepository;
+import com.chamados.api.Entities.*;
+import com.chamados.api.Repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -21,13 +17,7 @@ public class DataInitializer implements CommandLineRunner {
     private UserRepository userRepository;
 
     @Autowired
-    private DepartmentRepository departmentRepository;
-
-    @Autowired
-    private CargoRepository cargoRepository;
-
-    @Autowired
-    private UnitRepository unitRepository;
+    private RoleRepository roleRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -35,29 +25,23 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        Unit unit = new Unit();
-        unit.setName("Matriz");
-        unit.setAddress("...");
-        unitRepository.save(unit);
-
-        Department department = new Department();
-        department.setName("Admin");
-        department.setUnit(unit);
-        department.setReceivesRequests(false);
-        departmentRepository.save(department);
-
-        Cargo cargo = new Cargo();
-        cargo.setName("Administrador");
-        cargoRepository.save(cargo);
-
         if (userRepository.count() == 0) {
+            Role roleAdmin = roleRepository.findByName("ADMIN")
+                    .orElseGet(() -> roleRepository.save(new Role("ADMIN")));
+
+            Role roleUser = roleRepository.findByName("USER")
+                    .orElseGet(() -> roleRepository.save(new Role("USER")));
+
+            Set<Role> roles = new HashSet<>();
+            roles.add(roleAdmin);
+            roles.add(roleUser);
+
             User user = new User();
             user.setPassword("admin", passwordEncoder);
-            user.setName("Admin");
-            user.setEmail("admin@example.com");
-            user.setCargo(cargo);
-            user.setDepartment(department);
-            user.setPhone("1234");
+            user.setName("Administrador");
+            user.setEmail("admin@admin");
+            user.setRoles(roles);
+
             userRepository.save(user);
             System.out.println("Usuário admin criado.");
         }

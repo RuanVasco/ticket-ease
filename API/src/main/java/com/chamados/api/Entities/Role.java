@@ -21,6 +21,9 @@ public class Role {
     }
 
     public Role(String name) {
+        if (!name.startsWith("ROLE_")) {
+            name = "ROLE_" + name;
+        }
         this.name = name;
     }
 
