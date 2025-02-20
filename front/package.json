@@ -14,7 +14,7 @@
     "bootstrap": "^5.3.3",
     "date-fns": "^3.6.0",
     "jwt-decode": "^4.0.0",
-    "next": "14.2.4",
+    "next": "^14.2.24",
     "next-fonts": "^1.5.1",
     "next-themes": "^0.3.0",
     "react": "^18",

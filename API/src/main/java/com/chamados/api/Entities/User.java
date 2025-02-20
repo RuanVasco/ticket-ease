@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,7 +36,6 @@ public class User implements UserDetails {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Setter
     @JsonIgnore
     @Column(nullable = false)
     private String password;
@@ -56,6 +56,10 @@ public class User implements UserDetails {
     @ManyToOne
     @JoinColumn(name = "cargo_id")
     private Cargo cargo;
+
+    public void setPassword(String password, PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(password);
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

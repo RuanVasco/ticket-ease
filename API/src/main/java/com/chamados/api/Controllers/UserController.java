@@ -58,7 +58,6 @@ public class UserController {
     @GetMapping("/pageable")
     public ResponseEntity<Page<User>> getAllPageable(Pageable pageable) {
         Page<User> users = userRepository.findAll(pageable);
-        users.forEach(user -> user.setPassword(null));
 
         return ResponseEntity.ok(users);
     }
@@ -160,7 +159,7 @@ public class UserController {
         }
         user.setRoles(roles);
 
-        user.setPassword(passwordEncoder.encode(signUpDto.password()));
+        user.setPassword(signUpDto.password(), passwordEncoder);
 
         if (cargoId != null) {
             cargoRepository.findById(cargoId).ifPresent(user::setCargo);
