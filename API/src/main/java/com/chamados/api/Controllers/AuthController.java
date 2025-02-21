@@ -25,6 +25,7 @@ import com.chamados.api.Services.TokenService;
 import jakarta.validation.Valid;
 
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("auth")
@@ -55,11 +56,11 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody @Valid LoginDTO data) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
         Authentication auth = authenticationManager.authenticate(usernamePassword);
-        
+
         User user = (User) auth.getPrincipal();
 
         if (user == null) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Usuário não encontrado");
-        
+
         var token = tokenService.generateAccessToken(user);
         var refreshToken = tokenService.generateRefreshToken(user);
         
@@ -88,7 +89,7 @@ public class AuthController {
     
     @PostMapping("/validate")
     public ResponseEntity<?> validate(@RequestBody @Valid ValidateDTO token) {    	
-    	if (tokenService.validateToken(token.token()) != "") {
+    	if (!Objects.equals(tokenService.validateToken(token.token()), "")) {
     		return ResponseEntity.ok().build();
     	} else {
     		return ResponseEntity.status(HttpStatus.FORBIDDEN).body("invalid token");

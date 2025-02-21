@@ -30,6 +30,8 @@ public class Role {
     )
     private Set<Permission> permissions = new HashSet<>();
 
+    public Role() {}
+
     public Role(String name) {
         if (!name.startsWith("ROLE_")) {
             name = "ROLE_" + name;

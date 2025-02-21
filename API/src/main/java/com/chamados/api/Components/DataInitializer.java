@@ -22,6 +22,9 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private PermissionRepository permissionRepository;
+
     @Override
     @Transactional
     public void run(String... args) {
@@ -34,6 +37,14 @@ public class DataInitializer implements CommandLineRunner {
 
             Role roleUser = roleRepository.findByName("USER")
                     .orElseGet(() -> roleRepository.save(new Role("USER")));
+
+            Permission permission = new Permission();
+            permission.setName("VIEW_TICKET");
+            permission = permissionRepository.save(permission);
+
+            Set<Permission> permissions = new HashSet<>();
+            permissions.add(permission);
+            roleUser.setPermissions(permissions);
 
             Set<Role> roles = new HashSet<>();
             roles.add(roleAdmin);

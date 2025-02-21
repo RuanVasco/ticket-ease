@@ -41,6 +41,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
 						.requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
 						.requestMatchers(HttpMethod.POST, "/auth/validate").permitAll()
+						.requestMatchers(HttpMethod.GET, "/permissions/has-permission").permitAll()
 						.requestMatchers("/h2-console/**").permitAll()
 						.requestMatchers(HttpMethod.POST, "/departments/**").access(new WebExpressionAuthorizationManager("hasAuthority('CREATE_DEPARTMENT')"))
 						.requestMatchers(HttpMethod.POST, "/tickets-category/**").access(new WebExpressionAuthorizationManager("hasAuthority('CREATE_TICKET_CATEGORY')"))

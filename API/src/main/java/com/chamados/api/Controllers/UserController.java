@@ -172,17 +172,4 @@ public class UserController {
 
         return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
     }
-
-    @GetMapping("/isAdmin")
-    public ResponseEntity<Boolean> isAdmin() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.ok(false);
-        }
-
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        boolean isAdmin = authorities.contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
-        return ResponseEntity.ok(isAdmin);
-    }
 }
