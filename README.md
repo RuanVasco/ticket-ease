@@ -1,7 +1,7 @@
-##To do:
+## To do:
   - Authorization with permissions and profiles. Create a manageable modal on the admin page.</li>
   - Dashboard on tickets manage page.</li>
   - Notifications.</li>
 
-##Create /front/.env.local file and put the API URL there.<br>
-##Ex: NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+## Create /front/.env.local file and put the API URL there.<br>
+## Ex: NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
