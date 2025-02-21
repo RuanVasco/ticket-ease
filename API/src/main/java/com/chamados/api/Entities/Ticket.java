@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.util.List;
 import java.util.Date;
+import java.util.Set;
 
 @Getter
 @Entity
@@ -21,10 +22,8 @@ public class Ticket {
     @JoinColumn(name = "user_id")
     User user;
 
-//    @Setter
-//    @ManyToOne
-//    @JoinColumn(name = "form_id")
-//    Form form;
+    @ManyToMany
+    private Set<User> observers;
 
     @Setter
     @ManyToOne
@@ -75,4 +74,33 @@ public class Ticket {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "closedAt", nullable = true)
     private Date closedAt;
+
+    public static boolean canView(User user) {
+        return user.hasPermission("VIEW_TICKET");
+    }
+
+    public static boolean canEdit(User user) {
+        return user.hasPermission("EDIT_TICKET");
+    }
+
+    public static boolean canDelete(User user) {
+        return user.hasPermission("DELETE_TICKET");
+    }
+
+    public boolean canManage(User user) {
+        TicketCategory ticketedCategory = this.getTicketCategory();
+        Department department = null;
+
+        while (ticketedCategory != null && ticketedCategory.getDepartment() == null) {
+            ticketedCategory = ticketedCategory.getFather();
+        }
+        if (ticketedCategory != null) {
+            department = ticketedCategory.getDepartment();
+        }
+
+        return this.user.equals(user) ||
+                this.observers.contains(user) ||
+                (user.getDepartment().equals(department) && canEdit(user));
+    }
+
 }

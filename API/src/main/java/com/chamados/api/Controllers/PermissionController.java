@@ -1,15 +1,25 @@
 package com.chamados.api.Controllers;
 
+import com.chamados.api.Entities.Permission;
+import com.chamados.api.Entities.Role;
+import com.chamados.api.Repositories.PermissionRepository;
+import com.chamados.api.Repositories.RoleRepository;
+import com.chamados.api.Repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/permissions")
 public class PermissionController {
+
+    @Autowired
+    private UserRepository userRepository;
+
     @GetMapping("/has-permission")
     public ResponseEntity<?> checkPermission(
             @RequestParam String action,
@@ -27,4 +37,17 @@ public class PermissionController {
             return ResponseEntity.ok(false);
         }
     }
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<?> getPermissionsFromUser(@PathVariable Long id) {
+        List<Permission> permissions = userRepository.findPermissionsByUserId(id);
+
+        if (permissions.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(permissions);
+    }
 }
+
+

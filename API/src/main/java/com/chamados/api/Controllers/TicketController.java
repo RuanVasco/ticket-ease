@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -101,9 +102,9 @@ public class TicketController {
         return ResponseEntity.ok(tickets);
     }
 
+    @PreAuthorize("@Ticket.canManageTicket(#user)")
     @GetMapping("/{ticketID}")
     public ResponseEntity<?> getTicket(@PathVariable Long ticketID) {
-
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Optional<Ticket> optionalTicket = ticketRepository.findById(ticketID);
@@ -113,15 +114,6 @@ public class TicketController {
         }
 
         Ticket ticket = optionalTicket.get();
-
-        boolean isAdmin = user.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
-
-        boolean isOwner = ticket.getUser().getId().equals(user.getId());
-
-        if (!isAdmin && !isOwner) {
-            return new ResponseEntity<>("Access Denied", HttpStatus.FORBIDDEN);
-        }
 
         return ResponseEntity.ok(ticket);
     }

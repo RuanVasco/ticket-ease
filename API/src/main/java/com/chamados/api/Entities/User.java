@@ -11,9 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -52,6 +50,9 @@ public class User implements UserDetails {
     @JoinColumn(name = "department_id")
     private Department department;
 
+    @ManyToMany
+    private Set<Ticket> observedTickets;
+
     @Setter
     @ManyToOne
     @JoinColumn(name = "cargo_id")
@@ -61,11 +62,18 @@ public class User implements UserDetails {
         this.password = passwordEncoder.encode(password);
     }
 
+    public boolean hasPermission(String permission) {
+        Collection<? extends GrantedAuthority> currentPermissions = this.getAuthorities();
+
+        return currentPermissions.stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(permission));
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
                 .flatMap(role -> role.getPermissions().stream())
-                .map(permission -> new SimpleGrantedAuthority(permission.getName())) // Converte para GrantedAuthority
+                .map(permission -> new SimpleGrantedAuthority(permission.getName()))
                 .collect(Collectors.toSet());
     }
 

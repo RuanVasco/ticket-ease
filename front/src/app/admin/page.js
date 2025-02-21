@@ -18,7 +18,7 @@ const HomeAdmin = () => {
 		{
 			text: "Categorias de Formulário",
 			icon: <FaFolderOpen />,
-			link: "/admin/formscategory",
+			link: "/admin/ticket_category",
 			description: "Gerenciar Categorias",
 		},
 	];
@@ -69,7 +69,7 @@ const HomeAdmin = () => {
 				let entity = block.link.split("/").pop().toUpperCase();
 				entity = removePlural(entity);
 				const response = await checkPermission("VIEW", entity);
-				permissionResults[block.link] = response.message;
+				permissionResults[block.link] = response;
 			}
 
 			setPermissions(permissionResults);

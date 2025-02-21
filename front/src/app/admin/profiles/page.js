@@ -44,15 +44,16 @@ const Profiles = () => {
 		fetchData();
 	}, [currentPage, pageSize]);
 
-	const handleModalOpen = async (action, mode, idUnit) => {
+	const handleModalOpen = async (action, mode, id) => {
 		setModalTitle(`${action} Perfil`);
 		setModeModal(mode);
 
 		if (mode != "add") {
 			try {
 				const res = await axiosInstance.get(
-					`${API_BASE_URL}/profiles/${idUnit}`
+					`${API_BASE_URL}/profiles/${id}`
 				);
+
 				if (res.status === 200) {
 					setCurrentProfile({
 						id: res.data.id,
@@ -165,7 +166,7 @@ const Profiles = () => {
 				tabIndex="-1"
 				aria-hidden="true"
 			>
-				<div className="modal-dialog">
+				<div className="modal-dialog modal-xl">
 					<div className="modal-content">
 						<div className="modal-header">
 							<h1 className="modal-title fs-5" id="title_modal">
@@ -205,7 +206,7 @@ const Profiles = () => {
 
 								{modeModal === "delete" && (
 									<>
-										Deseja excluir a unidade{" "}
+										Deseja excluir o perfil{" "}
 										{currentProfile.name}?
 									</>
 								)}

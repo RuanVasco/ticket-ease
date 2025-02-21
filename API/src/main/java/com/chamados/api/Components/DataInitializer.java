@@ -32,9 +32,6 @@ public class DataInitializer implements CommandLineRunner {
             Role roleAdmin = roleRepository.findByName("ADMIN")
                     .orElseGet(() -> roleRepository.save(new Role("ADMIN")));
 
-            Role roleSuperAdmin = roleRepository.findByName("SUPERADMIN")
-                    .orElseGet(() -> roleRepository.save(new Role("SUPERADMIN")));
-
             Role roleUser = roleRepository.findByName("USER")
                     .orElseGet(() -> roleRepository.save(new Role("USER")));
 
@@ -47,20 +44,49 @@ public class DataInitializer implements CommandLineRunner {
             Permission permissionViewProfile = new Permission();
             permissionViewProfile.setName("VIEW_PROFILE");
 
+            Permission permissionViewTicketCategory = new Permission();
+            permissionViewTicketCategory.setName("VIEW_TICKET_CATEGORY");
+
+            Permission permissionCreateTicketCategory = new Permission();
+            permissionCreateTicketCategory.setName("CREATE_TICKET_CATEGORY");
+
+            Permission permissionCreateUnit = new Permission();
+            permissionCreateUnit.setName("CREATE_UNIT");
+
+            Permission permissionViewUnit = new Permission();
+            permissionViewUnit.setName("VIEW_UNIT");
+
+            Permission permissionCreateDepartment = new Permission();
+            permissionCreateDepartment.setName("CREATE_DEPARTMENT");
+
+            Permission permissionViewDepartment = new Permission();
+            permissionViewDepartment.setName("VIEW_DEPARTMENT");
+
             permissionCreateTicket = permissionRepository.save(permissionCreateTicket);
             permissionViewTicket = permissionRepository.save(permissionViewTicket);
             permissionViewProfile = permissionRepository.save(permissionViewProfile);
+            permissionViewTicketCategory = permissionRepository.save(permissionViewTicketCategory);
+            permissionCreateTicketCategory = permissionRepository.save(permissionCreateTicketCategory);
+            permissionCreateUnit = permissionRepository.save(permissionCreateUnit);
+            permissionViewUnit = permissionRepository.save(permissionViewUnit);
+            permissionCreateDepartment = permissionRepository.save(permissionCreateDepartment);
+            permissionViewDepartment = permissionRepository.save(permissionViewDepartment);
 
             Set<Permission> permissions = new HashSet<>();
             permissions.add(permissionCreateTicket);
             permissions.add(permissionViewTicket);
             permissions.add(permissionViewProfile);
-            roleUser.setPermissions(permissions);
+            permissions.add(permissionViewTicketCategory);
+            permissions.add(permissionCreateTicketCategory);
+            permissions.add(permissionCreateUnit);
+            permissions.add(permissionViewUnit);
+            permissions.add(permissionCreateDepartment);
+            permissions.add(permissionViewDepartment);
+            roleAdmin.setPermissions(permissions);
 
             Set<Role> roles = new HashSet<>();
             roles.add(roleAdmin);
             roles.add(roleUser);
-            roles.add(roleSuperAdmin);
 
             User user = new User();
             user.setPassword("admin", passwordEncoder);

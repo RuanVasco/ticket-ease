@@ -1,29 +1,19 @@
-interface CheckPermissionResponse {
-	message: string;
-	status: number;
-}
+import { getPermissions } from "./getPermissions";
+import getUserData from "./getUserData";
+import Cookies from "js-cookie";
 
-import axiosInstance from "./axiosConfig";
+export const checkPermission = async (action: string, entity: string): Promise<boolean> => {
+    const userData = getUserData();
+    if (!userData || typeof userData.id !== "number") return false;
 
-export const checkPermission = async (
-	action: string,
-	entity: string
-): Promise<CheckPermissionResponse> => {
-	const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-	try {
-		const response = await axiosInstance.get(
-			`${API_BASE_URL}/permissions/has-permission?action=${action}&entity=${entity}`
-		);
+    const requiredPermission = `${action}_${entity.toUpperCase()}`;
+    let permissions = JSON.parse(Cookies.get('userPermissions') || '[]');
+    
+    if (permissions.length === 0) {
+        permissions = await getPermissions(userData.id);
 
-		return {
-			message: response.data,
-			status: response.status,
-		};
-	} catch (error) {
-		console.error("Error checking permission:", error);
-		return {
-			message: "Erro ao verificar permissão.",
-			status: 500,
-		};
-	}
+        Cookies.set('userPermissions', JSON.stringify(permissions), { secure: true, httpOnly: false, sameSite: 'Strict' });
+    }
+
+    return permissions.includes(requiredPermission);
 };
