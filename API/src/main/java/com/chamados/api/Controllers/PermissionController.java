@@ -18,8 +18,6 @@ public class PermissionController {
 
         String requiredAuthority = action.toUpperCase() + "_" + entity.toUpperCase();
 
-        System.out.println("Authorities: " + authentication.getAuthorities());
-
         boolean hasPermission = authentication.getAuthorities().stream()
                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(requiredAuthority));
 

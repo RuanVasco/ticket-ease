@@ -38,13 +38,23 @@ public class DataInitializer implements CommandLineRunner {
             Role roleUser = roleRepository.findByName("USER")
                     .orElseGet(() -> roleRepository.save(new Role("USER")));
 
-            Permission permission = new Permission();
-            permission.setName("CREATE_TICKET");
-            permission.setName("VIEW_TICKET");
-            permission = permissionRepository.save(permission);
+            Permission permissionCreateTicket = new Permission();
+            permissionCreateTicket.setName("CREATE_TICKET");
+
+            Permission permissionViewTicket = new Permission();
+            permissionViewTicket.setName("VIEW_TICKET");
+
+            Permission permissionViewProfile = new Permission();
+            permissionViewProfile.setName("VIEW_PROFILE");
+
+            permissionCreateTicket = permissionRepository.save(permissionCreateTicket);
+            permissionViewTicket = permissionRepository.save(permissionViewTicket);
+            permissionViewProfile = permissionRepository.save(permissionViewProfile);
 
             Set<Permission> permissions = new HashSet<>();
-            permissions.add(permission);
+            permissions.add(permissionCreateTicket);
+            permissions.add(permissionViewTicket);
+            permissions.add(permissionViewProfile);
             roleUser.setPermissions(permissions);
 
             Set<Role> roles = new HashSet<>();
