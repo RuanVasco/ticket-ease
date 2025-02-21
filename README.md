@@ -3,5 +3,6 @@
   - Dashboard on tickets manage page.</li>
   - Notifications.</li>
 
-## Create /front/.env.local file and put the API URL there.<br>
-## Ex: NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+## Implementation: 
+  Create /front/.env.local file and put the API URL there.<br>
+  Ex: NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
