@@ -39,6 +39,7 @@ public class DataInitializer implements CommandLineRunner {
                     .orElseGet(() -> roleRepository.save(new Role("USER")));
 
             Permission permission = new Permission();
+            permission.setName("CREATE_TICKET");
             permission.setName("VIEW_TICKET");
             permission = permissionRepository.save(permission);
 
