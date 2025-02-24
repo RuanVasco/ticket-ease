@@ -1,9 +1,7 @@
 package com.chamados.api;
 
 import com.chamados.api.Authorizations.GenericAuthorizationManager;
-import com.chamados.api.Entities.Department;
-import com.chamados.api.Entities.Unit;
-import com.chamados.api.Services.CustomPermissionService;
+import com.chamados.api.Authorizations.TicketAuthorizationManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,9 +32,6 @@ public class SecurityConfig {
 
 	@Autowired
 	private GenericAuthorizationManager unitAuthorizationManager;
-
-	@Autowired
-	private GenericAuthorizationManager ticketsAuthorizationManager;
 
 	@Autowired
 	private GenericAuthorizationManager ticketCategoryAuthorizationManager;
@@ -71,11 +66,9 @@ public class SecurityConfig {
 						.requestMatchers("/departments/**").access(departmentAuthorizationManager)
 						.requestMatchers("/tickets-category/**").access(ticketCategoryAuthorizationManager)
 						.requestMatchers("/users/**").access(userAuthorizationManager)
-						.requestMatchers("/tickets/**").access(ticketsAuthorizationManager) // Create a custom AuthorizationManager for tickets
+						.requestMatchers("/tickets/**").access(new TicketAuthorizationManager())
 						.requestMatchers("/messages/**").access(messageAuthorizationManager) // Create a custom AuthorizationManager for messages
 						.requestMatchers("/cargos/**").access(cargoAuthorizationManager)
-						.requestMatchers(HttpMethod.GET, "/tickets/user").access(new WebExpressionAuthorizationManager("hasAuthority('VIEW_TICKET')"))
-						.requestMatchers(HttpMethod.GET, "/tickets/pageable").access(new WebExpressionAuthorizationManager("hasAuthority('VIEW_TICKET')"))
 						.requestMatchers("/profiles/**").access(roleAuthorizationManager)
 						.anyRequest().authenticated()
 				)

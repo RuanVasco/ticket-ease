@@ -47,37 +47,37 @@ public class TicketController {
     }
 
 
-    @GetMapping("/")
-    public ResponseEntity<?> getAll(
-            @RequestParam(value = "sort", defaultValue = "createdAt") String sortBy,
-            @RequestParam(value = "direction", defaultValue = "DESC") String direction) {
+//    @GetMapping("/")
+//    public ResponseEntity<?> getAll(
+//            @RequestParam(value = "sort", defaultValue = "createdAt") String sortBy,
+//            @RequestParam(value = "direction", defaultValue = "DESC") String direction) {
+//
+//        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+//        List<Ticket> tickets = ticketRepository.findAll(sort);
+//        return ResponseEntity.ok(tickets);
+//    }
 
-        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
-        List<Ticket> tickets = ticketRepository.findAll(sort);
-        return ResponseEntity.ok(tickets);
-    }
-
-    @GetMapping("/pageable")
-    public ResponseEntity<Page<Ticket>> getAllPageable(
-            @RequestParam(value = "page", defaultValue = "0") Integer page,
-            @RequestParam(value = "size", defaultValue = "10") Integer size,
-            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
-            @RequestParam(value = "sortDir", defaultValue = "DESC") String sortDir,
-            @RequestParam(value = "status", defaultValue = "Aberto") String status
-    ) {
-
-        Sort.Direction direction = Sort.Direction.fromString(sortDir.toUpperCase());
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-
-        Page<Ticket> tickets;
-        if ("ALL".equalsIgnoreCase(status)) {
-            tickets = ticketRepository.findAll(pageable);
-        } else {
-            tickets = ticketRepository.findByStatus(status, pageable);
-        }
-
-        return ResponseEntity.ok(tickets);
-    }
+//    @GetMapping("/pageable")
+//    public ResponseEntity<Page<Ticket>> getAllPageable(
+//            @RequestParam(value = "page", defaultValue = "0") Integer page,
+//            @RequestParam(value = "size", defaultValue = "10") Integer size,
+//            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
+//            @RequestParam(value = "sortDir", defaultValue = "DESC") String sortDir,
+//            @RequestParam(value = "status", defaultValue = "Aberto") String status
+//    ) {
+//
+//        Sort.Direction direction = Sort.Direction.fromString(sortDir.toUpperCase());
+//        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+//
+//        Page<Ticket> tickets;
+//        if ("ALL".equalsIgnoreCase(status)) {
+//            tickets = ticketRepository.findAll(pageable);
+//        } else {
+//            tickets = ticketRepository.findByStatus(status, pageable);
+//        }
+//
+//        return ResponseEntity.ok(tickets);
+//    }
 
     @GetMapping("/user")
     public ResponseEntity<Page<Ticket>> getAllUser(
