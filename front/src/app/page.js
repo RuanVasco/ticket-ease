@@ -14,7 +14,7 @@ const Home = () => {
 	useEffect(() => {
 		const checkUserPermission = async () => {
 			const hasPermission = await checkPermission("VIEW", "TICKET");
-			setCanViewChamados(hasPermission.message);
+			setCanViewChamados(hasPermission);
 		};
 
 		checkUserPermission();
