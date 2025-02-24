@@ -36,5 +36,9 @@ public class Department {
 		this.receivesRequests = receivesRequests;
 		this.unit = unit;
 	}
+
+	public static boolean canCreate(User user) {
+		return user.hasPermission("CREATE_DEPARTMENT");
+	}
 	
 }

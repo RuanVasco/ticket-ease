@@ -102,7 +102,6 @@ public class TicketController {
         return ResponseEntity.ok(tickets);
     }
 
-    @PreAuthorize("@Ticket.canManageTicket(#user)")
     @GetMapping("/{ticketID}")
     public ResponseEntity<?> getTicket(@PathVariable Long ticketID) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

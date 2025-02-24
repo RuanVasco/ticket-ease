@@ -1,5 +1,6 @@
 package com.chamados.api;
 
+import com.chamados.api.Authorizations.DepartmentAuthorizationManager;
 import com.chamados.api.Services.CustomPermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -43,7 +44,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.POST, "/auth/validate").permitAll()
 						.requestMatchers(HttpMethod.GET, "/permissions/has-permission").permitAll()
 						.requestMatchers("/h2-console/**").permitAll()
-						.requestMatchers(HttpMethod.POST, "/departments/**").access(new WebExpressionAuthorizationManager("hasAuthority('CREATE_DEPARTMENT')"))
+						.requestMatchers(HttpMethod.POST, "/departments/**").access(new DepartmentAuthorizationManager())
 						.requestMatchers(HttpMethod.POST, "/tickets-category/**").access(new WebExpressionAuthorizationManager("hasAuthority('CREATE_TICKET_CATEGORY')"))
 						.requestMatchers(HttpMethod.POST, "/units/**").access(new WebExpressionAuthorizationManager("hasAuthority('CREATE_UNIT')"))
 						.requestMatchers(HttpMethod.POST, "/tickets/**").access(new WebExpressionAuthorizationManager("hasAuthority('CREATE_TICKET')"))
