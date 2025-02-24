@@ -1,6 +1,8 @@
 package com.chamados.api;
 
-import com.chamados.api.Authorizations.DepartmentAuthorizationManager;
+import com.chamados.api.Authorizations.GenericAuthorizationManager;
+import com.chamados.api.Entities.Department;
+import com.chamados.api.Entities.Unit;
 import com.chamados.api.Services.CustomPermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +30,10 @@ public class SecurityConfig {
 	SecurityFilter securityFilter;
 
 	@Autowired
-	private CustomPermissionService customPermissionService;
+	private GenericAuthorizationManager departmentAuthorizationManager;
+
+	@Autowired
+	private GenericAuthorizationManager unitAuthorizationManager;
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -44,9 +49,9 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.POST, "/auth/validate").permitAll()
 						.requestMatchers(HttpMethod.GET, "/permissions/has-permission").permitAll()
 						.requestMatchers("/h2-console/**").permitAll()
-						.requestMatchers(HttpMethod.POST, "/departments/**").access(new DepartmentAuthorizationManager())
+						.requestMatchers("/units/**").access(unitAuthorizationManager)
+						.requestMatchers("/departments/**").access(departmentAuthorizationManager)
 						.requestMatchers(HttpMethod.POST, "/tickets-category/**").access(new WebExpressionAuthorizationManager("hasAuthority('CREATE_TICKET_CATEGORY')"))
-						.requestMatchers(HttpMethod.POST, "/units/**").access(new WebExpressionAuthorizationManager("hasAuthority('CREATE_UNIT')"))
 						.requestMatchers(HttpMethod.POST, "/tickets/**").access(new WebExpressionAuthorizationManager("hasAuthority('CREATE_TICKET')"))
 						.requestMatchers(HttpMethod.POST, "/messages/**").access(new WebExpressionAuthorizationManager("hasAuthority('CREATE_MESSAGE')"))
 						.requestMatchers(HttpMethod.POST, "/users/**").access(new WebExpressionAuthorizationManager("hasAuthority('CREATE_USER')"))
@@ -58,7 +63,6 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.DELETE, "/units/**").access(new WebExpressionAuthorizationManager("hasAuthority('DELETE_UNIT')"))
 						.requestMatchers(HttpMethod.DELETE, "/users/**").access(new WebExpressionAuthorizationManager("hasAuthority('DELETE_USER')"))
 						.requestMatchers(HttpMethod.GET, "/cargos/**").access(new WebExpressionAuthorizationManager("hasAuthority('VIEW_CARGO')"))
-						.requestMatchers(HttpMethod.GET, "/departments/**").access(new WebExpressionAuthorizationManager("hasAuthority('VIEW_DEPARTMENT')"))
 						.requestMatchers(HttpMethod.GET, "/units/**").access(new WebExpressionAuthorizationManager("hasAuthority('VIEW_UNIT')"))
 						.requestMatchers(HttpMethod.GET, "/tickets-category/**").access(new WebExpressionAuthorizationManager("hasAuthority('VIEW_TICKET_CATEGORY')"))
 						.requestMatchers(HttpMethod.GET, "/tickets/user").access(new WebExpressionAuthorizationManager("hasAuthority('VIEW_TICKET')"))

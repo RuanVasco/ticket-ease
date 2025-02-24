@@ -56,11 +56,20 @@ public class DataInitializer implements CommandLineRunner {
             Permission permissionViewUnit = new Permission();
             permissionViewUnit.setName("VIEW_UNIT");
 
+            Permission permissionDeleteUnit = new Permission();
+            permissionDeleteUnit.setName("DELETE_UNIT");
+
+            Permission permissionUpdateUnit = new Permission();
+            permissionUpdateUnit.setName("UPDATE_UNIT");
+
             Permission permissionCreateDepartment = new Permission();
             permissionCreateDepartment.setName("CREATE_DEPARTMENT");
 
             Permission permissionViewDepartment = new Permission();
             permissionViewDepartment.setName("VIEW_DEPARTMENT");
+
+            Permission permissionDeleteDepartment = new Permission();
+            permissionDeleteDepartment.setName("DELETE_DEPARTMENT");
 
             permissionCreateTicket = permissionRepository.save(permissionCreateTicket);
             permissionViewTicket = permissionRepository.save(permissionViewTicket);
@@ -71,6 +80,9 @@ public class DataInitializer implements CommandLineRunner {
             permissionViewUnit = permissionRepository.save(permissionViewUnit);
             permissionCreateDepartment = permissionRepository.save(permissionCreateDepartment);
             permissionViewDepartment = permissionRepository.save(permissionViewDepartment);
+            permissionDeleteDepartment = permissionRepository.save(permissionDeleteDepartment);
+            permissionDeleteUnit = permissionRepository.save(permissionDeleteUnit);
+            permissionUpdateUnit = permissionRepository.save(permissionUpdateUnit);
 
             Set<Permission> permissions = new HashSet<>();
             permissions.add(permissionCreateTicket);
@@ -82,6 +94,10 @@ public class DataInitializer implements CommandLineRunner {
             permissions.add(permissionViewUnit);
             permissions.add(permissionCreateDepartment);
             permissions.add(permissionViewDepartment);
+            permissions.add(permissionDeleteDepartment);
+            permissions.add(permissionDeleteUnit);
+            permissions.add(permissionUpdateUnit);
+
             roleAdmin.setPermissions(permissions);
 
             Set<Role> roles = new HashSet<>();

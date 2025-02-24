@@ -40,5 +40,16 @@ public class Department {
 	public static boolean canCreate(User user) {
 		return user.hasPermission("CREATE_DEPARTMENT");
 	}
-	
+
+	public static boolean canView(User user) {
+		return user.hasPermission("VIEW_DEPARTMENT");
+	}
+
+	public static boolean canUpdate(User user) {
+		return user.hasPermission("CREATE_DEPARTMENT");
+	}
+
+	public static boolean canDelete(User user) {
+		return user.hasPermission("DELETE_DEPARTMENT");
+	}
 }
