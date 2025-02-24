@@ -35,6 +35,24 @@ public class SecurityConfig {
 	@Autowired
 	private GenericAuthorizationManager unitAuthorizationManager;
 
+	@Autowired
+	private GenericAuthorizationManager ticketsAuthorizationManager;
+
+	@Autowired
+	private GenericAuthorizationManager ticketCategoryAuthorizationManager;
+
+	@Autowired
+	private GenericAuthorizationManager userAuthorizationManager;
+
+	@Autowired
+	private GenericAuthorizationManager cargoAuthorizationManager;
+
+	@Autowired
+	private GenericAuthorizationManager roleAuthorizationManager;
+
+	@Autowired
+	private GenericAuthorizationManager messageAuthorizationManager;
+
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 		return httpSecurity
@@ -51,26 +69,14 @@ public class SecurityConfig {
 						.requestMatchers("/h2-console/**").permitAll()
 						.requestMatchers("/units/**").access(unitAuthorizationManager)
 						.requestMatchers("/departments/**").access(departmentAuthorizationManager)
-						.requestMatchers(HttpMethod.POST, "/tickets-category/**").access(new WebExpressionAuthorizationManager("hasAuthority('CREATE_TICKET_CATEGORY')"))
-						.requestMatchers(HttpMethod.POST, "/tickets/**").access(new WebExpressionAuthorizationManager("hasAuthority('CREATE_TICKET')"))
-						.requestMatchers(HttpMethod.POST, "/messages/**").access(new WebExpressionAuthorizationManager("hasAuthority('CREATE_MESSAGE')"))
-						.requestMatchers(HttpMethod.POST, "/users/**").access(new WebExpressionAuthorizationManager("hasAuthority('CREATE_USER')"))
-						.requestMatchers(HttpMethod.POST, "/cargos/**").access(new WebExpressionAuthorizationManager("hasAuthority('CREATE_CARGO')"))
-						.requestMatchers(HttpMethod.PUT, "/cargos/**").access(new WebExpressionAuthorizationManager("hasAuthority('UPDATE_CARGO')"))
-						.requestMatchers(HttpMethod.PUT, "/users/**").access(new WebExpressionAuthorizationManager("hasAuthority('UPDATE_USER')"))
-						.requestMatchers(HttpMethod.PUT, "/units/**").access(new WebExpressionAuthorizationManager("hasAuthority('UPDATE_UNIT')"))
-						.requestMatchers(HttpMethod.DELETE, "/cargos/**").access(new WebExpressionAuthorizationManager("hasAuthority('DELETE_CARGO')"))
-						.requestMatchers(HttpMethod.DELETE, "/units/**").access(new WebExpressionAuthorizationManager("hasAuthority('DELETE_UNIT')"))
-						.requestMatchers(HttpMethod.DELETE, "/users/**").access(new WebExpressionAuthorizationManager("hasAuthority('DELETE_USER')"))
-						.requestMatchers(HttpMethod.GET, "/cargos/**").access(new WebExpressionAuthorizationManager("hasAuthority('VIEW_CARGO')"))
-						.requestMatchers(HttpMethod.GET, "/units/**").access(new WebExpressionAuthorizationManager("hasAuthority('VIEW_UNIT')"))
-						.requestMatchers(HttpMethod.GET, "/tickets-category/**").access(new WebExpressionAuthorizationManager("hasAuthority('VIEW_TICKET_CATEGORY')"))
+						.requestMatchers("/tickets-category/**").access(ticketCategoryAuthorizationManager)
+						.requestMatchers("/users/**").access(userAuthorizationManager)
+						.requestMatchers("/tickets/**").access(ticketsAuthorizationManager) // Create a custom AuthorizationManager for tickets
+						.requestMatchers("/messages/**").access(messageAuthorizationManager) // Create a custom AuthorizationManager for messages
+						.requestMatchers("/cargos/**").access(cargoAuthorizationManager)
 						.requestMatchers(HttpMethod.GET, "/tickets/user").access(new WebExpressionAuthorizationManager("hasAuthority('VIEW_TICKET')"))
 						.requestMatchers(HttpMethod.GET, "/tickets/pageable").access(new WebExpressionAuthorizationManager("hasAuthority('VIEW_TICKET')"))
-						.requestMatchers(HttpMethod.GET, "/messages/**").access(new WebExpressionAuthorizationManager("hasAuthority('VIEW_MESSAGE')"))
-						.requestMatchers(HttpMethod.GET, "/users/**").access(new WebExpressionAuthorizationManager("hasAuthority('VIEW_USER')"))
-						.requestMatchers(HttpMethod.GET, "/profiles/**").access(new WebExpressionAuthorizationManager("hasAuthority('VIEW_PROFILE')"))
-						.requestMatchers(HttpMethod.GET, "/images/**").permitAll()
+						.requestMatchers("/profiles/**").access(roleAuthorizationManager)
 						.anyRequest().authenticated()
 				)
 				.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
