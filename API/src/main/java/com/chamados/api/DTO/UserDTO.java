@@ -13,7 +13,6 @@ public class UserDTO {
     private String name;
     private String email;
     private String phone;
-    private Boolean isAdmin;
     private Department department;
     private Cargo cargo;
 
@@ -24,7 +23,12 @@ public class UserDTO {
         this.phone = user.getPhone();
         this.department = user.getDepartment();
         this.cargo = user.getCargo();
-        this.isAdmin = user.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+    }
+
+    public UserDTO(Long id, String name, String email, String phone) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
     }
 }

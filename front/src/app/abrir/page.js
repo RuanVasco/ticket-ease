@@ -199,7 +199,7 @@ const AbrirChamado = () => {
             receiveEmail: ticket.receiveEmail
         };
 
-        formData.append("ticketDTO", new Blob([JSON.stringify(ticketDTO)], { type: "application/json" }));
+        formData.append("ticketInputDTO", new Blob([JSON.stringify(ticketDTO)], { type: "application/json" }));
 
         for (let i = 0; i < attachments.length; i++) {
             formData.append("files", attachments[i]);

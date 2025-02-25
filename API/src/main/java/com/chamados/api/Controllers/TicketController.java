@@ -1,7 +1,8 @@
 package com.chamados.api.Controllers;
 
+import com.chamados.api.DTO.InputDTO.TicketInputDTO;
 import com.chamados.api.DTO.TicketDTO;
-import com.chamados.api.DTO.TicketDTOAssembler;
+import com.chamados.api.DTO.AssemblerDTO.TicketDTOAssembler;
 import com.chamados.api.Entities.Ticket;
 import com.chamados.api.Entities.User;
 import com.chamados.api.Repositories.TicketRepository;
@@ -15,7 +16,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +42,7 @@ public class TicketController {
     @PostMapping("/")
     public ResponseEntity<?> openTicket(
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
-            @RequestPart TicketDTO ticketDTO
+            @RequestPart TicketInputDTO ticketInputDTO
     ) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -50,7 +50,7 @@ public class TicketController {
             return ResponseEntity.notFound().build();
         }
 
-        Ticket ticket = ticketService.openTicket(ticketDTO, files, user);
+        Ticket ticket = ticketService.openTicket(ticketInputDTO, files, user);
         return ResponseEntity.ok(ticket.getId());
     }
 

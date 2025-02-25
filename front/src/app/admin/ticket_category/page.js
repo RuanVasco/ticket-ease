@@ -110,7 +110,6 @@ const FormsCategory = () => {
 						receiveTickets: category.receiveTickets,
 						father: father || { id: "", name: "" },
 						department: department || { id: "", name: "" },
-						hide: category.hide,
 					});
 				} else {
 					console.error("Error fetching category:", res.status);
@@ -125,7 +124,6 @@ const FormsCategory = () => {
 				receiveTickets: false,
 				department: { id: "", name: "" },
 				father: { id: "", name: "" },
-				hide: false,
 			});
 		}
 	};
@@ -147,11 +145,10 @@ const FormsCategory = () => {
 			const payload = {
 				name: currentCategory.name,
 				receiveTickets: currentCategory.receiveTickets,
-				department_id: rootCategory
+				departmentId: rootCategory
 					? currentCategory.department.id
 					: null,
-				father_id: !rootCategory ? currentCategory.father.id : null,
-				hide: currentCategory.hide,
+				fatherId: !rootCategory ? currentCategory.father.id : null,
 			};
 
 			let res;
@@ -185,7 +182,6 @@ const FormsCategory = () => {
 					receiveTickets: false,
 					department: { id: "", name: "" },
 					father: { id: "", name: "" },
-					hide: false,
 				});
 
 				setCurrentPage(0);

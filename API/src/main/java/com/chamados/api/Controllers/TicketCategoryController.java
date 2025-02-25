@@ -57,8 +57,8 @@ public class TicketCategoryController {
     public ResponseEntity<?> createTicketCategory(@RequestBody TicketCategoryDTO ticketCategoryDTO) {
         Department department = null;
 
-        if (ticketCategoryDTO.department_id().isPresent()) {
-            Optional<Department> optionalDepartment = departmentRepository.findById(ticketCategoryDTO.department_id().get());
+        if (ticketCategoryDTO.getDepartmentId() != null) {
+            Optional<Department> optionalDepartment = departmentRepository.findById(ticketCategoryDTO.getDepartmentId());
             if (optionalDepartment.isPresent()) {
                 department = optionalDepartment.get();
             }
@@ -66,12 +66,12 @@ public class TicketCategoryController {
 
         TicketCategory ticketCategory = null;
 
-        if (ticketCategoryDTO.father_id().isPresent()) {
-            Optional<TicketCategory> optionalTicketCategory = ticketCategoryRepository.findById(ticketCategoryDTO.father_id().get());
+        if (ticketCategoryDTO.getFatherId() != null) {
+            Optional<TicketCategory> optionalTicketCategory = ticketCategoryRepository.findById(ticketCategoryDTO.getFatherId());
             ticketCategory = optionalTicketCategory.orElse(null);
         }
 
-        ticketCategoryService.addCategory(ticketCategoryDTO.name(), ticketCategoryDTO.receiveTickets(), department, ticketCategory);
+        ticketCategoryService.addCategory(ticketCategoryDTO.getName(), ticketCategoryDTO.getReceiveTickets(), department, ticketCategory);
 
         return ResponseEntity.ok().build();
     }

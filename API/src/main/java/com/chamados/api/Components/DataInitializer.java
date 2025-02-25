@@ -51,13 +51,13 @@ public class DataInitializer implements CommandLineRunner {
             permissionDeleteTicket.setName("DELETE_TICKET");
 
             Permission permissionCreateTicketCategory = new Permission();
-            permissionCreateTicketCategory.setName("CREATE_TICKETCATEGORY");
+            permissionCreateTicketCategory.setName("CREATE_TICKET_CATEGORY");
 
             Permission permissionViewTicketCategory = new Permission();
-            permissionViewTicketCategory.setName("VIEW_TICKETCATEGORY");
+            permissionViewTicketCategory.setName("VIEW_TICKET_CATEGORY");
 
             Permission permissionDeleteTicketCategory = new Permission();
-            permissionDeleteTicketCategory.setName("DELETE_TICKETCATEGORY");
+            permissionDeleteTicketCategory.setName("DELETE_TICKET_CATEGORY");
 
             Permission permissionViewProfile = new Permission();
             permissionViewProfile.setName("VIEW_PROFILE");

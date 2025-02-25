@@ -18,7 +18,7 @@ const TableTicket = ({ viewMode = "readonly" }) => {
 	const columns = [
 		{ label: "ID", value: "id" },
 		{ label: "Assunto", value: "name" },
-		{ label: "Categoria", value: "ticketCategory.path" },
+		{ label: "Categoria", value: "categoryPath" },
 		{ label: "Status", value: "status" },
 		{ label: "Urgência", value: "urgency" },
 		{ label: "Data de Criação", value: "createdAt" },
@@ -27,20 +27,7 @@ const TableTicket = ({ viewMode = "readonly" }) => {
 
 	if (viewMode === "edit") {
 		columns.push({ label: "Usuário", value: "user.name" });
-	}
-
-	const renameFields = (ticket) => {
-		const renamedTicket = {};
-
-		columns.forEach((column) => {
-			const value = column.value
-				.split(".")
-				.reduce((obj, key) => (obj ? obj[key] : ""), ticket);
-			renamedTicket[column.value] = value;
-		});
-
-		return renamedTicket;
-	};
+	}	
 
 	const fetchData = async () => {
 		try {
@@ -61,7 +48,7 @@ const TableTicket = ({ viewMode = "readonly" }) => {
 
 			if (res.status === 200) {
 				console.log(res.data._embedded.ticketDTOList);
-				setData(renameFields(res.data._embedded.ticketDTOList));
+				setData(res.data._embedded.ticketDTOList);
 				setTotalPages(res.data.totalPages);
 			} else {
 				console.error("Erro:", res.status);

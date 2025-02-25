@@ -44,8 +44,8 @@ public class TicketCategoryService {
     public void updateCategory(TicketCategory ticketCategory, TicketCategoryDTO ticketCategoryDTO) {
         Department department = null;
 
-        if (ticketCategoryDTO.department_id().isPresent()) {
-            Optional<Department> optionalDepartment = departmentRepository.findById(ticketCategoryDTO.department_id().get());
+        if (ticketCategoryDTO.getDepartmentId() != null) {
+            Optional<Department> optionalDepartment = departmentRepository.findById(ticketCategoryDTO.getDepartmentId());
             if (optionalDepartment.isPresent()) {
                 department = optionalDepartment.get();
             }
@@ -53,15 +53,15 @@ public class TicketCategoryService {
 
         TicketCategory father = null;
 
-        if (ticketCategoryDTO.father_id().isPresent()) {
-            Optional<TicketCategory> optionalFather = ticketCategoryRepository.findById(ticketCategoryDTO.father_id().get());
+        if (ticketCategoryDTO.getFatherId() != null) {
+            Optional<TicketCategory> optionalFather = ticketCategoryRepository.findById(ticketCategoryDTO.getFatherId());
             father = optionalFather.orElse(null);
         }
 
-        String path = buildPath(father, department, ticketCategoryDTO.name());
+        String path = buildPath(father, department, ticketCategoryDTO.getName());
 
-        ticketCategory.setName(ticketCategoryDTO.name());
-        ticketCategory.setReceiveTickets(ticketCategoryDTO.receiveTickets());
+        ticketCategory.setName(ticketCategoryDTO.getName());
+        ticketCategory.setReceiveTickets(ticketCategoryDTO.getReceiveTickets());
         ticketCategory.setDepartment(department);
         ticketCategory.setFather(father);
         ticketCategory.setPath(path);

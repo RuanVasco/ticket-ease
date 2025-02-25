@@ -1,5 +1,6 @@
 package com.chamados.api.Services;
 
+import com.chamados.api.DTO.InputDTO.TicketInputDTO;
 import com.chamados.api.DTO.TicketDTO;
 import com.chamados.api.Entities.Ticket;
 import com.chamados.api.Entities.TicketCategory;
@@ -31,35 +32,35 @@ public class TicketService {
     @Autowired
     FileStorageService fileStorageService;
 
-    public Ticket openTicket(TicketDTO ticketDTO, List<MultipartFile> files, User user) {
+    public Ticket openTicket(TicketInputDTO ticketInputDTO, List<MultipartFile> files, User user) {
         Ticket ticket = new Ticket();
 
-        Optional<TicketCategory> optionalTicketCategory = ticketCategoryRepository.findById(ticketDTO.getTicketCategory_id());
+        Optional<TicketCategory> optionalTicketCategory = ticketCategoryRepository.findById(ticketInputDTO.ticketCategory_id());
 
         if (optionalTicketCategory.isEmpty()) {
             return null;
         }
 
-        if (ticketDTO.getName().isEmpty()) {
+        if (ticketInputDTO.name().isEmpty()) {
             return null;
         }
 
-        if (ticketDTO.getDescription().isEmpty()) {
+        if (ticketInputDTO.description().isEmpty()) {
             return null;
         }
 
         ticket.setUser(user);
         ticket.setTicketCategory(optionalTicketCategory.get());
-        ticket.setName(ticketDTO.getName());
-        ticket.setDescription(ticketDTO.getDescription());
+        ticket.setName(ticketInputDTO.name());
+        ticket.setDescription(ticketInputDTO.description());
         ticket.setStatus("Novo");
-        ticket.setUrgency(ticketDTO.getUrgency());
-        ticket.setReceiveEmail(ticketDTO.getReceiveEmail());
+        ticket.setUrgency(ticketInputDTO.urgency());
+        ticket.setReceiveEmail(ticketInputDTO.receiveEmail());
         ticket.setCreatedAt(new Date());
         ticket.setUpdatedAt(new Date());
 
-        if (ticketDTO.getObservation() != null) {
-            ticket.setObservation(ticketDTO.getObservation());
+        if (ticketInputDTO.observation() != null) {
+            ticket.setObservation(ticketInputDTO.observation());
         }
 
         List<String> filePaths = new ArrayList<>();
