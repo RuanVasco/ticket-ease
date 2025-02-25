@@ -14,6 +14,7 @@ const TableTicket = ({ viewMode = "readonly" }) => {
 	const [totalPages, setTotalPages] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
 	const [status, setStatus] = useState("Novo");
+	const [noResultsMessage, setNoResultsMessage] = useState("");
 
 	const columns = [
 		{ label: "ID", value: "id" },
@@ -27,7 +28,7 @@ const TableTicket = ({ viewMode = "readonly" }) => {
 
 	if (viewMode === "edit") {
 		columns.push({ label: "Usuário", value: "user.name" });
-	}	
+	}
 
 	const fetchData = async () => {
 		try {
@@ -46,12 +47,18 @@ const TableTicket = ({ viewMode = "readonly" }) => {
 
 			const res = await axiosInstance.get(url);
 
-			if (res.status === 200) {
-				setData(res.data._embedded.ticketDTOList);
-				setTotalPages(res.data.totalPages);
-			} else {
-				console.error("Erro:", res.status);
+			if (res.status !== 200) {
+				console.error("Erro na pesquisa:", res.status);
 			}
+
+			if (res.data?._embedded?.ticketDTOList?.length > 0) {
+				setData(res.data._embedded.ticketDTOList);
+				setTotalPages(res.data.page.totalPages);
+				setNoResultsMessage("");
+			} else {
+				setData([]);
+				setNoResultsMessage("Nenhum ticket encontrado.");
+			}			
 		} catch (error) {
 			console.log("Error:", error);
 		}
@@ -66,23 +73,47 @@ const TableTicket = ({ viewMode = "readonly" }) => {
 
 		if (query.length >= 3) {
 			try {
+				let url;
+
+				switch (viewMode) {
+					case "edit":
+						url = `${API_BASE_URL}/tickets/search/manager?page=${currentPage}&size=${pageSize}&status=${status}`;
+						break;
+					case "readonly":
+						url = `${API_BASE_URL}/tickets/search/user?page=${currentPage}&size=${pageSize}&status=${status}`;
+						break;
+					default:
+						break;
+				}
+
 				const res = await axiosInstance.get(
-					`${API_BASE_URL}/tickets/search`,
+					url,
 					{
 						params: { query },
 					}
 				);
 
-				if (res.status === 200) {
-					setData(res.data);
-				} else {
+				if (res.status !== 200) {
 					console.error("Erro na pesquisa:", res.status);
+					setNoResultsMessage("Erro ao buscar tickets. Tente novamente.");
 				}
+
+				if (res.data?._embedded?.ticketDTOList?.length > 0) {
+					setData(res.data._embedded.ticketDTOList);
+					setTotalPages(res.data.page.totalPages);
+					setNoResultsMessage("");
+				} else {
+					setData([]);
+        			setNoResultsMessage("Nenhum ticket encontrado.");
+				}
+
 			} catch (error) {
 				console.log("Search Error:", error);
+				setNoResultsMessage("Erro ao buscar tickets. Tente novamente.");
 			}
 		} else {
 			fetchData();
+			setNoResultsMessage("");
 		}
 	};
 
@@ -143,31 +174,33 @@ const TableTicket = ({ viewMode = "readonly" }) => {
 					</tr>
 				</thead>
 				<tbody>
-					{data.map((item, index) => (
-						<tr key={index}>
-							{columns.map((column, colIndex) => (
-								<td key={colIndex}>
-									{column.value === "name" ? (
-										<a
-											href={`chamados/${item.id}`}
-											className="fw-semibold text-decoration-underline"
-										>
-											{getNestedValue(item, column.value)}
-										</a>
-									) : column.value.includes("createdAt") ||
-									  column.value.includes("updatedAt") ||
-									  column.value.includes("closedAt") ? (
-										new DateFormatter(
-											item[column.value]
-										).toDateTime()
-									) : (
-										getNestedValue(item, column.value) ||
-										"N/A"
-									)}
-								</td>
-							))}
+					{data.length === 0 && noResultsMessage ? (
+						<tr>
+							<td colSpan={columns.length} className="text-center">{noResultsMessage}</td>
 						</tr>
-					))}
+					) : (
+						data.map((item, index) => (
+							<tr key={index}>
+								{columns.map((column, colIndex) => (
+									<td key={colIndex}>
+										{column.value === "name" ? (
+											<a href={`chamados/${item.id}`} className="fw-semibold text-decoration-underline">
+												{getNestedValue(item, column.value)}
+											</a>
+										) : column.value.includes("createdAt") ||
+											column.value.includes("updatedAt") ||
+											column.value.includes("closedAt") ? (
+												new DateFormatter(
+													item[column.value]
+												).toDateTime()
+											) : (
+											getNestedValue(item, column.value) || "N/A"
+										)}
+									</td>
+								))}
+							</tr>
+						))
+					)}
 				</tbody>
 			</table>
 			<Pagination

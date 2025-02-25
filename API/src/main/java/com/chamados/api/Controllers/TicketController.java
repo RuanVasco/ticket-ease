@@ -80,7 +80,7 @@ public class TicketController {
     }
 
     @GetMapping("/user")
-    public ResponseEntity<Page<Ticket>> getAllUser(
+    public ResponseEntity<PagedModel<TicketDTO>> getAllUser(
             @RequestParam(value = "page", defaultValue = "0") Integer page,
             @RequestParam(value = "size", defaultValue = "10") Integer size,
             @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
@@ -99,7 +99,9 @@ public class TicketController {
         );
 
         Page<Ticket> tickets = ticketService.getTicketsByUserId(userId, status, pageable);
-        return ResponseEntity.ok(tickets);
+        PagedModel<TicketDTO> pagedModel = pagedResourcesAssembler.toModel(tickets, ticketDTOAssembler);
+
+        return ResponseEntity.ok(pagedModel);
     }
 
     @GetMapping("/{ticketID}")
@@ -117,13 +119,32 @@ public class TicketController {
         return ResponseEntity.ok(ticket);
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<?> searchTickets(@RequestParam String query) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    @GetMapping("/search/{mode}")
+    public ResponseEntity<PagedModel<TicketDTO>> searchTickets(
+            @PathVariable String mode,
+            @RequestParam(value = "query", required = false) String query,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "DESC") String sortDir,
+            @RequestParam(value = "status", defaultValue = "ALL") String status
+    ) {
+        Sort.Direction direction = Sort.Direction.fromString(sortDir.toUpperCase());
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
-        List<Ticket> tickets = ticketRepository.findBySearch(query, user);
+        Page<Ticket> tickets;
 
-        return ResponseEntity.ok(tickets);
+        if ("user".equalsIgnoreCase(mode)) {
+            tickets = ticketService.searchUserTickets(query, status, pageable);
+        } else if ("manager".equalsIgnoreCase(mode)) {
+            tickets = ticketService.searchUserManageableTickets(query, status, pageable);
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+
+        PagedModel<TicketDTO> pagedModel = pagedResourcesAssembler.toModel(tickets, ticketDTOAssembler);
+        return ResponseEntity.ok(pagedModel);
     }
+
 
 }

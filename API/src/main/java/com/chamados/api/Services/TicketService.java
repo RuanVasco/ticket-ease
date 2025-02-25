@@ -96,4 +96,24 @@ public class TicketService {
 
         return new PageImpl<>(filteredTickets, pageable, filteredTickets.size());
     }
+
+    @Transactional
+    public Page<Ticket> searchUserTickets(String query, String status, Pageable pageable) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return ticketRepository.findByUserAndStatus(user, status, query, pageable);
+    }
+
+    @Transactional
+    public Page<Ticket> searchUserManageableTickets(String query, String status, Pageable pageable) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Page<Ticket> relatedTickets = ticketRepository.findByStatusAndQuery(status, query, pageable);
+        List<Ticket> filteredTickets = relatedTickets
+                .stream()
+                .filter(ticket -> ticket.canManage(user))
+                .toList();
+
+        return new PageImpl<>(filteredTickets, pageable, filteredTickets.size());
+    }
 }

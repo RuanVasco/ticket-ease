@@ -33,4 +33,31 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
             @Param("status") String status,
             Pageable pageable
     );
+
+    @Query("SELECT t FROM Ticket t WHERE " +
+            "(:status = 'ALL' OR LOWER(t.status) = LOWER(:status)) AND " +
+            "(LOWER(t.name) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            " LOWER(t.description) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            " LOWER(t.observation) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            " LOWER(t.ticketCategory.name) LIKE LOWER(CONCAT('%', :query, '%')))")
+    Page<Ticket> findByStatusAndQuery(
+            @Param("status") String status,
+            @Param("query") String query,
+            Pageable pageable
+    );
+
+    @Query("SELECT t FROM Ticket t WHERE " +
+            "(:status = 'ALL' OR LOWER(t.status) = LOWER(:status)) AND " +
+            "(LOWER(t.name) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            " LOWER(t.description) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            " LOWER(t.observation) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            " LOWER(t.ticketCategory.name) LIKE LOWER(CONCAT('%', :query, '%'))) AND " +
+            "t.user = :user")
+    Page<Ticket> findByUserAndStatus(
+            @Param("user") User user,
+            @Param("status") String status,
+            @Param("query") String query,
+            Pageable pageable
+    );
+
 }

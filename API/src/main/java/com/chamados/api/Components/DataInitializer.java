@@ -31,6 +31,9 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private DepartmentRepository departmentRepository;
 
+    @Autowired
+    private TicketCategoryRepository ticketCategoryRepository;
+
     @Override
     @Transactional
     public void run(String... args) {
@@ -135,6 +138,13 @@ public class DataInitializer implements CommandLineRunner {
             TI.setUnit(matriz);
             TI.setReceivesRequests(true);
             departmentRepository.save(TI);
+
+            TicketCategory ticketCategory = new TicketCategory();
+            ticketCategory.setName("Infraestrutura");
+            ticketCategory.setReceiveTickets(true);
+            ticketCategory.setDepartment(TI);
+            ticketCategory.setPath("TI");
+            ticketCategoryRepository.save(ticketCategory);
 
             User user = new User();
             user.setPassword("admin", passwordEncoder);
