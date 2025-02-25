@@ -25,6 +25,12 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private PermissionRepository permissionRepository;
 
+    @Autowired
+    private UnitRepository unitRepository;
+
+    @Autowired
+    private DepartmentRepository departmentRepository;
+
     @Override
     @Transactional
     public void run(String... args) {
@@ -41,14 +47,20 @@ public class DataInitializer implements CommandLineRunner {
             Permission permissionViewTicket = new Permission();
             permissionViewTicket.setName("VIEW_TICKET");
 
-            Permission permissionViewProfile = new Permission();
-            permissionViewProfile.setName("VIEW_PROFILE");
-
-            Permission permissionViewTicketCategory = new Permission();
-            permissionViewTicketCategory.setName("VIEW_TICKET_CATEGORY");
+            Permission permissionDeleteTicket = new Permission();
+            permissionDeleteTicket.setName("DELETE_TICKET");
 
             Permission permissionCreateTicketCategory = new Permission();
-            permissionCreateTicketCategory.setName("CREATE_TICKET_CATEGORY");
+            permissionCreateTicketCategory.setName("CREATE_TICKETCATEGORY");
+
+            Permission permissionViewTicketCategory = new Permission();
+            permissionViewTicketCategory.setName("VIEW_TICKETCATEGORY");
+
+            Permission permissionDeleteTicketCategory = new Permission();
+            permissionDeleteTicketCategory.setName("DELETE_TICKETCATEGORY");
+
+            Permission permissionViewProfile = new Permission();
+            permissionViewProfile.setName("VIEW_PROFILE");
 
             Permission permissionCreateUnit = new Permission();
             permissionCreateUnit.setName("CREATE_UNIT");
@@ -73,9 +85,11 @@ public class DataInitializer implements CommandLineRunner {
 
             permissionCreateTicket = permissionRepository.save(permissionCreateTicket);
             permissionViewTicket = permissionRepository.save(permissionViewTicket);
+            permissionDeleteTicket = permissionRepository.save(permissionDeleteTicket);
             permissionViewProfile = permissionRepository.save(permissionViewProfile);
             permissionViewTicketCategory = permissionRepository.save(permissionViewTicketCategory);
             permissionCreateTicketCategory = permissionRepository.save(permissionCreateTicketCategory);
+            permissionDeleteTicketCategory = permissionRepository.save(permissionDeleteTicketCategory);
             permissionCreateUnit = permissionRepository.save(permissionCreateUnit);
             permissionViewUnit = permissionRepository.save(permissionViewUnit);
             permissionCreateDepartment = permissionRepository.save(permissionCreateDepartment);
@@ -87,9 +101,11 @@ public class DataInitializer implements CommandLineRunner {
             Set<Permission> permissions = new HashSet<>();
             permissions.add(permissionCreateTicket);
             permissions.add(permissionViewTicket);
+            permissions.add(permissionDeleteTicket);
             permissions.add(permissionViewProfile);
             permissions.add(permissionViewTicketCategory);
             permissions.add(permissionCreateTicketCategory);
+            permissions.add(permissionDeleteTicketCategory);
             permissions.add(permissionCreateUnit);
             permissions.add(permissionViewUnit);
             permissions.add(permissionCreateDepartment);
@@ -112,6 +128,17 @@ public class DataInitializer implements CommandLineRunner {
 
             userRepository.save(user);
             System.out.println("Usuário admin criado.");
+
+            Unit matriz = new Unit();
+            matriz.setName("Matriz");
+            matriz.setAddress("Matriz");
+            unitRepository.save(matriz);
+
+            Department TI = new Department();
+            TI.setName("TI");
+            TI.setUnit(matriz);
+            TI.setReceivesRequests(true);
+            departmentRepository.save(TI);
         }
     }
 }

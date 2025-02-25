@@ -1,5 +1,6 @@
 package com.chamados.api.Entities;
 
+import java.util.Objects;
 import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
@@ -50,9 +51,6 @@ public class User implements UserDetails {
     @JoinColumn(name = "department_id")
     private Department department;
 
-    @ManyToMany
-    private Set<Ticket> observedTickets;
-
     @Setter
     @ManyToOne
     @JoinColumn(name = "cargo_id")
@@ -102,4 +100,16 @@ public class User implements UserDetails {
         return UserDetails.super.isEnabled();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        User user = (User) obj;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

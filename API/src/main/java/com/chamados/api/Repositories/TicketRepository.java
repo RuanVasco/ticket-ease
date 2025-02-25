@@ -33,4 +33,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
             @Param("status") String status,
             Pageable pageable
     );
+
+    @Query("SELECT t FROM Ticket t WHERE t.user = :user OR :user MEMBER OF t.observers")
+    Page<Ticket> findUserRelatedTickets(@Param("user") User user, Pageable pageable);
 }

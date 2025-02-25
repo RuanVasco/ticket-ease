@@ -29,13 +29,26 @@ const TableTicket = ({ viewMode = "readonly" }) => {
 		columns.push({ label: "Usuário", value: "user.name" });
 	}
 
+	const renameFields = (ticket) => {
+		const renamedTicket = {};
+
+		columns.forEach((column) => {
+			const value = column.value
+				.split(".")
+				.reduce((obj, key) => (obj ? obj[key] : ""), ticket);
+			renamedTicket[column.value] = value;
+		});
+
+		return renamedTicket;
+	};
+
 	const fetchData = async () => {
 		try {
 			let url;
 
 			switch (viewMode) {
 				case "edit":
-					url = `${API_BASE_URL}/tickets/pageable?page=${currentPage}&size=${pageSize}&status=${status}`;
+					url = `${API_BASE_URL}/tickets/department?page=${currentPage}&size=${pageSize}&status=${status}`;
 					break;
 				case "readonly":
 					url = `${API_BASE_URL}/tickets/user?page=${currentPage}&size=${pageSize}&status=${status}`;
@@ -47,7 +60,8 @@ const TableTicket = ({ viewMode = "readonly" }) => {
 			const res = await axiosInstance.get(url);
 
 			if (res.status === 200) {
-				setData(res.data.content);
+				console.log(res.data._embedded.ticketDTOList);
+				setData(renameFields(res.data._embedded.ticketDTOList));
 				setTotalPages(res.data.totalPages);
 			} else {
 				console.error("Erro:", res.status);
@@ -66,9 +80,12 @@ const TableTicket = ({ viewMode = "readonly" }) => {
 
 		if (query.length >= 3) {
 			try {
-				const res = await axiosInstance.get(`${API_BASE_URL}/tickets/search`, {
-					params: { query },
-				});
+				const res = await axiosInstance.get(
+					`${API_BASE_URL}/tickets/search`,
+					{
+						params: { query },
+					}
+				);
 
 				if (res.status === 200) {
 					setData(res.data);
@@ -152,11 +169,14 @@ const TableTicket = ({ viewMode = "readonly" }) => {
 											{getNestedValue(item, column.value)}
 										</a>
 									) : column.value.includes("createdAt") ||
-										column.value.includes("updatedAt") ||
-										column.value.includes("closedAt") ? (
-											new DateFormatter(item[column.value]).toDateTime()
+									  column.value.includes("updatedAt") ||
+									  column.value.includes("closedAt") ? (
+										new DateFormatter(
+											item[column.value]
+										).toDateTime()
 									) : (
-										getNestedValue(item, column.value) || "N/A"
+										getNestedValue(item, column.value) ||
+										"N/A"
 									)}
 								</td>
 							))}

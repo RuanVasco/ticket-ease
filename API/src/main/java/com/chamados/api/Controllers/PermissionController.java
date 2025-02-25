@@ -1,9 +1,6 @@
 package com.chamados.api.Controllers;
 
 import com.chamados.api.Entities.Permission;
-import com.chamados.api.Entities.Role;
-import com.chamados.api.Repositories.PermissionRepository;
-import com.chamados.api.Repositories.RoleRepository;
 import com.chamados.api.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +8,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/permissions")

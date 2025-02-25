@@ -8,10 +8,12 @@ import com.chamados.api.Repositories.TicketCategoryRepository;
 import com.chamados.api.Repositories.TicketRepository;
 import com.chamados.api.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.data.domain.Pageable;
+
 import java.util.*;
 
 @Service
@@ -32,32 +34,32 @@ public class TicketService {
     public Ticket openTicket(TicketDTO ticketDTO, List<MultipartFile> files, User user) {
         Ticket ticket = new Ticket();
 
-        Optional<TicketCategory> optionalTicketCategory = ticketCategoryRepository.findById(ticketDTO.ticketCategory_id());
+        Optional<TicketCategory> optionalTicketCategory = ticketCategoryRepository.findById(ticketDTO.getTicketCategory_id());
 
         if (optionalTicketCategory.isEmpty()) {
             return null;
         }
 
-        if (ticketDTO.name().isEmpty()) {
+        if (ticketDTO.getName().isEmpty()) {
             return null;
         }
 
-        if (ticketDTO.description().isEmpty()) {
+        if (ticketDTO.getDescription().isEmpty()) {
             return null;
         }
 
         ticket.setUser(user);
         ticket.setTicketCategory(optionalTicketCategory.get());
-        ticket.setName(ticketDTO.name());
-        ticket.setDescription(ticketDTO.description());
+        ticket.setName(ticketDTO.getName());
+        ticket.setDescription(ticketDTO.getDescription());
         ticket.setStatus("Novo");
-        ticket.setUrgency(ticketDTO.urgency());
-        ticket.setReceiveEmail(ticketDTO.receiveEmail());
+        ticket.setUrgency(ticketDTO.getUrgency());
+        ticket.setReceiveEmail(ticketDTO.getReceiveEmail());
         ticket.setCreatedAt(new Date());
         ticket.setUpdatedAt(new Date());
 
-        if (ticketDTO.observation() != null) {
-            ticket.setObservation(ticketDTO.observation());
+        if (ticketDTO.getObservation() != null) {
+            ticket.setObservation(ticketDTO.getObservation());
         }
 
         List<String> filePaths = new ArrayList<>();
@@ -76,5 +78,22 @@ public class TicketService {
 
     public Page<Ticket> getTicketsByUserId(Long userId, String status, Pageable pageable) {
         return ticketRepository.findByUserIdAndStatus(userId, status, pageable);
+    }
+
+    @Transactional
+    public Page<Ticket> getUserManageableTickets(int page, int size, String sortBy, String sortDir, String status) {
+        Sort.Direction direction = Sort.Direction.fromString(sortDir.toUpperCase());
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Page<Ticket> relatedTickets = ticketRepository.findUserRelatedTickets(user, pageable);
+
+        List<Ticket> filteredTickets = relatedTickets
+                .stream()
+                .filter(ticket -> ticket.canManage(user))
+                .toList();
+
+        return new PageImpl<>(filteredTickets, pageable, filteredTickets.size());
     }
 }

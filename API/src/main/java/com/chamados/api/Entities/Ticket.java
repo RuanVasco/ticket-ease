@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Date;
 import java.util.Set;
@@ -23,7 +24,12 @@ public class Ticket {
     User user;
 
     @ManyToMany
-    private Set<User> observers;
+    @JoinTable(
+            name = "ticket_observers",
+            joinColumns = @JoinColumn(name = "ticket_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> observers = new HashSet<>();
 
     @Setter
     @ManyToOne
@@ -88,19 +94,26 @@ public class Ticket {
     }
 
     public boolean canManage(User user) {
+        Department department = this.getDepartment();
+
+        return this.user.equals(user) ||
+                this.observers.contains(user) ||
+                (user.getDepartment() != null && user.getDepartment().equals(department) && canEdit(user));
+    }
+
+    public Department getDepartment() {
         TicketCategory ticketedCategory = this.getTicketCategory();
         Department department = null;
 
         while (ticketedCategory != null && ticketedCategory.getDepartment() == null) {
             ticketedCategory = ticketedCategory.getFather();
         }
+
         if (ticketedCategory != null) {
             department = ticketedCategory.getDepartment();
         }
 
-        return this.user.equals(user) ||
-                this.observers.contains(user) ||
-                (user.getDepartment().equals(department) && canEdit(user));
+        return department;
     }
 
 }

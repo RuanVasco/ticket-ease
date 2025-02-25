@@ -42,6 +42,10 @@ public class TicketAuthorizationManager implements AuthorizationManager<RequestA
             return new AuthorizationDecision(user.hasPermission("VIEW_TICKET"));
         }
 
+        if (method.equals("GET") && path.equals("/tickets/department")) {
+            return new AuthorizationDecision(user.hasPermission("VIEW_TICKET"));
+        }
+
         if (method.equals("GET") && path.matches("^/tickets/\\d+$")) {
             Long ticketID = extractTicketId(path);
             return new AuthorizationDecision(canViewTicket(user, ticketID));
