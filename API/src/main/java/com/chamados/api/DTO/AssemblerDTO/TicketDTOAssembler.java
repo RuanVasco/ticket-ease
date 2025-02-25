@@ -6,7 +6,6 @@ import com.chamados.api.DTO.TicketCategoryDTO;
 import com.chamados.api.DTO.UserDTO;
 import com.chamados.api.Entities.Ticket;
 import com.chamados.api.Entities.TicketCategory;
-import com.chamados.api.Entities.User;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.stereotype.Component;
@@ -34,7 +33,7 @@ public class TicketDTOAssembler implements RepresentationModelAssembler<Ticket, 
         if (ticket.getTicketCategory() != null) {
             dto.setTicketCategory(new TicketCategoryDTO(ticket.getTicketCategory()));
 
-            dto.setCategoryPath(getCategoryPath(ticket.getTicketCategory()));
+            dto.setCategoryPath((ticket.getTicketCategory().getPath()));
         }
 
         if (ticket.getUser() != null) {
@@ -55,26 +54,5 @@ public class TicketDTOAssembler implements RepresentationModelAssembler<Ticket, 
                 .getTicketById(ticket.getId())).withSelfRel());
 
         return dto;
-    }
-
-    private String getCategoryPath(TicketCategory ticketCategory) {
-        if (ticketCategory == null) {
-            return "";
-        }
-        StringBuilder path = new StringBuilder(ticketCategory.getName());
-        TicketCategory parent = ticketCategory.getFather();
-        TicketCategory lastCategory = ticketCategory;
-
-        while (parent != null) {
-            lastCategory = parent;
-            path.insert(0, parent.getName() + " > ");
-            parent = parent.getFather();
-        }
-
-        if (lastCategory.getDepartment() != null) {
-            path.insert(0, lastCategory.getDepartment().getName() + " > ");
-        }
-
-        return path.toString();
     }
 }

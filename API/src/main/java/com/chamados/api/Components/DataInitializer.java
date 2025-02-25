@@ -50,6 +50,9 @@ public class DataInitializer implements CommandLineRunner {
             Permission permissionDeleteTicket = new Permission();
             permissionDeleteTicket.setName("DELETE_TICKET");
 
+            Permission permissionEditTicket = new Permission();
+            permissionEditTicket.setName("EDIT_TICKET");
+
             Permission permissionCreateTicketCategory = new Permission();
             permissionCreateTicketCategory.setName("CREATE_TICKET_CATEGORY");
 
@@ -86,6 +89,7 @@ public class DataInitializer implements CommandLineRunner {
             permissionCreateTicket = permissionRepository.save(permissionCreateTicket);
             permissionViewTicket = permissionRepository.save(permissionViewTicket);
             permissionDeleteTicket = permissionRepository.save(permissionDeleteTicket);
+            permissionEditTicket = permissionRepository.save(permissionEditTicket);
             permissionViewProfile = permissionRepository.save(permissionViewProfile);
             permissionViewTicketCategory = permissionRepository.save(permissionViewTicketCategory);
             permissionCreateTicketCategory = permissionRepository.save(permissionCreateTicketCategory);
@@ -102,6 +106,7 @@ public class DataInitializer implements CommandLineRunner {
             permissions.add(permissionCreateTicket);
             permissions.add(permissionViewTicket);
             permissions.add(permissionDeleteTicket);
+            permissions.add(permissionEditTicket);
             permissions.add(permissionViewProfile);
             permissions.add(permissionViewTicketCategory);
             permissions.add(permissionCreateTicketCategory);
@@ -120,15 +125,6 @@ public class DataInitializer implements CommandLineRunner {
             roles.add(roleAdmin);
             roles.add(roleUser);
 
-            User user = new User();
-            user.setPassword("admin", passwordEncoder);
-            user.setName("Administrador");
-            user.setEmail("admin@admin");
-            user.setRoles(roles);
-
-            userRepository.save(user);
-            System.out.println("Usuário admin criado.");
-
             Unit matriz = new Unit();
             matriz.setName("Matriz");
             matriz.setAddress("Matriz");
@@ -139,6 +135,16 @@ public class DataInitializer implements CommandLineRunner {
             TI.setUnit(matriz);
             TI.setReceivesRequests(true);
             departmentRepository.save(TI);
+
+            User user = new User();
+            user.setPassword("admin", passwordEncoder);
+            user.setName("Administrador");
+            user.setEmail("admin@admin");
+            user.setRoles(roles);
+            user.setDepartment(TI);
+
+            userRepository.save(user);
+            System.out.println("Usuário admin criado.");
         }
     }
 }

@@ -74,7 +74,6 @@ public class TicketController {
             @RequestParam(value = "status", defaultValue = "Aberto") String status
     ) {
         Page<Ticket> tickets = ticketService.getUserManageableTickets(page, size, sortBy, sortDir, status);
-
         PagedModel<TicketDTO> pagedModel = pagedResourcesAssembler.toModel(tickets, ticketDTOAssembler);
 
         return ResponseEntity.ok(pagedModel);

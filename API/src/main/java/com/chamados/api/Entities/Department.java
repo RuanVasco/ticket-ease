@@ -10,6 +10,8 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Getter
 @Entity
 @Table(name="departments")
@@ -51,5 +53,14 @@ public class Department {
 
 	public static boolean canDelete(User user) {
 		return user.hasPermission("DELETE_DEPARTMENT");
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null || getClass() != obj.getClass()) return false;
+
+		Department department = (Department) obj;
+		return Objects.equals(this.id, department.id);
 	}
 }

@@ -88,8 +88,7 @@ public class TicketService {
 
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        Page<Ticket> relatedTickets = ticketRepository.findUserRelatedTickets(user, pageable);
-
+        Page<Ticket> relatedTickets = ticketRepository.findByStatus(status, pageable);
         List<Ticket> filteredTickets = relatedTickets
                 .stream()
                 .filter(ticket -> ticket.canManage(user))

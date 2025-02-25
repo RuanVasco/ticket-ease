@@ -47,7 +47,6 @@ const TableTicket = ({ viewMode = "readonly" }) => {
 			const res = await axiosInstance.get(url);
 
 			if (res.status === 200) {
-				console.log(res.data._embedded.ticketDTOList);
 				setData(res.data._embedded.ticketDTOList);
 				setTotalPages(res.data.totalPages);
 			} else {
