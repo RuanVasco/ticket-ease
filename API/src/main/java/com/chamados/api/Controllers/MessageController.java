@@ -65,7 +65,7 @@ public class MessageController {
             return ResponseEntity.badRequest().build();
         }
 
-        Message message = messageService.addMessager(ticket, user, messageDTO);
+        Message message = messageService.addMessage(ticket, user, messageDTO);
 
         return ResponseEntity.ok(message);
     }

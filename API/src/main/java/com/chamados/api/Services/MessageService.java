@@ -28,14 +28,14 @@ public class MessageService {
         return messageRepository.findByTicketId(ticketId);
     }
 
-    public Message addMessager(Ticket ticket, User user, MessageDTO messageDTO) {
+    public Message addMessage(Ticket ticket, User user, MessageDTO messageDTO) {
         String ticketStatus = ticket.getStatus();
 
-        if (ticketStatus.equals("Novo") && user != ticket.getUser()) {
+        if (ticketStatus.equals("Novo") && (user != ticket.getUser() && ticket.canManage(user))) {
             ticket.setStatus("Em Andamento");
         }
 
-        if (Boolean.TRUE.equals(messageDTO.getCloseTicket())) {
+        if (Boolean.TRUE.equals(messageDTO.getCloseTicket()) && ticket.canManage(user)) {
             ticket.setStatus("Fechado");
         }
 

@@ -5,6 +5,7 @@ import Header from "../../components/header/header";
 import axiosInstance from "../axiosConfig";
 import getUserData from "../getUserData";
 import DateFormatter from "../DateFormatter";
+import { checkPermission } from "../checkPermission";
 import styles from "./ticket_style.css";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -20,6 +21,7 @@ const TicketDetails = ({ id }) => {
 		closeTicket: false,
 	});
 	const [loading, setLoading] = useState(true);
+	const [isManager, setIsManager] = useState(false);
 
 	const chatEndRef = useRef(null);
 	const intervalRef = useRef(null);
@@ -27,6 +29,15 @@ const TicketDetails = ({ id }) => {
 	function getFirstName(fullName) {
 		return fullName.split(" ")[0];
 	}
+
+	useEffect(() => {
+		const checkUserPermission = async () => {
+			const isManager = await checkPermission("EDIT", "TICKET");
+			setIsManager(isManager);
+		};
+
+		checkUserPermission();
+	}, []);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -56,7 +67,7 @@ const TicketDetails = ({ id }) => {
 		const fetchMessages = async () => {
 			try {
 				const response = await axiosInstance.get(
-					`${API_BASE_URL}/messages/${id}`
+					`${API_BASE_URL}/messages/ticket/${id}`
 				);
 				if (response.status === 200 || response.status === 201) {
 					setMessages(response.data);
@@ -77,12 +88,7 @@ const TicketDetails = ({ id }) => {
 			}
 		};
 
-		fetchMessages();
-
-		if (data?.status !== "Fechado") {
-			intervalRef.current = setInterval(fetchMessages, 5000);
-		}
-
+		fetchMessages();	
 		return () => clearInterval(intervalRef.current);
 	}, [id, data?.status]);
 
@@ -106,10 +112,8 @@ const TicketDetails = ({ id }) => {
 		}
 
 		try {
-			const res = await axiosInstance.post(`${API_BASE_URL}/messages/`, {
+			const res = await axiosInstance.post(`${API_BASE_URL}/messages/ticket/${message.ticket_id}`, {
 				text: message.text,
-				user_id: message.user_id,
-				ticket_id: message.ticket_id,
 				closeTicket: close,
 			});
 
@@ -141,7 +145,7 @@ const TicketDetails = ({ id }) => {
 						<div className="d-flex flex-column">
 							<div className="box_description p-2 rounded mb-2 d-flex">
 								<div className="fw-semibold">{data?.description || ""}</div>
-								{data.filePaths && data.filePaths.length > 0 && (
+								{data?.filePaths && data.filePaths.length > 0 && (
 									<button
 										type="button"
 										className="btn-clean ms-auto"
@@ -179,7 +183,7 @@ const TicketDetails = ({ id }) => {
 											</div>
 										)
 									)
-								) : true ? ( //when user is department tecnichian
+								) : isManager ? ( 
 									<p>Envie uma mensagem para iniciar o chamado.</p>
 								) : null}
 								<div ref={chatEndRef} />
@@ -198,7 +202,7 @@ const TicketDetails = ({ id }) => {
 										Enviar
 										<BsSend className="ms-2" />
 									</button>
-									{true && ( //when user is department tecnichian
+									{isManager && ( 
 										<div className="dropup">
 											<button
 												type="button"
@@ -212,7 +216,7 @@ const TicketDetails = ({ id }) => {
 														className="dropdown-item"
 														onClick={(e) => handleSubmit(e, true)}
 													>
-														Enviar e fechar chamado
+														Enviar e finalizar chamado
 														<BsSendCheck className="ms-2" />
 													</button>
 												</li>
@@ -227,9 +231,9 @@ const TicketDetails = ({ id }) => {
 						<span>Por </span>
 						<br />
 						<div className="box_user_identity rounded p-2 mt-2">
-							<span>{data.user?.name || ""}</span> <br />
+							<span>{data?.user?.name || ""}</span> <br />
 							<span className="fw-lighter">
-								{data.user?.cargo.name || ""}
+								{data?.user?.cargo?.name || ""}
 							</span>{" "}
 							<br />
 						</div>
@@ -240,7 +244,7 @@ const TicketDetails = ({ id }) => {
 							id="user"
 							className="input-text"
 							type="text"
-							value={data.user?.department.name || ""}
+							value={data?.user?.department?.name || ""}
 							readOnly
 						/>
 						<label htmlFor="department" className="col-form-label">
@@ -250,7 +254,7 @@ const TicketDetails = ({ id }) => {
 							id="department"
 							className="input-text"
 							type="text"
-							value={data.ticketCategory?.path || ""}
+							value={data?.ticketCategory?.path || ""}
 							readOnly
 						/>
 						<label htmlFor="created_at" className="col-form-label">

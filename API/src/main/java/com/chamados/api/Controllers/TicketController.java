@@ -10,6 +10,7 @@ import com.chamados.api.Services.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -108,13 +109,17 @@ public class TicketController {
     public ResponseEntity<?> getTicketById(@PathVariable Long ticketID) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        Optional<Ticket> optionalTicket = ticketRepository.findByIdAndUser(user, ticketID);
+        Optional<Ticket> optionalTicket = ticketRepository.findById(ticketID);
 
         if (optionalTicket.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         Ticket ticket = optionalTicket.get();
+
+        if (!ticket.canManage(user) && !ticket.getUser().equals(user)) {
+            return new ResponseEntity<>("Acesso negado. Você não tem permissão.", HttpStatus.FORBIDDEN);
+        }
 
         return ResponseEntity.ok(ticket);
     }
