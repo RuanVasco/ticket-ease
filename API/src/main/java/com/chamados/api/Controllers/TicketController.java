@@ -108,7 +108,7 @@ public class TicketController {
     public ResponseEntity<?> getTicketById(@PathVariable Long ticketID) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        Optional<Ticket> optionalTicket = ticketRepository.findById(ticketID);
+        Optional<Ticket> optionalTicket = ticketRepository.findByIdAndUser(user, ticketID);
 
         if (optionalTicket.isEmpty()) {
             return ResponseEntity.notFound().build();

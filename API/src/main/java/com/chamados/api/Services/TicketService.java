@@ -1,7 +1,6 @@
 package com.chamados.api.Services;
 
 import com.chamados.api.DTO.InputDTO.TicketInputDTO;
-import com.chamados.api.DTO.TicketDTO;
 import com.chamados.api.Entities.Ticket;
 import com.chamados.api.Entities.TicketCategory;
 import com.chamados.api.Entities.User;
@@ -115,5 +114,9 @@ public class TicketService {
                 .toList();
 
         return new PageImpl<>(filteredTickets, pageable, filteredTickets.size());
+    }
+
+    public Optional<Ticket> findById(Long ticketId) {
+        return ticketRepository.findById(ticketId);
     }
 }

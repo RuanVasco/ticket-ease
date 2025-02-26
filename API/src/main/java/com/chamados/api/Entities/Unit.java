@@ -38,7 +38,7 @@ public class Unit {
 	}
 
 	public static boolean canUpdate(User user) {
-		return user.hasPermission("CREATE_UNIT");
+		return user.hasPermission("EDIT_UNIT");
 	}
 
 	public static boolean canDelete(User user) {

@@ -1,7 +1,8 @@
-package com.chamados.api;
+package com.chamados.api.Components.Config;
 
 import com.chamados.api.Authorizations.GenericAuthorizationManager;
 import com.chamados.api.Authorizations.TicketAuthorizationManager;
+import com.chamados.api.Components.SecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +18,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import com.chamados.api.Components.SecurityFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -61,12 +61,12 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.POST, "/auth/validate").permitAll()
 						.requestMatchers(HttpMethod.GET, "/permissions/has-permission").permitAll()
 						.requestMatchers("/h2-console/**").permitAll()
-						.requestMatchers("/units/**").access(unitAuthorizationManager)
+						.requestMatchers("/units/**").access(unitAuthorizationManager) //adicionar mensagem de retorno personalizada
 						.requestMatchers("/departments/**").access(departmentAuthorizationManager)
 						.requestMatchers("/tickets-category/**").access(ticketCategoryAuthorizationManager)
 						.requestMatchers("/users/**").access(userAuthorizationManager)
 						.requestMatchers("/tickets/**").access(new TicketAuthorizationManager())
-						.requestMatchers("/messages/**").access(messageAuthorizationManager) // Create a custom AuthorizationManager for messages
+						.requestMatchers("/messages/**").access(messageAuthorizationManager)
 						.requestMatchers("/cargos/**").access(cargoAuthorizationManager)
 						.requestMatchers("/profiles/**").access(roleAuthorizationManager)
 						.anyRequest().authenticated()

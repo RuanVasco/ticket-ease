@@ -30,4 +30,8 @@ public class Message {
 
     @Setter
     private Date sent_at;
+
+    public static boolean canCreate(User user) {return user.hasPermission("CREATE_MESSAGE");}
+
+    public static boolean canView(User user) {return user.hasPermission("VIEW_MESSAGE");}
 }

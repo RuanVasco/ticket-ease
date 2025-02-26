@@ -1,4 +1,4 @@
-package com.chamados.api.Components;
+package com.chamados.api.Components.Config;
 
 import com.chamados.api.Authorizations.GenericAuthorizationManager;
 import com.chamados.api.Entities.*;

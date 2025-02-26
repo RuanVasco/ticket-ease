@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Optional;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
@@ -23,7 +24,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     @Query("SELECT t FROM Ticket t WHERE (:status = 'ALL' OR LOWER(t.status) = LOWER(:status))")
     Page<Ticket> findByStatus(@Param("status") String status, Pageable pageable);
 
-    Page<Ticket> findByUserId(Long userId, Pageable pageable);
+    @Query("SELECT t FROM Ticket t WHERE t.id = :ticketId AND t.user = :user")
+    Optional<Ticket> findByIdAndUser(@Param("user") User user, @Param("ticketId") Long ticketId);
 
     @Query("SELECT t FROM Ticket t WHERE " +
             "(:userId IS NULL OR t.user.id = :userId) AND " +

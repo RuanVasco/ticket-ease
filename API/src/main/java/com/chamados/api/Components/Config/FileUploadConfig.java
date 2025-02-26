@@ -1,4 +1,4 @@
-package com.chamados.api;
+package com.chamados.api.Components.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

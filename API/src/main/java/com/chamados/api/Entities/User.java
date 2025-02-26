@@ -112,4 +112,20 @@ public class User implements UserDetails {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    public static boolean canCreate(User user) {
+        return user.hasPermission("CREATE_USER");
+    }
+
+    public static boolean canView(User user) {
+        return user.hasPermission("VIEW_USER");
+    }
+
+    public static boolean canUpdate(User user) {
+        return user.hasPermission("EDIT_USER");
+    }
+
+    public static boolean canDelete(User user) {
+        return user.hasPermission("DELETE_USER");
+    }
 }

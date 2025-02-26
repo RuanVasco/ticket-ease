@@ -89,6 +89,28 @@ public class DataInitializer implements CommandLineRunner {
             Permission permissionDeleteDepartment = new Permission();
             permissionDeleteDepartment.setName("DELETE_DEPARTMENT");
 
+            Permission permissionCreateMessage = new Permission();
+            permissionCreateMessage.setName("CREATE_MESSAGE");
+
+            Permission permissionViewMessage = new Permission();
+            permissionViewMessage.setName("VIEW_MESSAGE");
+
+            Permission permissionCreateUser = new Permission();
+            permissionCreateUser.setName("CREATE_USER");
+
+            Permission permissionViewUser = new Permission();
+            permissionViewUser.setName("VIEW_USER");
+
+            Permission permissionUpdateUser = new Permission();
+            permissionUpdateUser.setName("EDIT_USER");
+
+            Permission permissionDeleteUser = new Permission();
+            permissionDeleteUser.setName("DELETE_USER");
+
+            permissionCreateUser = permissionRepository.save(permissionCreateUser);
+            permissionViewUser = permissionRepository.save(permissionViewUser);
+            permissionUpdateUser = permissionRepository.save(permissionUpdateUser);
+            permissionDeleteUser = permissionRepository.save(permissionDeleteUser);
             permissionCreateTicket = permissionRepository.save(permissionCreateTicket);
             permissionViewTicket = permissionRepository.save(permissionViewTicket);
             permissionDeleteTicket = permissionRepository.save(permissionDeleteTicket);
@@ -104,8 +126,16 @@ public class DataInitializer implements CommandLineRunner {
             permissionDeleteDepartment = permissionRepository.save(permissionDeleteDepartment);
             permissionDeleteUnit = permissionRepository.save(permissionDeleteUnit);
             permissionUpdateUnit = permissionRepository.save(permissionUpdateUnit);
+            permissionCreateMessage = permissionRepository.save(permissionCreateMessage);
+            permissionViewMessage = permissionRepository.save(permissionViewMessage);
 
             Set<Permission> permissions = new HashSet<>();
+            permissions.add(permissionCreateUser);
+            permissions.add(permissionViewUser);
+            permissions.add(permissionUpdateUser);
+            permissions.add(permissionDeleteUser);
+            permissions.add(permissionCreateMessage);
+            permissions.add(permissionViewMessage);
             permissions.add(permissionCreateTicket);
             permissions.add(permissionViewTicket);
             permissions.add(permissionDeleteTicket);
@@ -122,11 +152,21 @@ public class DataInitializer implements CommandLineRunner {
             permissions.add(permissionDeleteUnit);
             permissions.add(permissionUpdateUnit);
 
-            roleAdmin.setPermissions(permissions);
+            Set<Permission> permissionsUser = new HashSet<>();
+            permissionsUser.add(permissionCreateMessage);
+            permissionsUser.add(permissionViewMessage);
+            permissionsUser.add(permissionCreateTicket);
+            permissionsUser.add(permissionViewTicket);
+            permissionsUser.add(permissionViewTicketCategory);
 
-            Set<Role> roles = new HashSet<>();
-            roles.add(roleAdmin);
-            roles.add(roleUser);
+            roleAdmin.setPermissions(permissions);
+            roleUser.setPermissions(permissionsUser);
+
+            Set<Role> rolesAdmin = new HashSet<>();
+            rolesAdmin.add(roleAdmin);
+
+            Set<Role> rolesUser = new HashSet<>();
+            rolesUser.add(roleUser);
 
             Unit matriz = new Unit();
             matriz.setName("Matriz");
@@ -139,6 +179,12 @@ public class DataInitializer implements CommandLineRunner {
             TI.setReceivesRequests(true);
             departmentRepository.save(TI);
 
+            Department RH = new Department();
+            RH.setName("RH");
+            RH.setUnit(matriz);
+            RH.setReceivesRequests(true);
+            departmentRepository.save(RH);
+
             TicketCategory ticketCategory = new TicketCategory();
             ticketCategory.setName("Infraestrutura");
             ticketCategory.setReceiveTickets(true);
@@ -146,15 +192,25 @@ public class DataInitializer implements CommandLineRunner {
             ticketCategory.setPath("TI");
             ticketCategoryRepository.save(ticketCategory);
 
-            User user = new User();
-            user.setPassword("admin", passwordEncoder);
-            user.setName("Administrador");
-            user.setEmail("admin@admin");
-            user.setRoles(roles);
-            user.setDepartment(TI);
+            User admin = new User();
+            admin.setPassword("admin", passwordEncoder);
+            admin.setName("Administrador");
+            admin.setEmail("admin@admin");
+            admin.setRoles(rolesAdmin);
+            admin.setDepartment(TI);
 
-            userRepository.save(user);
+            userRepository.save(admin);
             System.out.println("Usuário admin criado.");
+
+            User commonUser = new User();
+            commonUser.setPassword("user", passwordEncoder);
+            commonUser.setName("Usuário Comum");
+            commonUser.setEmail("user@user");
+            commonUser.setRoles(rolesUser);
+            commonUser.setDepartment(RH);
+
+            userRepository.save(commonUser);
+            System.out.println("Usuário comum criado.");
         }
     }
 }

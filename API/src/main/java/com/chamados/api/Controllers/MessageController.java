@@ -6,14 +6,16 @@ import com.chamados.api.Repositories.MessageRepository;
 import com.chamados.api.Repositories.TicketRepository;
 import com.chamados.api.Repositories.UserRepository;
 import com.chamados.api.Services.MessageService;
+import com.chamados.api.Services.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("messages")
@@ -31,7 +33,13 @@ public class MessageController {
     @Autowired
     MessageRepository messageRepository;
 
-    @GetMapping("/{ticketID}")
+    private final TicketService ticketService;
+
+    public MessageController(TicketService ticketService) {
+        this.ticketService = ticketService;
+    }
+
+    @GetMapping("/ticket/{ticketID}")
     public ResponseEntity<?> getMessages(@PathVariable Long ticketID) {
         List<Message> listMessage = messageService.getByTicketId(ticketID);
         if (listMessage.isEmpty()) {
@@ -41,38 +49,23 @@ public class MessageController {
         }
     }
 
-    @PostMapping("/")
-    public ResponseEntity<?> createMessage(@RequestBody MessageDTO messageDTO) {
-        Optional<User> optionalUser = userRepository.findById(messageDTO.user_id());
-        Optional<Ticket> optionalTicket = ticketRepository.findById(messageDTO.ticket_id());
+    @PostMapping("/ticket/{ticketId}")
+    public ResponseEntity<?> createMessage(@RequestBody MessageDTO messageDTO, @PathVariable Long ticketId) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (optionalUser.isEmpty()) return ResponseEntity.badRequest().build();
-        if (optionalTicket.isEmpty()) return ResponseEntity.badRequest().build();
+        Ticket ticket = ticketService.findById(ticketId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
 
-        User user = optionalUser.get();
-        Ticket ticket = optionalTicket.get();
+        if (!ticket.canManage(user) && !ticket.getUser().equals(user)) {
+            return new ResponseEntity<>("Acesso negado. Você não tem permissão.", HttpStatus.FORBIDDEN);
+        }
 
         String ticketStatus = ticket.getStatus();
-
         if (ticketStatus.equals("Fechado")) {
             return ResponseEntity.badRequest().build();
         }
 
-        if (ticketStatus.equals("Novo") && user != ticket.getUser()) {
-            ticket.setStatus("Em Andamento");
-        }
-
-        if (Boolean.TRUE.equals(messageDTO.closeTicket())) {
-            ticket.setStatus("Fechado");
-        }
-
-        Message message = new Message();
-        message.setText(messageDTO.text());
-        message.setUser(user);
-        message.setTicket(ticket);
-        message.setSent_at(new Date());
-
-        messageRepository.save(message);
+        Message message = messageService.addMessager(ticket, user, messageDTO);
 
         return ResponseEntity.ok(message);
     }
