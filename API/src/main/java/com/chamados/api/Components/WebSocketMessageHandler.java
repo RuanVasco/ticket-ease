@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Component
-public class WebSocketTicketHandler implements WebSocketHandler {
+public class WebSocketMessageHandler implements WebSocketHandler {
 
     private final CopyOnWriteArrayList<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
 

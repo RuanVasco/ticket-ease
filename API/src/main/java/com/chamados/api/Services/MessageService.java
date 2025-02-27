@@ -1,5 +1,6 @@
 package com.chamados.api.Services;
 
+import com.chamados.api.Components.WebSocketMessageHandler;
 import com.chamados.api.DTO.MessageDTO;
 import com.chamados.api.Entities.Message;
 import com.chamados.api.Entities.Ticket;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -18,17 +20,17 @@ public class MessageService {
     @Autowired
     MessageRepository messageRepository;
 
-    private final SimpMessagingTemplate messagingTemplate;
+    private final WebSocketMessageHandler messagingHandler;
 
-    public MessageService(SimpMessagingTemplate messagingTemplate) {
-        this.messagingTemplate = messagingTemplate;
+    public MessageService(WebSocketMessageHandler messagingHandler) {
+        this.messagingHandler = messagingHandler;
     }
 
     public List<Message> getByTicketId(Long ticketId) {
         return messageRepository.findByTicketId(ticketId);
     }
 
-    public Message addMessage(Ticket ticket, User user, MessageDTO messageDTO) {
+    public Message addMessage(Ticket ticket, User user, MessageDTO messageDTO) throws IOException {
         String ticketStatus = ticket.getStatus();
 
         if (ticketStatus.equals("Novo") && (user != ticket.getUser() && ticket.canManage(user))) {
@@ -46,7 +48,7 @@ public class MessageService {
         message.setSent_at(new Date());
 
         Message savedMessage = messageRepository.save(message);
-        messagingTemplate.convertAndSend("/topic/" + ticket.getId(), new MessageDTO(savedMessage));
+        messagingHandler.sendMessageToClients(savedMessage.getText());
 
         return message;
     }
