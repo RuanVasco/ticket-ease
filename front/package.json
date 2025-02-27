@@ -22,15 +22,10 @@
     "react": "^18",
     "react-dom": "^18",
     "react-icons": "^5.2.1",
-    "react-router-dom": "^6.24.0",
-    "sockjs-client": "^1.6.1",
-    "stomp": "^0.1.1",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
-    "@types/node": "20.14.8",
     "@types/react": "18.3.3",
-    "@types/sockjs-client": "^1.5.4",
     "eslint": "^8",
     "eslint-config-next": "14.2.4",
     "typescript": "5.5.2"

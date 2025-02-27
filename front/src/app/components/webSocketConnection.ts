@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
-import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -12,23 +10,22 @@ interface Message {
 
 const useWebSocketConnection = () => {
     const [messages, setMessages] = useState<Message[]>([]);
-    const router: AppRouterInstance = useRouter();
+    const router = useRouter();
 
     useEffect(() => {
         if (typeof window === "undefined") return;
 
-        const userToken: string = localStorage.getItem("token") ?? "";
+        const userToken = localStorage.getItem("token") ?? "";
 
         if (!userToken) {
             router.push('/auth/login');
             return;
         }
 
-        const socket = new SockJS(`${API_BASE_URL}/ws`);
         const stompClient = new Client({
-            webSocketFactory: () => socket,
+            brokerURL: `ws://${API_BASE_URL?.replace(/^http/, "ws")}/ws`, 
             connectHeaders: { Authorization: `Bearer ${userToken}` },
-            debug: (str) => console.log(str), 
+            debug: (str) => console.log(str),
             reconnectDelay: 5000, 
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,

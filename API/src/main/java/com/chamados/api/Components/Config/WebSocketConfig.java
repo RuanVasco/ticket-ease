@@ -24,7 +24,6 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(webSocketHandler, "/ws")
                 .addInterceptors(new WebSocketAuthInterceptor(tokenService))
-                .setAllowedOrigins("http://localhost:3000")
-                .withSockJS();
+                .setAllowedOrigins("http://localhost:3000");
     }
 }
