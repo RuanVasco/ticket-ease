@@ -20,17 +20,13 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
-        System.out.println("tst");
         if (request instanceof ServletServerHttpRequest) {
             ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
 
-            String token = servletRequest.getServletRequest().getParameter("token");
-            if (token == null) {
-                System.out.println(token);
-                String authHeader = servletRequest.getServletRequest().getHeader("Authorization");
-                if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                    token = authHeader.substring(7);
-                }
+            String token = "";
+            String authHeader = servletRequest.getServletRequest().getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7);
             }
 
             if (token != null && tokenService.validateToken(token) != null) {

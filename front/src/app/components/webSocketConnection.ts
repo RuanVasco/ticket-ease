@@ -23,10 +23,10 @@ const useWebSocketConnection = () => {
         }
 
         const stompClient = new Client({
-            brokerURL: `ws://${API_BASE_URL?.replace(/^http/, "ws")}/ws`, 
+            brokerURL: `${API_BASE_URL?.replace(/^http/, "ws")}/ws`, 
             connectHeaders: { Authorization: `Bearer ${userToken}` },
             debug: (str) => console.log(str),
-            reconnectDelay: 5000, 
+            reconnectDelay: 1000, 
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
         });
