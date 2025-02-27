@@ -1,8 +1,8 @@
 package com.chamados.api.Components.Config;
 
 import com.chamados.api.Components.WebSocketAuthInterceptor;
+import com.chamados.api.Components.WebSocketTicketHandler;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
@@ -11,9 +11,9 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
 
-    private final WebSocketHandler webSocketHandler;
+    private final WebSocketTicketHandler webSocketHandler;
 
-    public WebSocketConfig(WebSocketHandler webSocketHandler) {
+    public WebSocketConfig(WebSocketTicketHandler webSocketHandler) {
         this.webSocketHandler = webSocketHandler;
     }
 

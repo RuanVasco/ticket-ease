@@ -1,14 +1,15 @@
 package com.chamados.api.Services;
 
+import com.chamados.api.Components.WebSocketTicketHandler;
 import com.chamados.api.DTO.MessageDTO;
 import com.chamados.api.Entities.Message;
 import com.chamados.api.Entities.Ticket;
 import com.chamados.api.Entities.User;
 import com.chamados.api.Repositories.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -18,11 +19,7 @@ public class MessageService {
     @Autowired
     MessageRepository messageRepository;
 
-    private final SimpMessagingTemplate messagingTemplate;
-
-    public MessageService(SimpMessagingTemplate messagingTemplate) {
-        this.messagingTemplate = messagingTemplate;
-    }
+    private WebSocketTicketHandler webSocketHandler;
 
     public List<Message> getByTicketId(Long ticketId) {
         return messageRepository.findByTicketId(ticketId);
@@ -46,7 +43,14 @@ public class MessageService {
         message.setSent_at(new Date());
 
         Message savedMessage = messageRepository.save(message);
-        messagingTemplate.convertAndSend("/topic/" + ticket.getId(), new MessageDTO(savedMessage));
+
+        try {
+            WebSocketTicketHandler.sendMessageToUser(ticket.getId(), new MessageDTO(savedMessage));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         return message;
     }

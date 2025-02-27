@@ -16,17 +16,16 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
             org.springframework.http.server.ServerHttpResponse response,
             WebSocketHandler wsHandler,
             Map<String, Object> attributes) {
-
-        if (request instanceof ServletServerHttpRequest servletRequest) {
-            HttpServletRequest httpServletRequest = servletRequest.getServletRequest();
-            String token = httpServletRequest.getParameter("userToken");
-
-            if (token == null || !isValidToken(token)) {
-                return false;
-            }
-
-            attributes.put("userToken", token);
-        }
+//        if (request instanceof ServletServerHttpRequest servletRequest) {
+//            HttpServletRequest httpServletRequest = servletRequest.getServletRequest();
+//            String token = httpServletRequest.getParameter("userToken");
+//
+//            if (token == null || !isValidToken(token)) {
+//                return false;
+//            }
+//
+//            attributes.put("userToken", token);
+//        }
         return true;
     }
 
