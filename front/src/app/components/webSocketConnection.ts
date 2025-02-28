@@ -23,22 +23,33 @@ const useWebSocketConnection = () => {
         }
 
         const stompClient = new Client({
-            brokerURL: `${API_BASE_URL?.replace(/^http/, "ws")}/ws`, 
-            connectHeaders: { Authorization: `Bearer ${userToken}` },
+            brokerURL: `${API_BASE_URL?.replace(/^http/, "ws")}/ws`,
+            connectHeaders: {
+                Authorization: `Bearer ${userToken}`,
+            },
             debug: (str) => console.log(str),
-            reconnectDelay: 1000, 
+            reconnectDelay: 2000,
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
         });
 
-        stompClient.onConnect = (frame) => {
-            console.log("Conectado: ", frame);
+        stompClient.beforeConnect = () => {
+            const token = localStorage.getItem("token"); 
 
-            stompClient.subscribe('/topic/messages', (message) => {
-                const newMessage: Message = JSON.parse(message.body);
-                setMessages((prev) => [...prev, newMessage]);
+            if (token) {                
+                stompClient.connectHeaders = {
+                    Authorization: `Bearer ${token}`,
+                };
+            }
+            console.log("Tentando conectar com o token JWT...");
+            return new Promise<void>((resolve) => {
+                resolve();
             });
-        };
+        },
+
+            stompClient.onConnect = (frame) => {
+                console.log("Conectado: ", frame);
+            };
 
         stompClient.onStompError = (frame) => {
             console.error("Erro na conexão STOMP: ", frame.headers.message);

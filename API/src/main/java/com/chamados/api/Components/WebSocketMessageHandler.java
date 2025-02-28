@@ -7,16 +7,18 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class WebSocketMessageHandler implements WebSocketHandler {
 
-    private final CopyOnWriteArrayList<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
+    private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        sessions.add(session);
+        sessions.put(session.getId(), session);
+        sendMessageToClients("Usuário " + session.getId() + " Conectou");
     }
 
     @Override
@@ -30,7 +32,7 @@ public class WebSocketMessageHandler implements WebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        sessions.remove(session);
+        sessions.remove(session.getId());
     }
 
     @Override
@@ -39,7 +41,8 @@ public class WebSocketMessageHandler implements WebSocketHandler {
     }
 
     public void sendMessageToClients(String message) throws IOException {
-        for (WebSocketSession session : sessions) {
+        for (Map.Entry<String, WebSocketSession> entry : sessions.entrySet()) {
+            WebSocketSession session = entry.getValue();
             if (session.isOpen()) {
                 session.sendMessage(new TextMessage(message));
             }

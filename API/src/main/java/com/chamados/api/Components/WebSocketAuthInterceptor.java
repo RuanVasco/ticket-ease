@@ -19,21 +19,9 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
     }
 
     @Override
-    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
-        if (request instanceof ServletServerHttpRequest) {
-            ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
-
-            String token = "";
-            String authHeader = servletRequest.getServletRequest().getHeader("Authorization");
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                token = authHeader.substring(7);
-            }
-
-            if (token != null && tokenService.validateToken(token) != null) {
-                return true;
-            }
-        }
-        return false;
+    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
+                                   WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
+        return true;
     }
 
     @Override
@@ -42,9 +30,5 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
             org.springframework.http.server.ServerHttpResponse response,
             WebSocketHandler wsHandler,
             Exception exception) {
-    }
-
-    private boolean isValidToken(String token) {
-        return true;
     }
 }
