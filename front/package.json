@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@stomp/stompjs": "^7.0.0",
     "@types/bootstrap": "^5.2.10",
     "axios": "^1.7.2",
     "bootstrap": "^5.3.3",
@@ -21,11 +22,9 @@
     "react": "^18",
     "react-dom": "^18",
     "react-icons": "^5.2.1",
-    "react-router-dom": "^6.24.0",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
-    "@types/node": "20.14.8",
     "@types/react": "18.3.3",
     "eslint": "^8",
     "eslint-config-next": "14.2.4",

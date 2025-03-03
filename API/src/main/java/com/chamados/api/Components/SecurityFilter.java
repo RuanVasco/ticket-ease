@@ -28,6 +28,11 @@ public class SecurityFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+		if (request.getRequestURI().startsWith("/ws")) {
+			filterChain.doFilter(request, response);
+			return;
+		}
+
 		String token = this.recoverToken(request);
 		if (token != null) {
 			String login = tokenService.validateToken(token);
@@ -49,5 +54,7 @@ public class SecurityFilter extends OncePerRequestFilter {
 
 		return authHeader.substring(7);
 	}
+
+
 	
 }

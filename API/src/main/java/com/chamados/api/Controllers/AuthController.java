@@ -88,7 +88,7 @@ public class AuthController {
     }
     
     @PostMapping("/validate")
-    public ResponseEntity<?> validate(@RequestBody @Valid ValidateDTO token) {    	
+    public ResponseEntity<?> validate(@RequestBody @Valid ValidateDTO token) {
     	if (!Objects.equals(tokenService.validateToken(token.token()), "")) {
     		return ResponseEntity.ok().build();
     	} else {

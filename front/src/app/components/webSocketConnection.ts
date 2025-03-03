@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { Client } from "@stomp/stompjs";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -8,39 +8,59 @@ interface Message {
 	content: string;
 }
 
-const webSocketConnection = () => {
+const useWebSocketConnection = () => {
 	const [messages, setMessages] = useState<Message[]>([]);
-	const router: AppRouterInstance = useRouter();
+	const router = useRouter();
 
 	useEffect(() => {
-		const userToken: string = localStorage.getItem("token") ?? "";
+		if (typeof window === "undefined") return;
 
-		if (userToken === "") {
-			router.push("/auth/login");
+		const userToken = localStorage.getItem("token") ?? "";
+
+		if (!userToken) {
+			return;
 		}
 
-		const socket = new WebSocket(`ws://${API_BASE_URL}/ws`);
+		const stompClient = new Client({
+			brokerURL: `${API_BASE_URL?.replace(/^http/, "ws")}/ws`,
+			connectHeaders: {
+				Authorization: `Bearer ${userToken}`,
+			},
+			debug: (str) => console.log(str),
+			reconnectDelay: 2000,
+			heartbeatIncoming: 4000,
+			heartbeatOutgoing: 4000,
+		});
 
-		socket.onopen = () => {
-			console.log("Conectado ao WebSocket");
-			socket.send(JSON.stringify({ type: "auth", token: userToken }));
+		(stompClient.beforeConnect = () => {
+			const token = localStorage.getItem("token");
+
+			if (token) {
+				stompClient.connectHeaders = {
+					Authorization: `Bearer ${token}`,
+				};
+			}
+			console.log("Tentando conectar com o token JWT...");
+			return new Promise<void>((resolve) => {
+				resolve();
+			});
+		}),
+			(stompClient.onConnect = (frame) => {
+				console.log("Conectado: ", frame);
+			});
+
+		stompClient.onStompError = (frame) => {
+			console.error("Erro na conexão STOMP: ", frame.headers.message);
 		};
 
-		socket.onmessage = (event) => {
-			const newMessage = JSON.parse(event.data);
-			setMessages((prev) => [...prev, newMessage]);
-		};
-
-		socket.onclose = () => {
-			console.log("WebSocket desconectado");
-		};
+		stompClient.activate();
 
 		return () => {
-			socket.close();
+			stompClient.deactivate();
 		};
-	}, []);
+	}, [router]);
 
 	return messages;
 };
 
-export default webSocketConnection;
+export default useWebSocketConnection;

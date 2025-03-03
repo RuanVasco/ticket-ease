@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +51,7 @@ public class MessageController {
     }
 
     @PostMapping("/ticket/{ticketId}")
-    public ResponseEntity<?> createMessage(@RequestBody MessageDTO messageDTO, @PathVariable Long ticketId) {
+    public ResponseEntity<?> createMessage(@RequestBody MessageDTO messageDTO, @PathVariable Long ticketId) throws IOException {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Ticket ticket = ticketService.findById(ticketId)
