@@ -18,7 +18,6 @@ const useWebSocketConnection = () => {
         const userToken = localStorage.getItem("token") ?? "";
 
         if (!userToken) {
-            router.push('/auth/login');
             return;
         }
 
