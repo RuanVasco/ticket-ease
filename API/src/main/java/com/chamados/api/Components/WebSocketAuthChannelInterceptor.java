@@ -8,6 +8,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,7 @@ public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
         if (accessor.getCommand() != null && accessor.getCommand().equals(StompCommand.CONNECT)) {
             String token = accessor.getFirstNativeHeader("Authorization");
@@ -41,7 +42,7 @@ public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
                 throw new RuntimeException(e);
             }
 
-            SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()));
+            accessor.setUser(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()));
         }
 
         return message;

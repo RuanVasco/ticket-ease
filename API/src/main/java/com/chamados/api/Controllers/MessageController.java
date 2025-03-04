@@ -14,12 +14,14 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -59,9 +61,8 @@ public class MessageController {
 
     @MessageMapping("/message/{ticketId}")
     @SendTo("/topic/messages/{ticketId}")
-    public ResponseEntity<?> sendMessage(@DestinationVariable Long ticketId, @Payload MessageDTO messageDTO) throws IOException {
-        System.out.println(messageDTO);
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public ResponseEntity<?> sendMessage(@DestinationVariable Long ticketId, @Payload MessageDTO messageDTO, Principal principal) throws IOException {
+        User user = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
         Ticket ticket = ticketService.findById(ticketId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
 
