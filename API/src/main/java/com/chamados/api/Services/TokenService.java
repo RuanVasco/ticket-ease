@@ -3,7 +3,10 @@ package com.chamados.api.Services;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Optional;
 
+import com.chamados.api.Components.TokenUtils;
+import com.chamados.api.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +18,12 @@ import com.chamados.api.Entities.User;
 
 @Service
 public class TokenService {
+
+	private final UserRepository userRepository;
+
+	public TokenService(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
 
 	@Value("${api.security.token.secret}")
 	private String secret;
@@ -38,6 +47,19 @@ public class TokenService {
 		} catch (JWTCreationException exception) {
 			throw new RuntimeException("Error while generating access token", exception);
 		}
+	}
+
+	public User getUserFromToken(String token) {
+		Long userId = decodeUserIdFromToken(token);
+
+		Optional<User> optionalUser = userRepository.findById(userId);
+
+        return optionalUser.orElse(null);
+
+    }
+
+	private Long decodeUserIdFromToken(String token) {
+		return TokenUtils.extractUserId(token);
 	}
 
 	public String generateRefreshToken(User user) {

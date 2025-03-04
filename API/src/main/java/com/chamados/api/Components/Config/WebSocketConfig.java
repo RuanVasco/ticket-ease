@@ -1,48 +1,38 @@
 package com.chamados.api.Components.Config;
 
-import com.chamados.api.Components.WebSocketAuthInterceptor;
-<<<<<<< HEAD
-import com.chamados.api.Components.WebSocketTicketHandler;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
-import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
-=======
-import com.chamados.api.Components.WebSocketMessageInterceptor;
+import com.chamados.api.Components.WebSocketAuthChannelInterceptor;
 import com.chamados.api.Services.TokenService;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.messaging.access.intercept.MessageMatcherDelegatingAuthorizationManager;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
->>>>>>> b5de06d61482e6455b86bd94f3b1d169ae095df3
 
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-<<<<<<< HEAD
-    private final WebSocketTicketHandler webSocketHandler;
-
-    public WebSocketConfig(WebSocketTicketHandler webSocketHandler) {
-        this.webSocketHandler = webSocketHandler;
-=======
     private final TokenService tokenService;
-    private final WebSocketMessageInterceptor webSocketMessageInterceptor;
+    private final WebSocketAuthChannelInterceptor webSocketAuthChannelInterceptor;
 
-    public WebSocketConfig(TokenService tokenService, WebSocketMessageInterceptor webSocketMessageInterceptor) {
+    public WebSocketConfig(TokenService tokenService, WebSocketAuthChannelInterceptor webSocketAuthChannelInterceptor) {
         this.tokenService = tokenService;
-        this.webSocketMessageInterceptor = webSocketMessageInterceptor;
->>>>>>> b5de06d61482e6455b86bd94f3b1d169ae095df3
+        this.webSocketAuthChannelInterceptor = webSocketAuthChannelInterceptor;
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .addInterceptors(new WebSocketAuthInterceptor(tokenService))
-                .setAllowedOrigins("http://localhost:3000")
-                .withSockJS();
+                .setAllowedOrigins("http://localhost:3000");
     }
 
     @Override
@@ -53,6 +43,31 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(webSocketMessageInterceptor);
+        registration.interceptors(webSocketAuthChannelInterceptor);
+    }
+
+    @Bean
+    AuthorizationManager<Message<?>> webSocketMessageAuthorizationManager() {
+        return MessageMatcherDelegatingAuthorizationManager.builder()
+                .simpTypeMatchers(SimpMessageType.CONNECT, SimpMessageType.DISCONNECT, SimpMessageType.OTHER)
+                .permitAll()
+                .simpDestMatchers("/topic/**", "/queue/**", "/app/**")
+                .permitAll()
+                .anyMessage()
+                .authenticated()
+                .build();
+    }
+
+    @Bean
+    public ChannelInterceptor csrfChannelInterceptor() {
+        return new ChannelInterceptor() {
+            @Override
+            public Message<?> preSend(Message<?> message, MessageChannel channel) {
+                if (SimpMessageType.CONNECT.equals(StompHeaderAccessor.wrap(message).getMessageType())) {
+                    return message;
+                }
+                return message;
+            }
+        };
     }
 }
