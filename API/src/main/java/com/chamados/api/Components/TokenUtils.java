@@ -1,29 +1,32 @@
 package com.chamados.api.Components;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.SignedJWT;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
+import java.text.ParseException;
 
-
+@Component
 public class TokenUtils {
 
     @Value("${api.security.token.secret}")
-    private static String secretKey;
+    private String SECRET_KEY;
 
-    public static Long extractUserId(String token) {
+    public Long extractUserId(String token) throws JOSEException, ParseException {
         token = token.replace("Bearer ", "");
 
-        SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes());
+        SignedJWT decodedJWT = SignedJWT.parse(token);
 
-        Claims claims = Jwts.parser()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        JWSVerifier verifier = new MACVerifier(SECRET_KEY);
+        if (!decodedJWT.verify(verifier)) {
+            throw new IllegalArgumentException("Token inválido ou assinatura incorreta");
+        }
 
-        return claims.get("id", Long.class);
+        var claims = decodedJWT.getJWTClaimsSet();
+
+        return claims.getLongClaim("id");
     }
 }

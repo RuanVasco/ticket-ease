@@ -1,5 +1,6 @@
 package com.chamados.api.Services;
 
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -7,6 +8,7 @@ import java.util.Optional;
 
 import com.chamados.api.Components.TokenUtils;
 import com.chamados.api.Repositories.UserRepository;
+import com.nimbusds.jose.JOSEException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +22,11 @@ import com.chamados.api.Entities.User;
 public class TokenService {
 
 	private final UserRepository userRepository;
+	private final TokenUtils tokenUtils;
 
-	public TokenService(UserRepository userRepository) {
+	public TokenService(UserRepository userRepository, TokenUtils tokenUtils) {
 		this.userRepository = userRepository;
+		this.tokenUtils = tokenUtils;
 	}
 
 	@Value("${api.security.token.secret}")
@@ -49,7 +53,7 @@ public class TokenService {
 		}
 	}
 
-	public User getUserFromToken(String token) {
+	public User getUserFromToken(String token) throws ParseException, JOSEException {
 		Long userId = decodeUserIdFromToken(token);
 
 		Optional<User> optionalUser = userRepository.findById(userId);
@@ -58,8 +62,8 @@ public class TokenService {
 
     }
 
-	private Long decodeUserIdFromToken(String token) {
-		return TokenUtils.extractUserId(token);
+	private Long decodeUserIdFromToken(String token) throws ParseException, JOSEException {
+		return tokenUtils.extractUserId(token);
 	}
 
 	public String generateRefreshToken(User user) {

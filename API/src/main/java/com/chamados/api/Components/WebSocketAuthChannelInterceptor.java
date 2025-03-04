@@ -2,6 +2,7 @@ package com.chamados.api.Components;
 
 import com.chamados.api.Entities.User;
 import com.chamados.api.Services.TokenService;
+import com.nimbusds.jose.JOSEException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -10,6 +11,8 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import java.text.ParseException;
 
 @Component
 public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
@@ -31,7 +34,12 @@ public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
                 throw new IllegalArgumentException("Token inválido ou ausente");
             }
 
-            User user = tokenService.getUserFromToken(token);
+            User user = null;
+            try {
+                user = tokenService.getUserFromToken(token);
+            } catch (ParseException | JOSEException e) {
+                throw new RuntimeException(e);
+            }
 
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()));
         }
