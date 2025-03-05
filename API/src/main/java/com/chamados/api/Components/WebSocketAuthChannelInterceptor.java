@@ -1,27 +1,36 @@
 package com.chamados.api.Components;
 
 import com.chamados.api.Entities.User;
+import com.chamados.api.Services.TicketService;
 import com.chamados.api.Services.TokenService;
 import com.nimbusds.jose.JOSEException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
+import java.util.List;
 
 @Component
 public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
 
     private final TokenService tokenService;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final TicketService ticketService;
 
-    public WebSocketAuthChannelInterceptor(TokenService tokenService) {
+    public WebSocketAuthChannelInterceptor(TokenService tokenService,
+                                           @Qualifier("customMessagingTemplate") SimpMessagingTemplate messagingTemplate,
+                                           TicketService ticketService) {
         this.tokenService = tokenService;
+        this.messagingTemplate = messagingTemplate;
+        this.ticketService = ticketService;
     }
 
     @Override

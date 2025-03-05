@@ -44,18 +44,8 @@ const useWebSocketConnection = () => {
 		stompClient.onConnect = function (frame) {
 			console.log("Conectado ao WebSocket!");
 
-			stompClient.subscribe(`/topic/messages/1`, function (message) {
-				console.log("Mensagem recebida: " + message.body);
-
-				setMessages((prevMessages) => [
-					...prevMessages,
-					{ content: message.body },
-				]);
-			});
-
-			stompClient.publish({
-				destination: "/app/message/1",
-				body: JSON.stringify({ content: "Olá, Ticket!" }),
+			stompClient.subscribe("/topic/tickets", function (message) {
+				console.log("Tickets recebidos:", JSON.parse(message.body));
 			});
 		};
 

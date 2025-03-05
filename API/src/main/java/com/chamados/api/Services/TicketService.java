@@ -80,6 +80,10 @@ public class TicketService {
         return ticketRepository.findByUserIdAndStatus(userId, status, pageable);
     }
 
+    public List<Long> getTicketIdsByUserId(Long userId, String status) {
+        return ticketRepository.findTicketIdsByUserIdAndStatus(userId, status);
+    }
+
     @Transactional
     public Page<Ticket> getUserManageableTickets(int page, int size, String sortBy, String sortDir, String status) {
         Sort.Direction direction = Sort.Direction.fromString(sortDir.toUpperCase());

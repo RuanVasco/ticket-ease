@@ -48,17 +48,6 @@ public class MessageController {
         this.ticketService = ticketService;
     }
 
-//    @MessageMapping("/connect")
-//    @SendTo("/topic/user/{userId}")
-//    public List<Long> handleConnect() {
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        User user = (User) auth.getPrincipal();
-//
-//        List<Ticket> tickets = ticketService.getTicketsByUserId(user.getId());
-//
-//        return tickets.stream().map(Ticket::getId).collect(Collectors.toList());
-//    }
-
     @MessageMapping("/message/{ticketId}")
     @SendTo("/topic/messages/{ticketId}")
     public ResponseEntity<?> sendMessage(@DestinationVariable Long ticketId, @Payload MessageDTO messageDTO, Principal principal) throws IOException {
@@ -79,6 +68,14 @@ public class MessageController {
         Message message = messageService.addMessage(ticket, user, messageDTO);
 
         return ResponseEntity.ok(message);
+    }
+
+    @MessageMapping("/tickets")
+    @SendTo("/topic/tickets")
+    public List<Long> getUserTickets(Principal principal) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
+        System.out.println(user.getName());
+        return ticketService.getTicketIdsByUserId(user.getId(), "ALL");
     }
 
     @GetMapping("/ticket/{ticketID}")
