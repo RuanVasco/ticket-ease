@@ -95,7 +95,7 @@ public class Ticket {
 
     public boolean canManage(User user) {
         Department department = this.getDepartment();
-\
+
         return user.getDepartment() != null && user.getDepartment().equals(department) && canEdit(user);
     }
 

@@ -22,7 +22,7 @@ const Home = () => {
 
 	return (
 		<main>
-			<Header pageName="Chamados" />
+			<Header pageName="SolicitaAí" />
 			<div className="d-flex justify-content-center align-items-center div_main_content">
 				<div className="d-flex align-items-top">
 					<Link

@@ -59,6 +59,7 @@ const TicketDetails = ({ id }) => {
 	};
 
 	useEffect(() => {
+		console.log(messagesWebSocket)
 		if (messagesWebSocket.length > 0) {
 			setMessages((prevMessages) => {
 				const newMessages = messagesWebSocket.filter(

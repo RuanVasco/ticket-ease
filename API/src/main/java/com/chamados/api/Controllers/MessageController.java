@@ -96,7 +96,7 @@ public class MessageController {
 
         Message message = messageService.addMessage(ticket, user, messageDTO);
 
-        simpMessagingTemplate.convertAndSend("/topic/messages/" + ticketId, message);
+        simpMessagingTemplate.convertAndSend("/topic/ticket/" + ticketId, message);
     }
 
     @GetMapping("/ticket/{ticketID}")
