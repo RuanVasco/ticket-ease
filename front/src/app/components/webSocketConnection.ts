@@ -1,67 +1,70 @@
 import { useEffect, useState } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { Client } from "@stomp/stompjs";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 interface Message {
-    content: string;
+	content: string;
 }
 
 const useWebSocketConnection = () => {
-    const [messages, setMessages] = useState<Message[]>([]);
-    const router = useRouter();
+	const [messages, setMessages] = useState<Message[]>([]);
+	const router = useRouter();
 
-    useEffect(() => {
-        if (typeof window === "undefined") return;
+	useEffect(() => {
+		if (typeof window === "undefined") return;
 
-        const userToken = localStorage.getItem("token") ?? "";
+		const token = localStorage.getItem("token");
+		if (!token) {
+			return;
+		}
 
-        if (!userToken) {
-            return;
-        }
+		const stompClient = new Client({
+			brokerURL: `${API_BASE_URL?.replace(/^http/, "ws")}/ws`,
+			connectHeaders: {
+				Authorization: `Bearer ${token}`,
+			},
+			debug: (str) => console.log(str),
+			reconnectDelay: 5000,
+			heartbeatIncoming: 4000,
+			heartbeatOutgoing: 4000,
+			beforeConnect: () => {
+				return new Promise<void>((resolve) => {
+					if (token) {
+						stompClient.connectHeaders = {
+							Authorization: `Bearer ${token}`,
+						};
+					}
+					resolve();
+				});
+			},
+		});
 
-        const stompClient = new Client({
-            brokerURL: `${API_BASE_URL?.replace(/^http/, "ws")}/ws`,
-            connectHeaders: {
-                Authorization: `Bearer ${userToken}`,
-            },
-            debug: (str) => console.log(str),
-            reconnectDelay: 2000,
-            heartbeatIncoming: 4000,
-            heartbeatOutgoing: 4000,
-        });
+		stompClient.onConnect = function (frame) {
+			console.log("Conectado ao WebSocket!");
 
-        stompClient.beforeConnect = () => {
-            const token = localStorage.getItem("token"); 
+			stompClient.subscribe("/topic/tickets", function (message) {
+				console.log("Tickets recebidos:", JSON.parse(message.body));
+			});
+		};
 
-            if (token) {                
-                stompClient.connectHeaders = {
-                    Authorization: `Bearer ${token}`,
-                };
-            }
-            console.log("Tentando conectar com o token JWT...");
-            return new Promise<void>((resolve) => {
-                resolve();
-            });
-        },
+		stompClient.onStompError = function (frame) {
+			console.error("Erro no STOMP: " + frame.headers["message"]);
+			console.error("Detalhes: " + frame.body);
+		};
 
-            stompClient.onConnect = (frame) => {
-                console.log("Conectado: ", frame);
-            };
+		stompClient.activate();
 
-        stompClient.onStompError = (frame) => {
-            console.error("Erro na conexão STOMP: ", frame.headers.message);
-        };
+		return () => {
+			if (stompClient.connected) {
+				stompClient.deactivate();
+				console.log("WebSocket desconectado.");
+			}
+		};
+	}, [router]);
 
-        stompClient.activate();
-
-        return () => {
-            stompClient.deactivate();
-        };
-    }, [router]);
-
-    return messages;
+	return messages;
 };
 
 export default useWebSocketConnection;

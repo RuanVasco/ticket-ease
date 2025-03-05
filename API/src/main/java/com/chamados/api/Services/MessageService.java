@@ -1,6 +1,5 @@
 package com.chamados.api.Services;
 
-import com.chamados.api.Components.CustomWebSocketHandler;
 import com.chamados.api.DTO.MessageDTO;
 import com.chamados.api.Entities.Message;
 import com.chamados.api.Entities.Ticket;
@@ -18,12 +17,6 @@ public class MessageService {
 
     @Autowired
     MessageRepository messageRepository;
-
-    private final CustomWebSocketHandler messagingHandler;
-
-    public MessageService(CustomWebSocketHandler messagingHandler) {
-        this.messagingHandler = messagingHandler;
-    }
 
     public List<Message> getByTicketId(Long ticketId) {
         return messageRepository.findByTicketId(ticketId);
@@ -47,7 +40,7 @@ public class MessageService {
         message.setSent_at(new Date());
 
         Message savedMessage = messageRepository.save(message);
-        messagingHandler.sendMessageToClients(savedMessage.getText());
+        System.out.println(message);
 
         return message;
     }

@@ -1,9 +1,14 @@
 package com.chamados.api.Services;
 
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Optional;
 
+import com.chamados.api.Components.TokenUtils;
+import com.chamados.api.Repositories.UserRepository;
+import com.nimbusds.jose.JOSEException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +20,14 @@ import com.chamados.api.Entities.User;
 
 @Service
 public class TokenService {
+
+	private final UserRepository userRepository;
+	private final TokenUtils tokenUtils;
+
+	public TokenService(UserRepository userRepository, TokenUtils tokenUtils) {
+		this.userRepository = userRepository;
+		this.tokenUtils = tokenUtils;
+	}
 
 	@Value("${api.security.token.secret}")
 	private String secret;
@@ -38,6 +51,19 @@ public class TokenService {
 		} catch (JWTCreationException exception) {
 			throw new RuntimeException("Error while generating access token", exception);
 		}
+	}
+
+	public User getUserFromToken(String token) throws ParseException, JOSEException {
+		Long userId = decodeUserIdFromToken(token);
+
+		Optional<User> optionalUser = userRepository.findById(userId);
+
+        return optionalUser.orElse(null);
+
+    }
+
+	private Long decodeUserIdFromToken(String token) throws ParseException, JOSEException {
+		return tokenUtils.extractUserId(token);
 	}
 
 	public String generateRefreshToken(User user) {
