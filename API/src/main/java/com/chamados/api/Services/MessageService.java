@@ -1,13 +1,12 @@
 package com.chamados.api.Services;
 
-import com.chamados.api.Components.WebSocketMessageHandler;
+import com.chamados.api.Components.CustomWebSocketHandler;
 import com.chamados.api.DTO.MessageDTO;
 import com.chamados.api.Entities.Message;
 import com.chamados.api.Entities.Ticket;
 import com.chamados.api.Entities.User;
 import com.chamados.api.Repositories.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -20,9 +19,9 @@ public class MessageService {
     @Autowired
     MessageRepository messageRepository;
 
-    private final WebSocketMessageHandler messagingHandler;
+    private final CustomWebSocketHandler messagingHandler;
 
-    public MessageService(WebSocketMessageHandler messagingHandler) {
+    public MessageService(CustomWebSocketHandler messagingHandler) {
         this.messagingHandler = messagingHandler;
     }
 
