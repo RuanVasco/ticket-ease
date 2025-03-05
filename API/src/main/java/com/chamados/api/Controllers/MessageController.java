@@ -14,9 +14,8 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -24,7 +23,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @RestController
 @RequestMapping("messages")
@@ -43,9 +42,11 @@ public class MessageController {
     MessageRepository messageRepository;
 
     private final TicketService ticketService;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
-    public MessageController(TicketService ticketService) {
+    public MessageController(TicketService ticketService, SimpMessagingTemplate simpMessagingTemplate) {
         this.ticketService = ticketService;
+        this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
     @MessageMapping("/message/{ticketId}")
@@ -71,11 +72,15 @@ public class MessageController {
     }
 
     @MessageMapping("/tickets")
-    @SendTo("/topic/tickets")
-    public List<Long> getUserTickets(Principal principal) {
+    public void getUserTickets(@Payload Map<String, String> payload, Principal principal) {
         User user = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
-        System.out.println(user.getName());
-        return ticketService.getTicketIdsByUserId(user.getId(), "ALL");
+        String userId = payload.get("userId");
+
+        System.out.println("Usuário autenticado: " + user.getName());
+        List<Long> tickets = ticketService.getTicketIdsByUserId(user.getId(), "ALL");
+        System.out.println("Tickets encontrados: " + tickets);
+
+        simpMessagingTemplate.convertAndSend("/queue/tickets-" + userId, tickets);
     }
 
     @GetMapping("/ticket/{ticketID}")

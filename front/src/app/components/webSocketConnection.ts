@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Client } from "@stomp/stompjs";
+import getUserData from "./getUserData";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -10,6 +11,7 @@ interface Message {
 
 const useWebSocketConnection = () => {
 	const [messages, setMessages] = useState<Message[]>([]);
+	const [tickets, setTickets] = useState<number[]>([]);
 	const router = useRouter();
 
 	useEffect(() => {
@@ -19,6 +21,18 @@ const useWebSocketConnection = () => {
 		if (!token) {
 			return;
 		}
+
+		const userData = getUserData(); 
+        if (!userData) {
+            console.error("Dados do usuário não encontrados no token.");
+            return;
+        }
+
+        const userId = userData.id; 
+        if (!userId) {
+            console.error("userId não encontrado no token.");
+            return;
+        }
 
 		const stompClient = new Client({
 			brokerURL: `${API_BASE_URL?.replace(/^http/, "ws")}/ws`,
@@ -44,9 +58,16 @@ const useWebSocketConnection = () => {
 		stompClient.onConnect = function (frame) {
 			console.log("Conectado ao WebSocket!");
 
-			stompClient.subscribe("/topic/tickets", function (message) {
-				console.log("Tickets recebidos:", JSON.parse(message.body));
-			});
+			stompClient.subscribe(`/queue/tickets-${userId}`, function (message) {
+                const tickets = JSON.parse(message.body);
+                console.log("Tickets recebidos:", tickets);
+                setTickets(tickets); 
+            });
+
+            stompClient.publish({
+                destination: "/app/tickets",
+                body: JSON.stringify({ action: "getTickets", userId }),
+            });
 		};
 
 		stompClient.onStompError = function (frame) {
