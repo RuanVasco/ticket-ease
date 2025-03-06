@@ -1,6 +1,6 @@
 ## To do:
   - Authorization with permissions and profiles. Create a manageable modal on the admin page.
-  - Messages with websocket.
+  - Chat with websocket.
   - Dashboard on tickets manage page.
   - Notifications.
 
