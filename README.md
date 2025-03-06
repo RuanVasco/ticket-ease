@@ -1,7 +1,8 @@
 ## To do:
-  - Authorization with permissions and profiles. Create a manageable modal on the admin page.</li>
-  - Dashboard on tickets manage page.</li>
-  - Notifications.</li>
+  - Authorization with permissions and profiles. Create a manageable modal on the admin page.
+  - Messages with websocket.
+  - Dashboard on tickets manage page.
+  - Notifications.
 
 ## Implementation: 
   Create /front/.env.local file and put the API URL there.<br>
