@@ -120,7 +120,7 @@ const TicketDetails = ({ id }) => {
 		if (stompClient && stompClient.connected) {
 			try {
 				stompClient.publish({
-					destination: `/topic/ticket/${id}`,
+					destination: `/app/ticket/${id}`,
 					body: JSON.stringify({
 						text: message.text,
 						closeTicket: close,

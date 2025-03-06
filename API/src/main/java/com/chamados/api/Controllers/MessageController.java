@@ -77,8 +77,9 @@ public class MessageController {
         simpMessagingTemplate.convertAndSend("/queue/user/" + userId + "/tickets", ticketsId);
     }
 
-    @MessageMapping("/topic/ticket/{ticketId}")
+    @MessageMapping("/ticket/{ticketId}")
     public void sendMessage(@DestinationVariable Long ticketId, @Payload MessageDTO messageDTO, Principal principal) throws IOException {
+        System.out.println("Mensagem recebida: " + messageDTO.getText());
         User user = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
         Ticket ticket = ticketService.findById(ticketId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
@@ -90,8 +91,6 @@ public class MessageController {
         if ("Fechado".equals(ticket.getStatus())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Este ticket está fechado.");
         }
-
-        System.out.println("Mensagem recebida: " + messageDTO.getText());
 
         Message message = messageService.addMessage(ticket, user, messageDTO);
 
