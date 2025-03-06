@@ -8,6 +8,7 @@ import com.chamados.api.Repositories.UserRepository;
 import com.chamados.api.Services.MessageService;
 import com.chamados.api.Services.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -15,15 +16,18 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.socket.messaging.SessionConnectEvent;
 
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("messages")
@@ -49,38 +53,49 @@ public class MessageController {
         this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
-    @MessageMapping("/message/{ticketId}")
-    @SendTo("/topic/messages/{ticketId}")
-    public ResponseEntity<?> sendMessage(@DestinationVariable Long ticketId, @Payload MessageDTO messageDTO, Principal principal) throws IOException {
+    @MessageMapping("/user/{userId}/tickets")
+    public void receiveTickets(@DestinationVariable Long userId, Principal principal) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
+
+        if (!user.getId().equals(userId)) {
+            System.out.println("Erro de permissão: O usuário não tem permissão para acessar os tickets de outro usuário.");
+            return;
+        }
+
+        List<Ticket> tickets = ticketService.getTicketsByUserId(userId, "ALL");
+        List<Long> ticketsId = new ArrayList<>();
+        for (Ticket ticket : tickets) {
+            if (!ticket.canManage(user) && !ticket.getUser().equals(user)) {
+                System.out.println("Erro de permissão: O usuário não tem permissão para acessar o ticket " + ticket.getId());
+                continue;
+            }
+
+            System.out.println("Usuário com permissão para o ticket: "+ ticket.getId());
+            ticketsId.add(ticket.getId());
+        }
+
+        simpMessagingTemplate.convertAndSend("/queue/user/" + userId + "/tickets", ticketsId);
+    }
+
+    @MessageMapping("/topic/ticket/{ticketId}")
+    public void sendMessage(@DestinationVariable Long ticketId, @Payload MessageDTO messageDTO, Principal principal) throws IOException {
         User user = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
         Ticket ticket = ticketService.findById(ticketId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
 
         if (!ticket.canManage(user) && !ticket.getUser().equals(user)) {
-            return new ResponseEntity<>("Acesso negado. Você não tem permissão.", HttpStatus.FORBIDDEN);
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado. Você não tem permissão.");
         }
 
-        String ticketStatus = ticket.getStatus();
-        if (ticketStatus.equals("Fechado")) {
-            return ResponseEntity.badRequest().build();
+        if ("Fechado".equals(ticket.getStatus())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Este ticket está fechado.");
         }
 
-        System.out.println(messageDTO.getText());
+        System.out.println("Mensagem recebida: " + messageDTO.getText());
+
         Message message = messageService.addMessage(ticket, user, messageDTO);
 
-        return ResponseEntity.ok(message);
-    }
-
-    @MessageMapping("/tickets")
-    public void getUserTickets(@Payload Map<String, String> payload, Principal principal) {
-        User user = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
-        String userId = payload.get("userId");
-
-        System.out.println("Usuário autenticado: " + user.getName());
-        List<Long> tickets = ticketService.getTicketIdsByUserId(user.getId(), "ALL");
-        System.out.println("Tickets encontrados: " + tickets);
-
-        simpMessagingTemplate.convertAndSend("/queue/tickets-" + userId, tickets);
+        simpMessagingTemplate.convertAndSend("/topic/messages/" + ticketId, message);
     }
 
     @GetMapping("/ticket/{ticketID}")

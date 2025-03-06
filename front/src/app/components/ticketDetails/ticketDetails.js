@@ -3,6 +3,7 @@ import { BsSendCheck, BsSend } from "react-icons/bs";
 import { FaPaperclip } from "react-icons/fa6";
 import Header from "../../components/header/header";
 import axiosInstance from "../axiosConfig";
+import { useWebSocket } from "../webSocketContext";
 import getUserData from "../getUserData";
 import DateFormatter from "../DateFormatter";
 import { checkPermission } from "../checkPermission";
@@ -16,8 +17,6 @@ const TicketDetails = ({ id }) => {
 	const [messages, setMessages] = useState([]);
 	const [message, setMessage] = useState({
 		text: "",
-		user_id: userData ? userData.id : null,
-		ticket_id: parseInt(id, 10),
 		closeTicket: false,
 	});
 	const [loading, setLoading] = useState(true);
@@ -25,6 +24,8 @@ const TicketDetails = ({ id }) => {
 
 	const chatEndRef = useRef(null);
 	const intervalRef = useRef(null);
+
+	const stompClient = useWebSocket();
 
 	function getFirstName(fullName) {
 		return fullName.split(" ")[0];
@@ -65,6 +66,11 @@ const TicketDetails = ({ id }) => {
 
 	useEffect(() => {
 		const fetchMessages = async () => {
+			if (!id) {
+				console.error("ticketId não está definido.");
+				return;
+			}
+
 			try {
 				const response = await axiosInstance.get(
 					`${API_BASE_URL}/messages/ticket/${id}`
@@ -88,7 +94,7 @@ const TicketDetails = ({ id }) => {
 			}
 		};
 
-		fetchMessages();	
+		fetchMessages();
 		return () => clearInterval(intervalRef.current);
 	}, [id, data?.status]);
 
@@ -111,25 +117,48 @@ const TicketDetails = ({ id }) => {
 			return;
 		}
 
-		try {
-			const res = await axiosInstance.post(`${API_BASE_URL}/messages/ticket/${message.ticket_id}`, {
-				text: message.text,
-				closeTicket: close,
-			});
+		if (stompClient && stompClient.connected) {
+			try {
+				stompClient.publish({
+					destination: `/topic/ticket/${id}`,
+					body: JSON.stringify({
+						text: message.text,
+						closeTicket: close,
+					}),
+				});
 
-			if (res.status === 200 || res.status === 201) {
-				if (res.data.ticket.status === "Fechado") {
+				setMessages((prevMessages) => [...prevMessages, { text: message.text, closeTicket: close }]);
+				setMessage({ ...message, text: "" });
+
+				if (close) {
 					location.reload();
 				}
-
-				setMessages((prevMessages) => [...prevMessages, res.data]);
-				setMessage({ ...message, text: "" });
-			} else {
-				console.error("Erro ao enviar mensagem:", res.status);
+			} catch (error) {
+				console.error("Erro ao enviar mensagem via WebSocket:", error);
 			}
-		} catch (error) {
-			console.error("Erro ao enviar mensagem:", error);
+		} else {
+			console.error("WebSocket não conectado.");
 		}
+
+		// try {
+		// 	const res = await axiosInstance.post(`${API_BASE_URL}/messages/ticket/${message.ticket_id}`, {
+		// 		text: message.text,
+		// 		closeTicket: close,
+		// 	});
+
+		// 	if (res.status === 200 || res.status === 201) {
+		// 		if (res.data.ticket.status === "Fechado") {
+		// 			location.reload();
+		// 		}
+
+		// 		setMessages((prevMessages) => [...prevMessages, res.data]);
+		// 		setMessage({ ...message, text: "" });
+		// 	} else {
+		// 		console.error("Erro ao enviar mensagem:", res.status);
+		// 	}
+		// } catch (error) {
+		// 	console.error("Erro ao enviar mensagem:", error);
+		// }
 	};
 
 	if (loading) {
@@ -183,7 +212,7 @@ const TicketDetails = ({ id }) => {
 											</div>
 										)
 									)
-								) : isManager ? ( 
+								) : isManager ? (
 									<p>Envie uma mensagem para iniciar o chamado.</p>
 								) : null}
 								<div ref={chatEndRef} />
@@ -202,7 +231,7 @@ const TicketDetails = ({ id }) => {
 										Enviar
 										<BsSend className="ms-2" />
 									</button>
-									{isManager && ( 
+									{isManager && (
 										<div className="dropup">
 											<button
 												type="button"

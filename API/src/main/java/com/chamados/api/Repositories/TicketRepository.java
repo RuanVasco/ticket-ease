@@ -42,6 +42,11 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Long> findTicketIdsByUserIdAndStatus(@Param("userId") Long userId, @Param("status") String status);
 
     @Query("SELECT t FROM Ticket t WHERE " +
+            "(:userId IS NULL OR t.user.id = :userId) AND " +
+            "(:status = 'ALL' OR LOWER(t.status) = LOWER(:status))")
+    List<Ticket> findsByUserIdAndStatus(@Param("userId") Long userId, @Param("status") String status);
+
+    @Query("SELECT t FROM Ticket t WHERE " +
             "(:status = 'ALL' OR LOWER(t.status) = LOWER(:status)) AND " +
             "(LOWER(t.name) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
             " LOWER(t.description) LIKE LOWER(CONCAT('%', :query, '%')) OR " +

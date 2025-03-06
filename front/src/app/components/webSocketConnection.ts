@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Client } from "@stomp/stompjs";
+import { useWebSocket } from "./webSocketContext";
 import getUserData from "./getUserData";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 interface Message {
 	content: string;
@@ -12,62 +10,54 @@ interface Message {
 const useWebSocketConnection = () => {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [tickets, setTickets] = useState<number[]>([]);
+	const stompClient = useWebSocket();
 	const router = useRouter();
 
 	useEffect(() => {
-		if (typeof window === "undefined") return;
+		if (stompClient && tickets.length > 0) {
+			console.log("Tickets atualizados:", tickets);
+
+			tickets.forEach((ticketId) => {
+				stompClient.subscribe(`/topic/ticket/${ticketId}`, (message) => {
+					console.log("Mensagem recebida no tópico /topic/ticket/" + ticketId, message.body);
+				});
+			});
+		}
+	}, [tickets, stompClient]);
+
+	useEffect(() => {
+		if (typeof window === "undefined" || !stompClient) return;
 
 		const token = localStorage.getItem("token");
 		if (!token) {
 			return;
 		}
 
-		const userData = getUserData(); 
-        if (!userData) {
-            console.error("Dados do usuário não encontrados no token.");
-            return;
-        }
+		const userData = getUserData();
+		if (!userData) {
+			console.error("Dados do usuário não encontrados no token.");
+			return;
+		}
 
-        const userId = userData.id; 
-        if (!userId) {
-            console.error("userId não encontrado no token.");
-            return;
-        }
-
-		const stompClient = new Client({
-			brokerURL: `${API_BASE_URL?.replace(/^http/, "ws")}/ws`,
-			connectHeaders: {
-				Authorization: `Bearer ${token}`,
-			},
-			debug: (str) => console.log(str),
-			reconnectDelay: 5000,
-			heartbeatIncoming: 4000,
-			heartbeatOutgoing: 4000,
-			beforeConnect: () => {
-				return new Promise<void>((resolve) => {
-					if (token) {
-						stompClient.connectHeaders = {
-							Authorization: `Bearer ${token}`,
-						};
-					}
-					resolve();
-				});
-			},
-		});
+		const userId = userData.id;
+		if (!userId) {
+			console.error("userId não encontrado no token.");
+			return;
+		}
 
 		stompClient.onConnect = function (frame) {
 			console.log("Conectado ao WebSocket!");
 
-			stompClient.subscribe(`/queue/tickets-${userId}`, function (message) {
-                const tickets = JSON.parse(message.body);
-                console.log("Tickets recebidos:", tickets);
-                setTickets(tickets); 
-            });
+			stompClient.subscribe(`/queue/user/${userId}/tickets`, (message) => {
+				const tickets = JSON.parse(message.body);
+				setTickets(tickets);
+				console.log("Tickets recebidos:", tickets);
+			});
 
-            stompClient.publish({
-                destination: "/app/tickets",
-                body: JSON.stringify({ action: "getTickets", userId }),
-            });
+			stompClient.publish({
+				destination: `/app/user/${userId}/tickets`,
+				body: JSON.stringify({})
+			});
 		};
 
 		stompClient.onStompError = function (frame) {
@@ -75,15 +65,13 @@ const useWebSocketConnection = () => {
 			console.error("Detalhes: " + frame.body);
 		};
 
-		stompClient.activate();
-
 		return () => {
 			if (stompClient.connected) {
 				stompClient.deactivate();
 				console.log("WebSocket desconectado.");
 			}
 		};
-	}, [router]);
+	}, [stompClient]);
 
 	return messages;
 };
