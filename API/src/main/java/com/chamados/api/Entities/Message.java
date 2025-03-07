@@ -29,7 +29,7 @@ public class Message {
     private Ticket ticket;
 
     @Setter
-    private Date sent_at;
+    private Date sentAt;
 
     public static boolean canCreate(User user) {return user.hasPermission("CREATE_MESSAGE");}
 

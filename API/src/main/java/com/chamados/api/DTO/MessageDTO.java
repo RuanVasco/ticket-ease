@@ -15,7 +15,7 @@ public class MessageDTO {
     Boolean closeTicket;
     User user;
     Ticket ticket;
-    Date sent_at;
+    Date sentAt;
 
     public MessageDTO(String text, Boolean closeTicket) {
         this.text = text;
@@ -26,6 +26,6 @@ public class MessageDTO {
         this.text = message.getText();
         this.user = message.getUser();
         this.ticket = message.getTicket();
-        this.sent_at = message.getSent_at();
+        this.sentAt = message.getSentAt();
     }
 }

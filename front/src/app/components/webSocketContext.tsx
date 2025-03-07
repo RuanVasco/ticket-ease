@@ -3,18 +3,24 @@ import { Client } from "@stomp/stompjs";
 import getUserData from "./getUserData";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-const WebSocketContext = createContext<Client | null>(null);
+
+interface WebSocketContextType {
+    stompClient: Client | null;
+}
+
+const WebSocketContext = createContext<WebSocketContextType | null>(null);
 
 interface WebSocketProviderProps {
     children: ReactNode;
 }
 
-const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
+export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
     const [stompClient, setStompClient] = useState<Client | null>(null);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token) {
+            console.error("Token não encontrado no localStorage.");
             return;
         }
 
@@ -39,17 +45,16 @@ const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
             reconnectDelay: 5000,
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
-            beforeConnect: () => {
-                return new Promise<void>((resolve) => {
-                    if (token) {
-                        client.connectHeaders = {
-                            Authorization: `Bearer ${token}`,
-                        };
-                    }
-                    resolve();
-                });
-            },
         });
+
+        client.onConnect = function (frame) {
+            console.log("Conectado ao WebSocket!");
+        };
+
+        client.onStompError = function (frame) {
+            console.error("Erro no STOMP: " + frame.headers["message"]);
+            console.error("Detalhes: " + frame.body);
+        };
 
         client.activate();
         setStompClient(client);
@@ -63,15 +68,16 @@ const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
     }, []);
 
     return (
-        <WebSocketContext.Provider value={stompClient} >
+        <WebSocketContext.Provider value={{ stompClient }}>
             {children}
         </WebSocketContext.Provider>
     );
 };
 
 export const useWebSocket = () => {
-    const stompClient = useContext(WebSocketContext);
-    return stompClient;
+    const context = useContext(WebSocketContext);
+    if (!context) {
+        throw new Error("useWebSocket deve ser usado dentro de um WebSocketProvider");
+    }
+    return context;
 };
-
-export default WebSocketProvider;

@@ -3,15 +3,16 @@ import { BsSendCheck, BsSend } from "react-icons/bs";
 import { FaPaperclip } from "react-icons/fa6";
 import Header from "../../components/header/header";
 import axiosInstance from "../axiosConfig";
-import { useWebSocket } from "../webSocketContext";
 import getUserData from "../getUserData";
 import DateFormatter from "../DateFormatter";
-import { checkPermission } from "../checkPermission";
+import { checkPermission } from "../checkPermission"
+import { useWebSocketMessages } from "../MessagesWebSocket"
 import styles from "./ticket_style.css";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const TicketDetails = ({ id }) => {
+	const { messagesWebSocket, sendMessage } = useWebSocketMessages(id);
 	const userData = getUserData();
 	const [data, setData] = useState(null);
 	const [messages, setMessages] = useState([]);
@@ -25,35 +26,50 @@ const TicketDetails = ({ id }) => {
 	const chatEndRef = useRef(null);
 	const intervalRef = useRef(null);
 
-	const stompClient = useWebSocket();
+	const [page, setPage] = useState(0);
+	const [hasMore, setHasMore] = useState(true);
+	const pageSize = 10;
 
 	function getFirstName(fullName) {
 		return fullName.split(" ")[0];
 	}
 
-	const getMessages = async () => {
-		const response = await axiosInstance.get(
-			`${API_BASE_URL}/messages/ticket/${id}`
-		);
+	const loadOlderMessages = async () => {
+		if (!hasMore) return;
 
-		if (response.status === 200 || response.status === 201) {
-			setMessages(response.data);
+		try {
+			const response = await axiosInstance.get(
+				`${API_BASE_URL}/messages/ticket/${id}?page=${page}&size=${pageSize}&sort=sentAt`
+			);
 
-			const lastMessage =
-				response.data.length > 0
-					? response.data[response.data.length - 1]
-					: null;
-			if (lastMessage && lastMessage.ticket.status === "Fechado") {
-				clearInterval(intervalRef.current);
-				setData((prevData) => ({
-					...prevData,
-					status: "Fechado",
-				}));
+			if (response.status === 200 || response.status === 201) {
+				setMessages((prevMessages) => [...response.data.content, ...prevMessages]);
+				setPage((prevPage) => prevPage + 1);
+				setHasMore(!response.data.last);
 			}
-		} else {
-			console.error("Erro ao buscar mensagens:", response.status);
+		} catch (error) {
+			console.error("Erro ao buscar mensagens:", error);
 		}
 	};
+
+	const handleScroll = (e) => {
+		if (e.target.scrollTop === 0 && hasMore) {
+			loadOlderMessages();
+		}
+	};
+
+	useEffect(() => {
+		if (messagesWebSocket.length > 0) {
+			setMessages((prevMessages) => {
+				const newMessages = messagesWebSocket.filter(
+					(msg) => !prevMessages.some((m) => m.id === msg.id)
+				);
+				return [...prevMessages, ...newMessages];
+			});
+	
+			chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+		}
+	}, [messagesWebSocket]);
 
 	useEffect(() => {
 		const checkUserPermission = async () => {
@@ -96,7 +112,10 @@ const TicketDetails = ({ id }) => {
 			}
 
 			try {
-				getMessages();
+				setMessages([]);
+				setPage(0);
+    			setHasMore(true);
+				loadOlderMessages();
 			} catch (error) {
 				console.error("Erro ao buscar mensagens:", error);
 			}
@@ -107,7 +126,18 @@ const TicketDetails = ({ id }) => {
 	}, [id, data?.status]);
 
 	useEffect(() => {
-		chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+		if (messages.length === 0) return;
+	
+		const chatContainer = chatEndRef.current?.parentNode;
+		if (!chatContainer) return;
+	
+		const isAtBottom =
+			chatContainer.scrollHeight - chatContainer.scrollTop ===
+			chatContainer.clientHeight;
+	
+		if (!isAtBottom) {
+			chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+		}
 	}, [messages]);
 
 	const handleInputChange = (event) => {
@@ -125,32 +155,34 @@ const TicketDetails = ({ id }) => {
 			return;
 		}
 
-		if (stompClient && stompClient.connected) {
-			try {
-				stompClient.publish({
-					destination: `/app/ticket/${id}`,
-					body: JSON.stringify({
-						text: message.text,
-						closeTicket: close,
-					}),
-				});
+		sendMessage(message.text, close, id);
+		setMessage({ ...message, text: "" });
 
-				try {
-					getMessages();
-					setMessage({ ...message, text: "" });
-				} catch (error) {
-					console.error("Erro ao buscar mensagens:", error);
-				}
+		// if (stompClient && stompClient.connected) {
+		// 	try {
+		// 		stompClient.publish({
+		// 			destination: `/app/ticket/${id}`,
+		// 			body: JSON.stringify({
+		// 				text: message.text,
+		// 				closeTicket: close,
+		// 			}),
+		// 		});
 
-				if (close) {
-					location.reload();
-				}
-			} catch (error) {
-				console.error("Erro ao enviar mensagem via WebSocket:", error);
-			}
-		} else {
-			console.error("WebSocket não conectado.");
-		}
+		// 		try {
+		// 			setMessage({ ...message, text: "" });
+		// 		} catch (error) {
+		// 			console.error("Erro ao buscar mensagens:", error);
+		// 		}
+
+		// 		if (close) {
+		// 			location.reload();
+		// 		}
+		// 	} catch (error) {
+		// 		console.error("Erro ao enviar mensagem via WebSocket:", error);
+		// 	}
+		// } else {
+		// 	console.error("WebSocket não conectado.");
+		// }
 
 		// try {
 		// 	const res = await axiosInstance.post(`${API_BASE_URL}/messages/ticket/${message.ticket_id}`, {
@@ -202,7 +234,7 @@ const TicketDetails = ({ id }) => {
 										</button>
 									)}
 							</div>
-							<div className="chat_content rounded px-2 pb-3">
+							<div className="chat_content rounded px-2 pb-3" onScroll={handleScroll}>
 								{messages.length > 0 ? (
 									messages.map((msg) =>
 										msg.user.id === userData.id ? (
@@ -217,7 +249,7 @@ const TicketDetails = ({ id }) => {
 														)}
 														<span> - </span>
 														{new DateFormatter(
-															msg.sent_at
+															msg.sentAt
 														).toDateTime()}
 													</div>
 													{msg.text}
@@ -235,7 +267,7 @@ const TicketDetails = ({ id }) => {
 														)}
 														<span> - </span>
 														{new DateFormatter(
-															msg.sent_at
+															msg.sentAt
 														).toDateTime()}
 													</div>
 													{msg.text}

@@ -6,6 +6,8 @@ import com.chamados.api.Entities.Ticket;
 import com.chamados.api.Entities.User;
 import com.chamados.api.Repositories.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -37,11 +39,14 @@ public class MessageService {
         message.setText(messageDTO.getText());
         message.setUser(user);
         message.setTicket(ticket);
-        message.setSent_at(new Date());
+        message.setSentAt(new Date());
 
         Message savedMessage = messageRepository.save(message);
-        System.out.println(message);
 
         return message;
+    }
+
+    public Page<Message> getByTicketId(Long ticketID, Pageable pageable) {
+        return messageRepository.findByTicketId(ticketID, pageable);
     }
 }

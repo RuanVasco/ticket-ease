@@ -8,26 +8,24 @@ import com.chamados.api.Repositories.UserRepository;
 import com.chamados.api.Services.MessageService;
 import com.chamados.api.Services.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.socket.messaging.SessionConnectEvent;
 
+import org.springframework.data.domain.Pageable;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("messages")
@@ -102,12 +100,14 @@ public class MessageController {
     }
 
     @GetMapping("/ticket/{ticketID}")
-    public ResponseEntity<?> getMessages(@PathVariable Long ticketID) {
-        List<Message> listMessage = messageService.getByTicketId(ticketID);
-        if (listMessage.isEmpty()) {
-            return ResponseEntity.ok(new ArrayList<>());
-        } else {
-            return ResponseEntity.ok(listMessage);
-        }
+    public ResponseEntity<Page<Message>> getMessages(
+            @PathVariable Long ticketID,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("sentAt"));
+        Page<Message> messages = messageService.getByTicketId(ticketID, pageable);
+
+        return ResponseEntity.ok(messages);
     }
 }
