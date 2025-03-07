@@ -31,6 +31,30 @@ const TicketDetails = ({ id }) => {
 		return fullName.split(" ")[0];
 	}
 
+	const getMessages = async () => {
+		const response = await axiosInstance.get(
+			`${API_BASE_URL}/messages/ticket/${id}`
+		);
+
+		if (response.status === 200 || response.status === 201) {
+			setMessages(response.data);
+
+			const lastMessage =
+				response.data.length > 0
+					? response.data[response.data.length - 1]
+					: null;
+			if (lastMessage && lastMessage.ticket.status === "Fechado") {
+				clearInterval(intervalRef.current);
+				setData((prevData) => ({
+					...prevData,
+					status: "Fechado",
+				}));
+			}
+		} else {
+			console.error("Erro ao buscar mensagens:", response.status);
+		}
+	};
+
 	useEffect(() => {
 		const checkUserPermission = async () => {
 			const isManager = await checkPermission("EDIT", "TICKET");
@@ -72,23 +96,7 @@ const TicketDetails = ({ id }) => {
 			}
 
 			try {
-				const response = await axiosInstance.get(
-					`${API_BASE_URL}/messages/ticket/${id}`
-				);
-				if (response.status === 200 || response.status === 201) {
-					setMessages(response.data);
-
-					const lastMessage =
-						response.data.length > 0
-							? response.data[response.data.length - 1]
-							: null;
-					if (lastMessage && lastMessage.ticket.status === "Fechado") {
-						clearInterval(intervalRef.current);
-						setData((prevData) => ({ ...prevData, status: "Fechado" }));
-					}
-				} else {
-					console.error("Erro ao buscar mensagens:", response.status);
-				}
+				getMessages();
 			} catch (error) {
 				console.error("Erro ao buscar mensagens:", error);
 			}
@@ -127,8 +135,12 @@ const TicketDetails = ({ id }) => {
 					}),
 				});
 
-				setMessages((prevMessages) => [...prevMessages, { text: message.text, closeTicket: close }]);
-				setMessage({ ...message, text: "" });
+				try {
+					getMessages();
+					setMessage({ ...message, text: "" });
+				} catch (error) {
+					console.error("Erro ao buscar mensagens:", error);
+				}
 
 				if (close) {
 					location.reload();
@@ -167,45 +179,64 @@ const TicketDetails = ({ id }) => {
 
 	return (
 		<main>
-			<Header pageName={`Chamado ${data?.id || ""} - ${data?.name || ""}`} />
+			<Header
+				pageName={`Chamado ${data?.id || ""} - ${data?.name || ""}`}
+			/>
 			<div className="container">
 				<div className="row mt-3">
 					<div className="col-9">
 						<div className="d-flex flex-column">
 							<div className="box_description p-2 rounded mb-2 d-flex">
-								<div className="fw-semibold">{data?.description || ""}</div>
-								{data?.filePaths && data.filePaths.length > 0 && (
-									<button
-										type="button"
-										className="btn-clean ms-auto"
-										data-bs-toggle="modal"
-										data-bs-target="#attachmentsModal"
-									>
-										Anexos <FaPaperclip />
-									</button>
-								)}
+								<div className="fw-semibold">
+									{data?.description || ""}
+								</div>
+								{data?.filePaths &&
+									data.filePaths.length > 0 && (
+										<button
+											type="button"
+											className="btn-clean ms-auto"
+											data-bs-toggle="modal"
+											data-bs-target="#attachmentsModal"
+										>
+											Anexos <FaPaperclip />
+										</button>
+									)}
 							</div>
 							<div className="chat_content rounded px-2 pb-3">
 								{messages.length > 0 ? (
 									messages.map((msg) =>
 										msg.user.id === userData.id ? (
-											<div key={msg.id} className="mt-3 message-box-sent">
+											<div
+												key={msg.id}
+												className="mt-3 message-box-sent"
+											>
 												<div className="message-bubble">
 													<div className="box_message_details mb-2">
-														{getFirstName(msg.user.name)}
+														{getFirstName(
+															msg.user.name
+														)}
 														<span> - </span>
-														{new DateFormatter(msg.sent_at).toDateTime()}
+														{new DateFormatter(
+															msg.sent_at
+														).toDateTime()}
 													</div>
 													{msg.text}
 												</div>
 											</div>
 										) : (
-											<div key={msg.id} className="mt-3 message-box-received">
+											<div
+												key={msg.id}
+												className="mt-3 message-box-received"
+											>
 												<div className="message-bubble">
 													<div className="box_message_details mb-2">
-														{getFirstName(msg.user.name)}
+														{getFirstName(
+															msg.user.name
+														)}
 														<span> - </span>
-														{new DateFormatter(msg.sent_at).toDateTime()}
+														{new DateFormatter(
+															msg.sent_at
+														).toDateTime()}
 													</div>
 													{msg.text}
 												</div>
@@ -213,12 +244,18 @@ const TicketDetails = ({ id }) => {
 										)
 									)
 								) : isManager ? (
-									<p>Envie uma mensagem para iniciar o chamado.</p>
+									<p>
+										Envie uma mensagem para iniciar o
+										chamado.
+									</p>
 								) : null}
 								<div ref={chatEndRef} />
 							</div>
 							{data?.status !== "Fechado" && (
-								<form className="mt-3 input-group" onSubmit={handleSubmit}>
+								<form
+									className="mt-3 input-group"
+									onSubmit={handleSubmit}
+								>
 									<input
 										type="text"
 										className="input-text form-control"
@@ -227,7 +264,10 @@ const TicketDetails = ({ id }) => {
 										onChange={handleInputChange}
 										placeholder="Digite sua mensagem..."
 									/>
-									<button type="submit" className="btn_send_message">
+									<button
+										type="submit"
+										className="btn_send_message"
+									>
 										Enviar
 										<BsSend className="ms-2" />
 									</button>
@@ -243,9 +283,15 @@ const TicketDetails = ({ id }) => {
 												<li>
 													<button
 														className="dropdown-item"
-														onClick={(e) => handleSubmit(e, true)}
+														onClick={(e) =>
+															handleSubmit(
+																e,
+																true
+															)
+														}
 													>
-														Enviar e finalizar chamado
+														Enviar e finalizar
+														chamado
 														<BsSendCheck className="ms-2" />
 													</button>
 												</li>
@@ -293,7 +339,11 @@ const TicketDetails = ({ id }) => {
 							id="created_at"
 							className="input-text"
 							type="text"
-							value={new DateFormatter(data?.createdAt).toDateTime() || ""}
+							value={
+								new DateFormatter(
+									data?.createdAt
+								).toDateTime() || ""
+							}
 							readOnly
 						/>
 						<label htmlFor="observation" className="col-form-label">

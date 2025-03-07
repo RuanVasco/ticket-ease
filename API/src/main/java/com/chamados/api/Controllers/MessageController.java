@@ -62,6 +62,11 @@ public class MessageController {
             return;
         }
 
+        if (!Message.canView(user)) {
+            System.out.println("Erro de permissão: O usuário não tem permissão para visualizar mensagens.");
+            return;
+        }
+
         List<Ticket> tickets = ticketService.getTicketsByUserId(userId, "ALL");
         List<Long> ticketsId = new ArrayList<>();
         for (Ticket ticket : tickets) {
@@ -79,12 +84,11 @@ public class MessageController {
 
     @MessageMapping("/ticket/{ticketId}")
     public void sendMessage(@DestinationVariable Long ticketId, @Payload MessageDTO messageDTO, Principal principal) throws IOException {
-        System.out.println("Mensagem recebida: " + messageDTO.getText());
         User user = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
         Ticket ticket = ticketService.findById(ticketId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
 
-        if (!ticket.canManage(user) && !ticket.getUser().equals(user)) {
+        if ((!ticket.canManage(user) && !ticket.getUser().equals(user)) || !Message.canCreate(user)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado. Você não tem permissão.");
         }
 
