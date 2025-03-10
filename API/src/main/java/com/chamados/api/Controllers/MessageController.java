@@ -18,6 +18,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -80,6 +81,7 @@ public class MessageController {
         simpMessagingTemplate.convertAndSend("/queue/user/" + userId + "/tickets", ticketsId);
     }
 
+    @Transactional
     @MessageMapping("/ticket/{ticketId}")
     public void sendMessage(@DestinationVariable Long ticketId, @Payload MessageDTO messageDTO, Principal principal) throws IOException {
         User user = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
@@ -96,7 +98,9 @@ public class MessageController {
 
         Message message = messageService.addMessage(ticket, user, messageDTO);
 
+        System.out.println("Enviando mensagem para o tópico /topic/ticket/" + ticketId);
         simpMessagingTemplate.convertAndSend("/topic/ticket/" + ticketId, message);
+        System.out.println("Mensagem enviada para o tópico /topic/ticket/" + ticketId);
     }
 
     @GetMapping("/ticket/{ticketID}")
