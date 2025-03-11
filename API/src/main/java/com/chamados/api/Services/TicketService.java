@@ -80,12 +80,13 @@ public class TicketService {
         return ticketRepository.findByUserIdAndStatus(userId, status, pageable);
     }
 
-    public List<Long> getTicketIdsByUserId(Long userId, String status) {
-        return ticketRepository.findTicketIdsByUserIdAndStatus(userId, status);
-    }
+    public List<Ticket> getTicketsByRelatedUser(User user) {
+        List<Ticket> relatedTickets = ticketRepository.findAll();
 
-    public List<Ticket> getTicketsByUserId(Long userId, String status) {
-        return ticketRepository.findsByUserIdAndStatus(userId, status);
+        return relatedTickets
+                .stream()
+                .filter(ticket -> ticket.canManage(user) || ticket.getUser().equals(user))
+                .toList();
     }
 
     @Transactional

@@ -38,7 +38,34 @@ export const MessagesProvider = ({
 	const [messages, setMessages] = useState<Record<number, Message[]>>({});
 
 	useEffect(() => {
-		if (!userData?.id) return;
+		if (!userData?.id || !stompClient || !isConnected) return;
+		const subscriptions: any[] = [];
+
+		ticketsId.forEach((ticketId) => {
+			const sub = stompClient.subscribe(
+				`/topic/ticket/${ticketId}`,
+				(message: any) => {
+					const newMessage: Message = JSON.parse(message.body);
+					const ticketId = newMessage.ticket.id;
+
+					setMessages((prev) => ({
+						...prev,
+						[ticketId]: [...(prev[ticketId] || []), newMessage],
+					}));			
+					
+				}
+			);
+			subscriptions.push(sub);
+		});
+
+		return () => {
+			subscriptions.forEach((sub) => sub.unsubscribe());
+		};
+		
+	}, [ticketsId])
+
+	useEffect(() => {
+		if (!userData?.id || !stompClient || !isConnected) return;
 
 		const subscriptions: any[] = [];
 
@@ -47,28 +74,6 @@ export const MessagesProvider = ({
 				console.log("Esperando conexão STOMP...");
 				return;
 			}
-
-			console.log("WebSocket conectado! Inscrevendo-se nos tópicos...");
-
-			Object.keys(messages).forEach((ticketId) => {
-				const sub = stompClient.subscribe(
-					`/topic/ticket/${ticketId}`,
-					(message: any) => {
-						const newMessage: Message = JSON.parse(message.body);
-						const ticketId = newMessage.ticket.id;
-
-						setMessages((prev) => ({
-							...prev,
-							[ticketId]: [...(prev[ticketId] || []), newMessage],
-						}));
-
-						new Notification("Nova mensagem", {
-							body: `${newMessage.user.name}: ${newMessage.text}`,
-						});
-					}
-				);
-				subscriptions.push(sub);
-			});
 
 			stompClient.subscribe(
 				`/queue/user/${userData?.id}/tickets`,
@@ -83,9 +88,9 @@ export const MessagesProvider = ({
 			);
 
 			stompClient.publish({
-				destination: `/user/${userData?.id}/tickets`,
+				destination: `/app/user/${userData?.id}/tickets`,
 				body: JSON.stringify({}),
-			});
+			});			
 
 			clearInterval(interval);
 		};
@@ -106,27 +111,7 @@ export const MessagesProvider = ({
 			stompClient.publish({
 				destination: `/app/ticket/${ticketId}`,
 				body: JSON.stringify(messageData),
-			});
-
-			setMessages((prev) => ({
-				...prev,
-				[ticketId]: [
-					...(prev[ticketId] || []),
-					{
-						...messageData,
-						id: Date.now(),
-						ticket: { id: ticketId, name: "Ticket" },
-						user: {
-							id: 1,
-							name: "Você",
-							phone: "",
-							email: "",
-							cargo: "",
-						},
-						sentAt: new Date(),
-					},
-				],
-			}));
+			});			
 		}
 	};
 
@@ -136,6 +121,7 @@ export const MessagesProvider = ({
 		</MessagesContext.Provider>
 	);
 };
+
 
 export const useMessages = () => {
 	const context = useContext(MessagesContext);

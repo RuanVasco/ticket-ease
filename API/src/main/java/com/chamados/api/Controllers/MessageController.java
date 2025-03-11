@@ -66,7 +66,7 @@ public class MessageController {
             return;
         }
 
-        List<Ticket> tickets = ticketService.getTicketsByUserId(userId, "ALL");
+        List<Ticket> tickets = ticketService.getTicketsByRelatedUser(user);
         List<Long> ticketsId = new ArrayList<>();
         for (Ticket ticket : tickets) {
             if (!ticket.canManage(user) && !ticket.getUser().equals(user)) {
@@ -89,6 +89,7 @@ public class MessageController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
 
         if ((!ticket.canManage(user) && !ticket.getUser().equals(user)) || !Message.canCreate(user)) {
+            System.out.println("Acesso negado. Usuário não tem permissão.");
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado. Você não tem permissão.");
         }
 

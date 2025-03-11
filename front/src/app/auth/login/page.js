@@ -22,9 +22,7 @@ export default function Login() {
             if (res.status === 200) {
                 localStorage.setItem('token', res.data.token);
                 localStorage.setItem('refreshToken', res.data.refreshToken);
-
-                
-
+               
                 router.push('/');
             } else {
                 console.error('Erro ao enviar formulário:', res.status);

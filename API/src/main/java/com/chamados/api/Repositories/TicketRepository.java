@@ -39,7 +39,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     @Query("SELECT t.id FROM Ticket t WHERE " +
             "(:userId IS NULL OR t.user.id = :userId) AND " +
             "(:status = 'ALL' OR LOWER(t.status) = LOWER(:status))")
-    List<Long> findTicketIdsByUserIdAndStatus(@Param("userId") Long userId, @Param("status") String status);
+    List<Ticket> findTicketsByUserIdAndStatus(@Param("userId") Long userId, @Param("status") String status);
 
     @Query("SELECT t FROM Ticket t WHERE " +
             "(:userId IS NULL OR t.user.id = :userId) AND " +
