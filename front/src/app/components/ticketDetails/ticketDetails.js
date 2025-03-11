@@ -5,17 +5,18 @@ import Header from "../../components/header/header";
 import axiosInstance from "../axiosConfig";
 import getUserData from "../getUserData";
 import DateFormatter from "../DateFormatter";
-import { checkPermission } from "../checkPermission"
-import { useWebSocketMessages } from "../MessagesWebSocket"
+import { checkPermission } from "../checkPermission";
+import { useMessages } from "../MessagesContext";
 import styles from "./ticket_style.css";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const TicketDetails = ({ id }) => {
-	const { messagesWebSocket, sendMessage } = useWebSocketMessages(id);
+	const { messages, sendMessage } = useMessages();
+	const [allMessages, setAllMessages] = useState([]);
 	const userData = getUserData();
 	const [data, setData] = useState(null);
-	const [messages, setMessages] = useState([]);
+	const [oldMessages, setOldMessages] = useState([]);
 	const [message, setMessage] = useState({
 		text: "",
 		closeTicket: false,
@@ -43,7 +44,10 @@ const TicketDetails = ({ id }) => {
 			);
 
 			if (response.status === 200 || response.status === 201) {
-				setMessages((prevMessages) => [...response.data.content, ...prevMessages]);
+				setOldMessages((prevMessages) => [
+					...response.data.content,
+					...prevMessages,
+				]);
 				setPage((prevPage) => prevPage + 1);
 				setHasMore(!response.data.last);
 			}
@@ -59,18 +63,20 @@ const TicketDetails = ({ id }) => {
 	};
 
 	useEffect(() => {
-		console.log(messagesWebSocket)
-		if (messagesWebSocket.length > 0) {
-			setMessages((prevMessages) => {
-				const newMessages = messagesWebSocket.filter(
-					(msg) => !prevMessages.some((m) => m.id === msg.id)
-				);
-				return [...prevMessages, ...newMessages];
-			});
-	
-			chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-		}
-	}, [messagesWebSocket]);
+		const messagesArray = Array.isArray(messages)
+			? messages
+			: Object.values(messages).flat();
+
+		const mergedMessages = [...oldMessages, ...messagesArray];
+
+		const uniqueMessages = Array.from(
+			new Map(mergedMessages.map((m) => [m.id, m])).values()
+		);
+
+		uniqueMessages.sort((a, b) => new Date(a.sentAt) - new Date(b.sentAt));
+
+		setAllMessages(uniqueMessages);
+	}, [oldMessages, messages]);
 
 	useEffect(() => {
 		const checkUserPermission = async () => {
@@ -113,9 +119,9 @@ const TicketDetails = ({ id }) => {
 			}
 
 			try {
-				setMessages([]);
+				setOldMessages([]);
 				setPage(0);
-    			setHasMore(true);
+				setHasMore(true);
 				loadOlderMessages();
 			} catch (error) {
 				console.error("Erro ao buscar mensagens:", error);
@@ -127,19 +133,19 @@ const TicketDetails = ({ id }) => {
 	}, [id, data?.status]);
 
 	useEffect(() => {
-		if (messages.length === 0) return;
-	
+		if (allMessages.length === 0) return;
+
 		const chatContainer = chatEndRef.current?.parentNode;
 		if (!chatContainer) return;
-	
+
 		const isAtBottom =
 			chatContainer.scrollHeight - chatContainer.scrollTop ===
 			chatContainer.clientHeight;
-	
+
 		if (!isAtBottom) {
 			chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
 		}
-	}, [messages]);
+	}, [allMessages]);
 
 	const handleInputChange = (event) => {
 		const { name, value, type, checked } = event.target;
@@ -158,52 +164,6 @@ const TicketDetails = ({ id }) => {
 
 		sendMessage(message.text, close, id);
 		setMessage({ ...message, text: "" });
-
-		// if (stompClient && stompClient.connected) {
-		// 	try {
-		// 		stompClient.publish({
-		// 			destination: `/app/ticket/${id}`,
-		// 			body: JSON.stringify({
-		// 				text: message.text,
-		// 				closeTicket: close,
-		// 			}),
-		// 		});
-
-		// 		try {
-		// 			setMessage({ ...message, text: "" });
-		// 		} catch (error) {
-		// 			console.error("Erro ao buscar mensagens:", error);
-		// 		}
-
-		// 		if (close) {
-		// 			location.reload();
-		// 		}
-		// 	} catch (error) {
-		// 		console.error("Erro ao enviar mensagem via WebSocket:", error);
-		// 	}
-		// } else {
-		// 	console.error("WebSocket não conectado.");
-		// }
-
-		// try {
-		// 	const res = await axiosInstance.post(`${API_BASE_URL}/messages/ticket/${message.ticket_id}`, {
-		// 		text: message.text,
-		// 		closeTicket: close,
-		// 	});
-
-		// 	if (res.status === 200 || res.status === 201) {
-		// 		if (res.data.ticket.status === "Fechado") {
-		// 			location.reload();
-		// 		}
-
-		// 		setMessages((prevMessages) => [...prevMessages, res.data]);
-		// 		setMessage({ ...message, text: "" });
-		// 	} else {
-		// 		console.error("Erro ao enviar mensagem:", res.status);
-		// 	}
-		// } catch (error) {
-		// 	console.error("Erro ao enviar mensagem:", error);
-		// }
 	};
 
 	if (loading) {
@@ -235,9 +195,12 @@ const TicketDetails = ({ id }) => {
 										</button>
 									)}
 							</div>
-							<div className="chat_content rounded px-2 pb-3" onScroll={handleScroll}>
-								{messages.length > 0 ? (
-									messages.map((msg) =>
+							<div
+								className="chat_content rounded px-2 pb-3"
+								onScroll={handleScroll}
+							>
+								{allMessages.length > 0 ? (
+									allMessages.map((msg) =>
 										msg.user.id === userData.id ? (
 											<div
 												key={msg.id}
