@@ -69,6 +69,35 @@ const Profiles = () => {
 		}
 	});
 
+	const mapPermissions = (apiPermissions) => {
+		const defaultPermissions = {
+			ticket: { create: false, edit: false, view: false, delete: false },
+			ticketCategory: { create: false, edit: false, view: false, delete: false },
+			unit: { create: false, edit: false, view: false, delete: false },
+			department: { create: false, edit: false, view: false, delete: false },
+			message: { create: false, edit: false, view: false, delete: false },
+			user: { create: false, edit: false, view: false, delete: false },
+			profile: { create: false, edit: false, view: false, delete: false }
+		};
+
+		apiPermissions.forEach((perm) => {
+			const parts = perm.name.split('_');
+
+			if (parts.length > 1) {
+				const action = parts[0].toLowerCase();
+				const entity = parts.slice(1)
+					.map((word, index) => index === 0 ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+					.join('');
+
+				if (defaultPermissions[entity] && defaultPermissions[entity][action] !== undefined) {
+					defaultPermissions[entity][action] = true;
+				}
+			}
+		});
+
+		return defaultPermissions;
+	};
+
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -99,11 +128,17 @@ const Profiles = () => {
 					`${API_BASE_URL}/profiles/${id}`
 				);
 
+				console.log(res.data.permissions);
+
 				if (res.status === 200) {
 					setCurrentProfile({
 						id: res.data.id,
 						name: res.data.name,
 					});
+
+					if (res.data.permissions) {
+						setPermissions(mapPermissions(res.data.permissions));
+					}
 				} else {
 					console.error("Error", res.status);
 				}
@@ -265,7 +300,7 @@ const Profiles = () => {
 														<th>Deletar</th>
 													</tr>
 												</thead>
-												<tbody>
+												<tbody style={{color: "black"}}>
 													{Object.keys(permissions).map(entity => (
 														<tr key={entity}>
 															<td>{entity.replace(/([A-Z])/g, ' $1').toUpperCase()}</td>

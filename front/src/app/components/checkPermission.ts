@@ -5,7 +5,7 @@ export const checkPermission = (action: string, entity: string): boolean => {
 
     if (!userData || !userData.permissions) return false;
 
-    const requiredPermission = `${action}_${entity.toUpperCase()}`;
+    const requiredPermission = `${action}_${entity}`.toUpperCase();
 
     return userData.permissions.includes(requiredPermission);
 };
