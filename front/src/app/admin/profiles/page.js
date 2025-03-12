@@ -24,6 +24,51 @@ const Profiles = () => {
 		name: "",
 	});
 
+	const [permissions, setPermissions] = useState({
+		ticket: {
+			create: true,
+			edit: true,
+			view: true,
+			delete: true
+		},
+		ticketCategory: {
+			create: true,
+			edit: false,
+			view: true,
+			delete: true
+		},
+		unit: {
+			create: true,
+			edit: true,
+			view: true,
+			delete: true
+		},
+		department: {
+			create: true,
+			edit: false,
+			view: true,
+			delete: true
+		},
+		message: {
+			create: true,
+			edit: false,
+			view: true,
+			delete: false
+		},
+		user: {
+			create: true,
+			edit: true,
+			view: true,
+			delete: true
+		},
+		profile: {
+			create: true,
+			edit: true,
+			view: true,
+			delete: true
+		}
+	});
+
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -71,6 +116,16 @@ const Profiles = () => {
 				name: "",
 			});
 		}
+	};
+
+	const handleCheckboxChange = (entity, permission) => {
+		setPermissions(prevPermissions => ({
+			...prevPermissions,
+			[entity]: {
+				...prevPermissions[entity],
+				[permission]: !prevPermissions[entity][permission]
+			}
+		}));
 	};
 
 	const handleFilterChange = (e) => {
@@ -200,6 +255,33 @@ const Profiles = () => {
 												onChange={handleInputChange}
 												required
 											/>
+											<table border="1">
+												<thead>
+													<tr>
+														<th>Entidade</th>
+														<th>Criar</th>
+														<th>Editar</th>
+														<th>Ver</th>
+														<th>Deletar</th>
+													</tr>
+												</thead>
+												<tbody>
+													{Object.keys(permissions).map(entity => (
+														<tr key={entity}>
+															<td>{entity.replace(/([A-Z])/g, ' $1').toUpperCase()}</td>
+															{["create", "edit", "view", "delete"].map(permission => (
+																<td key={permission}>
+																	<input
+																		type="checkbox"
+																		checked={permissions[entity][permission]}
+																		onChange={() => handleCheckboxChange(entity, permission)}
+																	/>
+																</td>
+															))}
+														</tr>
+													))}
+												</tbody>
+											</table>
 										</div>
 									</>
 								)}

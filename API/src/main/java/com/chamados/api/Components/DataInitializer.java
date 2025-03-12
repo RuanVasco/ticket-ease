@@ -65,9 +65,6 @@ public class DataInitializer implements CommandLineRunner {
             Permission permissionDeleteTicketCategory = new Permission();
             permissionDeleteTicketCategory.setName("DELETE_TICKET_CATEGORY");
 
-            Permission permissionViewProfile = new Permission();
-            permissionViewProfile.setName("VIEW_PROFILE");
-
             Permission permissionCreateUnit = new Permission();
             permissionCreateUnit.setName("CREATE_UNIT");
 
@@ -107,6 +104,18 @@ public class DataInitializer implements CommandLineRunner {
             Permission permissionDeleteUser = new Permission();
             permissionDeleteUser.setName("DELETE_USER");
 
+            Permission permissionCreateProfile = new Permission();
+            permissionCreateProfile.setName("CREATE_PROFILE");
+
+            Permission permissionViewProfile = new Permission();
+            permissionViewProfile.setName("VIEW_PROFILE");
+
+            Permission permissionUpdateProfile = new Permission();
+            permissionUpdateProfile.setName("EDIT_PROFILE");
+
+            Permission permissionDeleteProfile = new Permission();
+            permissionDeleteProfile.setName("DELETE_PROFILE");
+
             permissionCreateUser = permissionRepository.save(permissionCreateUser);
             permissionViewUser = permissionRepository.save(permissionViewUser);
             permissionUpdateUser = permissionRepository.save(permissionUpdateUser);
@@ -115,7 +124,10 @@ public class DataInitializer implements CommandLineRunner {
             permissionViewTicket = permissionRepository.save(permissionViewTicket);
             permissionDeleteTicket = permissionRepository.save(permissionDeleteTicket);
             permissionEditTicket = permissionRepository.save(permissionEditTicket);
+            permissionCreateProfile = permissionRepository.save(permissionCreateProfile);
             permissionViewProfile = permissionRepository.save(permissionViewProfile);
+            permissionUpdateProfile = permissionRepository.save(permissionUpdateProfile);
+            permissionDeleteProfile = permissionRepository.save(permissionDeleteProfile);
             permissionViewTicketCategory = permissionRepository.save(permissionViewTicketCategory);
             permissionCreateTicketCategory = permissionRepository.save(permissionCreateTicketCategory);
             permissionDeleteTicketCategory = permissionRepository.save(permissionDeleteTicketCategory);
@@ -151,6 +163,9 @@ public class DataInitializer implements CommandLineRunner {
             permissions.add(permissionDeleteDepartment);
             permissions.add(permissionDeleteUnit);
             permissions.add(permissionUpdateUnit);
+            permissions.add(permissionCreateProfile);
+            permissions.add(permissionUpdateProfile);
+            permissions.add(permissionDeleteProfile);
 
             Set<Permission> permissionsUser = new HashSet<>();
             permissionsUser.add(permissionCreateMessage);
