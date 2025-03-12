@@ -22,6 +22,8 @@ interface Message {
 interface MessagesContextType {
 	messages: Record<number, Message[]>;
 	sendMessage: (text: string, close: boolean, ticketId: number) => void;
+	clearNotifications: (ticketId: number) => void;
+	notifications: Record<number, Message[]>;
 }
 const MessagesContext = createContext<MessagesContextType | undefined>(
 	undefined
@@ -36,6 +38,7 @@ export const MessagesProvider = ({
 	const userData = getUserData();
 	const [ticketsId, setTicketsId] = useState<number[]>([]);
 	const [messages, setMessages] = useState<Record<number, Message[]>>({});
+	const [notifications, setNotifications] = useState<Record<number, Message[]>>({});
 
 	useEffect(() => {
 		if (!userData?.id || !stompClient || !isConnected) return;
@@ -51,8 +54,12 @@ export const MessagesProvider = ({
 					setMessages((prev) => ({
 						...prev,
 						[ticketId]: [...(prev[ticketId] || []), newMessage],
-					}));			
+					}));	
 					
+					setNotifications((prev) => ({
+						...prev,
+						[ticketId]: [...(prev[ticketId] || []), newMessage],
+					}));					
 				}
 			);
 			subscriptions.push(sub);
@@ -115,8 +122,17 @@ export const MessagesProvider = ({
 		}
 	};
 
+	const clearNotifications = (ticketId: number) => {
+		setNotifications((prev) => {
+			const newNotifications = { ...prev };
+			delete newNotifications[ticketId];
+			return newNotifications;
+		});
+	};
+
+
 	return (
-		<MessagesContext.Provider value={{ messages, sendMessage }}>
+		<MessagesContext.Provider value={{ messages, sendMessage, notifications, clearNotifications }}>
 			{children}
 		</MessagesContext.Provider>
 	);

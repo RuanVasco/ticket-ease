@@ -7,6 +7,7 @@ import "./home.css";
 import Header from "./components/header/header";
 import withAuth from "./auth/withAuth";
 import { checkPermission } from "./components/checkPermission";
+import Notifications from "./components/Notifications";
 
 const Home = () => {
 	const [canViewChamados, setCanViewChamados] = useState(false);
@@ -22,7 +23,8 @@ const Home = () => {
 
 	return (
 		<main>
-			<Header pageName="SolicitaAí" />
+			<Header pageName="" />
+			<Notifications />
 			<div className="d-flex justify-content-center align-items-center div_main_content">
 				<div className="d-flex align-items-top">
 					<Link
