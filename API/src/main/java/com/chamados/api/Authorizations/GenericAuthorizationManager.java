@@ -51,7 +51,7 @@ public class GenericAuthorizationManager implements AuthorizationManager<Request
     private String getActionFromMethod(String method) {
         return switch (method) {
             case "POST" -> "canCreate";
-            case "PUT" -> "canUpdate";
+            case "PUT" -> "canEdit";
             case "DELETE" -> "canDelete";
             default -> "canView";
         };

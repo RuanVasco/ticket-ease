@@ -26,46 +26,44 @@ const Profiles = () => {
 
 	const [permissions, setPermissions] = useState({
 		ticket: {
-			create: true,
-			edit: true,
-			view: true,
-			delete: true
-		},
-		ticketCategory: {
-			create: true,
+			create: false,
 			edit: false,
-			view: true,
-			delete: true
-		},
-		unit: {
-			create: true,
-			edit: true,
-			view: true,
-			delete: true
-		},
-		department: {
-			create: true,
-			edit: false,
-			view: true,
-			delete: true
-		},
-		message: {
-			create: true,
-			edit: false,
-			view: true,
+			view: false,
 			delete: false
 		},
+		ticketCategory: {
+			create: false,
+			edit: false,
+			view: false,
+			delete: false
+		},
+		unit: {
+			create: false,
+			edit: false,
+			view: false,
+			delete: false
+		},
+		department: {
+			create: false,
+			edit: false,
+			view: false,
+			delete: false
+		},
+		message: {
+			create: false,
+			view: false,
+		},
 		user: {
-			create: true,
-			edit: true,
-			view: true,
-			delete: true
+			create: false,
+			edit: false,
+			view: false,
+			delete: false
 		},
 		profile: {
-			create: true,
-			edit: true,
-			view: true,
-			delete: true
+			create: false,
+			edit: false,
+			view: false,
+			delete: false
 		}
 	});
 
@@ -96,6 +94,21 @@ const Profiles = () => {
 		});
 
 		return defaultPermissions;
+	};
+
+	const reverseMapPermissions = (permissions) => {
+		const apiPermissions = [];
+	
+		Object.entries(permissions).forEach(([entity, actions]) => {
+			Object.entries(actions).forEach(([action, allowed]) => {
+				if (allowed) {
+					const formattedEntity = entity.replace(/([A-Z])/g, "_$1").toUpperCase(); 
+					apiPermissions.push({ name: `${action.toUpperCase()}_${formattedEntity}` });
+				}
+			});
+		});
+	
+		return apiPermissions;
 	};
 
 	useEffect(() => {
@@ -184,36 +197,30 @@ const Profiles = () => {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-
+	
 		try {
 			let res;
-
+			const formattedPermissions = reverseMapPermissions(permissions);
+			const payload = { ...currentProfile, permissions: formattedPermissions };
+	
 			if (submitType === "delete") {
 				res = await axiosInstance.delete(
 					`${API_BASE_URL}/profiles/${currentProfile.id}`
 				);
 			} else if (submitType === "add") {
-				res = await axiosInstance.post(
-					`${API_BASE_URL}/profiles/`,
-					currentProfile
-				);
+				res = await axiosInstance.post(`${API_BASE_URL}/profiles/`, payload);
 			} else if (submitType === "update") {
 				res = await axiosInstance.put(
 					`${API_BASE_URL}/profiles/${currentProfile.id}`,
-					currentProfile
+					payload
 				);
 			} else {
 				console.error("Invalid submit type");
 				return;
 			}
-
+	
 			if (res.status === 200 || res.status === 201) {
-				setCurrentProfile({
-					id: "",
-					name: "",
-				});
-
-				window.location.reload();
+				setCurrentProfile({ id: "", name: "" });
 			} else {
 				console.error("Error", res.status);
 			}
