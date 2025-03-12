@@ -33,17 +33,6 @@ public class PermissionController {
             return ResponseEntity.ok(false);
         }
     }
-
-    @GetMapping("/user/{id}")
-    public ResponseEntity<?> getPermissionsFromUser(@PathVariable Long id) {
-        List<Permission> permissions = userRepository.findPermissionsByUserId(id);
-
-        if (permissions.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(permissions);
-    }
 }
 
 

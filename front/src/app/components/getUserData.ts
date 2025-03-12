@@ -4,6 +4,7 @@ interface UserData extends JwtPayload {
     id: number;
     name: string;
     sub: string;
+    permissions: string[];
 }
 
 const getUserData = (): UserData | null => {

@@ -44,6 +44,33 @@ public class DataInitializer implements CommandLineRunner {
             Role roleUser = roleRepository.findByName("USER")
                     .orElseGet(() -> roleRepository.save(new Role("USER")));
 
+            Permission permissionCreateCargo = new Permission();
+            permissionCreateCargo.setName("CREATE_CARGO");
+
+            Permission permissionEditCargo = new Permission();
+            permissionEditCargo.setName("EDIT_CARGO");
+
+            Permission permissionViewCargo = new Permission();
+            permissionViewCargo.setName("VIEW_CARGO");
+
+            Permission permissionDeleteCargo = new Permission();
+            permissionDeleteCargo.setName("DELETE_CARGO");
+
+            Permission permissionCreateDepartment = new Permission();
+            permissionCreateDepartment.setName("CREATE_DEPARTMENT");
+
+            Permission permissionViewDepartment = new Permission();
+            permissionViewDepartment.setName("VIEW_DEPARTMENT");
+
+            Permission permissionDeleteDepartment = new Permission();
+            permissionDeleteDepartment.setName("DELETE_DEPARTMENT");
+
+            Permission permissionCreateMessage = new Permission();
+            permissionCreateMessage.setName("CREATE_MESSAGE");
+
+            Permission permissionViewMessage = new Permission();
+            permissionViewMessage.setName("VIEW_MESSAGE");
+
             Permission permissionCreateTicket = new Permission();
             permissionCreateTicket.setName("CREATE_TICKET");
 
@@ -77,21 +104,6 @@ public class DataInitializer implements CommandLineRunner {
             Permission permissionUpdateUnit = new Permission();
             permissionUpdateUnit.setName("UPDATE_UNIT");
 
-            Permission permissionCreateDepartment = new Permission();
-            permissionCreateDepartment.setName("CREATE_DEPARTMENT");
-
-            Permission permissionViewDepartment = new Permission();
-            permissionViewDepartment.setName("VIEW_DEPARTMENT");
-
-            Permission permissionDeleteDepartment = new Permission();
-            permissionDeleteDepartment.setName("DELETE_DEPARTMENT");
-
-            Permission permissionCreateMessage = new Permission();
-            permissionCreateMessage.setName("CREATE_MESSAGE");
-
-            Permission permissionViewMessage = new Permission();
-            permissionViewMessage.setName("VIEW_MESSAGE");
-
             Permission permissionCreateUser = new Permission();
             permissionCreateUser.setName("CREATE_USER");
 
@@ -107,64 +119,86 @@ public class DataInitializer implements CommandLineRunner {
             Permission permissionCreateProfile = new Permission();
             permissionCreateProfile.setName("CREATE_PROFILE");
 
+            Permission permissionEditProfile = new Permission();
+            permissionEditProfile.setName("EDIT_PROFILE");
+
             Permission permissionViewProfile = new Permission();
             permissionViewProfile.setName("VIEW_PROFILE");
 
-            Permission permissionUpdateProfile = new Permission();
-            permissionUpdateProfile.setName("EDIT_PROFILE");
-
             Permission permissionDeleteProfile = new Permission();
             permissionDeleteProfile.setName("DELETE_PROFILE");
+
+            permissionCreateCargo = permissionRepository.save(permissionCreateCargo);
+            permissionEditCargo = permissionRepository.save(permissionEditCargo);
+            permissionViewCargo = permissionRepository.save(permissionViewCargo);
+            permissionDeleteCargo = permissionRepository.save(permissionDeleteCargo);
+
+            permissionCreateDepartment = permissionRepository.save(permissionCreateDepartment);
+            permissionViewDepartment = permissionRepository.save(permissionViewDepartment);
+            permissionDeleteDepartment = permissionRepository.save(permissionDeleteDepartment);
+
+            permissionCreateMessage = permissionRepository.save(permissionCreateMessage);
+            permissionViewMessage = permissionRepository.save(permissionViewMessage);
+
+            permissionCreateTicket = permissionRepository.save(permissionCreateTicket);
+            permissionViewTicket = permissionRepository.save(permissionViewTicket);
+            permissionDeleteTicket = permissionRepository.save(permissionDeleteTicket);
+            permissionEditTicket = permissionRepository.save(permissionEditTicket);
+
+            permissionCreateTicketCategory = permissionRepository.save(permissionCreateTicketCategory);
+            permissionViewTicketCategory = permissionRepository.save(permissionViewTicketCategory);
+            permissionDeleteTicketCategory = permissionRepository.save(permissionDeleteTicketCategory);
+
+            permissionCreateUnit = permissionRepository.save(permissionCreateUnit);
+            permissionViewUnit = permissionRepository.save(permissionViewUnit);
+            permissionDeleteUnit = permissionRepository.save(permissionDeleteUnit);
+            permissionUpdateUnit = permissionRepository.save(permissionUpdateUnit);
 
             permissionCreateUser = permissionRepository.save(permissionCreateUser);
             permissionViewUser = permissionRepository.save(permissionViewUser);
             permissionUpdateUser = permissionRepository.save(permissionUpdateUser);
             permissionDeleteUser = permissionRepository.save(permissionDeleteUser);
-            permissionCreateTicket = permissionRepository.save(permissionCreateTicket);
-            permissionViewTicket = permissionRepository.save(permissionViewTicket);
-            permissionDeleteTicket = permissionRepository.save(permissionDeleteTicket);
-            permissionEditTicket = permissionRepository.save(permissionEditTicket);
+
             permissionCreateProfile = permissionRepository.save(permissionCreateProfile);
+            permissionEditProfile = permissionRepository.save(permissionEditProfile);
             permissionViewProfile = permissionRepository.save(permissionViewProfile);
-            permissionUpdateProfile = permissionRepository.save(permissionUpdateProfile);
             permissionDeleteProfile = permissionRepository.save(permissionDeleteProfile);
-            permissionViewTicketCategory = permissionRepository.save(permissionViewTicketCategory);
-            permissionCreateTicketCategory = permissionRepository.save(permissionCreateTicketCategory);
-            permissionDeleteTicketCategory = permissionRepository.save(permissionDeleteTicketCategory);
-            permissionCreateUnit = permissionRepository.save(permissionCreateUnit);
-            permissionViewUnit = permissionRepository.save(permissionViewUnit);
-            permissionCreateDepartment = permissionRepository.save(permissionCreateDepartment);
-            permissionViewDepartment = permissionRepository.save(permissionViewDepartment);
-            permissionDeleteDepartment = permissionRepository.save(permissionDeleteDepartment);
-            permissionDeleteUnit = permissionRepository.save(permissionDeleteUnit);
-            permissionUpdateUnit = permissionRepository.save(permissionUpdateUnit);
-            permissionCreateMessage = permissionRepository.save(permissionCreateMessage);
-            permissionViewMessage = permissionRepository.save(permissionViewMessage);
 
             Set<Permission> permissions = new HashSet<>();
-            permissions.add(permissionCreateUser);
-            permissions.add(permissionViewUser);
-            permissions.add(permissionUpdateUser);
-            permissions.add(permissionDeleteUser);
+            permissions.add(permissionCreateCargo);
+            permissions.add(permissionEditCargo);
+            permissions.add(permissionViewCargo);
+            permissions.add(permissionDeleteCargo);
+
+            permissions.add(permissionCreateDepartment);
+            permissions.add(permissionViewDepartment);
+            permissions.add(permissionDeleteDepartment);
+
             permissions.add(permissionCreateMessage);
             permissions.add(permissionViewMessage);
+
             permissions.add(permissionCreateTicket);
             permissions.add(permissionViewTicket);
             permissions.add(permissionDeleteTicket);
             permissions.add(permissionEditTicket);
-            permissions.add(permissionViewProfile);
-            permissions.add(permissionViewTicketCategory);
+
             permissions.add(permissionCreateTicketCategory);
+            permissions.add(permissionViewTicketCategory);
             permissions.add(permissionDeleteTicketCategory);
+
             permissions.add(permissionCreateUnit);
             permissions.add(permissionViewUnit);
-            permissions.add(permissionCreateDepartment);
-            permissions.add(permissionViewDepartment);
-            permissions.add(permissionDeleteDepartment);
             permissions.add(permissionDeleteUnit);
             permissions.add(permissionUpdateUnit);
+
+            permissions.add(permissionCreateUser);
+            permissions.add(permissionViewUser);
+            permissions.add(permissionUpdateUser);
+            permissions.add(permissionDeleteUser);
+
             permissions.add(permissionCreateProfile);
-            permissions.add(permissionUpdateProfile);
+            permissions.add(permissionEditProfile);
+            permissions.add(permissionViewProfile);
             permissions.add(permissionDeleteProfile);
 
             Set<Permission> permissionsUser = new HashSet<>();

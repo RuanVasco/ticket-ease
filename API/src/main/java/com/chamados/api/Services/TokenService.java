@@ -4,7 +4,9 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.chamados.api.Components.TokenUtils;
 import com.chamados.api.Repositories.UserRepository;
@@ -41,11 +43,18 @@ public class TokenService {
 	public String generateAccessToken(User user) {
 		try {
 			Algorithm algorithm = Algorithm.HMAC256(secret);
+
+			List<String> permissions = userRepository.findPermissionsByUserId(user.getId())
+					.stream()
+					.map(permission -> permission.getName())
+					.collect(Collectors.toList());
+
 			return JWT.create()
 					.withIssuer("auth-api")
 					.withSubject(user.getEmail())
 					.withClaim("id", user.getId())
 					.withClaim("name", user.getName())
+					.withClaim("permissions", permissions)
 					.withExpiresAt(getExpirationDate(accessExpiration))
 					.sign(algorithm);
 		} catch (JWTCreationException exception) {

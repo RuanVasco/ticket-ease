@@ -68,7 +68,7 @@ const HomeAdmin = () => {
 			for (const block of allBlocks) {
 				let entity = block.link.split("/").pop().toUpperCase();
 				entity = removePlural(entity);
-				const response = await checkPermission("VIEW", entity);
+				const response = checkPermission("VIEW", entity);
 				permissionResults[block.link] = response;
 			}
 
