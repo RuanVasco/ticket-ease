@@ -92,22 +92,30 @@ public class UserController {
         Optional<Cargo> optionalCargo = cargoRepository.findById(userUpdateDTO.cargoId());
         Optional<Department> optionalDepartment = departmentRepository.findById(userUpdateDTO.departmentId());
 
-        if (optionalCargo.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
         if (optionalDepartment.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        Cargo cargo = optionalCargo.get();
         Department department = optionalDepartment.get();
+
+        Set<Role> roles = new HashSet<>();
+
+        for (Long roleId : userUpdateDTO.profiles()) {
+            Optional<Role> optionalRole = roleRepository.findById(roleId);
+
+            optionalRole.ifPresent(roles::add);
+        }
 
         user.setName(userUpdateDTO.name());
         user.setEmail(userUpdateDTO.email());
         user.setPhone(userUpdateDTO.phone());
-        user.setCargo(cargo);
         user.setDepartment(department);
+        user.setRoles(roles);
+
+        if (optionalCargo.isPresent()) {
+            Cargo cargo = optionalCargo.get();
+            user.setCargo(cargo);
+        }
 
         userRepository.save(user);
 
@@ -116,7 +124,6 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserRegisterDTO signUpDto) {
-
         Long cargoId = signUpDto.cargoId();
         Long departmentId = signUpDto.departmentId();
 
@@ -124,15 +131,19 @@ public class UserController {
             return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
         }
 
-        Optional<Role> optionalRoleUser = roleRepository.findByName("ROLE_USER");
-        if (optionalRoleUser.isEmpty()) {
-            return new ResponseEntity<>("Default role not found", HttpStatus.INTERNAL_SERVER_ERROR);
+        Set<Role> roles = new HashSet<>();
+
+        for (Long roleId : signUpDto.profiles()) {
+            Optional<Role> optionalRole = roleRepository.findById(roleId);
+
+            optionalRole.ifPresent(roles::add);
         }
 
         User user = new User();
         user.setName(signUpDto.name());
         user.setEmail(signUpDto.email());
         user.setPhone(signUpDto.phone());
+        user.setRoles(roles);
 
         user.setPassword(signUpDto.password(), passwordEncoder);
 

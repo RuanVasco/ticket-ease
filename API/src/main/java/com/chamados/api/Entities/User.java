@@ -121,7 +121,7 @@ public class User implements UserDetails {
         return user.hasPermission("VIEW_USER");
     }
 
-    public static boolean canUpdate(User user) {
+    public static boolean canEdit(User user) {
         return user.hasPermission("EDIT_USER");
     }
 

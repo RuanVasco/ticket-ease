@@ -8,14 +8,14 @@ import styles from "./header.css";
 import ThemeSelector from "../themeSelector";
 import getUserData from "../getUserData";
 
-const Header = ({ pageName }) => {
+const Header = ({ pageName, backUrl = "/" }) => {
     const router = useRouter();
     const pathname = usePathname();
     const [user, setUser] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
-            const userData = await getUserData();
+            const userData = getUserData();
             setUser(userData);
         };
         fetchData();
@@ -31,7 +31,7 @@ const Header = ({ pageName }) => {
 
     if (pathname !== '/') {
         buttonBack = (
-            <button onClick={() => router.back()} className="btn btn-go-back">
+            <button onClick={() => router.push(backUrl)} className="btn btn-go-back">
                 <FaArrowLeft /> Voltar
             </button>
         );

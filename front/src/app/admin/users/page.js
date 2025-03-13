@@ -457,8 +457,8 @@ const User = () => {
 													}))}
 												onChange={(selectedProfiles) => {
 													const updatedProfiles = selectedProfiles.map(profile => ({
-														id: selectedProfiles.value,
-														name: selectedProfiles.label
+														id: profile.value,
+														name: profile.label
 													}));
 
 													setCurrentUser({
