@@ -103,23 +103,6 @@ public class UserController {
         Cargo cargo = optionalCargo.get();
         Department department = optionalDepartment.get();
 
-        Set<Role> roles = new HashSet<>();
-
-        Optional<Role> optionalRoleUser = roleRepository.findByName("ROLE_USER");
-
-        if (optionalRoleUser.isEmpty()) {
-            return new ResponseEntity<>("Default role not found", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        roles.add(optionalRoleUser.get());
-
-        if (userUpdateDTO.isAdmin()) {
-            Optional<Role> optionalRoleAdmin = roleRepository.findByName("ROLE_ADMIN");
-            optionalRoleAdmin.ifPresent(roles::add);
-        }
-
-        user.setRoles(roles);
-
         user.setName(userUpdateDTO.name());
         user.setEmail(userUpdateDTO.email());
         user.setPhone(userUpdateDTO.phone());
@@ -150,14 +133,6 @@ public class UserController {
         user.setName(signUpDto.name());
         user.setEmail(signUpDto.email());
         user.setPhone(signUpDto.phone());
-
-        Set<Role> roles = new HashSet<>();
-        roles.add(optionalRoleUser.get());
-        if (signUpDto.isAdmin()) {
-            Optional<Role> optionalRoleAdmin = roleRepository.findByName("ROLE_ADMIN");
-            optionalRoleAdmin.ifPresent(roles::add);
-        }
-        user.setRoles(roles);
 
         user.setPassword(signUpDto.password(), passwordEncoder);
 

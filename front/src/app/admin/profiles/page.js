@@ -317,6 +317,9 @@ const Profiles = () => {
 																		type="checkbox"
 																		checked={permissions[entity][permission]}
 																		onChange={() => handleCheckboxChange(entity, permission)}
+																		disabled={
+																			modeModal === "readonly"
+																		}
 																	/>
 																</td>
 															))}

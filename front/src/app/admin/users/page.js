@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../../components/axiosConfig";
+import Select from 'react-select';
 import Header from "../../components/header/header";
 import Table from "../../components/table/table";
 import ActionBar from "../../components/actionBar/actionBar";
@@ -31,14 +32,19 @@ const User = () => {
 		phone: "",
 		department: { id: "", name: "" },
 		cargo: { id: "", name: "" },
-		isAdmin: false,
+		profiles: [],
 		password: "",
 	});
+
 	const [cargos, setCargos] = useState([]);
 	const [departments, setDepartments] = useState([]);
+	const [profiles, setProfiles] = useState([]);
+
 	const [submitType, setSubmitType] = useState("");
+	const [isClient, setIsClient] = useState(false);
 
 	useEffect(() => {
+		setIsClient(true);
 		const fetchUsersData = async () => {
 			try {
 				const res = await axiosInstance.get(
@@ -68,6 +74,19 @@ const User = () => {
 			}
 		};
 
+		const fetchProfilesData = async () => {
+			try {
+				const res = await axiosInstance.get(`${API_BASE_URL}/profiles/`);
+				if (res.status === 200) {
+					setProfiles(res.data);
+				} else {
+					console.error("Error", res.status);
+				}
+			} catch (error) {
+				console.error(error);
+			}
+		};
+
 		const fetchDepartmentsData = async () => {
 			try {
 				const res = await axiosInstance.get(
@@ -86,6 +105,7 @@ const User = () => {
 		fetchUsersData();
 		fetchCargosData();
 		fetchDepartmentsData();
+		fetchProfilesData();
 	}, [currentPage, pageSize]);
 
 	const handleModalOpen = async (action, mode, idUser) => {
@@ -105,6 +125,7 @@ const User = () => {
 						id: res.data.cargo?.id ?? -1,
 						name: res.data.cargo?.name ?? "",
 					};
+
 					setCurrentUser({
 						id: res.data.id,
 						name: res.data.name,
@@ -112,7 +133,7 @@ const User = () => {
 						phone: res.data.phone,
 						department: department,
 						cargo: cargos,
-						isAdmin: res.data.isAdmin,
+						profiles: res.data.roles,
 						password: "",
 					});
 				} else {
@@ -129,7 +150,7 @@ const User = () => {
 				phone: "",
 				department: { id: "", name: "" },
 				cargo: { id: "", name: "" },
-				isAdmin: false,
+				profiles: [],
 				password: "",
 			});
 		}
@@ -173,7 +194,7 @@ const User = () => {
 		e.preventDefault();
 		try {
 			let res;
-			const { department, cargo, ...postData } = currentUser;
+			const { department, cargo, profiles, ...postData } = currentUser;
 
 			if (submitType === "delete") {
 				res = await axiosInstance.delete(
@@ -184,12 +205,13 @@ const User = () => {
 					...postData,
 					departmentId: department.id,
 					cargoId: cargo.id,
+					profiles: profiles.map(profile => profile.id),
 				};
 
 				switch (submitType) {
 					case "add":
-						if (!department || !cargo) {
-							console.error("Department or cargo is null");
+						if (!department) {
+							console.error("Department is null");
 							return;
 						}
 
@@ -199,8 +221,8 @@ const User = () => {
 						);
 						break;
 					case "update":
-						if (!department || !cargo) {
-							console.error("Department or cargo is null");
+						if (!department) {
+							console.error("Department is null");
 							return;
 						}
 
@@ -223,7 +245,7 @@ const User = () => {
 					phone: "",
 					department: { id: "", name: "" },
 					cargo: { id: "", name: "" },
-					isAdmin: false,
+					profiles: [],
 					password: "",
 				});
 
@@ -235,6 +257,10 @@ const User = () => {
 			console.error(error);
 		}
 	};
+
+	if (!isClient) {
+		return null;
+	}
 
 	return (
 		<main>
@@ -342,9 +368,8 @@ const User = () => {
 												readOnly={
 													modeModal === "readonly"
 												}
-												value={currentUser.phone}
+												value={currentUser.phone ?? ""}
 												onChange={handleInputChange}
-												required
 											/>
 										</div>
 
@@ -397,13 +422,12 @@ const User = () => {
 												name="cargo"
 												id="cargo"
 												value={
-													currentUser.cargo?.id || ""
+													currentUser.cargo?.id ?? ""
 												}
 												onChange={handleInputChange}
 												disabled={
 													modeModal === "readonly"
 												}
-												required
 											>
 												<option value="">----</option>
 												{cargos.map((cargo) => (
@@ -415,6 +439,38 @@ const User = () => {
 													</option>
 												))}
 											</select>
+										</div>
+
+										<div className="mt-2">
+											<label htmlFor="profile" className="form-label">
+												Perfis
+											</label>
+											<Select
+												isMulti
+												name="profile"
+												id="profile"
+												value={currentUser.profiles.map(profile => ({
+													value: profile.id,
+													label: profile.name
+												})) || []} 
+												onChange={(selectedProfiles) => {
+													const updatedProfiles = selectedProfiles.map(profile => ({
+														value: profile.id,
+														label: profile.name
+													}));
+
+													setCurrentUser({
+														...currentUser,
+														profiles: updatedProfiles,
+													});
+												}}
+												options={profiles.map((profile) => ({
+													value: profile.id,
+													label: profile.name,
+												}))}
+												className="basic-multi-select"
+												classNamePrefix="select"
+											/>
 										</div>
 										{modeModal !== "readonly" && (
 											<div className="mt-2">
@@ -439,31 +495,6 @@ const User = () => {
 												/>
 											</div>
 										)}
-										<div className="mt-2">
-											<input
-												name="isAdmin"
-												id="isAdmin"
-												type="checkbox"
-												className="form-check-input"
-												readOnly={
-													modeModal === "readonly"
-												}
-												checked={currentUser.isAdmin}
-												onChange={(e) =>
-													setCurrentUser({
-														...currentUser,
-														isAdmin:
-															e.target.checked,
-													})
-												}
-											/>
-											<label
-												htmlFor="isAdmin"
-												className="form-label ms-2"
-											>
-												Administrador
-											</label>
-										</div>
 									</>
 								)}
 

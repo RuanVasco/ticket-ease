@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -74,5 +75,25 @@ public class ProfileController {
 
         roleRepository.save(existingProfile);
         return ResponseEntity.ok(existingProfile);
+    }
+
+    @PostMapping("/")
+    @Transactional
+    public ResponseEntity<Role> createProfile(@RequestBody Role newProfile) {
+        if (newProfile.getName() == null || newProfile.getPermissions() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Set<Permission> permissionSet = new HashSet<>();
+
+        for (Permission permission : newProfile.getPermissions()) {
+            Optional<Permission> existingPermission = Optional.ofNullable(permissionRepository.findByName(permission.getName()));
+            existingPermission.ifPresent(permissionSet::add);
+        }
+
+        newProfile.setPermissions(permissionSet);
+        Role savedProfile = roleRepository.save(newProfile);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedProfile);
     }
 }
