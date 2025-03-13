@@ -133,7 +133,7 @@ const User = () => {
 						phone: res.data.phone,
 						department: department,
 						cargo: cargos,
-						profiles: res.data.roles,
+						profiles: res.data.roles ?? [],
 						password: "",
 					});
 				} else {
@@ -446,22 +446,24 @@ const User = () => {
 												Perfis
 											</label>
 											<Select
+												isDisabled={modeModal === "readonly"}
 												isMulti
 												name="profile"
 												id="profile"
-												value={currentUser.profiles.map(profile => ({
-													value: profile.id,
-													label: profile.name
-												})) || []} 
-												onChange={(selectedProfiles) => {
-													const updatedProfiles = selectedProfiles.map(profile => ({
+												value={
+													(currentUser.profiles || []).map(profile => ({
 														value: profile.id,
 														label: profile.name
+													}))}
+												onChange={(selectedProfiles) => {
+													const updatedProfiles = selectedProfiles.map(profile => ({
+														id: selectedProfiles.value,
+														name: selectedProfiles.label
 													}));
 
 													setCurrentUser({
 														...currentUser,
-														profiles: updatedProfiles,
+														profiles: updatedProfiles || [],
 													});
 												}}
 												options={profiles.map((profile) => ({
@@ -472,6 +474,7 @@ const User = () => {
 												classNamePrefix="select"
 											/>
 										</div>
+
 										{modeModal !== "readonly" && (
 											<div className="mt-2">
 												<label
