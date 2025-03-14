@@ -31,7 +31,7 @@ public class Cargo {
         return user.hasPermission("VIEW_CARGO");
     }
 
-    public static boolean canUpdate(User user) {
+    public static boolean canEdit(User user) {
         return user.hasPermission("CREATE_CARGO");
     }
 

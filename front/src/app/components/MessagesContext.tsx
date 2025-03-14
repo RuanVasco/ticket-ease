@@ -78,7 +78,6 @@ export const MessagesProvider = ({
 
 		const checkConnection = () => {
 			if (!stompClient || !isConnected) {
-				console.log("Esperando conexão STOMP...");
 				return;
 			}
 
@@ -107,7 +106,6 @@ export const MessagesProvider = ({
 		return () => {
 			clearInterval(interval);
 			subscriptions.forEach((sub) => sub.unsubscribe());
-			console.log("Desinscrito de todos os tópicos.");
 		};
 	}, [stompClient, isConnected, userData?.id]);
 

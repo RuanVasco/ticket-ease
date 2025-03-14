@@ -89,6 +89,10 @@ public class Ticket {
         return user.hasPermission("EDIT_TICKET");
     }
 
+    public static boolean canCreate(User user) {
+        return user.hasPermission("CREATE_TICKET");
+    }
+
     public static boolean canDelete(User user) {
         return user.hasPermission("DELETE_TICKET");
     }

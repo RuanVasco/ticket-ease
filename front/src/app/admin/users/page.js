@@ -264,7 +264,7 @@ const User = () => {
 
 	return (
 		<main>
-			<Header pageName="Gerenciar Usuários" />
+			<Header pageName="Gerenciar Usuários" backUrl="/admin" />
 			<div className="container">
 				<ActionBar
 					modalTargetId="modal"

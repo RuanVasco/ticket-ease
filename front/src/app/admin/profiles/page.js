@@ -73,7 +73,7 @@ const Profiles = () => {
 			ticketCategory: { create: false, edit: false, view: false, delete: false },
 			unit: { create: false, edit: false, view: false, delete: false },
 			department: { create: false, edit: false, view: false, delete: false },
-			message: { create: false, edit: false, view: false, delete: false },
+			message: { create: false, view: false },
 			user: { create: false, edit: false, view: false, delete: false },
 			profile: { create: false, edit: false, view: false, delete: false }
 		};
@@ -98,36 +98,36 @@ const Profiles = () => {
 
 	const reverseMapPermissions = (permissions) => {
 		const apiPermissions = [];
-	
+
 		Object.entries(permissions).forEach(([entity, actions]) => {
 			Object.entries(actions).forEach(([action, allowed]) => {
 				if (allowed) {
-					const formattedEntity = entity.replace(/([A-Z])/g, "_$1").toUpperCase(); 
+					const formattedEntity = entity.replace(/([A-Z])/g, "_$1").toUpperCase();
 					apiPermissions.push({ name: `${action.toUpperCase()}_${formattedEntity}` });
 				}
 			});
 		});
-	
+
 		return apiPermissions;
 	};
 
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const res = await axiosInstance.get(
-					`${API_BASE_URL}/profiles/pageable?page=${currentPage}&size=${pageSize}`
-				);
-				if (res.status === 200) {
-					setData(res.data.content);
-					setTotalPages(res.data.totalPages);
-				} else {
-					console.error("Error", res.status);
-				}
-			} catch (error) {
-				console.error(error);
+	const fetchData = async () => {
+		try {
+			const res = await axiosInstance.get(
+				`${API_BASE_URL}/profiles/pageable?page=${currentPage}&size=${pageSize}`
+			);
+			if (res.status === 200) {
+				setData(res.data.content);
+				setTotalPages(res.data.totalPages);
+			} else {
+				console.error("Error", res.status);
 			}
-		};
+		} catch (error) {
+			console.error(error);
+		}
+	};
 
+	useEffect(() => {	
 		fetchData();
 	}, [currentPage, pageSize]);
 
@@ -140,8 +140,6 @@ const Profiles = () => {
 				const res = await axiosInstance.get(
 					`${API_BASE_URL}/profiles/${id}`
 				);
-
-				console.log(res.data.permissions);
 
 				if (res.status === 200) {
 					setCurrentProfile({
@@ -197,12 +195,12 @@ const Profiles = () => {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-	
+
 		try {
 			let res;
 			const formattedPermissions = reverseMapPermissions(permissions);
 			const payload = { ...currentProfile, permissions: formattedPermissions };
-	
+
 			if (submitType === "delete") {
 				res = await axiosInstance.delete(
 					`${API_BASE_URL}/profiles/${currentProfile.id}`
@@ -218,9 +216,14 @@ const Profiles = () => {
 				console.error("Invalid submit type");
 				return;
 			}
-	
+
 			if (res.status === 200 || res.status === 201) {
 				setCurrentProfile({ id: "", name: "" });
+				document.getElementById("modal").classList.remove("show");
+                document.getElementById("modal").style.display = "none";
+                document.querySelector(".modal-backdrop").remove();
+
+                fetchData();
 			} else {
 				console.error("Error", res.status);
 			}
@@ -231,7 +234,7 @@ const Profiles = () => {
 
 	return (
 		<main>
-			<Header pageName="Gerenciar Perfis" />
+			<Header pageName="Gerenciar Perfis" backUrl="/admin" />
 			<div className="container">
 				<ActionBar
 					modalTargetId="modal"
@@ -297,7 +300,9 @@ const Profiles = () => {
 												onChange={handleInputChange}
 												required
 											/>
-											<table border="1">
+										</div>
+										<div className="mt-2">
+											<table className="table table-striped">
 												<thead>
 													<tr>
 														<th>Entidade</th>
@@ -307,20 +312,20 @@ const Profiles = () => {
 														<th>Deletar</th>
 													</tr>
 												</thead>
-												<tbody style={{color: "black"}}>
+												<tbody>
 													{Object.keys(permissions).map(entity => (
 														<tr key={entity}>
 															<td>{entity.replace(/([A-Z])/g, ' $1').toUpperCase()}</td>
 															{["create", "edit", "view", "delete"].map(permission => (
 																<td key={permission}>
-																	<input
-																		type="checkbox"
-																		checked={permissions[entity][permission]}
-																		onChange={() => handleCheckboxChange(entity, permission)}
-																		disabled={
-																			modeModal === "readonly"
-																		}
-																	/>
+																	{permissions[entity][permission] !== undefined ? (
+																		<input
+																			type="checkbox"
+																			checked={permissions[entity][permission]}
+																			onChange={() => handleCheckboxChange(entity, permission)}
+																			disabled={modeModal === "readonly"}
+																		/>
+																	) : null}
 																</td>
 															))}
 														</tr>

@@ -28,23 +28,23 @@ const Units = () => {
 		address: "",
 	});
 
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const res = await axiosInstance.get(
-					`${API_BASE_URL}/units/pageable?page=${currentPage}&size=${pageSize}`
-				);
-				if (res.status === 200) {
-					setData(res.data.content);
-					setTotalPages(res.data.totalPages);
-				} else {
-					console.error("Error", res.status);
-				}
-			} catch (error) {
-				console.log(error);
+	const fetchData = async () => {
+		try {
+			const res = await axiosInstance.get(
+				`${API_BASE_URL}/units/pageable?page=${currentPage}&size=${pageSize}`
+			);
+			if (res.status === 200) {
+				setData(res.data.content);
+				setTotalPages(res.data.totalPages);
+			} else {
+				console.error("Error", res.status);
 			}
-		};
+		} catch (error) {
+			console.log(error);
+		}
+	};
 
+	useEffect(() => {
 		fetchData();
 	}, [currentPage, pageSize]);
 
@@ -129,7 +129,11 @@ const Units = () => {
 					address: "",
 				});
 
-				window.location.reload();
+				document.getElementById("modal").classList.remove("show");
+                document.getElementById("modal").style.display = "none";
+                document.querySelector(".modal-backdrop").remove();
+
+                fetchData();
 			} else {
 				console.error("Error", res.status);
 			}
@@ -140,7 +144,7 @@ const Units = () => {
 
 	return (
 		<main>
-			<Header pageName="Gerenciar Unidades" />
+			<Header pageName="Gerenciar Unidades" backUrl="/admin" />
 			<div className="container">
 				<ActionBar
 					modalTargetId="modal"

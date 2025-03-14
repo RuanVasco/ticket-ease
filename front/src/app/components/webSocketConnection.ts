@@ -15,13 +15,11 @@ const useWebSocketConnection = () => {
 
     useEffect(() => {
         if (stompClient && tickets.length > 0) {
-            console.log("Tickets atualizados:", tickets);
 
             tickets.forEach((ticketId) => {
                 stompClient.subscribe(`/topic/ticket/${ticketId}`, (message) => {
                     const newMessage = JSON.parse(message.body);
                     setMessages((prevMessages) => [...prevMessages, newMessage]);
-                    console.log("Mensagem recebida no tópico /topic/ticket/" + ticketId, newMessage);
                 });
             });
         }
@@ -56,7 +54,6 @@ const useWebSocketConnection = () => {
         stompClient.subscribe(`/queue/user/${userId}/tickets`, (message) => {
             const tickets = JSON.parse(message.body);
             setTickets(tickets);
-            console.log("Tickets recebidos:", tickets);
         });
 
         stompClient.publish({

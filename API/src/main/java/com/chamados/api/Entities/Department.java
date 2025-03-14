@@ -47,7 +47,7 @@ public class Department {
 		return user.hasPermission("VIEW_DEPARTMENT");
 	}
 
-	public static boolean canUpdate(User user) {
+	public static boolean canEdit(User user) {
 		return user.hasPermission("CREATE_DEPARTMENT");
 	}
 

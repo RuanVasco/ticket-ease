@@ -189,7 +189,7 @@ const Departments = () => {
 
 	return (
 		<main>
-			<Header pageName="Gerenciar Setores" />
+			<Header pageName="Gerenciar Setores" backUrl="/admin" />
 			<div className="container">
 				<ActionBar
 					modalTargetId="modal"

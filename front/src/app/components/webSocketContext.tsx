@@ -60,7 +60,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
 		});
 
 		client.onConnect = function (frame) {
-			console.log("Conectado ao WebSocket!");
 			setIsConnected(true);
 		};
 
@@ -76,7 +75,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
 			if (client.connected) {
 				client.deactivate();
 				setIsConnected(false);
-				console.log("WebSocket desconectado.");
 			}
 		};
 	}, []);

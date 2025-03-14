@@ -51,6 +51,19 @@ public class ProfileController {
         return ResponseEntity.ok(profile);
     }
 
+    @DeleteMapping("/{profileId}")
+    public ResponseEntity<?> deleteProfile(@PathVariable Long profileId) {
+        Optional<Role> optionalRole = roleRepository.findById(profileId);
+
+        if (optionalRole.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Role profile = optionalRole.get();
+        roleRepository.deleteById(profile.getId());
+        return ResponseEntity.ok().build();
+    }
+
     @PutMapping("/{profileId}")
     @Transactional
     public ResponseEntity<?> updateProfile(@PathVariable Long profileId, @RequestBody Role updatedProfile) {
