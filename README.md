@@ -8,4 +8,4 @@
 ## Implementation:
 
 Create /front/.env.local file and put the API URL there.<br>
-Ex:"""<br>NEXT_PUBLIC_API_BASE_URL=http://localhost:8080<br>VITE_WS_URL=http://localhost:8080"""
+Ex:```<br>NEXT_PUBLIC_API_BASE_URL=http://localhost:8080<br>VITE_WS_URL=http://localhost:8080```
