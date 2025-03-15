@@ -1,0 +1,40 @@
+.div_select_sector {
+    width: 15vw;
+    color: var(--primary-color) !important;
+}
+
+.nav_forms_cat_list {
+    list-style: none;
+    padding: 0;
+}
+
+.nav_forms_cat_item {
+    font-size: 1.1rem;
+    padding: 4px 7px;
+    border-radius: 4px;
+}
+
+.nav_forms_cat_item:hover {
+    background-color: var(--secondary-color-hover);
+}
+
+.nav_forms_cat_btn_back {
+    padding: 0;
+    border: 0;
+    color: var(--primary-color);
+    background-color: var(--secondary-color);
+}
+
+.nav_forms_cat_head {
+    font-size: 1.1rem;
+}
+
+.item_selected {
+    background-color: var(--secondary-color-hover);
+}
+
+.form_box {
+    height: 85vh;
+    overflow-y: scroll;
+    padding-bottom: 20px;
+}
