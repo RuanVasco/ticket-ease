@@ -11,7 +11,7 @@ TicketEase is a **ticket management system** designed to streamline issue tracki
 🔲 Dashboard for ticket management.  
 🔲 Real-time notifications.  
 🔲 Assign permissions per ticket category.  
-🔲 Dynamic form creation.
+🔲 Dynamic form creation. <br>
 🔲 Docker.
 
 ---
