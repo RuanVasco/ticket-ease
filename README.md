@@ -18,6 +18,7 @@ TicketEase is a **ticket management system** designed to streamline issue tracki
 
 ## 🛠️ Technologies Used
 Frontend
+
     ⚡ React + Vite – Fast and modern frontend development.
     🎨 Bootstrap + Custom CSS – For UI styling and responsive design.
     🏗 TypeScript – Strongly typed JavaScript for better maintainability.
@@ -25,6 +26,7 @@ Frontend
     🔗 React Router – Enables single-page application (SPA) navigation.
 
 Backend
+
     🏢 Spring Boot – Robust Java backend for handling API requests.
     🔐 JWT Authentication – Secure login with role-based access control.
     📩 Spring WebSocket – Real-time communication for chat and notifications.
