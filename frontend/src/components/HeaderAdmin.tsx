@@ -6,7 +6,7 @@ import "../assets/styles/header.css";
 import { User } from "../types/User";
 
 import GetUserData from "./GetUserData";
-import ThemeSelector from "./ThemeSelector";
+import ThemeSelector from "./ThemeSwitcher";
 
 interface HeaderAdminProps {
     pageName: string;
@@ -40,7 +40,7 @@ const HeaderAdmin: React.FC<HeaderAdminProps> = ({ pageName }) => {
                         )}
                     </div>
                     <div className="col-6 d-flex justify-content-center">
-                        <h3 className="fw-bold my-auto">{pageName}</h3>
+                        <h3 className="fw-bold my-auto page_title">{pageName}</h3>
                     </div>
                     <div className="col-3 text-end">
                         <button

@@ -6,6 +6,7 @@ import App from "./App.tsx";
 import { AuthProvider } from "./context/AuthContext";
 import { WebSocketProvider } from "./context/WebSocketContext";
 import "./assets/styles/global.css";
+import { ThemeProvider } from "./context/ThemeContext";
 import { PermissionsProvider } from "./context/PermissionsContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
@@ -14,7 +15,9 @@ createRoot(document.getElementById("root")!).render(
             <BrowserRouter>
                 <PermissionsProvider>
                     <AuthProvider>
-                        <App />
+                        <ThemeProvider>
+                            <App />
+                        </ThemeProvider>
                     </AuthProvider>
                 </PermissionsProvider>
             </BrowserRouter>

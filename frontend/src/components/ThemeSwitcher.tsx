@@ -1,29 +1,9 @@
-import { useState, useEffect } from "react";
 import { IoSunny, IoMoon } from "react-icons/io5";
-
-import ThemeChange from "./ThemeChange";
+import { useTheme } from "../context/ThemeContext";
 import "../assets/styles/theme_selector.css";
 
-const ThemeSelector: React.FC = () => {
-    const [theme, setTheme] = useState<string>("light");
-
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            const savedTheme = localStorage.getItem("theme");
-            if (savedTheme) {
-                setTheme(savedTheme);
-            }
-        }
-    }, []);
-
-    useEffect(() => {
-        ThemeChange(theme);
-    }, [theme]);
-
-    const handleThemeChange = (selectedTheme: string) => {
-        setTheme(selectedTheme);
-        localStorage.setItem("theme", selectedTheme);
-    };
+const ThemeSwitcher: React.FC = () => {
+    const { theme, setTheme } = useTheme();
 
     return (
         <div className="btn-group" role="group" aria-label="Basic radio toggle button group">
@@ -33,8 +13,8 @@ const ThemeSelector: React.FC = () => {
                 name="theme"
                 id="radioLight"
                 autoComplete="off"
-                checked={theme !== "retro" && theme !== "dark"}
-                onChange={() => handleThemeChange("light")}
+                checked={theme === "light"}
+                onChange={() => setTheme("light")}
             />
             <label className="btn btn-theme-selector" htmlFor="radioLight" title="Light Mode">
                 <IoSunny />
@@ -47,7 +27,7 @@ const ThemeSelector: React.FC = () => {
                 id="radioDark"
                 autoComplete="off"
                 checked={theme === "dark"}
-                onChange={() => handleThemeChange("dark")}
+                onChange={() => setTheme("dark")}
             />
             <label className="btn btn-theme-selector" htmlFor="radioDark" title="Dark Mode">
                 <IoMoon />
@@ -56,4 +36,4 @@ const ThemeSelector: React.FC = () => {
     );
 };
 
-export default ThemeSelector;
+export default ThemeSwitcher;

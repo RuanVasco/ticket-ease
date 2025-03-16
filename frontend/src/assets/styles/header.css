@@ -28,3 +28,23 @@
     background-color: var(--static-secondary-color-hover);
     color: var(--static-primary-color-hover);
 }
+
+.tab_item_link {
+    color: var(--static-secondary-color);
+    font-weight: bold;
+    margin: 0 10px;
+    padding: 2px;
+}
+
+.tab_item_link:hover {
+    color: var(--static-secondary-color-hover);
+    border-bottom: 1px solid var(--static-secondary-color-hover);
+}
+
+.tab_item_link_active {
+    border-bottom: 1px solid var(--static-secondary-color);
+}
+
+.page_title {
+    padding: 5px;
+}

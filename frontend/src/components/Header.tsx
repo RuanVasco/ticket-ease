@@ -1,25 +1,24 @@
 import { useEffect, useState } from "react";
 import { FaGear } from "react-icons/fa6";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import "../assets/styles/header.css";
 import { usePermissions } from "../context/PermissionsContext";
 import { User } from "../types/User";
 
 import GetUserData from "./GetUserData";
-import ThemeSelector from "./ThemeSelector";
+import ThemeSelector from "./ThemeSwitcher";
+import { useAuth } from "../context/AuthContext";
 
 const Header: React.FC = () => {
+    const location = useLocation();
     const [user, setUser] = useState<User | null>(null);
     const [canEditTicket, setCanEditTicket] = useState(false);
     const { hasPermission } = usePermissions();
+    const { logout } = useAuth();
 
     useEffect(() => {
-        const checkUserPermission = async () => {
-            setCanEditTicket(hasPermission("EDIT_TICKET"));
-        };
-
-        checkUserPermission();
+        setCanEditTicket(hasPermission("EDIT_TICKET"));
     }, []);
 
     useEffect(() => {
@@ -30,11 +29,13 @@ const Header: React.FC = () => {
         fetchData();
     }, []);
 
-    const logout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("refreshToken");
-        window.location.reload();
+    const handleLogout = () => {
+        document.getElementsByClassName("modal-backdrop")[0].remove();
+        logout();
     };
+
+    const getActiveClass = (path: string) =>
+        location.pathname === path ? "tab_item_link tab_item_link_active" : "tab_item_link";
 
     return (
         <nav className="navbar navbar-expand-lg header-style">
@@ -44,14 +45,17 @@ const Header: React.FC = () => {
                         <h3 className="fw-bold my-auto">TicketEase</h3>
                     </div>
                     <div className="col-6 d-flex justify-content-center">
-                        <Link to="/" className="btn btn-secondary me-2">
+                        <Link to="/" className={getActiveClass("/")}>
                             Criar
                         </Link>
-                        <Link to="/tickets" className="btn btn-secondary me-2">
+                        <Link to="/tickets" className={getActiveClass("/tickets")}>
                             Visualizar
                         </Link>
                         {canEditTicket && (
-                            <Link to="/gerenciar-tickets" className="btn btn-secondary">
+                            <Link
+                                to="/gerenciar-tickets"
+                                className={getActiveClass("/gerenciar-tickets")}
+                            >
                                 Gerenciar
                             </Link>
                         )}
@@ -84,7 +88,7 @@ const Header: React.FC = () => {
                                         <button
                                             type="button"
                                             className="btn btn-warning btn-sm ms-3"
-                                            onClick={logout}
+                                            onClick={handleLogout}
                                         >
                                             Sair
                                         </button>

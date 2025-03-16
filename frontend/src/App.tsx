@@ -49,7 +49,7 @@ function App() {
                     <Route path="/admin/departments" element={<DepartmentManagement />} />
                     <Route path="/admin/cargos" element={<CargoManagement />} />
                     <Route path="/admin/profiles" element={<ProfileManagement />} />
-                    <Route path="/admin/ticket-categories" element={<TicketCategoryManagement />} />
+                    <Route path="/admin/ticket_category" element={<TicketCategoryManagement />} />
                 </Route>
             )}
 

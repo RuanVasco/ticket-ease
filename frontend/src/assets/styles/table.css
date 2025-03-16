@@ -8,16 +8,13 @@ th {
     color: var(--secondary-color);
 }
 
+.table-custom th,
 .table-custom td {
     background-color: rgba(0, 0, 0, 0);
     color: var(--primary-color);
     border-bottom: 1px solid var(--primary-color);
-}
-
-.table-custom th {
-    background-color: rgba(0, 0, 0, 0);
-    color: var(--primary-color);
-    border-bottom: 1px solid var(--primary-color);
+    vertical-align: middle;
+    text-align: center;
 }
 
 .col-auto-width {

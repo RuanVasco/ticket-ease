@@ -1,4 +1,4 @@
-:root {
+/* :root {
     --secondary-color: #f9f9f9;
     --secondary-color-hover: #e7e7e7;
     --primary-color: #1f1f1f;
@@ -8,11 +8,33 @@
     --static-primary-color: #1f1f1f;
     --static-secondary-color-hover: #e7e7e7;
     --static-primary-color-hover: #0e0e0e;
+} */
+
+:root {
+    --primary-color: #1f1f1f;
+    --secondary-color: #f9f9f9;
+    --primary-color-hover: #0e0e0e;
+    --secondary-color-hover: #e7e7e7;
+
+    --static-secondary-color: #f9f9f9;
+    --static-primary-color: #1f1f1f;
+    --static-secondary-color-hover: #e7e7e7;
+    --static-primary-color-hover: #0e0e0e;
+}
+
+[data-theme="dark"] {
+    --primary-color: #f9f9f9;
+    --secondary-color: #1f1f1f;
+    --primary-color-hover: #e7e7e7;
+    --secondary-color-hover: #0e0e0e;
 }
 
 body {
     background-color: var(--secondary-color);
     color: var(--primary-color);
+    transition:
+        background-color 0.3s,
+        color 0.3s;
 }
 
 a {
