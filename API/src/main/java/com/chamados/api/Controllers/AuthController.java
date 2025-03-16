@@ -1,31 +1,29 @@
 package com.chamados.api.Controllers;
 
-import com.chamados.api.Repositories.CargoRepository;
-import com.chamados.api.Repositories.DepartmentRepository;
+import com.chamados.api.Entities.Permission;
+import com.chamados.api.Entities.Role;
+import com.chamados.api.Repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.chamados.api.DTO.LoginDTO;
 import com.chamados.api.DTO.LoginResponseDTO;
 import com.chamados.api.DTO.ValidateDTO;
 import com.chamados.api.Entities.User;
-import com.chamados.api.Repositories.RoleRepository;
-import com.chamados.api.Repositories.UserRepository;
 import com.chamados.api.Services.TokenService;
 
 import jakarta.validation.Valid;
 
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("auth")
@@ -94,5 +92,23 @@ public class AuthController {
     	} else {
     		return ResponseEntity.status(HttpStatus.FORBIDDEN).body("invalid token");
     	}
+    }
+
+    @GetMapping("/permissions")
+    public ResponseEntity<List<Permission>> getPermissions() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !(authentication.getPrincipal() instanceof User user)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        Set<Role> roles = user.getRoles();
+
+        List<Permission> permissions = roles.stream()
+                .flatMap(role -> role.getPermissions() != null ? role.getPermissions().stream() : Stream.empty())
+                .distinct()
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(permissions);
     }
 }

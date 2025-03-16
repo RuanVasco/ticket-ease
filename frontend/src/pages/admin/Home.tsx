@@ -1,7 +1,7 @@
 import { useState, useEffect, JSX } from "react";
 import { FaSuitcase, FaUser, FaUsers, FaStore, FaFolderOpen, FaIdBadge } from "react-icons/fa6";
 import Block from "../../components/Block";
-import { checkPermission } from "../../components/CheckPermission";
+import { usePermissions } from "../../context/PermissionsContext";
 
 interface BlockData {
     text: string;
@@ -54,6 +54,7 @@ const HomeAdmin: React.FC = () => {
     ];
 
     const [permissions, setPermissions] = useState<Record<string, boolean>>({});
+    const { hasPermission } = usePermissions();
 
     useEffect(() => {
         const fetchPermissions = async () => {
@@ -65,7 +66,7 @@ const HomeAdmin: React.FC = () => {
             for (const block of allBlocks) {
                 let entity = block.link.split("/").pop()?.toUpperCase() || "";
                 entity = removePlural(entity);
-                permissionResults[block.link] = checkPermission("VIEW", entity);
+                permissionResults[block.link] = hasPermission("VIEW_" + entity);
             }
 
             setPermissions(permissionResults);

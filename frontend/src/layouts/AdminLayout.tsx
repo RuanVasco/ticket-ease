@@ -1,16 +1,11 @@
-import { Navigate, Outlet } from "react-router-dom";
-import { CheckAdminAccess } from "../components/CheckAdminAccess";
+import { Outlet } from "react-router-dom";
+import HeaderAdmin from "../components/HeaderAdmin";
 
 const AdminLayout = () => {
-    const isAdmin = CheckAdminAccess();
-
-    if (!isAdmin) {
-        return <Navigate to="/" replace />;
-    }
-
     return (
         <div className="layout">
             <main>
+                <HeaderAdmin pageName="Administração" />
                 <Outlet />
             </main>
         </div>

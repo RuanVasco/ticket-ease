@@ -40,7 +40,7 @@ const UnitManagement: React.FC = () => {
                 console.error("Error", res.status);
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     };
 

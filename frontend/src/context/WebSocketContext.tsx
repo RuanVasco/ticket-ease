@@ -22,13 +22,10 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
     const isConnected = useRef(false);
 
     useEffect(() => {
-        console.log("WebSocket conectado?", isConnected.current);
-
         const token = localStorage.getItem("token");
         if (!token || !userId) return;
 
         if (isConnected.current && stompClient.current?.connected) {
-            console.log("✅ WebSocket já está conectado. Nenhuma ação necessária.");
             return;
         }
 
@@ -43,11 +40,8 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
             onConnect: () => {
-                console.log("✅ WebSocket conectado.");
-
                 client.subscribe(`/queue/user/${userId}/tickets`, (message: IMessage) => {
                     const ticketIds: string[] = JSON.parse(message.body);
-                    console.log("📩 Recebidos IDs de tickets:", ticketIds);
 
                     setTicketNotifications(ticketIds);
 
@@ -64,7 +58,6 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
                                     }));
                                 }
                             );
-                            console.log(`🔗 Inscrito no ticket ${ticketId}`);
                         }
                     });
                 });
@@ -92,7 +85,6 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
                 stompClient.current
                     .deactivate()
                     .then(() => {
-                        console.log("🔌 WebSocket fechado.");
                         isConnected.current = false;
                     })
                     .catch((err) => {

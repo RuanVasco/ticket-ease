@@ -17,3 +17,14 @@
     outline: 0 !important;
     border: 0;
 }
+
+.btn-go-back {
+    background-color: var(--static-secondary-color);
+    color: var(--static-primary-color);
+    padding: 4px 5px;
+}
+
+.btn-go-back:hover {
+    background-color: var(--static-secondary-color-hover);
+    color: var(--static-primary-color-hover);
+}

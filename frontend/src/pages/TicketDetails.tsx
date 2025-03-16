@@ -4,7 +4,7 @@ import { FaPaperclip } from "react-icons/fa6";
 import axiosInstance from "../components/AxiosConfig";
 import getUserData from "../components/GetUserData";
 import DateFormatter from "../components/DateFormatter";
-import { checkPermission } from "../components/CheckPermission";
+import { usePermissions } from "../context/PermissionsContext";
 import { useWebSocket } from "../context/WebSocketContext";
 import { useParams } from "react-router-dom";
 import "../assets/styles/ticket_details.css";
@@ -53,6 +53,7 @@ const TicketDetails: React.FC = () => {
     const pageSize = 10;
 
     const getFirstName = (fullName: string) => fullName.split(" ")[0];
+    const { hasPermission } = usePermissions();
 
     const loadOlderMessages = async () => {
         if (!hasMore) return;
@@ -94,7 +95,7 @@ const TicketDetails: React.FC = () => {
 
     useEffect(() => {
         const checkUserPermission = async () => {
-            const isManager = await checkPermission("EDIT", "TICKET");
+            const isManager = hasPermission("EDIT_TICKET");
             setIsManager(isManager);
         };
 
@@ -206,7 +207,7 @@ const TicketDetails: React.FC = () => {
                             <div className="chat_content rounded px-2 pb-3" onScroll={handleScroll}>
                                 {allMessages.length > 0 ? (
                                     allMessages.map((msg) =>
-                                        Number(msg.user.id) === userData?.id ? (
+                                        Number(msg.user.id) === Number(userData?.id) ? (
                                             <div key={msg.id} className="mt-3 message-box-sent">
                                                 <div className="message-bubble">
                                                     <div className="box_message_details mb-2">

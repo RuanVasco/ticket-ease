@@ -1,15 +1,16 @@
 import { JwtPayload, jwtDecode } from "jwt-decode";
 import { User } from "../types/User";
-import { Permission } from "../types/Permission";
+import { Profile } from "../types/Profile";
+import { Department } from "../types/Department";
 
 interface UserData extends JwtPayload {
     id: number;
     name: string;
-    email: string;
-    permissions: Permission[];
+    sub: string;
+    roles: Profile[];
 }
 
-const GetUserData = (): UserData | null => {
+const GetUserData = (): User | null => {
     if (typeof window !== "undefined") {
         const token = localStorage.getItem("token");
         if (token) {
@@ -17,8 +18,11 @@ const GetUserData = (): UserData | null => {
             return new User(
                 decodedToken.id.toString(),
                 decodedToken.name,
-                decodedToken.email,
-                decodedToken.permissions
+                decodedToken.sub,
+                "",
+                {} as Department,
+                {} as Department,
+                decodedToken.roles
             );
         }
     }

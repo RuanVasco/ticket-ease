@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.chamados.api.Components.TokenUtils;
+import com.chamados.api.Entities.Role;
 import com.chamados.api.Repositories.UserRepository;
 import com.nimbusds.jose.JOSEException;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,17 +45,11 @@ public class TokenService {
 		try {
 			Algorithm algorithm = Algorithm.HMAC256(secret);
 
-			List<String> permissions = userRepository.findPermissionsByUserId(user.getId())
-					.stream()
-					.map(permission -> permission.getName())
-					.collect(Collectors.toList());
-
 			return JWT.create()
 					.withIssuer("auth-api")
 					.withSubject(user.getEmail())
 					.withClaim("id", user.getId())
 					.withClaim("name", user.getName())
-					.withClaim("permissions", permissions)
 					.withExpiresAt(getExpirationDate(accessExpiration))
 					.sign(algorithm);
 		} catch (JWTCreationException exception) {

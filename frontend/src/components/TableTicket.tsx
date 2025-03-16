@@ -75,7 +75,7 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                 setNoResultsMessage("Nenhum ticket encontrado.");
             }
         } catch (error) {
-            console.log("Error:", error);
+            console.error("Error:", error);
         }
     };
 
@@ -121,7 +121,7 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                     setNoResultsMessage("Nenhum ticket encontrado.");
                 }
             } catch (error) {
-                console.log("Search Error:", error);
+                console.error("Search Error:", error);
                 setNoResultsMessage("Erro ao buscar tickets. Tente novamente.");
             }
         } else {

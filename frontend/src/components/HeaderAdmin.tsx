@@ -1,32 +1,24 @@
 import { useEffect, useState } from "react";
-import { FaGear } from "react-icons/fa6";
-import { Link } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { FaArrowLeft, FaGear } from "react-icons/fa6";
 import "../assets/styles/header.css";
-import { usePermissions } from "../context/PermissionsContext";
 
 import ThemeSelector from "./ThemeSelector";
 import GetUserData from "./GetUserData";
 import { User } from "../types/User";
 
-const Header: React.FC = () => {
+interface HeaderAdminProps {
+    pageName: string;
+}
+
+const HeaderAdmin: React.FC<HeaderAdminProps> = ({ pageName }) => {
+    const navigate = useNavigate();
+    const location = useLocation();
     const [user, setUser] = useState<User | null>(null);
-    const [canEditTicket, setCanEditTicket] = useState(false);
-    const { hasPermission } = usePermissions();
 
     useEffect(() => {
-        const checkUserPermission = async () => {
-            setCanEditTicket(hasPermission("EDIT_TICKET"));
-        };
-
-        checkUserPermission();
-    }, []);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            const userData = GetUserData();
-            setUser(userData);
-        };
-        fetchData();
+        const userData = GetUserData();
+        setUser(userData);
     }, []);
 
     const logout = () => {
@@ -40,20 +32,14 @@ const Header: React.FC = () => {
             <div className="container">
                 <div className="row w-100 py-2">
                     <div className="col-3">
-                        <h3 className="fw-bold my-auto">TicketEase</h3>
+                        {location.pathname !== "/admin" && (
+                            <button onClick={() => navigate("/admin")} className="btn btn-go-back">
+                                <FaArrowLeft /> Voltar
+                            </button>
+                        )}
                     </div>
                     <div className="col-6 d-flex justify-content-center">
-                        <Link to="/" className="btn btn-secondary me-2">
-                            Criar
-                        </Link>
-                        <Link to="/tickets" className="btn btn-secondary me-2">
-                            Visualizar
-                        </Link>
-                        {canEditTicket && (
-                            <Link to="/gerenciar-tickets" className="btn btn-secondary">
-                                Gerenciar
-                            </Link>
-                        )}
+                        <h3 className="fw-bold my-auto">{pageName}</h3>
                     </div>
                     <div className="col-3 text-end">
                         <button
@@ -66,7 +52,7 @@ const Header: React.FC = () => {
                     </div>
                 </div>
             </div>
-            <div className="modal fade" id="configModal" tabIndex={-1}>
+            <div className="modal fade" id="configModal" tabIndex={-1} aria-hidden="true">
                 <div className="modal-dialog">
                     <div className="modal-content">
                         <div className="modal-header">
@@ -79,7 +65,7 @@ const Header: React.FC = () => {
                             {user && (
                                 <div className="row">
                                     <div className="col">
-                                        <span className="fw-semibold">{user.name}</span>
+                                        <span className="fw-semibold">{user.name} </span>
                                         <button
                                             type="button"
                                             className="btn btn-warning btn-sm ms-3"
@@ -88,8 +74,7 @@ const Header: React.FC = () => {
                                             Sair
                                         </button>
                                         <br />
-                                        {user.email}
-                                        <br />
+                                        {user.email} <br />
                                     </div>
                                 </div>
                             )}
@@ -110,4 +95,4 @@ const Header: React.FC = () => {
     );
 };
 
-export default Header;
+export default HeaderAdmin;

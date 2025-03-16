@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { usePermissions } from "./PermissionsContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -15,6 +16,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const clearPermissions = usePermissions().clearPermissions;
 
     const checkAuth = async (): Promise<boolean> => {
         const token = localStorage.getItem("token");
@@ -58,6 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const logout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("refreshToken");
+        clearPermissions;
         navigate("/login");
     };
 

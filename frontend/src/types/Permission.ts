@@ -1,6 +1,4 @@
 export interface Permission {
-    create?: boolean;
-    edit?: boolean;
-    view?: boolean;
-    delete?: boolean;
+    id: string;
+    name: string;
 }
