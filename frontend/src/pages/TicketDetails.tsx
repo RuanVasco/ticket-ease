@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef, ChangeEvent, FormEvent } from "react";
 import { BsSendCheck, BsSend } from "react-icons/bs";
 import { FaPaperclip } from "react-icons/fa6";
+import { useParams } from "react-router-dom";
+
 import axiosInstance from "../components/AxiosConfig";
-import getUserData from "../components/GetUserData";
 import DateFormatter from "../components/DateFormatter";
+import getUserData from "../components/GetUserData";
 import { usePermissions } from "../context/PermissionsContext";
 import { useWebSocket } from "../context/WebSocketContext";
-import { useParams } from "react-router-dom";
 import "../assets/styles/ticket_details.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;

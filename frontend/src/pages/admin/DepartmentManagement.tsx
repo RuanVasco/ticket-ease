@@ -1,9 +1,9 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
-import axiosInstance from "../../components/AxiosConfig";
-import Table from "../../components/Table";
-import ActionBar from "../../components/ActionBar";
-import Pagination from "../../components/Pagination";
 
+import ActionBar from "../../components/ActionBar";
+import axiosInstance from "../../components/AxiosConfig";
+import Pagination from "../../components/Pagination";
+import Table from "../../components/Table";
 import { Department } from "../../types/Department";
 import { Unit } from "../../types/Unit";
 

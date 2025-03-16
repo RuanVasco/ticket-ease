@@ -1,14 +1,15 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
-import axiosInstance from "../../components/AxiosConfig";
-import Select from "react-select";
-import Table from "../../components/Table";
-import ActionBar from "../../components/ActionBar";
-import Pagination from "../../components/Pagination";
-import { User } from "../../types/User";
 import { FaUserMinus, FaUserPlus } from "react-icons/fa6";
+import Select from "react-select";
+
+import ActionBar from "../../components/ActionBar";
+import axiosInstance from "../../components/AxiosConfig";
+import Pagination from "../../components/Pagination";
+import Table from "../../components/Table";
 import { Cargo } from "../../types/Cargo";
 import { Department } from "../../types/Department";
 import { Profile } from "../../types/Profile";
+import { User } from "../../types/User";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, JSX } from "react";
 import { FaSuitcase, FaUser, FaUsers, FaStore, FaFolderOpen, FaIdBadge } from "react-icons/fa6";
+
 import Block from "../../components/Block";
 import { usePermissions } from "../../context/PermissionsContext";
 

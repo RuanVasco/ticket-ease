@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import Pagination from "./Pagination";
-import ItemsPerPage from "./ItemsPerPage";
+
 import axiosInstance from "./AxiosConfig";
 import DateFormatter from "./DateFormatter";
+import ItemsPerPage from "./ItemsPerPage";
+import Pagination from "./Pagination";
 import "../assets/styles/table.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;

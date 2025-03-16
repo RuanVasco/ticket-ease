@@ -1,9 +1,10 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import axiosInstance from "../components/AxiosConfig";
-import AttachmentsForm from "../components/AttachmentsForm";
 import { FaAngleRight, FaAngleLeft, FaFolderOpen, FaClipboardList, FaPlus } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
+
+import AttachmentsForm from "../components/AttachmentsForm";
+import axiosInstance from "../components/AxiosConfig";
 import "../assets/styles/create_ticket.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
@@ -70,12 +71,12 @@ const CreateTicket: React.FC = () => {
     const organizeData = (): Category => {
         const categoryMap = new Map<string, Category>();
         const departmentMap = new Map<string, Category>();
-        let root: Category = { id: "root", name: "Categorias", path: "", children: [] };
+        const root: Category = { id: "root", name: "Categorias", path: "", children: [] };
 
         categories.forEach((category) => {
             categoryMap.set(category.id, { ...category, children: [] });
             if (category.department) {
-                let departmentId = category.department.id;
+                const departmentId = category.department.id;
                 if (!departmentMap.has(departmentId)) {
                     departmentMap.set(departmentId, {
                         ...category.department,
@@ -88,13 +89,13 @@ const CreateTicket: React.FC = () => {
 
         categories.forEach((category) => {
             if (category.father) {
-                let parentCategory = categoryMap.get(category.father.id);
+                const parentCategory = categoryMap.get(category.father.id);
                 if (parentCategory) {
                     parentCategory.children.push(categoryMap.get(category.id)!);
                 }
             } else {
                 if (category.department) {
-                    let department = departmentMap.get(category.department.id);
+                    const department = departmentMap.get(category.department.id);
                     if (department) {
                         department.children.push(categoryMap.get(category.id)!);
                     }

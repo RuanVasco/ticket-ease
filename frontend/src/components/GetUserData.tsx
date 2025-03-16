@@ -1,7 +1,8 @@
 import { JwtPayload, jwtDecode } from "jwt-decode";
-import { User } from "../types/User";
-import { Profile } from "../types/Profile";
+
 import { Department } from "../types/Department";
+import { Profile } from "../types/Profile";
+import { User } from "../types/User";
 
 interface UserData extends JwtPayload {
     id: number;

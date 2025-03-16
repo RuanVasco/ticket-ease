@@ -1,22 +1,21 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Login from "./pages/Login";
-import CreateTicket from "./pages/CreateTicket";
-import ViewTickets from "./pages/ViewTickets";
-import TicketDetails from "./pages/TicketDetails";
-import ManageTickets from "./pages/ManageTickets";
-import MainLayout from "./layouts/MainLayout";
 
+import { usePermissions } from "./context/PermissionsContext";
 import AdminLayout from "./layouts/AdminLayout";
-import Home from "./pages/admin/Home";
-import UserManagement from "./pages/admin/UserManagement";
-import UnitManagement from "./pages/admin/UnitManagement";
-import DepartmentManagement from "./pages/admin/DepartmentManagement";
+import MainLayout from "./layouts/MainLayout";
+import ProtectedLayout from "./layouts/ProtectedLayout";
 import CargoManagement from "./pages/admin/CargoManagement";
+import DepartmentManagement from "./pages/admin/DepartmentManagement";
+import Home from "./pages/admin/Home";
 import ProfileManagement from "./pages/admin/ProfileManagement";
 import TicketCategoryManagement from "./pages/admin/TicketCategoryManagement";
-
-import ProtectedLayout from "./layouts/ProtectedLayout";
-import { usePermissions } from "./context/PermissionsContext";
+import UnitManagement from "./pages/admin/UnitManagement";
+import UserManagement from "./pages/admin/UserManagement";
+import CreateTicket from "./pages/CreateTicket";
+import Login from "./pages/Login";
+import ManageTickets from "./pages/ManageTickets";
+import TicketDetails from "./pages/TicketDetails";
+import ViewTickets from "./pages/ViewTickets";
 
 function App() {
     const { hasPermission, isAdmin, loading } = usePermissions();

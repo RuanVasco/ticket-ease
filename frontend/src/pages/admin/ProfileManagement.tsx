@@ -1,10 +1,11 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
-import axiosInstance from "../../components/AxiosConfig";
-import Table from "../../components/Table";
+
 import ActionBar from "../../components/ActionBar";
+import axiosInstance from "../../components/AxiosConfig";
 import Pagination from "../../components/Pagination";
-import { Profile } from "../../types/Profile";
+import Table from "../../components/Table";
 import { Permission } from "../../types/Permission";
+import { Profile } from "../../types/Profile";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 

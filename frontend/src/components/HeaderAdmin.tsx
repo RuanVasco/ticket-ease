@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
 import { FaArrowLeft, FaGear } from "react-icons/fa6";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../assets/styles/header.css";
 
-import ThemeSelector from "./ThemeSelector";
-import GetUserData from "./GetUserData";
 import { User } from "../types/User";
+
+import GetUserData from "./GetUserData";
+import ThemeSelector from "./ThemeSelector";
 
 interface HeaderAdminProps {
     pageName: string;

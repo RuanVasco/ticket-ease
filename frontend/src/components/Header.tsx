@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { FaGear } from "react-icons/fa6";
 import { Link } from "react-router-dom";
+
 import "../assets/styles/header.css";
 import { usePermissions } from "../context/PermissionsContext";
-
-import ThemeSelector from "./ThemeSelector";
-import GetUserData from "./GetUserData";
 import { User } from "../types/User";
+
+import GetUserData from "./GetUserData";
+import ThemeSelector from "./ThemeSelector";
 
 const Header: React.FC = () => {
     const [user, setUser] = useState<User | null>(null);

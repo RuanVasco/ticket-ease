@@ -1,6 +1,7 @@
+import axios from "axios";
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+
 import { usePermissions } from "./PermissionsContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
