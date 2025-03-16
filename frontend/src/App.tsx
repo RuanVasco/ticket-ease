@@ -1,38 +1,61 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import CreateTicket from "./pages/CreateTicket";
-import ViewTickets from "./pages/ViewTicket";
+import ViewTickets from "./pages/ViewTickets";
 import TicketDetails from "./pages/TicketDetails";
+import ManageTickets from "./pages/ManageTickets";
+import MainLayout from "./layouts/MainLayout";
+
+import AdminLayout from "./layouts/AdminLayout";
+import Home from "./pages/admin/Home";
+import Users from "./pages/admin/Users";
+
+import { useEffect, useState } from "react";
+import { checkPermission } from "./components/CheckPermission";
 
 function App() {
+    const [canEditTicket, setCanEditTicket] = useState(false);
+
+    useEffect(() => {
+        const checkUserPermission = async () => {
+            const hasPermission = checkPermission("EDIT", "TICKET");
+            setCanEditTicket(hasPermission);
+        };
+
+        checkUserPermission();
+    }, []);
+
     return (
         <Routes>
             <Route path="/login" element={<Login />} />
+
             <Route
-                path="/"
                 element={
                     <ProtectedRoute>
-                        <CreateTicket />
+                        <MainLayout />
                     </ProtectedRoute>
                 }
-            />
+            >
+                <Route path="/" element={<CreateTicket />} />
+                <Route path="/tickets" element={<ViewTickets />} />
+                <Route path="/tickets/:id" element={<TicketDetails />} />
+                {canEditTicket && <Route path="/gerenciar-tickets" element={<ManageTickets />} />}
+            </Route>
+
             <Route
-                path="/visualizar"
+                path="/admin"
                 element={
                     <ProtectedRoute>
-                        <ViewTickets />
+                        <AdminLayout />
                     </ProtectedRoute>
                 }
-            />
-            <Route
-                path="/chamado/:id"
-                element={
-                    <ProtectedRoute>
-                        <TicketDetails />
-                    </ProtectedRoute>
-                }
-            />
+            >
+                <Route path="/admin/" element={<Home />} />
+                <Route path="/admin/users" element={<Users />} />
+            </Route>
+
+            <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     );
 }

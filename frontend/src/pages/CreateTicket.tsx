@@ -1,7 +1,6 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../components/AxiosConfig";
-import Header from "../components/Header";
 import AttachmentsForm from "../components/AttachmentsForm";
 import { FaAngleRight, FaAngleLeft, FaFolderOpen, FaClipboardList, FaPlus } from "react-icons/fa6";
 import { v4 as uuidv4 } from "uuid";
@@ -28,7 +27,7 @@ interface Ticket {
     receiveEmail: boolean;
 }
 
-const CreateTicket = () => {
+const CreateTicket: React.FC = () => {
     const navigate = useNavigate();
     const [categories, setCategories] = useState<Category[]>([]);
     const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
@@ -223,7 +222,7 @@ const CreateTicket = () => {
             });
 
             if (res.status === 200 || res.status === 201) {
-                navigate(`/chamado/${res.data}`);
+                navigate(`/tickets/${res.data}`);
             } else {
                 console.error("Erro:", res.status);
             }
@@ -234,7 +233,6 @@ const CreateTicket = () => {
 
     return (
         <main>
-            <Header pageName="Abrir Chamado" />
             <div className="container">
                 <div className="row mt-3">
                     <div className="col-3">

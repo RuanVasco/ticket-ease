@@ -1,18 +1,24 @@
 import { useEffect, useState } from "react";
 import { FaGear } from "react-icons/fa6";
 import { Link } from "react-router-dom";
+import { checkPermission } from "./CheckPermission";
 import "../assets/styles/header.css";
 
 import ThemeSelector from "./ThemeSelector";
 import GetUserData from "./GetUserData";
 
-interface HeaderProps {
-    pageName: string;
-    backUrl?: string;
-}
-
-const Header: React.FC<HeaderProps> = ({ pageName }) => {
+const Header: React.FC = () => {
     const [user, setUser] = useState<{ name: string; sub: string } | null>(null);
+    const [canEditTicket, setCanEditTicket] = useState(false);
+
+    useEffect(() => {
+        const checkUserPermission = async () => {
+            const hasPermission = checkPermission("EDIT", "TICKET");
+            setCanEditTicket(hasPermission);
+        };
+
+        checkUserPermission();
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -33,15 +39,20 @@ const Header: React.FC<HeaderProps> = ({ pageName }) => {
             <div className="container">
                 <div className="row w-100 py-2">
                     <div className="col-3">
-                        <h3 className="fw-bold my-auto">{pageName}</h3>
+                        <h3 className="fw-bold my-auto">TicketEase</h3>
                     </div>
                     <div className="col-6 d-flex justify-content-center">
                         <Link to="/" className="btn btn-secondary me-2">
                             Criar
                         </Link>
-                        <Link to="/visualizar" className="btn btn-secondary">
+                        <Link to="/tickets" className="btn btn-secondary me-2">
                             Visualizar
                         </Link>
+                        {canEditTicket && (
+                            <Link to="/gerenciar-tickets" className="btn btn-secondary">
+                                Gerenciar
+                            </Link>
+                        )}
                     </div>
                     <div className="col-3 text-end">
                         <button

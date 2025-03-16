@@ -197,7 +197,7 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                                     <td key={colIndex}>
                                         {column.value === "name" ? (
                                             <Link
-                                                to={`/chamado/${item.id}`}
+                                                to={`/tickets/${item.id}`}
                                                 className="fw-semibold text-decoration-underline"
                                             >
                                                 {getNestedValue(item, column.value)}
