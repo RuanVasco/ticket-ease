@@ -9,7 +9,12 @@ import MainLayout from "./layouts/MainLayout";
 
 import AdminLayout from "./layouts/AdminLayout";
 import Home from "./pages/admin/Home";
-import Users from "./pages/admin/Users";
+import UserManagement from "./pages/admin/UserManagement";
+import UnitManagement from "./pages/admin/UnitManagement";
+import DepartmentManagement from "./pages/admin/DepartmentManagement";
+import CargoManagement from "./pages/admin/CargoManagement";
+import ProfileManagement from "./pages/admin/ProfileManagement";
+import TicketCategoryManagement from "./pages/admin/TicketCategoryManagement";
 
 import { useEffect, useState } from "react";
 import { checkPermission } from "./components/CheckPermission";
@@ -52,7 +57,12 @@ function App() {
                 }
             >
                 <Route path="/admin/" element={<Home />} />
-                <Route path="/admin/users" element={<Users />} />
+                <Route path="/admin/users" element={<UserManagement />} />
+                <Route path="/admin/units" element={<UnitManagement />} />
+                <Route path="/admin/departments" element={<DepartmentManagement />} />
+                <Route path="/admin/cargos" element={<CargoManagement />} />
+                <Route path="/admin/profiles" element={<ProfileManagement />} />
+                <Route path="/admin/ticket-categories" element={<TicketCategoryManagement />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />

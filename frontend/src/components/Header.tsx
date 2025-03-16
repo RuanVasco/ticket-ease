@@ -6,9 +6,10 @@ import "../assets/styles/header.css";
 
 import ThemeSelector from "./ThemeSelector";
 import GetUserData from "./GetUserData";
+import { User } from "../types/User";
 
 const Header: React.FC = () => {
-    const [user, setUser] = useState<{ name: string; sub: string } | null>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [canEditTicket, setCanEditTicket] = useState(false);
 
     useEffect(() => {

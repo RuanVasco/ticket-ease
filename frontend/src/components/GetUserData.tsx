@@ -1,10 +1,12 @@
 import { JwtPayload, jwtDecode } from "jwt-decode";
+import { User } from "../types/User";
+import { Permission } from "../types/Permission";
 
 interface UserData extends JwtPayload {
     id: number;
     name: string;
-    sub: string;
-    permissions: string[];
+    email: string;
+    permissions: Permission[];
 }
 
 const GetUserData = (): UserData | null => {
@@ -12,7 +14,12 @@ const GetUserData = (): UserData | null => {
         const token = localStorage.getItem("token");
         if (token) {
             const decodedToken = jwtDecode<UserData>(token);
-            return decodedToken;
+            return new User(
+                decodedToken.id.toString(),
+                decodedToken.name,
+                decodedToken.email,
+                decodedToken.permissions
+            );
         }
     }
     return null;

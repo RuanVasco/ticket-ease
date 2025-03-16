@@ -4,25 +4,13 @@ import Select from "react-select";
 import Table from "../../components/Table";
 import ActionBar from "../../components/ActionBar";
 import Pagination from "../../components/Pagination";
+import { User } from "../../types/User";
 import { FaUserMinus, FaUserPlus } from "react-icons/fa6";
+import { Cargo } from "../../types/Cargo";
+import { Department } from "../../types/Department";
+import { Profile } from "../../types/Profile";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
-
-interface User {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    department: { id: string; name: string };
-    cargo: { id: string; name: string };
-    profiles: { id: string; name: string }[];
-    password: string;
-}
-
-interface SelectOption {
-    id: string;
-    name: string;
-}
 
 const columns = [
     { value: "name", label: "Nome" },
@@ -46,15 +34,15 @@ const UserManagement: React.FC = () => {
         name: "",
         email: "",
         phone: "",
-        department: { id: "", name: "" },
-        cargo: { id: "", name: "" },
+        department: new Department(),
+        cargo: new Cargo(),
         profiles: [],
         password: "",
     });
 
-    const [cargos, setCargos] = useState<SelectOption[]>([]);
-    const [departments, setDepartments] = useState<SelectOption[]>([]);
-    const [profiles, setProfiles] = useState<SelectOption[]>([]);
+    const [cargos, setCargos] = useState<Cargo[]>([]);
+    const [departments, setDepartments] = useState<Department[]>([]);
+    const [profiles, setProfiles] = useState<Profile[]>([]);
 
     useEffect(() => {
         const fetchUsersData = async () => {
@@ -73,15 +61,15 @@ const UserManagement: React.FC = () => {
 
         const fetchOptions = async (
             endpoint: string,
-            setState: React.Dispatch<React.SetStateAction<SelectOption[]>>
+            setState: React.Dispatch<React.SetStateAction<any[]>>
         ) => {
             try {
                 const res = await axiosInstance.get(`${API_BASE_URL}/${endpoint}/`);
                 if (res.status === 200) {
                     setState(
                         res.data.map((item: { id: string; name: string }) => ({
-                            value: item.id,
-                            label: item.name,
+                            id: item.id,
+                            name: item.name,
                         }))
                     );
                 }
@@ -112,6 +100,8 @@ const UserManagement: React.FC = () => {
                         department: {
                             id: res.data.department?.id ?? "",
                             name: res.data.department?.name ?? "",
+                            unit: res.data.unit ?? "",
+                            receivesRequests: res.data.receivesRequests ?? false,
                         },
                         cargo: {
                             id: res.data.cargo?.id ?? "",
@@ -130,8 +120,8 @@ const UserManagement: React.FC = () => {
                 name: "",
                 email: "",
                 phone: "",
-                department: { id: "", name: "" },
-                cargo: { id: "", name: "" },
+                department: new Department(),
+                cargo: new Cargo(),
                 profiles: [],
                 password: "",
             });
@@ -208,8 +198,8 @@ const UserManagement: React.FC = () => {
                     name: "",
                     email: "",
                     phone: "",
-                    department: { id: "", name: "" },
-                    cargo: { id: "", name: "" },
+                    department: new Department(),
+                    cargo: new Cargo(),
                     profiles: [],
                     password: "",
                 });
