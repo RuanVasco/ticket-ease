@@ -85,7 +85,9 @@ const TicketDetails: React.FC = () => {
             ? ticketMessages
             : Object.values(ticketMessages).flat();
 
-        const mergedMessages = [...oldMessages, ...messagesArray];
+        const filteredMessages = messagesArray.filter((m) => Number(m.ticket.id) === Number(id));
+
+        const mergedMessages = [...oldMessages, ...filteredMessages];
 
         const uniqueMessages = Array.from(new Map(mergedMessages.map((m) => [m.id, m])).values());
 
