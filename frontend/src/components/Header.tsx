@@ -9,12 +9,13 @@ import { User } from "../types/User";
 import GetUserData from "./GetUserData";
 import ThemeSelector from "./ThemeSwitcher";
 import { useAuth } from "../context/AuthContext";
+import { MdExitToApp } from "react-icons/md";
 
 const Header: React.FC = () => {
     const location = useLocation();
     const [user, setUser] = useState<User | null>(null);
     const [canEditTicket, setCanEditTicket] = useState(false);
-    const { hasPermission } = usePermissions();
+    const { hasPermission, isAdmin } = usePermissions();
     const { logout } = useAuth();
 
     useEffect(() => {
@@ -57,6 +58,11 @@ const Header: React.FC = () => {
                                 className={getActiveClass("/gerenciar-tickets")}
                             >
                                 Gerenciar
+                            </Link>
+                        )}
+                        {isAdmin && (
+                            <Link to="/admin" className={getActiveClass("/admin")} target="_blank">
+                                Admin <MdExitToApp />
                             </Link>
                         )}
                     </div>
