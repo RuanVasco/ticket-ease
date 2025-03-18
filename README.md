@@ -49,5 +49,6 @@ Other Technologies
 2️⃣ **Add the required environment variables** as shown in the example below:
 
 ```ini
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+VITE_API_BASE_URL=http://localhost:8080
 VITE_WS_URL=http://localhost:8080/ws
+
