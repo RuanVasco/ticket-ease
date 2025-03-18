@@ -12,7 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedHeaders("*")
-                .allowedOrigins("http://localhost:3000", "http://192.0.3.127:3000", "http://localhost:5173", "http://localhost:4173")
+                .allowedOrigins("http://localhost:3000", "http://192.0.3.127:3000", "http://localhost:5173", "http://localhost:4173", "http://192.0.1.68:4173")
                 .allowedMethods("*");
     }
 
