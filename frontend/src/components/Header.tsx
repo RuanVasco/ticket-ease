@@ -15,12 +15,12 @@ const Header: React.FC = () => {
     const location = useLocation();
     const [user, setUser] = useState<User | null>(null);
     const [canEditTicket, setCanEditTicket] = useState(false);
-    const { hasPermission, isAdmin } = usePermissions();
+    const { hasPermission, isAdmin, permissions } = usePermissions();
     const { logout } = useAuth();
 
     useEffect(() => {
         setCanEditTicket(hasPermission("EDIT_TICKET"));
-    }, []);
+    }, [permissions]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -31,7 +31,7 @@ const Header: React.FC = () => {
     }, []);
 
     const handleLogout = () => {
-        document.getElementsByClassName("modal-backdrop")[0].remove();
+        document.getElementsByClassName("modal-backdrop")[0]?.remove();
         logout();
     };
 

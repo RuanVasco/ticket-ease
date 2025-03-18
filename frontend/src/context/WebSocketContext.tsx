@@ -1,7 +1,7 @@
 import { Client, IMessage } from "@stomp/stompjs";
 import { createContext, useContext, useEffect, useState, useRef, ReactNode } from "react";
-
 import GetUserData from "../components/GetUserData";
+import { useAuth } from "./AuthContext";
 
 const WS_URL = import.meta.env.VITE_WS_URL as string;
 
@@ -16,6 +16,7 @@ const WebSocketContext = createContext<WebSocketContextType | undefined>(undefin
 export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const userData = GetUserData();
     const userId = userData?.id;
+    const { checkAuth } = useAuth();
     const [ticketMessages, setTicketMessages] = useState<Record<string, any[]>>({});
     const [ticketNotifications, setTicketNotifications] = useState<string[]>([]);
     const stompClient = useRef<Client | null>(null);
@@ -23,82 +24,78 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
     const isConnected = useRef(false);
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (!token || !userId) return;
+        const connectWebSocket = async () => {
+            const isAuthenticated = await checkAuth();
+            if (!isAuthenticated || !userId) return;
 
-        if (isConnected.current && stompClient.current?.connected) {
-            return;
-        }
+            if (isConnected.current && stompClient.current?.connected) return;
+            isConnected.current = true;
 
-        isConnected.current = true;
+            const token = localStorage.getItem("token");
+            if (!token) return;
 
-        const client = new Client({
-            brokerURL: WS_URL,
-            connectHeaders: {
-                Authorization: `Bearer ${token}`,
-            },
-            reconnectDelay: 5000,
-            heartbeatIncoming: 4000,
-            heartbeatOutgoing: 4000,
-            onConnect: () => {
-                client.subscribe(`/queue/user/${userId}/tickets`, (message: IMessage) => {
-                    const ticketIds: string[] = JSON.parse(message.body);
+            const client = new Client({
+                brokerURL: WS_URL,
+                connectHeaders: { Authorization: `Bearer ${token}` },
+                reconnectDelay: 5000,
+                heartbeatIncoming: 4000,
+                heartbeatOutgoing: 4000,
+                onConnect: () => {
+                    console.log("✅ Conectado ao WebSocket!");
 
-                    setTicketNotifications(ticketIds);
+                    client.subscribe(`/queue/user/${userId}/tickets`, (message: IMessage) => {
+                        const ticketIds: string[] = JSON.parse(message.body);
+                        setTicketNotifications(ticketIds);
 
-                    ticketIds.forEach((ticketId) => {
-                        if (!subscribedTickets.current.has(ticketId)) {
-                            subscribedTickets.current.add(ticketId);
-                            client.subscribe(
-                                `/topic/ticket/${ticketId}`,
-                                (ticketMessage: IMessage) => {
+                        ticketIds.forEach((ticketId) => {
+                            if (!subscribedTickets.current.has(ticketId)) {
+                                subscribedTickets.current.add(ticketId);
+                                client.subscribe(`/topic/ticket/${ticketId}`, (ticketMessage: IMessage) => {
                                     const newMessage = JSON.parse(ticketMessage.body);
                                     setTicketMessages((prev) => ({
                                         ...prev,
                                         [ticketId]: [...(prev[ticketId] || []), newMessage],
                                     }));
-                                }
-                            );
-                        }
+                                });
+                            }
+                        });
                     });
-                });
 
-                client.publish({
-                    destination: `/app/user/${userId}/tickets`,
-                    body: JSON.stringify({ userId }),
-                });
-            },
-            onDisconnect: () => {
-                isConnected.current = false;
-                console.warn("⚠️ WebSocket desconectado. Tentando reconectar...");
-            },
-            onStompError: (error) => {
-                console.error("❌ Erro WebSocket:", error);
-                isConnected.current = false;
-            },
-        });
+                    client.publish({
+                        destination: `/app/user/${userId}/tickets`,
+                        body: JSON.stringify({ userId }),
+                    });
+                },
+                onDisconnect: () => {
+                    isConnected.current = false;
+                    console.warn("⚠️ WebSocket desconectado. Tentando reconectar...");
+                },
+                onStompError: (error) => {
+                    console.error("❌ Erro WebSocket:", error);
+                    isConnected.current = false;
+                },
+            });
 
-        stompClient.current = client;
-        client.activate();
+            stompClient.current = client;
+            client.activate();
 
-        return () => {
-            if (stompClient.current) {
-                stompClient.current
-                    .deactivate()
-                    .then(() => {
+            return () => {
+                if (stompClient.current) {
+                    stompClient.current.deactivate().then(() => {
                         isConnected.current = false;
-                    })
-                    .catch((err) => {
+                    }).catch((err) => {
                         console.error("❌ Erro ao fechar WebSocket:", err);
                     });
-            }
+                }
+            };
         };
-    }, [userId]);
+
+        connectWebSocket();
+    }, [userId, checkAuth]);
 
     const sendMessage = (text: string, close: boolean, ticketId: string) => {
         if (stompClient.current?.connected) {
             const messageData = { text, closeTicket: close };
-
             stompClient.current.publish({
                 destination: `/app/ticket/${ticketId}`,
                 body: JSON.stringify(messageData),

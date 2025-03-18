@@ -11,16 +11,16 @@ import { PermissionsProvider } from "./context/PermissionsContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
-        <WebSocketProvider>
-            <BrowserRouter>
-                <PermissionsProvider>
-                    <AuthProvider>
+        <BrowserRouter>
+            <AuthProvider>
+                <WebSocketProvider>
+                    <PermissionsProvider>
                         <ThemeProvider>
                             <App />
                         </ThemeProvider>
-                    </AuthProvider>
-                </PermissionsProvider>
-            </BrowserRouter>
-        </WebSocketProvider>
+                    </PermissionsProvider>
+                </WebSocketProvider>
+            </AuthProvider>
+        </BrowserRouter>
     </StrictMode>
 );

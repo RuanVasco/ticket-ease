@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useMemo } from "react";
-
 import axiosInstance from "../components/AxiosConfig";
 import { Permission } from "../types/Permission";
+import { useAuth } from "./AuthContext";
 
 interface PermissionsContextType {
     permissions: Permission[];
@@ -15,12 +15,25 @@ interface PermissionsContextType {
 const PermissionsContext = createContext<PermissionsContextType | undefined>(undefined);
 
 export const PermissionsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { checkAuth } = useAuth();
     const [permissions, setPermissions] = useState<Permission[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
     useEffect(() => {
-        fetchPermissions();
-    }, []);
+        const verifyAuth = async () => {
+            const authStatus = await checkAuth();
+            setIsAuthenticated(authStatus);
+
+            if (authStatus) {
+                fetchPermissions();
+            } else {
+                setLoading(false);
+            }
+        };
+
+        verifyAuth();
+    }, [checkAuth]);
 
     const fetchPermissions = async () => {
         try {
@@ -59,6 +72,14 @@ export const PermissionsProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setPermissions([]);
         sessionStorage.removeItem("permissions");
     };
+
+    if (isAuthenticated === null) {
+        return <div>Carregando permissões...</div>;
+    }
+
+    if (!isAuthenticated) {
+        return <PermissionsContext.Provider value={{ permissions: [], loading: false, fetchPermissions, hasPermission: () => false, isAdmin: false, clearPermissions }}>{children}</PermissionsContext.Provider>;
+    }
 
     return (
         <PermissionsContext.Provider

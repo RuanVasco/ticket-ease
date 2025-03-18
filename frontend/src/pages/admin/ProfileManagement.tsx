@@ -11,16 +11,6 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 const columns = [{ value: "name", label: "Nome" }];
 
-interface Permissions {
-    ticket: Permission;
-    ticketCategory: Permission;
-    unit: Permission;
-    department: Permission;
-    message: Pick<Permission, "create" | "view">;
-    user: Permission;
-    profile: Permission;
-}
-
 const ProfileManagement: React.FC = () => {
     const [filterText, setFilterText] = useState<string>("");
     const [modeModal, setModeModal] = useState<string>("");
@@ -35,7 +25,7 @@ const ProfileManagement: React.FC = () => {
         name: "",
     });
 
-    const [permissions, setPermissions] = useState<Permissions>({
+    const [permissions, setPermissions] = useState<Record<string, Record<string, boolean>>>({
         ticket: { create: false, edit: false, view: false, delete: false },
         ticketCategory: { create: false, edit: false, view: false, delete: false },
         unit: { create: false, edit: false, view: false, delete: false },
@@ -45,8 +35,8 @@ const ProfileManagement: React.FC = () => {
         profile: { create: false, edit: false, view: false, delete: false },
     });
 
-    const mapPermissions = (apiPermissions: { name: string }[]): Permissions => {
-        const defaultPermissions: Permissions = {
+    const mapPermissions = (apiPermissions: { name: string }[]) => {
+        const defaultPermissions: Record<string, Record<string, boolean>> = {
             ticket: { create: false, edit: false, view: false, delete: false },
             ticketCategory: { create: false, edit: false, view: false, delete: false },
             unit: { create: false, edit: false, view: false, delete: false },
@@ -70,12 +60,7 @@ const ProfileManagement: React.FC = () => {
                     .join("") as keyof Permissions;
 
                 if (defaultPermissions[entity] && action in defaultPermissions[entity]) {
-                    if (
-                        defaultPermissions[entity] instanceof Object &&
-                        action in defaultPermissions[entity]
-                    ) {
-                        (defaultPermissions[entity] as Permission)[action] = true;
-                    }
+                    defaultPermissions[entity][action] = true;
                 }
             }
         });
@@ -83,7 +68,7 @@ const ProfileManagement: React.FC = () => {
         return defaultPermissions;
     };
 
-    const reverseMapPermissions = (permissions: Permissions) => {
+    const reverseMapPermissions = (permissions: Record<string, Record<string, boolean>>) => {
         const apiPermissions: { name: string }[] = [];
 
         Object.entries(permissions).forEach(([entity, actions]) => {
@@ -97,7 +82,6 @@ const ProfileManagement: React.FC = () => {
 
         return apiPermissions;
     };
-
     const fetchData = async () => {
         try {
             const res = await axiosInstance.get(
@@ -141,17 +125,12 @@ const ProfileManagement: React.FC = () => {
         }
     };
 
-    const handleCheckboxChange = (entity: keyof Permissions, permission: keyof Permission) => {
+    const handleCheckboxChange = (entity: string, action: string) => {
         setPermissions((prevPermissions) => ({
             ...prevPermissions,
             [entity]: {
                 ...prevPermissions[entity],
-                [permission]:
-                    entity in prevPermissions &&
-                    typeof prevPermissions[entity] === "object" &&
-                    permission in (prevPermissions[entity] as Permission)
-                        ? !(prevPermissions[entity] as Permission)[permission]
-                        : false,
+                [action]: !prevPermissions[entity][action],
             },
         }));
     };
@@ -273,54 +252,28 @@ const ProfileManagement: React.FC = () => {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {Object.keys(permissions).map((entity) => (
-                                                        <tr key={entity}>
-                                                            <td>
-                                                                {entity
-                                                                    .replace(/([A-Z])/g, " $1")
-                                                                    .toUpperCase()}
-                                                            </td>
-                                                            {[
-                                                                "create",
-                                                                "edit",
-                                                                "view",
-                                                                "delete",
-                                                            ].map((permission) => (
-                                                                <td key={permission}>
-                                                                    {(
-                                                                        permissions[
-                                                                            entity as keyof Permissions
-                                                                        ] as Permission
-                                                                    )[
-                                                                        permission as keyof Permission
-                                                                    ] !== undefined ? (
-                                                                        <input
-                                                                            type="checkbox"
-                                                                            checked={
-                                                                                (
-                                                                                    permissions[
-                                                                                        entity as keyof Permissions
-                                                                                    ] as Permission
-                                                                                )[
-                                                                                    permission as keyof Permission
-                                                                                ]
-                                                                            }
-                                                                            onChange={() =>
-                                                                                handleCheckboxChange(
-                                                                                    entity as keyof Permissions,
-                                                                                    permission as keyof Permission
-                                                                                )
-                                                                            }
-                                                                            disabled={
-                                                                                modeModal ===
-                                                                                "readonly"
-                                                                            }
-                                                                        />
-                                                                    ) : null}
-                                                                </td>
-                                                            ))}
-                                                        </tr>
-                                                    ))}
+                                                    {Object.entries(permissions).map(([entity, actions]) => {
+                                                        const allPermissions = ["create", "edit", "view", "delete"]; // Permissões padrão
+                                                        return (
+                                                            <tr key={entity}>
+                                                                <td>{entity.toUpperCase()}</td>
+                                                                {allPermissions.map((permission) => (
+                                                                    <td key={permission}>
+                                                                        {actions[permission] !== undefined ? ( // Verifica se a permissão existe
+                                                                            <input
+                                                                                disabled={modeModal === "readonly"}
+                                                                                type="checkbox"
+                                                                                checked={actions[permission]}
+                                                                                onChange={() => handleCheckboxChange(entity, permission)}
+                                                                            />
+                                                                        ) : (
+                                                                            <span>-</span> // Exibe um traço se a permissão não existir
+                                                                        )}
+                                                                    </td>
+                                                                ))}
+                                                            </tr>
+                                                        );
+                                                    })}
                                                 </tbody>
                                             </table>
                                         </div>

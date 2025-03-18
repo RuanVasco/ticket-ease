@@ -16,6 +16,12 @@ const GetUserData = (): User | null => {
         const token = localStorage.getItem("token");
         if (token) {
             const decodedToken = jwtDecode<UserData>(token);
+
+            if (!decodedToken.id || !decodedToken.name || !decodedToken.sub) {
+                console.warn("⚠️ Token inválido ou incompleto:", decodedToken);
+                return null;
+            }
+
             return new User(
                 decodedToken.id.toString(),
                 decodedToken.name,

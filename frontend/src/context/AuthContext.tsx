@@ -2,8 +2,6 @@ import axios from "axios";
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { usePermissions } from "./PermissionsContext";
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 interface AuthContextType {
@@ -17,7 +15,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    const clearPermissions = usePermissions().clearPermissions;
 
     const checkAuth = async (): Promise<boolean> => {
         const token = localStorage.getItem("token");
@@ -26,12 +23,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (!token) {
             if (refreshToken) {
                 try {
-                    const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-                        refreshToken,
-                    });
+                    const response = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken });
                     localStorage.setItem("token", response.data.token);
                     return true;
                 } catch (error) {
+                    logout();
                     return false;
                 }
             }
@@ -41,6 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 await axios.post(`${API_BASE_URL}/auth/validate`, { token });
                 return true;
             } catch (error) {
+                logout();
                 return false;
             }
         }
@@ -61,7 +58,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const logout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("refreshToken");
-        clearPermissions;
+        sessionStorage.clear();
         navigate("/login");
     };
 
