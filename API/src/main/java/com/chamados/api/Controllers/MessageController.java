@@ -3,9 +3,11 @@ package com.chamados.api.Controllers;
 import com.chamados.api.DTO.MessageDTO;
 import com.chamados.api.Entities.*;
 import com.chamados.api.Repositories.MessageRepository;
+import com.chamados.api.Repositories.NotificationRepository;
 import com.chamados.api.Repositories.TicketRepository;
 import com.chamados.api.Repositories.UserRepository;
 import com.chamados.api.Services.MessageService;
+import com.chamados.api.Services.NotificationService;
 import com.chamados.api.Services.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -45,11 +47,15 @@ public class MessageController {
     MessageRepository messageRepository;
 
     private final TicketService ticketService;
+    private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
 
-    public MessageController(TicketService ticketService, SimpMessagingTemplate simpMessagingTemplate) {
+    public MessageController(TicketService ticketService, SimpMessagingTemplate simpMessagingTemplate, NotificationService notificationService, NotificationRepository notificationRepository) {
         this.ticketService = ticketService;
         this.simpMessagingTemplate = simpMessagingTemplate;
+        this.notificationService = notificationService;
+        this.notificationRepository = notificationRepository;
     }
 
     @MessageMapping("/user/{userId}/tickets")
@@ -101,6 +107,10 @@ public class MessageController {
 
         System.out.println("Enviando mensagem para o tópico /topic/ticket/" + ticketId);
         simpMessagingTemplate.convertAndSend("/topic/ticket/" + ticketId, message);
+        Notification notification = new Notification(user, "Mensagem enviada!", String.valueOf(ticketId), "ticket");
+        notification = notificationRepository.save(notification);
+        notificationService.sendNotification(user, notification);
+
         System.out.println("Mensagem enviada para o tópico /topic/ticket/" + ticketId);
     }
 

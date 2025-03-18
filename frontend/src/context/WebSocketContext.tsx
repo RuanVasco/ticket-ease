@@ -65,6 +65,10 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
                         destination: `/app/user/${userId}/tickets`,
                         body: JSON.stringify({ userId }),
                     });
+
+                    client.subscribe(`/user/queue/notifications`, (notification: IMessage) => {
+                        console.log(notification);
+                    });
                 },
                 onDisconnect: () => {
                     isConnected.current = false;
