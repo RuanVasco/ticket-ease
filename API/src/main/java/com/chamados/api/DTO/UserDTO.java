@@ -16,7 +16,7 @@ public class UserDTO {
     private String name;
     private String email;
     private String phone;
-    private Department department;
+    private Set<Department> departments;
     private Cargo cargo;
     private Set<Role> roles;
 
@@ -25,7 +25,7 @@ public class UserDTO {
         this.name = user.getName();
         this.email = user.getEmail();
         this.phone = user.getPhone();
-        this.department = user.getDepartment();
+        this.departments = user.getDepartments();
         this.roles = user.getRoles();
         this.cargo = user.getCargo();
     }

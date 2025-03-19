@@ -47,9 +47,13 @@ public class User implements UserDetails {
     private Set<Role> roles;
 
     @Setter
-    @ManyToOne
-    @JoinColumn(name = "department_id")
-    private Department department;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_department",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "department_id")
+    )
+    private Set<Department> departments;
 
     @Setter
     @ManyToOne
@@ -111,21 +115,5 @@ public class User implements UserDetails {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    public static boolean canCreate(User user) {
-        return user.hasPermission("CREATE_USER");
-    }
-
-    public static boolean canView(User user) {
-        return user.hasPermission("VIEW_USER");
-    }
-
-    public static boolean canEdit(User user) {
-        return user.hasPermission("EDIT_USER");
-    }
-
-    public static boolean canDelete(User user) {
-        return user.hasPermission("DELETE_USER");
     }
 }

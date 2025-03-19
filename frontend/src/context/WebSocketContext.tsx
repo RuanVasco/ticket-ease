@@ -41,8 +41,6 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
                 heartbeatIncoming: 4000,
                 heartbeatOutgoing: 4000,
                 onConnect: () => {
-                    console.log("✅ Conectado ao WebSocket!");
-
                     client.subscribe(`/queue/user/${userId}/tickets`, (message: IMessage) => {
                         const ticketIds: string[] = JSON.parse(message.body);
                         setTicketNotifications(ticketIds);

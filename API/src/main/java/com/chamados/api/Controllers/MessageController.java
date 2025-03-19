@@ -75,7 +75,7 @@ public class MessageController {
         List<Ticket> tickets = ticketService.getTicketsByRelatedUser(user);
         List<Long> ticketsId = new ArrayList<>();
         for (Ticket ticket : tickets) {
-            if (!ticket.canManage(user) && !ticket.getUser().equals(user)) {
+            if (!ticket.getUser().equals(user)) {
                 System.out.println("Erro de permissão: O usuário não tem permissão para acessar o ticket " + ticket.getId());
                 continue;
             }
@@ -94,7 +94,7 @@ public class MessageController {
         Ticket ticket = ticketService.findById(ticketId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
 
-        if ((!ticket.canManage(user) && !ticket.getUser().equals(user)) || !Message.canCreate(user)) {
+        if (!ticket.getUser().equals(user)) {
             System.out.println("Acesso negado. Usuário não tem permissão.");
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado. Você não tem permissão.");
         }
@@ -119,6 +119,7 @@ public class MessageController {
             @PathVariable Long ticketID,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
+        //Verificar usuário;
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("sentAt"));
         Page<Message> messages = messageService.getByTicketId(ticketID, pageable);

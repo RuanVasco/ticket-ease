@@ -21,12 +21,6 @@ public class ProfileController {
     @Autowired
     private RoleRepository roleRepository;
 
-    private final PermissionRepository permissionRepository;
-
-    public ProfileController(PermissionRepository permissionRepository) {
-        this.permissionRepository = permissionRepository;
-    }
-
     @GetMapping("/")
     public ResponseEntity<?> getAll() {
         return ResponseEntity.ok(roleRepository.findAll());
@@ -76,16 +70,6 @@ public class ProfileController {
         Role existingProfile = optionalRole.get();
         existingProfile.setName(updatedProfile.getName());
 
-        Set<Permission> permissionSet = new HashSet<>();
-
-        for (Permission permission : updatedProfile.getPermissions()) {
-            Optional<Permission> existingPermission = Optional.ofNullable(permissionRepository.findByName(permission.getName()));
-
-            existingPermission.ifPresent(permissionSet::add);
-        }
-
-        existingProfile.setPermissions(permissionSet);
-
         roleRepository.save(existingProfile);
         return ResponseEntity.ok(existingProfile);
     }
@@ -97,14 +81,6 @@ public class ProfileController {
             return ResponseEntity.badRequest().build();
         }
 
-        Set<Permission> permissionSet = new HashSet<>();
-
-        for (Permission permission : newProfile.getPermissions()) {
-            Optional<Permission> existingPermission = Optional.ofNullable(permissionRepository.findByName(permission.getName()));
-            existingPermission.ifPresent(permissionSet::add);
-        }
-
-        newProfile.setPermissions(permissionSet);
         Role savedProfile = roleRepository.save(newProfile);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProfile);

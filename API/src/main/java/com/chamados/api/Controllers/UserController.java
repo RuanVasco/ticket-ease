@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,7 +53,7 @@ public class UserController {
 
     @GetMapping("/")
     public ResponseEntity<?> getAll() {
-        return ResponseEntity.ok(userRepository.findAllWithoutPassword());
+        return ResponseEntity.ok(userRepository.findAll());
     }
 
     @GetMapping("/pageable")
@@ -90,15 +91,9 @@ public class UserController {
         User user = optionalUser.get();
 
         Optional<Cargo> optionalCargo = cargoRepository.findById(userUpdateDTO.cargoId());
-        Optional<Department> optionalDepartment = departmentRepository.findById(userUpdateDTO.departmentId());
-
-        if (optionalDepartment.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Department department = optionalDepartment.get();
 
         Set<Role> roles = new HashSet<>();
+        Set<Department> departmentSet = new HashSet<>();
 
         for (Long roleId : userUpdateDTO.profiles()) {
             Optional<Role> optionalRole = roleRepository.findById(roleId);
@@ -106,10 +101,16 @@ public class UserController {
             optionalRole.ifPresent(roles::add);
         }
 
+        for (Long departmentId : userUpdateDTO.departments()) {
+            Optional<Department> optionalDepartment = departmentRepository.findById(departmentId);
+
+            optionalDepartment.ifPresent(departmentSet::add);
+        }
+
         user.setName(userUpdateDTO.name());
         user.setEmail(userUpdateDTO.email());
         user.setPhone(userUpdateDTO.phone());
-        user.setDepartment(department);
+        user.setDepartments(departmentSet);
         user.setRoles(roles);
 
         if (optionalCargo.isPresent()) {
@@ -125,7 +126,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserRegisterDTO signUpDto) {
         Long cargoId = signUpDto.cargoId();
-        Long departmentId = signUpDto.departmentId();
+        List<Long> departments = signUpDto.departments();
 
         if (userRepository.existsByEmail(signUpDto.email())) {
             return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
@@ -150,9 +151,15 @@ public class UserController {
         if (cargoId != null) {
             cargoRepository.findById(cargoId).ifPresent(user::setCargo);
         }
-        if (departmentId != null) {
-            departmentRepository.findById(departmentId).ifPresent(user::setDepartment);
+
+        Set<Department> departmentSet = new HashSet<>();
+        for (Long departmentId : departments) {
+            Optional<Department> optionalDepartment = departmentRepository.findById(departmentId);
+
+            optionalDepartment.ifPresent(departmentSet::add);
         }
+
+        user.setDepartments(departmentSet);
 
         userRepository.save(user);
 

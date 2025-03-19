@@ -1,11 +1,13 @@
 package com.chamados.api.Components;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import com.chamados.api.Services.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -36,7 +38,8 @@ public class SecurityFilter extends OncePerRequestFilter {
 		String token = this.recoverToken(request);
 		if (token != null) {
 			String login = tokenService.validateToken(token);
-			User user = userRepository.findByEmail(login);
+			User user = userRepository.findByEmail(login)
+					.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 			
 			var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
 			SecurityContextHolder.getContext().setAuthentication(authentication);

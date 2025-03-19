@@ -81,28 +81,6 @@ public class Ticket {
     @Column(name = "closedAt", nullable = true)
     private Date closedAt;
 
-    public static boolean canView(User user) {
-        return user.hasPermission("VIEW_TICKET");
-    }
-
-    public static boolean canEdit(User user) {
-        return user.hasPermission("EDIT_TICKET");
-    }
-
-    public static boolean canCreate(User user) {
-        return user.hasPermission("CREATE_TICKET");
-    }
-
-    public static boolean canDelete(User user) {
-        return user.hasPermission("DELETE_TICKET");
-    }
-
-    public boolean canManage(User user) {
-        Department department = this.getDepartment();
-
-        return user.getDepartment() != null && user.getDepartment().equals(department) && canEdit(user);
-    }
-
     public Department getDepartment() {
         TicketCategory ticketedCategory = this.getTicketCategory();
         Department department = null;

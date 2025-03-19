@@ -55,17 +55,6 @@ public class TicketController {
         return ResponseEntity.ok(ticket.getId());
     }
 
-
-//    @GetMapping("/")
-//    public ResponseEntity<?> getAll(
-//            @RequestParam(value = "sort", defaultValue = "createdAt") String sortBy,
-//            @RequestParam(value = "direction", defaultValue = "DESC") String direction) {
-//
-//        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
-//        List<Ticket> tickets = ticketRepository.findAll(sort);
-//        return ResponseEntity.ok(tickets);
-//    }
-
     @GetMapping("/department")
     public ResponseEntity<PagedModel<TicketDTO>> getAllPageable(
             @RequestParam(value = "page", defaultValue = "0") Integer page,
@@ -117,7 +106,7 @@ public class TicketController {
 
         Ticket ticket = optionalTicket.get();
 
-        if (!ticket.canManage(user) && !ticket.getUser().equals(user)) {
+        if (!ticket.getUser().equals(user)) {
             return new ResponseEntity<>("Acesso negado. Você não tem permissão.", HttpStatus.FORBIDDEN);
         }
 

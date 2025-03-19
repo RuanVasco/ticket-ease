@@ -1,7 +1,5 @@
 package com.chamados.api.Components.Config;
 
-import com.chamados.api.Authorizations.GenericAuthorizationManager;
-import com.chamados.api.Authorizations.TicketAuthorizationManager;
 import com.chamados.api.Components.SecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -19,12 +17,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -33,27 +25,6 @@ public class SecurityConfig {
 
 	@Autowired
 	SecurityFilter securityFilter;
-
-	@Autowired
-	private GenericAuthorizationManager departmentAuthorizationManager;
-
-	@Autowired
-	private GenericAuthorizationManager unitAuthorizationManager;
-
-	@Autowired
-	private GenericAuthorizationManager ticketCategoryAuthorizationManager;
-
-	@Autowired
-	private GenericAuthorizationManager userAuthorizationManager;
-
-	@Autowired
-	private GenericAuthorizationManager cargoAuthorizationManager;
-
-	@Autowired
-	private GenericAuthorizationManager roleAuthorizationManager;
-
-	@Autowired
-	private GenericAuthorizationManager messageAuthorizationManager;
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -71,16 +42,53 @@ public class SecurityConfig {
 						.requestMatchers("/ws").permitAll()
 						.requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
 						.requestMatchers(HttpMethod.POST, "/auth/validate").permitAll()
-						.requestMatchers(HttpMethod.GET, "/permissions/has-permission").permitAll()
 						.requestMatchers("/h2-console/**").permitAll()
-						.requestMatchers("/units/**").access(unitAuthorizationManager) //adicionar mensagem de retorno personalizada
-						.requestMatchers("/departments/**").access(departmentAuthorizationManager)
-						.requestMatchers("/tickets-category/**").access(ticketCategoryAuthorizationManager)
-						.requestMatchers("/users/**").access(userAuthorizationManager)
-						.requestMatchers("/tickets/**").access(new TicketAuthorizationManager())
-						.requestMatchers("/messages/**").access(messageAuthorizationManager)
-						.requestMatchers("/cargos/**").access(cargoAuthorizationManager)
-						.requestMatchers("/profiles/**").access(roleAuthorizationManager)
+
+						// UNITS
+						.requestMatchers(HttpMethod.GET, "/units/**").permitAll()
+						.requestMatchers(HttpMethod.POST, "/units/**").hasAuthority("CREATE_UNIT")
+						.requestMatchers(HttpMethod.PUT, "/units/**").hasAuthority("EDIT_UNIT")
+						.requestMatchers(HttpMethod.DELETE, "/units/**").hasAuthority("DELETE_UNIT")
+
+						// DEPARTMENTS
+						.requestMatchers(HttpMethod.GET, "/departments/**").permitAll()
+						.requestMatchers(HttpMethod.POST, "/departments/**").hasAuthority("CREATE_DEPARTMENT")
+						.requestMatchers(HttpMethod.PUT, "/departments/**").hasAuthority("EDIT_DEPARTMENT")
+						.requestMatchers(HttpMethod.DELETE, "/departments/**").hasAuthority("DELETE_DEPARTMENT")
+
+						// TICKETS CATEGORY
+						.requestMatchers(HttpMethod.GET, "/tickets-category/**").permitAll()
+						.requestMatchers(HttpMethod.POST, "/tickets-category/**").hasAuthority("CREATE_TICKET_CATEGORY")
+						.requestMatchers(HttpMethod.PUT, "/tickets-category/**").hasAuthority("EDIT_TICKET_CATEGORY")
+						.requestMatchers(HttpMethod.DELETE, "/tickets-category/**").hasAuthority("DELETE_TICKET_CATEGORY")
+
+						// USERS
+						.requestMatchers(HttpMethod.GET, "/users/**").permitAll()
+						.requestMatchers(HttpMethod.POST, "/users/**").hasAuthority("CREATE_USER")
+						.requestMatchers(HttpMethod.PUT, "/users/**").hasAuthority("EDIT_USER")
+						.requestMatchers(HttpMethod.DELETE, "/users/**").hasAuthority("DELETE_USER")
+
+						// TICKETS
+						.requestMatchers(HttpMethod.GET, "/tickets/**").permitAll()
+						.requestMatchers(HttpMethod.POST, "/tickets/**").hasAuthority("CREATE_TICKET")
+						.requestMatchers(HttpMethod.PUT, "/tickets/**").hasAuthority("EDIT_TICKET")
+						.requestMatchers(HttpMethod.DELETE, "/tickets/**").hasAuthority("DELETE_TICKET")
+
+						// MESSAGES
+						.requestMatchers(HttpMethod.GET, "/messages/ticket/**").permitAll()
+						.requestMatchers(HttpMethod.POST, "/messages/**").hasAuthority("CREATE_MESSAGE")
+
+						// CARGOS (Posições/Cargos)
+						.requestMatchers(HttpMethod.GET, "/cargos/**").permitAll()
+						.requestMatchers(HttpMethod.POST, "/cargos/**").hasAuthority("CREATE_CARGO")
+						.requestMatchers(HttpMethod.PUT, "/cargos/**").hasAuthority("EDIT_CARGO")
+						.requestMatchers(HttpMethod.DELETE, "/cargos/**").hasAuthority("DELETE_CARGO")
+
+						// PROFILES (Perfis de Usuário)
+						.requestMatchers(HttpMethod.GET, "/profiles/**").permitAll()
+						.requestMatchers(HttpMethod.POST, "/profiles/**").hasAuthority("CREATE_PROFILE")
+						.requestMatchers(HttpMethod.PUT, "/profiles/**").hasAuthority("EDIT_PROFILE")
+						.requestMatchers(HttpMethod.DELETE, "/profiles/**").hasAuthority("DELETE_PROFILE")
 						.anyRequest().authenticated()
 				)
 				.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
