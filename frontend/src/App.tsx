@@ -24,7 +24,7 @@ function App() {
         return <div>Carregando permissões...</div>;
     }
 
-    const canEditTicket = hasPermission("EDIT_TICKET");
+    const canManageTicket = hasPermission("MANAGE_TICKET");
 
     return (
         <Routes>
@@ -35,7 +35,7 @@ function App() {
                     <Route path="/" element={<CreateTicket />} />
                     <Route path="/tickets" element={<ViewTickets />} />
                     <Route path="/tickets/:id" element={<TicketDetails />} />
-                    {canEditTicket && (
+                    {canManageTicket && (
                         <Route path="/gerenciar-tickets" element={<ManageTickets />} />
                     )}
                 </Route>

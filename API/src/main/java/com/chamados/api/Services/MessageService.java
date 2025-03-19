@@ -27,11 +27,11 @@ public class MessageService {
     public Message addMessage(Ticket ticket, User user, MessageDTO messageDTO) throws IOException {
         String ticketStatus = ticket.getStatus();
 
-        if (ticketStatus.equals("Novo") && (user != ticket.getUser())) {
+        if (ticketStatus.equals("Novo") && (user != ticket.getUser() && ticket.canManage(user))) {
             ticket.setStatus("Em Andamento");
         }
 
-        if (Boolean.TRUE.equals(messageDTO.getCloseTicket())) {
+        if (Boolean.TRUE.equals(messageDTO.getCloseTicket()) && ticket.canManage(user)) {
             ticket.setStatus("Fechado");
         }
 

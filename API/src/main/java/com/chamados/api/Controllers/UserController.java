@@ -90,7 +90,13 @@ public class UserController {
 
         User user = optionalUser.get();
 
-        Optional<Cargo> optionalCargo = cargoRepository.findById(userUpdateDTO.cargoId());
+        if (userUpdateDTO.cargoId() != null) {
+            Optional<Cargo> optionalCargo = cargoRepository.findById(userUpdateDTO.cargoId());
+            if (optionalCargo.isPresent()) {
+                Cargo cargo = optionalCargo.get();
+                user.setCargo(cargo);
+            }
+        }
 
         Set<Role> roles = new HashSet<>();
         Set<Department> departmentSet = new HashSet<>();
@@ -112,11 +118,6 @@ public class UserController {
         user.setPhone(userUpdateDTO.phone());
         user.setDepartments(departmentSet);
         user.setRoles(roles);
-
-        if (optionalCargo.isPresent()) {
-            Cargo cargo = optionalCargo.get();
-            user.setCargo(cargo);
-        }
 
         userRepository.save(user);
 

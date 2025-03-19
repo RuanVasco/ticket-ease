@@ -67,20 +67,21 @@ public class MessageController {
             return;
         }
 
-        if (!Message.canView(user)) {
-            System.out.println("Erro de permissão: O usuário não tem permissão para visualizar mensagens.");
-            return;
-        }
-
         List<Ticket> tickets = ticketService.getTicketsByRelatedUser(user);
         List<Long> ticketsId = new ArrayList<>();
+
         for (Ticket ticket : tickets) {
             if (!ticket.getUser().equals(user)) {
                 System.out.println("Erro de permissão: O usuário não tem permissão para acessar o ticket " + ticket.getId());
                 continue;
             }
 
-            System.out.println("Usuário com permissão para o ticket: "+ ticket.getId());
+            if (!ticket.canManage(user)) {
+                System.out.println("Erro de permissão: O usuário não tem permissão para gerenciar o ticket " + ticket.getId());
+                continue;
+            }
+
+            System.out.println("Usuário com permissão para o ticket: " + ticket.getId());
             ticketsId.add(ticket.getId());
         }
 

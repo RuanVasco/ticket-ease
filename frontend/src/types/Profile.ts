@@ -1,14 +1,13 @@
-export interface IProfile {
+import { Permission } from "./Permission";
+
+export class Profile {
     id: string;
     name: string;
-}
+    permissions: Permission[];
 
-export class Profile implements IProfile {
-    id: string;
-    name: string;
-
-    constructor(id: "", name: "") {
+    constructor(id: "", name: "", permissions: Permission[]) {
         this.id = id;
         this.name = name;
+        this.permissions = permissions;
     }
 }

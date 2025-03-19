@@ -16,7 +16,6 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 const columns = [
     { value: "name", label: "Nome" },
     { value: "email", label: "E-mail" },
-    { value: "department.name", label: "Setor" },
     { value: "cargo.name", label: "Cargo" },
 ];
 
@@ -35,7 +34,7 @@ const UserManagement: React.FC = () => {
         name: "",
         email: "",
         phone: "",
-        department: new Department(),
+        departments: [],
         cargo: new Cargo(),
         profiles: [],
         password: "",
@@ -98,12 +97,7 @@ const UserManagement: React.FC = () => {
                         name: res.data.name,
                         email: res.data.email,
                         phone: res.data.phone ?? "",
-                        department: {
-                            id: res.data.department?.id ?? "",
-                            name: res.data.department?.name ?? "",
-                            unit: res.data.unit ?? "",
-                            receivesRequests: res.data.receivesRequests ?? false,
-                        },
+                        departments: res.data.departments ?? [],
                         cargo: {
                             id: res.data.cargo?.id ?? "",
                             name: res.data.cargo?.name ?? "",
@@ -121,7 +115,7 @@ const UserManagement: React.FC = () => {
                 name: "",
                 email: "",
                 phone: "",
-                department: new Department(),
+                departments: [],
                 cargo: new Cargo(),
                 profiles: [],
                 password: "",
@@ -142,12 +136,7 @@ const UserManagement: React.FC = () => {
     const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
 
-        if (name === "department") {
-            setCurrentUser((prev) => ({
-                ...prev,
-                department: { ...prev.department, id: value },
-            }));
-        } else if (name === "cargo") {
+        if (name === "cargo") {
             setCurrentUser((prev) => ({
                 ...prev,
                 cargo: { ...prev.cargo, id: value },
@@ -164,11 +153,11 @@ const UserManagement: React.FC = () => {
         e.preventDefault();
         try {
             let res;
-            const { department, cargo, profiles, ...postData } = currentUser;
+            const { departments, cargo, profiles, ...postData } = currentUser;
 
             const postDataWithIds = {
                 ...postData,
-                departmentId: department.id,
+                departments: departments.map((department) => department.id),
                 cargoId: cargo.id,
                 profiles: profiles.map((profile) => profile.id),
             };
@@ -199,7 +188,7 @@ const UserManagement: React.FC = () => {
                     name: "",
                     email: "",
                     phone: "",
-                    department: new Department(),
+                    departments: [],
                     cargo: new Cargo(),
                     profiles: [],
                     password: "",
@@ -303,25 +292,34 @@ const UserManagement: React.FC = () => {
                                             <label htmlFor="department" className="form-label">
                                                 Setor
                                             </label>
-                                            <select
-                                                className="form-select"
+                                            <Select
+                                                isDisabled={modeModal === "readonly"}
+                                                isMulti
                                                 name="department"
                                                 id="department"
-                                                value={currentUser.department?.id || ""}
-                                                onChange={handleInputChange}
-                                                disabled={modeModal === "readonly"}
-                                                required
-                                            >
-                                                <option value="">----</option>
-                                                {departments.map((department) => (
-                                                    <option
-                                                        key={department.id}
-                                                        value={department.id}
-                                                    >
-                                                        {department.name}
-                                                    </option>
-                                                ))}
-                                            </select>
+                                                value={(currentUser.departments || []).map(
+                                                    (department) => ({
+                                                        value: department.id,
+                                                        label: department.name,
+                                                    })
+                                                )}
+                                                onChange={(selectedDepartments) => {
+                                                    const updatedDepartments = selectedDepartments.map(
+                                                        (department) => (new Department(department.value, department.label))
+                                                    );
+
+                                                    setCurrentUser({
+                                                        ...currentUser,
+                                                        departments: updatedDepartments || [],
+                                                    });
+                                                }}
+                                                options={departments.map((department) => ({
+                                                    value: department.id,
+                                                    label: department.name,
+                                                }))}
+                                                className="basic-multi-select"
+                                                classNamePrefix="select"
+                                            />
                                         </div>
 
                                         <div className="mt-2">

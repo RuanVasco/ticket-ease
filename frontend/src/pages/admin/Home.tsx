@@ -67,7 +67,7 @@ const HomeAdmin: React.FC = () => {
             for (const block of allBlocks) {
                 let entity = block.link.split("/").pop()?.toUpperCase() || "";
                 entity = removePlural(entity);
-                permissionResults[block.link] = hasPermission("VIEW_" + entity);
+                permissionResults[block.link] = (hasPermission("EDIT_" + entity) || hasPermission(`FULL_ACCESS`));
             }
 
             setPermissions(permissionResults);

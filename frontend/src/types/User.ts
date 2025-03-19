@@ -7,7 +7,7 @@ export class User {
     name: string;
     email: string;
     phone: string;
-    department: Department;
+    departments: Department[];
     cargo: Cargo;
     profiles: Profile[];
     password: string;
@@ -17,7 +17,7 @@ export class User {
         name: string,
         email: string,
         phone: string = "",
-        department: Department = {} as Department,
+        department: Department[] = [],
         cargo: Cargo = {} as Cargo,
         profiles: Profile[] = [],
         password: string = ""
@@ -26,7 +26,7 @@ export class User {
         this.name = name;
         this.email = email;
         this.phone = phone;
-        this.department = department;
+        this.departments = department;
         this.cargo = cargo;
         this.profiles = profiles;
         this.password = password;

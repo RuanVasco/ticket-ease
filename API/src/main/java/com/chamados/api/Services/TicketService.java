@@ -83,7 +83,10 @@ public class TicketService {
     public List<Ticket> getTicketsByRelatedUser(User user) {
         List<Ticket> relatedTickets = ticketRepository.findAll();
 
-        return relatedTickets;
+        return relatedTickets
+                .stream()
+                .filter(ticket -> ticket.canManage(user) || ticket.getUser().equals(user))
+                .toList();
     }
 
     @Transactional
@@ -96,6 +99,7 @@ public class TicketService {
         Page<Ticket> relatedTickets = ticketRepository.findByStatus(status, pageable);
         List<Ticket> filteredTickets = relatedTickets
                 .stream()
+                .filter((ticket -> ticket.canManage(user)))
                 .toList();
 
         return new PageImpl<>(filteredTickets, pageable, filteredTickets.size());
@@ -115,6 +119,7 @@ public class TicketService {
         Page<Ticket> relatedTickets = ticketRepository.findByStatusAndQuery(status, query, pageable);
         List<Ticket> filteredTickets = relatedTickets
                 .stream()
+                .filter((ticket -> ticket.canManage(user)))
                 .toList();
 
         return new PageImpl<>(filteredTickets, pageable, filteredTickets.size());

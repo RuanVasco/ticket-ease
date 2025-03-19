@@ -81,6 +81,20 @@ public class Ticket {
     @Column(name = "closedAt", nullable = true)
     private Date closedAt;
 
+    public boolean canManage(User user) {
+        Department department = this.getDepartment();
+
+        if (department == null) {
+            return false;
+        }
+
+        boolean isInDepartment = user.getDepartments() != null &&
+                user.getDepartments().stream().anyMatch(d -> d.equals(department));
+
+        return isInDepartment && (user.hasPermission("MANAGE_TICKET") || user.hasPermission("FULL_ACCESS"));
+    }
+
+
     public Department getDepartment() {
         TicketCategory ticketedCategory = this.getTicketCategory();
         Department department = null;

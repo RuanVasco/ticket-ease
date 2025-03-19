@@ -27,7 +27,7 @@ const GetUserData = (): User | null => {
                 decodedToken.name,
                 decodedToken.sub,
                 "",
-                {} as Department,
+                [],
                 {} as Department,
                 decodedToken.roles
             );

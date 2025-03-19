@@ -14,12 +14,12 @@ import { MdExitToApp } from "react-icons/md";
 const Header: React.FC = () => {
     const location = useLocation();
     const [user, setUser] = useState<User | null>(null);
-    const [canEditTicket, setCanEditTicket] = useState(false);
+    const [canManageTicket, setCanManageTicket] = useState(false);
     const { hasPermission, isAdmin, permissions } = usePermissions();
     const { logout } = useAuth();
 
     useEffect(() => {
-        setCanEditTicket(hasPermission("EDIT_TICKET"));
+        setCanManageTicket(hasPermission("MANAGE_TICKET") || hasPermission("FULL_ACCESS"));
     }, [permissions]);
 
     useEffect(() => {
@@ -52,7 +52,7 @@ const Header: React.FC = () => {
                         <Link to="/tickets" className={getActiveClass("/tickets")}>
                             Visualizar
                         </Link>
-                        {canEditTicket && (
+                        {canManageTicket && (
                             <Link
                                 to="/gerenciar-tickets"
                                 className={getActiveClass("/gerenciar-tickets")}

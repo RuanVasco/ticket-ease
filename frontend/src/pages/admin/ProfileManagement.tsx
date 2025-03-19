@@ -20,68 +20,13 @@ const ProfileManagement: React.FC = () => {
     const [currentPage, setCurrentPage] = useState<number>(0);
     const [totalPages, setTotalPages] = useState<number>(1);
     const [pageSize, setPageSize] = useState<number>(10);
+    const [permissions, setPermissions] = useState<Permission[]>([]);
     const [currentProfile, setCurrentProfile] = useState<Profile>({
         id: "",
         name: "",
+        permissions: []
     });
 
-    const [permissions, setPermissions] = useState<Record<string, Record<string, boolean>>>({
-        ticket: { create: false, edit: false, view: false, delete: false },
-        ticketCategory: { create: false, edit: false, view: false, delete: false },
-        unit: { create: false, edit: false, view: false, delete: false },
-        department: { create: false, edit: false, view: false, delete: false },
-        message: { create: false, view: false },
-        user: { create: false, edit: false, view: false, delete: false },
-        profile: { create: false, edit: false, view: false, delete: false },
-    });
-
-    const mapPermissions = (apiPermissions: { name: string }[]) => {
-        const defaultPermissions: Record<string, Record<string, boolean>> = {
-            ticket: { create: false, edit: false, view: false, delete: false },
-            ticketCategory: { create: false, edit: false, view: false, delete: false },
-            unit: { create: false, edit: false, view: false, delete: false },
-            department: { create: false, edit: false, view: false, delete: false },
-            message: { create: false, view: false },
-            user: { create: false, edit: false, view: false, delete: false },
-            profile: { create: false, edit: false, view: false, delete: false },
-        };
-
-        apiPermissions.forEach(({ name }) => {
-            const parts = name.split("_");
-            if (parts.length > 1) {
-                const action = parts[0].toLowerCase() as keyof Permission;
-                const entity = parts
-                    .slice(1)
-                    .map((word, index) =>
-                        index === 0
-                            ? word.toLowerCase()
-                            : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-                    )
-                    .join("") as keyof Permissions;
-
-                if (defaultPermissions[entity] && action in defaultPermissions[entity]) {
-                    defaultPermissions[entity][action] = true;
-                }
-            }
-        });
-
-        return defaultPermissions;
-    };
-
-    const reverseMapPermissions = (permissions: Record<string, Record<string, boolean>>) => {
-        const apiPermissions: { name: string }[] = [];
-
-        Object.entries(permissions).forEach(([entity, actions]) => {
-            Object.entries(actions).forEach(([action, allowed]) => {
-                if (allowed) {
-                    const formattedEntity = entity.replace(/([A-Z])/g, "_$1").toUpperCase();
-                    apiPermissions.push({ name: `${action.toUpperCase()}_${formattedEntity}` });
-                }
-            });
-        });
-
-        return apiPermissions;
-    };
     const fetchData = async () => {
         try {
             const res = await axiosInstance.get(
@@ -98,8 +43,24 @@ const ProfileManagement: React.FC = () => {
         }
     };
 
+    const fetchPermissions = async () => {
+        try {
+            const res = await axiosInstance.get(
+                `${API_BASE_URL}/permissions`
+            );
+
+            if (res.status === 200) {
+                console.log(res.data)
+                setPermissions(res.data);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     useEffect(() => {
         fetchData();
+        fetchPermissions();
     }, [currentPage, pageSize]);
 
     const handleModalOpen = async (action: string, mode: string, id?: string) => {
@@ -110,10 +71,11 @@ const ProfileManagement: React.FC = () => {
             try {
                 const res = await axiosInstance.get(`${API_BASE_URL}/profiles/${id}`);
                 if (res.status === 200) {
-                    setCurrentProfile({ id: res.data.id, name: res.data.name });
-                    if (res.data.permissions) {
-                        setPermissions(mapPermissions(res.data.permissions));
-                    }
+                    setCurrentProfile({
+                        id: res.data.id,
+                        name: res.data.name,
+                        permissions: res.data.permissions || [],
+                    });
                 } else {
                     console.error("Error", res.status);
                 }
@@ -121,18 +83,8 @@ const ProfileManagement: React.FC = () => {
                 console.error(error);
             }
         } else {
-            setCurrentProfile({ id: "", name: "" });
+            setCurrentProfile({ id: "", name: "", permissions: [] });
         }
-    };
-
-    const handleCheckboxChange = (entity: string, action: string) => {
-        setPermissions((prevPermissions) => ({
-            ...prevPermissions,
-            [entity]: {
-                ...prevPermissions[entity],
-                [action]: !prevPermissions[entity][action],
-            },
-        }));
     };
 
     const handleFilterChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -153,8 +105,10 @@ const ProfileManagement: React.FC = () => {
         e.preventDefault();
 
         try {
-            const formattedPermissions = reverseMapPermissions(permissions);
-            const payload = { ...currentProfile, permissions: formattedPermissions };
+            const payload = {
+                ...currentProfile,
+                permissions: currentProfile.permissions.map((p) => p.id),
+            };
 
             let res;
             if (submitType === "delete") {
@@ -162,17 +116,14 @@ const ProfileManagement: React.FC = () => {
             } else if (submitType === "add") {
                 res = await axiosInstance.post(`${API_BASE_URL}/profiles/`, payload);
             } else if (submitType === "update") {
-                res = await axiosInstance.put(
-                    `${API_BASE_URL}/profiles/${currentProfile.id}`,
-                    payload
-                );
+                res = await axiosInstance.put(`${API_BASE_URL}/profiles/${currentProfile.id}`, payload);
             } else {
                 console.error("Invalid submit type");
                 return;
             }
 
             if (res.status === 200 || res.status === 201) {
-                setCurrentProfile({ id: "", name: "" });
+                setCurrentProfile({ id: "", name: "", permissions: [] });
                 window.location.reload();
             } else {
                 console.error("Error", res.status);
@@ -180,6 +131,19 @@ const ProfileManagement: React.FC = () => {
         } catch (error) {
             console.error(error);
         }
+    };
+
+    const handlePermissionToggle = (permission: Permission) => {
+        setCurrentProfile((prevProfile) => {
+            const hasPermission = prevProfile.permissions?.some((p) => p.id === permission.id);
+
+            return {
+                ...prevProfile,
+                permissions: hasPermission
+                    ? prevProfile.permissions?.filter((p) => p.id !== permission.id)
+                    : [...(prevProfile.permissions || []), permission],
+            };
+        });
     };
 
     return (
@@ -244,36 +208,24 @@ const ProfileManagement: React.FC = () => {
                                             <table className="table table-striped">
                                                 <thead>
                                                     <tr>
-                                                        <th>Entidade</th>
-                                                        <th>Criar</th>
-                                                        <th>Editar</th>
-                                                        <th>Ver</th>
-                                                        <th>Deletar</th>
+                                                        <th>Permissão</th>
+                                                        <th>Habilitar</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {Object.entries(permissions).map(([entity, actions]) => {
-                                                        const allPermissions = ["create", "edit", "view", "delete"]; // Permissões padrão
-                                                        return (
-                                                            <tr key={entity}>
-                                                                <td>{entity.toUpperCase()}</td>
-                                                                {allPermissions.map((permission) => (
-                                                                    <td key={permission}>
-                                                                        {actions[permission] !== undefined ? ( // Verifica se a permissão existe
-                                                                            <input
-                                                                                disabled={modeModal === "readonly"}
-                                                                                type="checkbox"
-                                                                                checked={actions[permission]}
-                                                                                onChange={() => handleCheckboxChange(entity, permission)}
-                                                                            />
-                                                                        ) : (
-                                                                            <span>-</span> // Exibe um traço se a permissão não existir
-                                                                        )}
-                                                                    </td>
-                                                                ))}
-                                                            </tr>
-                                                        );
-                                                    })}
+                                                    {permissions.map((permission) => (
+                                                        <tr key={permission.id}>
+                                                            <td id={permission.id}>{permission.name}</td>
+                                                            <td>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={currentProfile.permissions?.some((p) => p.id === permission.id) || false}
+                                                                    onChange={() => handlePermissionToggle(permission)}
+                                                                    disabled={modeModal === "readonly"}
+                                                                />
+                                                            </td>
+                                                        </tr>
+                                                    ))}
                                                 </tbody>
                                             </table>
                                         </div>

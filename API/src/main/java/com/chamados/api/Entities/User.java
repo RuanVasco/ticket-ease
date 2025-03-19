@@ -65,9 +65,13 @@ public class User implements UserDetails {
     }
 
     public boolean hasPermission(String permission) {
+        if (permission == null || permission.isEmpty()) {
+            return false;
+        }
+
         Collection<? extends GrantedAuthority> currentPermissions = this.getAuthorities();
 
-        return currentPermissions.stream()
+        return currentPermissions != null && currentPermissions.stream()
                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(permission));
     }
 

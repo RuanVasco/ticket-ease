@@ -60,6 +60,10 @@ export const PermissionsProvider: React.FC<{ children: React.ReactNode }> = ({ c
     };
 
     const isAdmin = useMemo(() => {
+        if (hasPermission(`FULL_ACCESS`)) {
+            return true;
+        }
+
         const entities = ["USER", "PROFILE", "DEPARTMENT", "UNIT", "CARGO", "TICKET_CATEGORY"];
         const actions = ["CREATE", "EDIT", "DELETE"];
 
