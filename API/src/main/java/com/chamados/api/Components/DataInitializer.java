@@ -46,69 +46,91 @@ public class DataInitializer implements CommandLineRunner {
 
             Permission permissionFullAccess = new Permission();
             permissionFullAccess.setName("FULL_ACCESS");
+            permissionFullAccess.setDescription("Acesso total ao sistema");
 
             Permission permissionCreateCargo = new Permission();
             permissionCreateCargo.setName("CREATE_CARGO");
+            permissionCreateCargo.setDescription("Permite criar cargos");
 
             Permission permissionEditCargo = new Permission();
             permissionEditCargo.setName("EDIT_CARGO");
+            permissionEditCargo.setDescription("Permite editar cargos");
 
             Permission permissionDeleteCargo = new Permission();
             permissionDeleteCargo.setName("DELETE_CARGO");
+            permissionDeleteCargo.setDescription("Permite deletar cargos");
 
             Permission permissionCreateDepartment = new Permission();
             permissionCreateDepartment.setName("CREATE_DEPARTMENT");
+            permissionCreateDepartment.setDescription("Permite criar departamentos");
 
             Permission permissionDeleteDepartment = new Permission();
             permissionDeleteDepartment.setName("DELETE_DEPARTMENT");
+            permissionDeleteDepartment.setDescription("Permite deletar departamentos");
 
             Permission permissionUpdateDepartment = new Permission();
             permissionUpdateDepartment.setName("EDIT_DEPARTMENT");
+            permissionUpdateDepartment.setDescription("Permite editar departamentos");
 
             Permission permissionCreateMessage = new Permission();
             permissionCreateMessage.setName("CREATE_MESSAGE");
+            permissionCreateMessage.setDescription("Permite enviar mensagens");
 
             Permission permissionCreateTicket = new Permission();
             permissionCreateTicket.setName("CREATE_TICKET");
+            permissionCreateTicket.setDescription("Permite criar chamados");
 
             Permission permissionManageTicket = new Permission();
             permissionManageTicket.setName("MANAGE_TICKET");
+            permissionManageTicket.setDescription("Permite gerenciar chamados");
 
             Permission permissionCreateTicketCategory = new Permission();
             permissionCreateTicketCategory.setName("CREATE_TICKET_CATEGORY");
+            permissionCreateTicketCategory.setDescription("Permite criar categorias de chamado");
 
             Permission permissionUpdateTicketCategory = new Permission();
             permissionUpdateTicketCategory.setName("EDIT_TICKET_CATEGORY");
+            permissionUpdateTicketCategory.setDescription("Permite editar categorias de chamado");
 
             Permission permissionDeleteTicketCategory = new Permission();
             permissionDeleteTicketCategory.setName("DELETE_TICKET_CATEGORY");
+            permissionDeleteTicketCategory.setDescription("Permite deletar categorias de chamado");
 
             Permission permissionCreateUnit = new Permission();
             permissionCreateUnit.setName("CREATE_UNIT");
+            permissionCreateUnit.setDescription("Permite criar unidades");
 
             Permission permissionDeleteUnit = new Permission();
             permissionDeleteUnit.setName("DELETE_UNIT");
+            permissionDeleteUnit.setDescription("Permite deletar unidades");
 
             Permission permissionUpdateUnit = new Permission();
             permissionUpdateUnit.setName("EDIT_UNIT");
+            permissionUpdateUnit.setDescription("Permite editar unidades");
 
             Permission permissionCreateUser = new Permission();
             permissionCreateUser.setName("CREATE_USER");
+            permissionCreateUser.setDescription("Permite criar usuários");
 
             Permission permissionUpdateUser = new Permission();
             permissionUpdateUser.setName("EDIT_USER");
+            permissionUpdateUser.setDescription("Permite editar usuários");
 
             Permission permissionDeleteUser = new Permission();
             permissionDeleteUser.setName("DELETE_USER");
+            permissionDeleteUser.setDescription("Permite deletar usuários");
 
             Permission permissionCreateProfile = new Permission();
             permissionCreateProfile.setName("CREATE_PROFILE");
+            permissionCreateProfile.setDescription("Permite criar perfis");
 
             Permission permissionEditProfile = new Permission();
             permissionEditProfile.setName("EDIT_PROFILE");
+            permissionEditProfile.setDescription("Permite editar perfis");
 
             Permission permissionDeleteProfile = new Permission();
             permissionDeleteProfile.setName("DELETE_PROFILE");
+            permissionDeleteProfile.setDescription("Permite deletar perfis");
 
             permissionFullAccess = permissionRepository.save(permissionFullAccess);
 

@@ -50,7 +50,6 @@ const ProfileManagement: React.FC = () => {
             );
 
             if (res.status === 200) {
-                console.log(res.data)
                 setPermissions(res.data);
             }
         } catch (error) {
@@ -107,14 +106,14 @@ const ProfileManagement: React.FC = () => {
         try {
             const payload = {
                 ...currentProfile,
-                permissions: currentProfile.permissions.map((p) => p.id),
+                permissions: currentProfile.permissions,
             };
 
             let res;
             if (submitType === "delete") {
                 res = await axiosInstance.delete(`${API_BASE_URL}/profiles/${currentProfile.id}`);
             } else if (submitType === "add") {
-                res = await axiosInstance.post(`${API_BASE_URL}/profiles/`, payload);
+                res = await axiosInstance.post(`${API_BASE_URL}/profiles`, payload);
             } else if (submitType === "update") {
                 res = await axiosInstance.put(`${API_BASE_URL}/profiles/${currentProfile.id}`, payload);
             } else {
@@ -208,14 +207,14 @@ const ProfileManagement: React.FC = () => {
                                             <table className="table table-striped">
                                                 <thead>
                                                     <tr>
-                                                        <th>Permissão</th>
                                                         <th>Habilitar</th>
+                                                        <th>Permissão</th>
+                                                        <th>Descrição</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {permissions.map((permission) => (
                                                         <tr key={permission.id}>
-                                                            <td id={permission.id}>{permission.name}</td>
                                                             <td>
                                                                 <input
                                                                     type="checkbox"
@@ -224,6 +223,8 @@ const ProfileManagement: React.FC = () => {
                                                                     disabled={modeModal === "readonly"}
                                                                 />
                                                             </td>
+                                                            <td id={permission.id}>{permission.name}</td>
+                                                            <td>{permission.description}</td>
                                                         </tr>
                                                     ))}
                                                 </tbody>

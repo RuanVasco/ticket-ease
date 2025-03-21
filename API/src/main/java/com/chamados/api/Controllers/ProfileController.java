@@ -1,5 +1,6 @@
 package com.chamados.api.Controllers;
 
+import com.chamados.api.DTO.RoleDTO;
 import com.chamados.api.Entities.Permission;
 import com.chamados.api.Entities.Role;
 import com.chamados.api.Repositories.PermissionRepository;
@@ -74,14 +75,18 @@ public class ProfileController {
         return ResponseEntity.ok(existingProfile);
     }
 
-    @PostMapping("/")
+    @PostMapping
     @Transactional
-    public ResponseEntity<Role> createProfile(@RequestBody Role newProfile) {
-        if (newProfile.getName() == null || newProfile.getPermissions() == null) {
+    public ResponseEntity<Role> createProfile(@RequestBody RoleDTO roleDTO) {
+        if (roleDTO.name() == null || roleDTO.permissions() == null) {
             return ResponseEntity.badRequest().build();
         }
 
-        Role savedProfile = roleRepository.save(newProfile);
+        Role role = new Role();
+        role.setName(roleDTO.name());
+        role.setPermissions(roleDTO.permissions());
+
+        Role savedProfile = roleRepository.save(role);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProfile);
     }
