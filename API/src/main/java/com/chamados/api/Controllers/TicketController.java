@@ -3,8 +3,10 @@ package com.chamados.api.Controllers;
 import com.chamados.api.DTO.InputDTO.TicketInputDTO;
 import com.chamados.api.DTO.TicketDTO;
 import com.chamados.api.DTO.AssemblerDTO.TicketDTOAssembler;
+import com.chamados.api.Entities.Department;
 import com.chamados.api.Entities.Ticket;
 import com.chamados.api.Entities.User;
+import com.chamados.api.Repositories.DepartmentRepository;
 import com.chamados.api.Repositories.TicketRepository;
 import com.chamados.api.Services.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.hateoas.PagedModel;
 
@@ -28,16 +31,19 @@ public class TicketController {
     private final TicketService ticketService;
     private final PagedResourcesAssembler<Ticket> pagedResourcesAssembler;
     private final TicketDTOAssembler ticketDTOAssembler;
+    private final DepartmentRepository departmentRepository;
 
     @Autowired
     TicketRepository ticketRepository;
 
     public TicketController(TicketService ticketService,
                             PagedResourcesAssembler<Ticket> pagedResourcesAssembler,
-                            TicketDTOAssembler ticketDTOAssembler) {
+                            TicketDTOAssembler ticketDTOAssembler,
+                            DepartmentRepository departmentRepository) {
         this.ticketService = ticketService;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.ticketDTOAssembler = ticketDTOAssembler;
+        this.departmentRepository = departmentRepository;
     }
 
     @PostMapping("/")
@@ -55,15 +61,20 @@ public class TicketController {
         return ResponseEntity.ok(ticket.getId());
     }
 
-    @GetMapping("/department")
+    @GetMapping("/department/{departmentId}")
     public ResponseEntity<PagedModel<TicketDTO>> getAllPageable(
+            @PathVariable Long departmentId,
             @RequestParam(value = "page", defaultValue = "0") Integer page,
             @RequestParam(value = "size", defaultValue = "10") Integer size,
             @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
             @RequestParam(value = "sortDir", defaultValue = "DESC") String sortDir,
-            @RequestParam(value = "status", defaultValue = "Aberto") String status
+            @RequestParam(value = "status", defaultValue = "Novo") String status
     ) {
-        Page<Ticket> tickets = ticketService.getUserManageableTickets(page, size, sortBy, sortDir, status);
+        Optional<Department> optionalDepartment = departmentRepository.findById(departmentId);
+        if (optionalDepartment.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        Page<Ticket> tickets = ticketService.getUserManageableTickets(page, size, sortBy, sortDir, status, optionalDepartment.get());
         PagedModel<TicketDTO> pagedModel = pagedResourcesAssembler.toModel(tickets, ticketDTOAssembler);
 
         return ResponseEntity.ok(pagedModel);

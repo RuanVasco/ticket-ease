@@ -61,7 +61,7 @@ public class ProfileController {
 
     @PutMapping("/{profileId}")
     @Transactional
-    public ResponseEntity<?> updateProfile(@PathVariable Long profileId, @RequestBody Role updatedProfile) {
+    public ResponseEntity<?> updateProfile(@PathVariable Long profileId, @RequestBody RoleDTO roleDTO) {
         Optional<Role> optionalRole = roleRepository.findById(profileId);
 
         if (optionalRole.isEmpty()) {
@@ -69,7 +69,12 @@ public class ProfileController {
         }
 
         Role existingProfile = optionalRole.get();
-        existingProfile.setName(updatedProfile.getName());
+
+        String roleName = roleDTO.name().toUpperCase();
+        roleName = roleName.startsWith("ROLE_") ? roleName : "ROLE_" + roleName;
+
+        existingProfile.setName(roleName);
+        existingProfile.setPermissions(roleDTO.permissions());
 
         roleRepository.save(existingProfile);
         return ResponseEntity.ok(existingProfile);
@@ -82,8 +87,11 @@ public class ProfileController {
             return ResponseEntity.badRequest().build();
         }
 
+        String roleName = roleDTO.name().toUpperCase();
+        roleName = roleName.startsWith("ROLE_") ? roleName : "ROLE_" + roleName;
+
         Role role = new Role();
-        role.setName(roleDTO.name());
+        role.setName(roleName);
         role.setPermissions(roleDTO.permissions());
 
         Role savedProfile = roleRepository.save(role);

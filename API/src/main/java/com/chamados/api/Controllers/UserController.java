@@ -56,6 +56,13 @@ public class UserController {
         return ResponseEntity.ok(userRepository.findAll());
     }
 
+    @GetMapping("/me/departments")
+    public ResponseEntity<?> getDepartments() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return ResponseEntity.ok(user.getDepartments());
+    }
+
     @GetMapping("/pageable")
     public ResponseEntity<Page<User>> getAllPageable(Pageable pageable) {
         Page<User> users = userRepository.findAll(pageable);

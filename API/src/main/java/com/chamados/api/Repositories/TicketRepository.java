@@ -1,5 +1,6 @@
 package com.chamados.api.Repositories;
 
+import com.chamados.api.Entities.Department;
 import com.chamados.api.Entities.Ticket;
 import com.chamados.api.Entities.User;
 import org.springframework.data.domain.Page;

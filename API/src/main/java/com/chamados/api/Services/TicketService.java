@@ -1,6 +1,7 @@
 package com.chamados.api.Services;
 
 import com.chamados.api.DTO.InputDTO.TicketInputDTO;
+import com.chamados.api.Entities.Department;
 import com.chamados.api.Entities.Ticket;
 import com.chamados.api.Entities.TicketCategory;
 import com.chamados.api.Entities.User;
@@ -90,7 +91,7 @@ public class TicketService {
     }
 
     @Transactional
-    public Page<Ticket> getUserManageableTickets(int page, int size, String sortBy, String sortDir, String status) {
+    public Page<Ticket> getUserManageableTickets(int page, int size, String sortBy, String sortDir, String status, Department department) {
         Sort.Direction direction = Sort.Direction.fromString(sortDir.toUpperCase());
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
@@ -99,7 +100,7 @@ public class TicketService {
         Page<Ticket> relatedTickets = ticketRepository.findByStatus(status, pageable);
         List<Ticket> filteredTickets = relatedTickets
                 .stream()
-                .filter((ticket -> ticket.canManage(user)))
+                .filter((ticket -> ticket.canManage(user) && ticket.getDepartment().equals(department)))
                 .toList();
 
         return new PageImpl<>(filteredTickets, pageable, filteredTickets.size());

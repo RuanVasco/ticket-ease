@@ -6,6 +6,7 @@ import DateFormatter from "./DateFormatter";
 import ItemsPerPage from "./ItemsPerPage";
 import Pagination from "./Pagination";
 import "../assets/styles/table.css";
+import { Department } from "../types/Department";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -31,6 +32,8 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
     const [pageSize, setPageSize] = useState<number>(10);
     const [status, setStatus] = useState<string>("Novo");
     const [noResultsMessage, setNoResultsMessage] = useState<string>("");
+    const [departments, setDepartments] = useState<Department[]>([]);
+    const [department, setDepartment] = useState<Department>();
 
     const columns: { label: string; value: string }[] = [
         { label: "ID", value: "id" },
@@ -52,7 +55,8 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
 
             switch (viewMode) {
                 case "edit":
-                    url = `${API_BASE_URL}/tickets/department?page=${currentPage}&size=${pageSize}&status=${status}`;
+                    if (!department) return;
+                    url = `${API_BASE_URL}/tickets/department/${department.id}?page=${currentPage}&size=${pageSize}&status=${status}`;
                     break;
                 case "readonly":
                     url = `${API_BASE_URL}/tickets/user?page=${currentPage}&size=${pageSize}&status=${status}`;
@@ -80,11 +84,37 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
         }
     };
 
-    useEffect(() => {
-        fetchData();
+    const fetchUserDepartments = async () => {
+        try {
+            const res = await axiosInstance.get(`${API_BASE_URL}/users/me/departments`);
 
-        return () => {};
-    }, [currentPage, pageSize, status, viewMode]);
+            if (res.status !== 200) {
+                console.error("Erro ao buscar seus departamentos:", res.status);
+            }
+
+            if (res.data) {
+                setDepartments(res.data);
+            } else {
+                setDepartments([]);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    }
+
+    useEffect(() => {
+        fetchUserDepartments();
+        if (viewMode === "edit" && !department) return;
+        fetchData();
+    }, [currentPage, pageSize, status, viewMode, department]);
+
+
+    useEffect(() => {
+        if (departments.length > 0 && !department) {
+            setDepartment(departments[0]);
+        }
+    }, [departments]);
+
 
     const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value;
@@ -136,6 +166,13 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
         setCurrentPage(0);
     };
 
+    const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selected = departments.find(dep => dep.id === e.target.value);
+        setDepartment(selected);
+        setCurrentPage(0);
+    };
+
+
     const getNestedValue = (obj: any, path: string): any => {
         return path.split(".").reduce((acc, part) => acc && acc[part], obj);
     };
@@ -166,6 +203,22 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                             <option value="ALL">Todos</option>
                         </select>
                     </div>
+                    {departments.length > 1 && (
+                        <div className="ms-3">
+                            <label htmlFor="departmentSelect">Departamento: </label>
+                            <select
+                                value={department?.id || ""}
+                                onChange={handleDepartmentChange}
+                                className="form-select"
+                                id="departmentSelect"
+                            >
+                                {departments.map((department, index) => (
+                                    <option key={index} value={department.id}>
+                                        {department.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>)}
                 </div>
                 <div className="col-2">
                     <input
@@ -204,8 +257,8 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                                                 {getNestedValue(item, column.value)}
                                             </Link>
                                         ) : column.value.includes("createdAt") ||
-                                          column.value.includes("updatedAt") ||
-                                          column.value.includes("closedAt") ? (
+                                            column.value.includes("updatedAt") ||
+                                            column.value.includes("closedAt") ? (
                                             DateFormatter(
                                                 (item[column.value as keyof Ticket] as
                                                     | string
