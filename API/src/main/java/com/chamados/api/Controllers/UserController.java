@@ -60,7 +60,12 @@ public class UserController {
     public ResponseEntity<?> getDepartments() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        return ResponseEntity.ok(user.getDepartments());
+        List<Department> sortedDepartments = user.getDepartments().stream()
+                .sorted(Comparator.comparing(Department::getId))
+                .toList();
+
+
+        return ResponseEntity.ok(sortedDepartments);
     }
 
     @GetMapping("/pageable")

@@ -1,5 +1,6 @@
 package com.chamados.api.Entities;
 
+import com.chamados.api.Types.ScopeType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,4 +17,12 @@ public class Permission {
     private String name;
 
     private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ScopeType scope = ScopeType.GLOBAL;
+
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private Department department;
 }

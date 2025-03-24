@@ -34,6 +34,7 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
     const [noResultsMessage, setNoResultsMessage] = useState<string>("");
     const [departments, setDepartments] = useState<Department[]>([]);
     const [department, setDepartment] = useState<Department>();
+    const [searchQuery, setSearchQuery] = useState<string>("");
 
     const columns: { label: string; value: string }[] = [
         { label: "ID", value: "id" },
@@ -49,65 +50,70 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
         columns.push({ label: "Usuário", value: "user.name" });
     }
 
-    const fetchData = async () => {
-        try {
-            let url = "";
-
-            switch (viewMode) {
-                case "edit":
-                    if (!department) return;
-                    url = `${API_BASE_URL}/tickets/department/${department.id}?page=${currentPage}&size=${pageSize}&status=${status}`;
-                    break;
-                case "readonly":
-                    url = `${API_BASE_URL}/tickets/user?page=${currentPage}&size=${pageSize}&status=${status}`;
-                    break;
-                default:
-                    break;
-            }
-
-            const res = await axiosInstance.get(url);
-
-            if (res.status !== 200) {
-                console.error("Erro na pesquisa:", res.status);
-            }
-
-            if (res.data?._embedded?.ticketDTOList?.length > 0) {
-                setData(res.data._embedded.ticketDTOList);
-                setTotalPages(res.data.page.totalPages);
-                setNoResultsMessage("");
-            } else {
-                setData([]);
-                setNoResultsMessage("Nenhum ticket encontrado.");
-            }
-        } catch (error) {
-            console.error("Error:", error);
-        }
+    const getNestedValue = (obj: any, path: string): any => {
+        return path.split(".").reduce((acc, part) => acc && acc[part], obj);
     };
 
     const fetchUserDepartments = async () => {
         try {
             const res = await axiosInstance.get(`${API_BASE_URL}/users/me/departments`);
-
-            if (res.status !== 200) {
-                console.error("Erro ao buscar seus departamentos:", res.status);
-            }
-
-            if (res.data) {
+            if (res.status === 200 && res.data) {
                 setDepartments(res.data);
-            } else {
-                setDepartments([]);
             }
         } catch (error) {
-            console.error("Error:", error);
+            console.error("Erro ao buscar departamentos:", error);
         }
-    }
+    };
+
+    const fetchData = async () => {
+        try {
+            let url = "";
+
+            if (searchQuery.length >= 3) {
+                url =
+                    viewMode === "edit"
+                        ? `${API_BASE_URL}/tickets/search/manager`
+                        : `${API_BASE_URL}/tickets/search/user`;
+            } else {
+                if (viewMode === "edit") {
+                    if (!department) return;
+                    url = `${API_BASE_URL}/tickets/department/${department.id}`;
+                } else {
+                    url = `${API_BASE_URL}/tickets/user`;
+                }
+            }
+
+            const params: any = {
+                page: currentPage,
+                size: pageSize,
+                status,
+            };
+
+            if (searchQuery.length >= 3) {
+                params.query = searchQuery;
+            }
+
+            const res = await axiosInstance.get(url, { params });
+
+            if (res.status === 200 && res.data?._embedded?.ticketDTOList?.length > 0) {
+                setData(res.data._embedded.ticketDTOList);
+                setTotalPages(res.data.page.totalPages);
+                setNoResultsMessage("");
+            } else {
+                setData([]);
+                setTotalPages(1);
+                setNoResultsMessage("Nenhum ticket encontrado.");
+            }
+        } catch (error) {
+            console.error("Erro ao buscar dados:", error);
+            setData([]);
+            setNoResultsMessage("Erro ao buscar tickets.");
+        }
+    };
 
     useEffect(() => {
         fetchUserDepartments();
-        if (viewMode === "edit" && !department) return;
-        fetchData();
-    }, [currentPage, pageSize, status, viewMode, department]);
-
+    }, []);
 
     useEffect(() => {
         if (departments.length > 0 && !department) {
@@ -115,50 +121,15 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
         }
     }, [departments]);
 
+    useEffect(() => {
+        if (viewMode === "edit" && !department) return;
+        fetchData();
+    }, [currentPage, pageSize, status, department, searchQuery]);
 
-    const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value;
-
-        if (query.length >= 3) {
-            try {
-                let url = "";
-
-                switch (viewMode) {
-                    case "edit":
-                        url = `${API_BASE_URL}/tickets/search/manager?page=${currentPage}&size=${pageSize}&status=${status}`;
-                        break;
-                    case "readonly":
-                        url = `${API_BASE_URL}/tickets/search/user?page=${currentPage}&size=${pageSize}&status=${status}`;
-                        break;
-                    default:
-                        break;
-                }
-
-                const res = await axiosInstance.get(url, {
-                    params: { query },
-                });
-
-                if (res.status !== 200) {
-                    console.error("Erro na pesquisa:", res.status);
-                    setNoResultsMessage("Erro ao buscar tickets. Tente novamente.");
-                }
-
-                if (res.data?._embedded?.ticketDTOList?.length > 0) {
-                    setData(res.data._embedded.ticketDTOList);
-                    setTotalPages(res.data.page.totalPages);
-                    setNoResultsMessage("");
-                } else {
-                    setData([]);
-                    setNoResultsMessage("Nenhum ticket encontrado.");
-                }
-            } catch (error) {
-                console.error("Search Error:", error);
-                setNoResultsMessage("Erro ao buscar tickets. Tente novamente.");
-            }
-        } else {
-            fetchData();
-            setNoResultsMessage("");
-        }
+        setSearchQuery(query);
+        setCurrentPage(0);
     };
 
     const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -167,14 +138,9 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
     };
 
     const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selected = departments.find(dep => dep.id === e.target.value);
+        const selected = departments.find((dep) => Number(dep.id) === Number(e.target.value));
         setDepartment(selected);
         setCurrentPage(0);
-    };
-
-
-    const getNestedValue = (obj: any, path: string): any => {
-        return path.split(".").reduce((acc, part) => acc && acc[part], obj);
     };
 
     const handlePageChange = (page: number) => setCurrentPage(page);
@@ -203,7 +169,7 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                             <option value="ALL">Todos</option>
                         </select>
                     </div>
-                    {departments.length > 1 && (
+                    {viewMode === "edit" && departments.length > 1 && (
                         <div className="ms-3">
                             <label htmlFor="departmentSelect">Departamento: </label>
                             <select
@@ -212,13 +178,14 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                                 className="form-select"
                                 id="departmentSelect"
                             >
-                                {departments.map((department, index) => (
-                                    <option key={index} value={department.id}>
-                                        {department.name}
+                                {departments.map((dep) => (
+                                    <option key={dep.id} value={dep.id}>
+                                        {dep.name}
                                     </option>
                                 ))}
                             </select>
-                        </div>)}
+                        </div>
+                    )}
                 </div>
                 <div className="col-2">
                     <input
@@ -247,28 +214,30 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                     ) : (
                         data.map((item, index) => (
                             <tr key={index}>
-                                {columns.map((column, colIndex) => (
-                                    <td key={colIndex}>
-                                        {column.value === "name" ? (
-                                            <Link
-                                                to={`/tickets/${item.id}`}
-                                                className="fw-semibold text-decoration-underline"
-                                            >
-                                                {getNestedValue(item, column.value)}
-                                            </Link>
-                                        ) : column.value.includes("createdAt") ||
-                                            column.value.includes("updatedAt") ||
-                                            column.value.includes("closedAt") ? (
-                                            DateFormatter(
-                                                (item[column.value as keyof Ticket] as
-                                                    | string
-                                                    | Date) ?? ""
-                                            )
-                                        ) : (
-                                            getNestedValue(item, column.value) || "N/A"
-                                        )}
-                                    </td>
-                                ))}
+                                {columns.map((column, colIndex) => {
+                                    const value = getNestedValue(item, column.value);
+                                    const isDate =
+                                        column.value === "createdAt" ||
+                                        column.value === "updatedAt" ||
+                                        column.value === "closedAt";
+
+                                    return (
+                                        <td key={colIndex}>
+                                            {column.value === "name" ? (
+                                                <Link
+                                                    to={`/tickets/${item.id}`}
+                                                    className="fw-semibold text-decoration-underline"
+                                                >
+                                                    {value}
+                                                </Link>
+                                            ) : isDate ? (
+                                                DateFormatter(value || "")
+                                            ) : (
+                                                value || "N/A"
+                                            )}
+                                        </td>
+                                    );
+                                })}
                             </tr>
                         ))
                     )}

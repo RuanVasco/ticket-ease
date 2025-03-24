@@ -117,7 +117,7 @@ public class TicketController {
 
         Ticket ticket = optionalTicket.get();
 
-        if (!ticket.getUser().equals(user) || !ticket.canManage(user)) {
+        if (!ticket.getUser().equals(user) && !ticket.canManage(user)) {
             return new ResponseEntity<>("Acesso negado. Você não tem permissão.", HttpStatus.FORBIDDEN);
         }
 

@@ -98,7 +98,7 @@ const TicketDetails: React.FC = () => {
 
     useEffect(() => {
         const checkUserPermission = async () => {
-            const isManager = hasPermission("EDIT_TICKET");
+            const isManager = hasPermission("MANAGE_TICKET");
             setIsManager(isManager);
         };
 
@@ -145,7 +145,7 @@ const TicketDetails: React.FC = () => {
         };
 
         fetchMessages();
-        return () => {};
+        return () => { };
     }, [id, data?.status]);
 
     useEffect(() => {
