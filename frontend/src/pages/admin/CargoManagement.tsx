@@ -5,6 +5,7 @@ import axiosInstance from "../../components/AxiosConfig";
 import Pagination from "../../components/Pagination";
 import Table from "../../components/Table";
 import { Cargo } from "../../types/Cargo";
+import { usePermissions } from "../../context/PermissionsContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -23,6 +24,16 @@ const CargoManagement: React.FC = () => {
         id: "",
         name: "",
     });
+    const { hasPermission } = usePermissions();
+    const [canCreate, setCanCreate] = useState<boolean>(false);
+    const [canEdit, setCanEdit] = useState<boolean>(false);
+    const [canDelete, setCanDelete] = useState<boolean>(false);
+
+    useEffect(() => {
+        setCanCreate(hasPermission("CREATE_CARGO"));
+        setCanEdit(hasPermission("EDIT_CARGO"));
+        setCanDelete(hasPermission("DELETE_CARGO"));
+    }, [hasPermission]);
 
     const fetchData = async () => {
         try {
@@ -140,6 +151,8 @@ const CargoManagement: React.FC = () => {
                     filterText={filterText}
                     onPageSizeChange={handlePageSizeChange}
                     pageSize={pageSize}
+                    canCreate={canCreate}
+                    canDelete={canDelete}
                 />
 
                 <Table
@@ -149,6 +162,8 @@ const CargoManagement: React.FC = () => {
                     mode="admin"
                     handleModalOpen={handleModalOpen}
                     filterText={filterText}
+                    canDelete={canDelete}
+                    canEdit={canEdit}
                 />
                 <Pagination
                     currentPage={currentPage}

@@ -19,7 +19,7 @@ const Header: React.FC = () => {
     const { logout } = useAuth();
 
     useEffect(() => {
-        setCanManageTicket(hasPermission("MANAGE_TICKET") || hasPermission("FULL_ACCESS"));
+        setCanManageTicket(hasPermission("MANAGE_TICKET"));
     }, [permissions]);
 
     useEffect(() => {

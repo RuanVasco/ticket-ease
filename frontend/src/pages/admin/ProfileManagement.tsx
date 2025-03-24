@@ -6,6 +6,7 @@ import Pagination from "../../components/Pagination";
 import Table from "../../components/Table";
 import { Permission } from "../../types/Permission";
 import { Profile } from "../../types/Profile";
+import { usePermissions } from "../../context/PermissionsContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -26,6 +27,16 @@ const ProfileManagement: React.FC = () => {
         name: "",
         permissions: []
     });
+    const { hasPermission } = usePermissions();
+    const [canCreate, setCanCreate] = useState<boolean>(false);
+    const [canEdit, setCanEdit] = useState<boolean>(false);
+    const [canDelete, setCanDelete] = useState<boolean>(false);
+
+    useEffect(() => {
+        setCanCreate(hasPermission("CREATE_PROFILE"));
+        setCanEdit(hasPermission("EDIT_PROFILE"));
+        setCanDelete(hasPermission("DELETE_PROFILE"));
+    }, [hasPermission]);
 
     const fetchData = async () => {
         try {
@@ -156,6 +167,8 @@ const ProfileManagement: React.FC = () => {
                     filterText={filterText}
                     onPageSizeChange={handlePageSizeChange}
                     pageSize={pageSize}
+                    canCreate={canCreate}
+                    canDelete={canDelete}
                 />
                 <Table
                     columns={columns}
@@ -164,6 +177,8 @@ const ProfileManagement: React.FC = () => {
                     mode="admin"
                     handleModalOpen={handleModalOpen}
                     filterText={filterText}
+                    canDelete={canDelete}
+                    canEdit={canEdit}
                 />
                 <Pagination
                     currentPage={currentPage}
@@ -210,6 +225,7 @@ const ProfileManagement: React.FC = () => {
                                                         <th>Habilitar</th>
                                                         <th>Permissão</th>
                                                         <th>Descrição</th>
+                                                        <th>Escopo</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -225,6 +241,7 @@ const ProfileManagement: React.FC = () => {
                                                             </td>
                                                             <td id={permission.id}>{permission.name}</td>
                                                             <td>{permission.description}</td>
+                                                            <td>{permission.scope}</td>
                                                         </tr>
                                                     ))}
                                                 </tbody>

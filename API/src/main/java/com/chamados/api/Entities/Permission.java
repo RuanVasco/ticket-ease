@@ -13,7 +13,7 @@ public class Permission {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
 
     private String description;
@@ -21,8 +21,4 @@ public class Permission {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ScopeType scope = ScopeType.GLOBAL;
-
-    @ManyToOne
-    @JoinColumn(name = "department_id")
-    private Department department;
 }

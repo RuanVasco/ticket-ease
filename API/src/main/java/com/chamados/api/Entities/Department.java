@@ -38,29 +38,4 @@ public class Department {
 		this.receivesRequests = receivesRequests;
 		this.unit = unit;
 	}
-
-	public static boolean canCreate(User user) {
-		return user.hasPermission("CREATE_DEPARTMENT");
-	}
-
-	public static boolean canView(User user) {
-		return user.hasPermission("VIEW_DEPARTMENT");
-	}
-
-	public static boolean canEdit(User user) {
-		return user.hasPermission("CREATE_DEPARTMENT");
-	}
-
-	public static boolean canDelete(User user) {
-		return user.hasPermission("DELETE_DEPARTMENT");
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null || getClass() != obj.getClass()) return false;
-
-		Department department = (Department) obj;
-		return Objects.equals(this.id, department.id);
-	}
 }

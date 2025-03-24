@@ -38,20 +38,4 @@ public class Role {
         }
         this.name = name;
     }
-
-    public static boolean canCreate(User user) {
-        return user.hasPermission("CREATE_PROFILE");
-    }
-
-    public static boolean canView(User user) {
-        return user.hasPermission("VIEW_PROFILE");
-    }
-
-    public static boolean canEdit(User user) {
-        return user.hasPermission("EDIT_PROFILE");
-    }
-
-    public static boolean canDelete(User user) {
-        return user.hasPermission("DELETE_PROFILE");
-    }
 }

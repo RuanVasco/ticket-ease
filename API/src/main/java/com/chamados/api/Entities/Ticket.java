@@ -88,10 +88,8 @@ public class Ticket {
             return false;
         }
 
-        boolean isInDepartment = user.getDepartments() != null &&
-                user.getDepartments().stream().anyMatch(d -> d.equals(department));
-
-        return isInDepartment && (user.hasPermission("MANAGE_TICKET") || user.hasPermission("FULL_ACCESS"));
+        return user.hasPermission("MANAGE_TICKET", department)
+                || user.hasGlobalPermission("FULL_ACCESS");
     }
 
 

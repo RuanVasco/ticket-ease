@@ -22,20 +22,4 @@ public class Cargo {
 
     public Cargo() {
     }
-
-    public static boolean canCreate(User user) {
-        return user.hasPermission("CREATE_CARGO");
-    }
-
-    public static boolean canView(User user) {
-        return user.hasPermission("VIEW_CARGO");
-    }
-
-    public static boolean canEdit(User user) {
-        return user.hasPermission("CREATE_CARGO");
-    }
-
-    public static boolean canDelete(User user) {
-        return user.hasPermission("DELETE_CARGO");
-    }
 }

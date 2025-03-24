@@ -15,6 +15,8 @@ interface ActionBarProps {
     removeIcon?: React.ElementType;
     onPageSizeChange: (size: number) => void;
     pageSize: number;
+    canCreate?: boolean;
+    canDelete?: boolean;
 }
 
 const ActionBar: React.FC<ActionBarProps> = ({
@@ -27,6 +29,8 @@ const ActionBar: React.FC<ActionBarProps> = ({
     removeIcon: RemoveIcon = FaMinus,
     onPageSizeChange,
     pageSize,
+    canCreate = false,
+    canDelete = false,
 }) => {
     const [items, setItems] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
@@ -68,22 +72,26 @@ const ActionBar: React.FC<ActionBarProps> = ({
                 <div className="col"></div>
                 <div className="d-flex justify-content-center col">
                     <div className="d-flex align-items-center">
-                        <button
-                            className="btn btn-massive-actions me-2"
-                            data-bs-toggle="modal"
-                            data-bs-target={`#${modalTargetId}`}
-                            onClick={onCreate}
-                        >
-                            <AddIcon />
-                        </button>
-                        <button
-                            className="btn btn-massive-actions me-2"
-                            onClick={handleDelMassiveAction}
-                            data-bs-toggle="modal"
-                            data-bs-target="#modalDelete"
-                        >
-                            <RemoveIcon />
-                        </button>
+                        {canCreate && (
+                            <button
+                                className="btn btn-massive-actions me-2"
+                                data-bs-toggle="modal"
+                                data-bs-target={`#${modalTargetId}`}
+                                onClick={onCreate}
+                            >
+                                <AddIcon />
+                            </button>
+                        )}
+                        {canDelete && (
+                            <button
+                                className="btn btn-massive-actions me-2"
+                                onClick={handleDelMassiveAction}
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalDelete"
+                            >
+                                <RemoveIcon />
+                            </button>
+                        )}
                         <input
                             className="form-control"
                             placeholder="Filtrar"

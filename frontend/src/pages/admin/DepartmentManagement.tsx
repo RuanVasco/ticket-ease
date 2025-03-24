@@ -6,6 +6,7 @@ import Pagination from "../../components/Pagination";
 import Table from "../../components/Table";
 import { Department } from "../../types/Department";
 import { Unit } from "../../types/Unit";
+import { usePermissions } from "../../context/PermissionsContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -31,6 +32,16 @@ const DepartmentManagement: React.FC = () => {
         unit: { id: "", name: "", address: "" },
         receivesRequests: false,
     });
+    const { hasPermission } = usePermissions();
+    const [canCreate, setCanCreate] = useState<boolean>(false);
+    const [canEdit, setCanEdit] = useState<boolean>(false);
+    const [canDelete, setCanDelete] = useState<boolean>(false);
+
+    useEffect(() => {
+        setCanCreate(hasPermission("CREATE_DEPARTMENT"));
+        setCanEdit(hasPermission("EDIT_DEPARTMENT"));
+        setCanDelete(hasPermission("DELETE_DEPARTMENT"));
+    }, [hasPermission]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -186,6 +197,8 @@ const DepartmentManagement: React.FC = () => {
                     filterText={filterText}
                     onPageSizeChange={handlePageSizeChange}
                     pageSize={pageSize}
+                    canCreate={canCreate}
+                    canDelete={canDelete}
                 />
                 <Table
                     columns={columns}
@@ -194,6 +207,8 @@ const DepartmentManagement: React.FC = () => {
                     mode="admin"
                     handleModalOpen={handleModalOpen}
                     filterText={filterText}
+                    canDelete={canDelete}
+                    canEdit={canEdit}
                 />
                 <Pagination
                     currentPage={currentPage}

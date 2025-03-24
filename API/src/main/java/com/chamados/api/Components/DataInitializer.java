@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -49,10 +50,8 @@ public class DataInitializer implements CommandLineRunner {
             RH.setReceivesRequests(true);
             departmentRepository.save(RH);
 
-            // Permissões globais
             List<Permission> permissions = new ArrayList<>();
 
-            permissions.add(createPermission("FULL_ACCESS", "Acesso total ao sistema"));
             permissions.add(createPermission("CREATE_CARGO", "Permite criar cargos"));
             permissions.add(createPermission("EDIT_CARGO", "Permite editar cargos"));
             permissions.add(createPermission("DELETE_CARGO", "Permite deletar cargos"));
@@ -81,8 +80,27 @@ public class DataInitializer implements CommandLineRunner {
             permissions.add(createPermission("EDIT_PROFILE", "Permite editar perfis"));
             permissions.add(createPermission("DELETE_PROFILE", "Permite deletar perfis"));
 
+            List<String> ticketCategoryPermissions = List.of(
+                    "CREATE_TICKET_CATEGORY",
+                    "EDIT_TICKET_CATEGORY",
+                    "DELETE_TICKET_CATEGORY"
+            );
+            List<Permission> departmentScopedPermissions = new ArrayList<>();
+
+
+            for (String permissionName : ticketCategoryPermissions) {
+                Permission permission = new Permission();
+                permission.setName(permissionName);
+                permission.setScope(ScopeType.DEPARTMENT);
+                permission.setDescription(String.format("Permissão %s no escopo de departamento", permissionName));
+
+                departmentScopedPermissions.add(permission);
+            }
+
+
             // Persistir todas as permissões globais
             permissionRepository.saveAll(permissions);
+            permissionRepository.saveAll(departmentScopedPermissions);
 
             // Associar permissões aos papéis
             Set<Permission> adminPermissions = new HashSet<>(permissions);
@@ -98,6 +116,20 @@ public class DataInitializer implements CommandLineRunner {
 
             Set<Role> rolesUser = new HashSet<>();
             rolesUser.add(roleUser);
+
+            Role roleManager = roleRepository.findByName("MANAGER")
+                    .orElseGet(() -> roleRepository.save(new Role("MANAGER")));
+
+            Set<Permission> managerPermissions = departmentScopedPermissions.stream()
+                    .filter(p -> List.of(
+                            "CREATE_TICKET_CATEGORY",
+                            "EDIT_TICKET_CATEGORY",
+                            "DELETE_TICKET_CATEGORY",
+                            "MANAGE_TICKET"
+                    ).contains(p.getName()))
+                    .collect(Collectors.toSet());
+
+            roleManager.setPermissions(managerPermissions);
 
             // Categoria inicial
             TicketCategory ticketCategory = new TicketCategory();

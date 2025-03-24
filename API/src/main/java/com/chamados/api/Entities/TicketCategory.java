@@ -30,16 +30,4 @@ public class TicketCategory {
     @ManyToOne
     @JoinColumn(name = "father_id", nullable = true)
     private TicketCategory father;
-
-    public static boolean canCreate(User user) {return user.hasPermission("CREATE_TICKET_CATEGORY");}
-
-    public static boolean canView(User user) {return user.hasPermission("VIEW_TICKET_CATEGORY");}
-
-    public static boolean canEdit(User user) {
-        return user.hasPermission("EDIT_TICKET_CATEGORY");
-    }
-
-    public static boolean canDelete(User user) {
-        return user.hasPermission("DELETE_TICKET_CATEGORY");
-    }
 }

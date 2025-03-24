@@ -2,6 +2,8 @@ package com.chamados.api.Entities;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import com.chamados.api.Types.ScopeType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
@@ -64,15 +66,37 @@ public class User implements UserDetails {
         this.password = passwordEncoder.encode(password);
     }
 
-    public boolean hasPermission(String permission) {
-        if (permission == null || permission.isEmpty()) {
+    public boolean hasPermission(String permissionName, Department department) {
+        if (permissionName == null || permissionName.isEmpty()) {
             return false;
         }
 
-        Collection<? extends GrantedAuthority> currentPermissions = this.getAuthorities();
+        for (Role role : this.roles) {
+            for (Permission permission : role.getPermissions()) {
+                if (!permission.getName().equals(permissionName)) continue;
 
-        return currentPermissions != null && currentPermissions.stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(permission));
+                if (permission.getScope() == ScopeType.GLOBAL) {
+                    return true;
+                }
+
+                if (permission.getScope() == ScopeType.DEPARTMENT &&
+                        this.departments.contains(department)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public boolean hasGlobalPermission(String permissionName) {
+        if (permissionName == null || permissionName.isEmpty()) {
+            return false;
+        }
+
+        return roles.stream()
+                .flatMap(role -> role.getPermissions().stream())
+                .anyMatch(p -> p.getName().equals(permissionName) && p.getScope() == ScopeType.GLOBAL);
     }
 
     @Override

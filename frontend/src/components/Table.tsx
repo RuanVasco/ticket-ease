@@ -13,6 +13,8 @@ interface TableProps {
     mode?: "admin" | "readonly";
     handleModalOpen: (action: string, mode: string, id: string) => void;
     filterText: string;
+    canEdit?: boolean;
+    canDelete?: boolean;
 }
 
 const Table: React.FC<TableProps> = ({
@@ -22,6 +24,8 @@ const Table: React.FC<TableProps> = ({
     mode = "admin",
     handleModalOpen,
     filterText,
+    canDelete = false,
+    canEdit = false,
 }) => {
     const filteredData = data.filter((row) =>
         columns.some((column) => {
@@ -67,26 +71,30 @@ const Table: React.FC<TableProps> = ({
                                 </button>
                                 {mode !== "readonly" && (
                                     <>
-                                        <button
-                                            className="btn btn-secondary me-1"
-                                            data-bs-toggle="modal"
-                                            data-bs-target={`#${modalID}`}
-                                            onClick={() =>
-                                                handleModalOpen("Editar", "update", row.id)
-                                            }
-                                        >
-                                            <FaPencil />
-                                        </button>
-                                        <button
-                                            className="btn btn-danger"
-                                            data-bs-toggle="modal"
-                                            data-bs-target={`#${modalID}`}
-                                            onClick={() =>
-                                                handleModalOpen("Excluir", "delete", row.id)
-                                            }
-                                        >
-                                            <FaCircleXmark />
-                                        </button>
+                                        {canEdit && (
+                                            <button
+                                                className="btn btn-secondary me-1"
+                                                data-bs-toggle="modal"
+                                                data-bs-target={`#${modalID}`}
+                                                onClick={() =>
+                                                    handleModalOpen("Editar", "update", row.id)
+                                                }
+                                            >
+                                                <FaPencil />
+                                            </button>
+                                        )}
+                                        {canDelete && (
+                                            <button
+                                                className="btn btn-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target={`#${modalID}`}
+                                                onClick={() =>
+                                                    handleModalOpen("Excluir", "delete", row.id)
+                                                }
+                                            >
+                                                <FaCircleXmark />
+                                            </button>
+                                        )}
                                     </>
                                 )}
                             </td>

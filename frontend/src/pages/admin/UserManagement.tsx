@@ -10,6 +10,7 @@ import { Cargo } from "../../types/Cargo";
 import { Department } from "../../types/Department";
 import { Profile } from "../../types/Profile";
 import { User } from "../../types/User";
+import { usePermissions } from "../../context/PermissionsContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -43,6 +44,16 @@ const UserManagement: React.FC = () => {
     const [cargos, setCargos] = useState<Cargo[]>([]);
     const [departments, setDepartments] = useState<Department[]>([]);
     const [profiles, setProfiles] = useState<Profile[]>([]);
+    const { hasPermission } = usePermissions();
+    const [canCreate, setCanCreate] = useState<boolean>(false);
+    const [canEdit, setCanEdit] = useState<boolean>(false);
+    const [canDelete, setCanDelete] = useState<boolean>(false);
+
+    useEffect(() => {
+        setCanCreate(hasPermission("CREATE_USER"));
+        setCanEdit(hasPermission("EDIT_USER"));
+        setCanDelete(hasPermission("DELETE_USER"));
+    }, [hasPermission]);
 
     useEffect(() => {
         const fetchUsersData = async () => {
@@ -214,6 +225,8 @@ const UserManagement: React.FC = () => {
                     filterText={filterText}
                     onPageSizeChange={handlePageSizeChange}
                     pageSize={pageSize}
+                    canCreate={canCreate}
+                    canDelete={canDelete}
                 />
                 <Table
                     columns={columns}
@@ -222,6 +235,8 @@ const UserManagement: React.FC = () => {
                     mode="admin"
                     handleModalOpen={handleModalOpen}
                     filterText={filterText}
+                    canEdit={canEdit}
+                    canDelete={canDelete}
                 />
                 <Pagination
                     currentPage={currentPage}
@@ -363,6 +378,7 @@ const UserManagement: React.FC = () => {
                                                         (profile) => ({
                                                             id: profile.value,
                                                             name: profile.label,
+                                                            permissions: [],
                                                         })
                                                     );
 

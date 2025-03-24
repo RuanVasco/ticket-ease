@@ -6,6 +6,7 @@ import Pagination from "../../components/Pagination";
 import Table from "../../components/Table";
 import { Department } from "../../types/Department";
 import { TicketCategory } from "../../types/TicketCategory";
+import { usePermissions } from "../../context/PermissionsContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -36,6 +37,16 @@ const TicketCategoryManagement: React.FC = () => {
         department: { id: "", name: "" },
         father: { id: "", name: "" },
     });
+    const { hasPermission, permissions } = usePermissions();
+    const [canCreate, setCanCreate] = useState<boolean>(false);
+    const [canEdit, setCanEdit] = useState<boolean>(false);
+    const [canDelete, setCanDelete] = useState<boolean>(false);
+
+    useEffect(() => {
+        setCanCreate(hasPermission("CREATE_TICKET_CATEGORY"));
+        setCanEdit(hasPermission("EDIT_TICKET_CATEGORY"));
+        setCanDelete(hasPermission("DELETE_TICKET_CATEGORY"));
+    }, [hasPermission]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -56,11 +67,39 @@ const TicketCategoryManagement: React.FC = () => {
 
         const fetchCategories = async () => {
             try {
-                const res = await axiosInstance.get(`${API_BASE_URL}/tickets-category/`);
-                if (res.status === 200) {
-                    setCategories(res.data);
+                const canManageGlobally = permissions.some(
+                    (p) =>
+                        ["CREATE_TICKET_CATEGORY", "EDIT_TICKET_CATEGORY", "DELETE_TICKET_CATEGORY"].includes(p.name) &&
+                        p.scope === "GLOBAL"
+                );
+
+                if (canManageGlobally) {
+                    const res = await axiosInstance.get(`${API_BASE_URL}/tickets-category`);
+                    if (res.status === 200) {
+                        setCategories(res.data);
+                    } else {
+                        console.error("Error fetching all categories:", res.status);
+                    }
                 } else {
-                    console.error("Error fetching categories:", res.status);
+                    const userDeptsRes = await axiosInstance.get(`${API_BASE_URL}/users/me/departments`);
+                    const userDepartments = userDeptsRes.data;
+
+                    const deptIds = userDepartments.map((d: any) => d.id);
+                    if (deptIds.length === 0) {
+                        setCategories([]);
+                        return;
+                    }
+
+                    const res = await axiosInstance.get(`${API_BASE_URL}/tickets-category/by-departments`, {
+                        params: { departmentIds: deptIds },
+                        paramsSerializer: { indexes: null },
+                    });
+
+                    if (res.status === 200) {
+                        setCategories(res.data);
+                    } else {
+                        console.error("Error fetching department categories:", res.status);
+                    }
                 }
             } catch (error) {
                 console.error("Error fetching categories:", error);
@@ -72,8 +111,23 @@ const TicketCategoryManagement: React.FC = () => {
                 const res = await axiosInstance.get(`${API_BASE_URL}/departments/receiveRequests`, {
                     params: { receiveRequests: true },
                 });
+
                 if (res.status === 200) {
-                    setDepartments(res.data);
+                    const allDepartments = res.data;
+
+                    const canManageGlobally = permissions.some(
+                        (p) =>
+                            ["CREATE_TICKET_CATEGORY", "EDIT_TICKET_CATEGORY", "DELETE_TICKET_CATEGORY"].includes(p.name) &&
+                            p.scope === "GLOBAL"
+                    );
+
+                    if (canManageGlobally) {
+                        setDepartments(allDepartments);
+                    } else {
+                        const userDepartmentsRes = await axiosInstance.get(`${API_BASE_URL}/users/me/departments`);
+                        const userDepartments = userDepartmentsRes.data;
+                        setDepartments(userDepartments);
+                    }
                 } else {
                     console.error("Error fetching departments:", res.status);
                 }
@@ -151,7 +205,7 @@ const TicketCategoryManagement: React.FC = () => {
                     );
                     break;
                 case "add":
-                    res = await axiosInstance.post(`${API_BASE_URL}/tickets-category/`, payload);
+                    res = await axiosInstance.post(`${API_BASE_URL}/tickets-category`, payload);
                     break;
                 case "update":
                     res = await axiosInstance.put(
@@ -221,6 +275,8 @@ const TicketCategoryManagement: React.FC = () => {
                     filterText={filterText}
                     onPageSizeChange={handlePageSizeChange}
                     pageSize={pageSize}
+                    canCreate={canCreate}
+                    canDelete={canDelete}
                 />
                 <Table
                     columns={columns}
@@ -229,6 +285,8 @@ const TicketCategoryManagement: React.FC = () => {
                     mode="admin"
                     handleModalOpen={handleModalOpen}
                     filterText={filterText}
+                    canDelete={canDelete}
+                    canEdit={canEdit}
                 />
                 <Pagination
                     currentPage={currentPage}
@@ -375,9 +433,8 @@ const TicketCategoryManagement: React.FC = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className={`btn btn-${
-                                        modeModal === "delete" ? "danger" : "primary"
-                                    }`}
+                                    className={`btn btn-${modeModal === "delete" ? "danger" : "primary"
+                                        }`}
                                     onClick={() => setSubmitType(modeModal)}
                                 >
                                     {modeModal === "delete" ? "Excluir" : "Salvar"}

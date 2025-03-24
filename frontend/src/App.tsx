@@ -24,7 +24,7 @@ function App() {
         return <div>Carregando permissões...</div>;
     }
 
-    const canManageTicket = hasPermission("MANAGE_TICKET") || hasPermission("FULL_ACCESS");
+    const canManageTicket = hasPermission("MANAGE_TICKET");
 
     return (
         <Routes>

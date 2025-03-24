@@ -5,6 +5,7 @@ import axiosInstance from "../../components/AxiosConfig";
 import Pagination from "../../components/Pagination";
 import Table from "../../components/Table";
 import { Unit } from "../../types/Unit";
+import { usePermissions } from "../../context/PermissionsContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -27,6 +28,17 @@ const UnitManagement: React.FC = () => {
         name: "",
         address: "",
     });
+
+    const { hasPermission } = usePermissions();
+    const [canCreate, setCanCreate] = useState<boolean>(false);
+    const [canEdit, setCanEdit] = useState<boolean>(false);
+    const [canDelete, setCanDelete] = useState<boolean>(false);
+
+    useEffect(() => {
+        setCanCreate(hasPermission("CREATE_UNIT"));
+        setCanEdit(hasPermission("EDIT_UNIT"));
+        setCanDelete(hasPermission("DELETE_UNIT"));
+    }, [hasPermission]);
 
     const fetchData = async () => {
         try {
@@ -142,6 +154,8 @@ const UnitManagement: React.FC = () => {
                     filterText={filterText}
                     onPageSizeChange={handlePageSizeChange}
                     pageSize={pageSize}
+                    canCreate={canCreate}
+                    canDelete={canDelete}
                 />
                 <Table
                     columns={columns}
@@ -150,6 +164,8 @@ const UnitManagement: React.FC = () => {
                     mode="admin"
                     handleModalOpen={handleModalOpen}
                     filterText={filterText}
+                    canDelete={canDelete}
+                    canEdit={canEdit}
                 />
                 <Pagination
                     currentPage={currentPage}

@@ -46,49 +46,49 @@ public class SecurityConfig {
 
 						// UNITS
 						.requestMatchers(HttpMethod.GET, "/units/**").permitAll()
-						.requestMatchers(HttpMethod.POST, "/units/**").hasAnyAuthority("CREATE_UNIT", "FULL_ACCESS")
-						.requestMatchers(HttpMethod.PUT, "/units/**").hasAnyAuthority("EDIT_UNIT", "FULL_ACCESS")
-						.requestMatchers(HttpMethod.DELETE, "/units/**").hasAnyAuthority("DELETE_UNIT", "FULL_ACCESS")
+						.requestMatchers(HttpMethod.POST, "/units/**").hasAnyAuthority("CREATE_UNIT")
+						.requestMatchers(HttpMethod.PUT, "/units/**").hasAnyAuthority("EDIT_UNIT")
+						.requestMatchers(HttpMethod.DELETE, "/units/**").hasAnyAuthority("DELETE_UNIT")
 
 						// DEPARTMENTS
 						.requestMatchers(HttpMethod.GET, "/departments/**").permitAll()
-						.requestMatchers(HttpMethod.POST, "/departments/**").hasAnyAuthority("CREATE_DEPARTMENT", "FULL_ACCESS")
-						.requestMatchers(HttpMethod.PUT, "/departments/**").hasAnyAuthority("EDIT_DEPARTMENT", "FULL_ACCESS")
-						.requestMatchers(HttpMethod.DELETE, "/departments/**").hasAnyAuthority("DELETE_DEPARTMENT", "FULL_ACCESS")
+						.requestMatchers(HttpMethod.POST, "/departments/**").hasAnyAuthority("CREATE_DEPARTMENT")
+						.requestMatchers(HttpMethod.PUT, "/departments/**").hasAnyAuthority("EDIT_DEPARTMENT")
+						.requestMatchers(HttpMethod.DELETE, "/departments/**").hasAnyAuthority("DELETE_DEPARTMENT")
 
 						// TICKETS CATEGORY
 						.requestMatchers(HttpMethod.GET, "/tickets-category/**").permitAll()
-						.requestMatchers(HttpMethod.POST, "/tickets-category/**").hasAnyAuthority("CREATE_TICKET_CATEGORY", "FULL_ACCESS")
-						.requestMatchers(HttpMethod.PUT, "/tickets-category/**").hasAnyAuthority("EDIT_TICKET_CATEGORY", "FULL_ACCESS")
-						.requestMatchers(HttpMethod.DELETE, "/tickets-category/**").hasAnyAuthority("DELETE_TICKET_CATEGORY", "FULL_ACCESS")
+						.requestMatchers(HttpMethod.POST, "/tickets-category/**").hasAnyAuthority("CREATE_TICKET_CATEGORY")
+						.requestMatchers(HttpMethod.PUT, "/tickets-category/**").hasAnyAuthority("EDIT_TICKET_CATEGORY")
+						.requestMatchers(HttpMethod.DELETE, "/tickets-category/**").hasAnyAuthority("DELETE_TICKET_CATEGORY")
 
 						// USERS
 						.requestMatchers(HttpMethod.GET, "/users/**").permitAll()
-						.requestMatchers(HttpMethod.POST, "/users/**").hasAnyAuthority("CREATE_USER", "FULL_ACCESS")
-						.requestMatchers(HttpMethod.PUT, "/users/**").hasAnyAuthority("EDIT_USER", "FULL_ACCESS")
-						.requestMatchers(HttpMethod.DELETE, "/users/**").hasAnyAuthority("DELETE_USER", "FULL_ACCESS")
+						.requestMatchers(HttpMethod.POST, "/users/**").hasAnyAuthority("CREATE_USER")
+						.requestMatchers(HttpMethod.PUT, "/users/**").hasAnyAuthority("EDIT_USER")
+						.requestMatchers(HttpMethod.DELETE, "/users/**").hasAnyAuthority("DELETE_USER")
 
 						// TICKETS
 						.requestMatchers(HttpMethod.GET, "/tickets/**").permitAll()
-						.requestMatchers(HttpMethod.POST, "/tickets/**").hasAnyAuthority("CREATE_TICKET", "FULL_ACCESS")
-						.requestMatchers(HttpMethod.PUT, "/tickets/**").hasAnyAuthority("EDIT_TICKET", "FULL_ACCESS")
-						.requestMatchers(HttpMethod.DELETE, "/tickets/**").hasAnyAuthority("DELETE_TICKET", "FULL_ACCESS")
+						.requestMatchers(HttpMethod.POST, "/tickets/**").hasAnyAuthority("CREATE_TICKET")
+						.requestMatchers(HttpMethod.PUT, "/tickets/**").hasAnyAuthority("EDIT_TICKET")
+						.requestMatchers(HttpMethod.DELETE, "/tickets/**").hasAnyAuthority("DELETE_TICKET")
 
 						// MESSAGES
 						.requestMatchers(HttpMethod.GET, "/messages/ticket/**").permitAll()
-						.requestMatchers(HttpMethod.POST, "/messages/**").hasAnyAuthority("CREATE_MESSAGE", "FULL_ACCESS")
+						.requestMatchers(HttpMethod.POST, "/messages/**").hasAnyAuthority("CREATE_MESSAGE")
 
 						// CARGOS (Posições/Cargos)
 						.requestMatchers(HttpMethod.GET, "/cargos/**").permitAll()
-						.requestMatchers(HttpMethod.POST, "/cargos/**").hasAnyAuthority("CREATE_CARGO", "FULL_ACCESS")
-						.requestMatchers(HttpMethod.PUT, "/cargos/**").hasAnyAuthority("EDIT_CARGO", "FULL_ACCESS")
-						.requestMatchers(HttpMethod.DELETE, "/cargos/**").hasAnyAuthority("DELETE_CARGO", "FULL_ACCESS")
+						.requestMatchers(HttpMethod.POST, "/cargos/**").hasAnyAuthority("CREATE_CARGO")
+						.requestMatchers(HttpMethod.PUT, "/cargos/**").hasAnyAuthority("EDIT_CARGO")
+						.requestMatchers(HttpMethod.DELETE, "/cargos/**").hasAnyAuthority("DELETE_CARGO")
 
 						// PROFILES (Perfis de Usuário)
 						.requestMatchers(HttpMethod.GET, "/profiles/**").permitAll()
-						.requestMatchers(HttpMethod.POST, "/profiles/**").hasAnyAuthority("CREATE_PROFILE", "FULL_ACCESS")
-						.requestMatchers(HttpMethod.PUT, "/profiles/**").hasAnyAuthority("EDIT_PROFILE", "FULL_ACCESS")
-						.requestMatchers(HttpMethod.DELETE, "/profiles/**").hasAnyAuthority("DELETE_PROFILE", "FULL_ACCESS")
+						.requestMatchers(HttpMethod.POST, "/profiles/**").hasAnyAuthority("CREATE_PROFILE")
+						.requestMatchers(HttpMethod.PUT, "/profiles/**").hasAnyAuthority("EDIT_PROFILE")
+						.requestMatchers(HttpMethod.DELETE, "/profiles/**").hasAnyAuthority("DELETE_PROFILE")
 
 						// PERMISSIONS
 						.requestMatchers(HttpMethod.GET, "/permissions/**").permitAll()
