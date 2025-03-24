@@ -83,7 +83,8 @@ public class DataInitializer implements CommandLineRunner {
             List<String> ticketCategoryPermissions = List.of(
                     "CREATE_TICKET_CATEGORY",
                     "EDIT_TICKET_CATEGORY",
-                    "DELETE_TICKET_CATEGORY"
+                    "DELETE_TICKET_CATEGORY",
+                    "MANAGE_TICKET"
             );
             List<Permission> departmentScopedPermissions = new ArrayList<>();
 
