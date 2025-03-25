@@ -1,15 +1,13 @@
 import { Cargo } from "./Cargo";
-import { Department } from "./Department";
-import { Profile } from "./Profile";
+import { ProfileDepartments } from "./ProfileDepartments";
 
 export class User {
     id: string;
     name: string;
     email: string;
     phone: string;
-    departments: Department[];
     cargo: Cargo;
-    profiles: Profile[];
+    profileDepartments: ProfileDepartments[];
     password: string;
 
     constructor(
@@ -17,18 +15,16 @@ export class User {
         name: string,
         email: string,
         phone: string = "",
-        department: Department[] = [],
         cargo: Cargo = {} as Cargo,
-        profiles: Profile[] = [],
+        profileDepartments: ProfileDepartments[],
         password: string = ""
     ) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.phone = phone;
-        this.departments = department;
         this.cargo = cargo;
-        this.profiles = profiles;
+        this.profileDepartments = profileDepartments;
         this.password = password;
     }
 }

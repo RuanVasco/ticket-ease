@@ -11,6 +11,7 @@ import { Department } from "../../types/Department";
 import { Profile } from "../../types/Profile";
 import { User } from "../../types/User";
 import { usePermissions } from "../../context/PermissionsContext";
+import { ProfileDepartments } from "../../types/ProfileDepartments";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -29,15 +30,17 @@ const UserManagement: React.FC = () => {
     const [pageSize, setPageSize] = useState<number>(10);
     const [totalPages, setTotalPages] = useState<number>(1);
     const [submitType, setSubmitType] = useState<string>("");
+    const [selectedDepartmentIds, setSelectedDepartmentIds] = useState<string[]>([]);
+    const [selectedProfileId, setSelectedProfileId] = useState<string>("");
+    const [profileDepartments, setProfileDepartments] = useState<ProfileDepartments[]>([]);
 
     const [currentUser, setCurrentUser] = useState<User>({
         id: "",
         name: "",
         email: "",
         phone: "",
-        departments: [],
         cargo: new Cargo(),
-        profiles: [],
+        profileDepartments: [],
         password: "",
     });
 
@@ -95,6 +98,29 @@ const UserManagement: React.FC = () => {
         fetchOptions("profiles", setProfiles);
     }, [currentPage, pageSize]);
 
+    const handleAddProfileDepartment = () => {
+        if (!selectedProfileId || selectedDepartmentIds.length === 0) return;
+
+        const newPairs = selectedDepartmentIds.map((departmentId) => ({
+            departmentId,
+            roleId: selectedProfileId,
+        }));
+
+        const unique = newPairs.filter(
+            (newItem) =>
+                !profileDepartments.some(
+                    (existing) =>
+                        existing.departmentId === newItem.departmentId &&
+                        existing.profileId === newItem.roleId
+                )
+        );
+
+        // setProfileDepartments((prev) => [...prev, ...unique]);
+
+        setSelectedDepartmentIds([]);
+        setSelectedProfileId("");
+    };
+
     const handleModalOpen = async (action: string, mode: string, idUser?: string) => {
         setModalTitle(`${action} Usuário`);
         setModeModal(mode);
@@ -103,17 +129,17 @@ const UserManagement: React.FC = () => {
             try {
                 const res = await axiosInstance.get(`${API_BASE_URL}/users/${idUser}`);
                 if (res.status === 200) {
+                    console.log(res.data)
                     setCurrentUser({
                         id: res.data.id,
                         name: res.data.name,
                         email: res.data.email,
                         phone: res.data.phone ?? "",
-                        departments: res.data.departments ?? [],
                         cargo: {
                             id: res.data.cargo?.id ?? "",
                             name: res.data.cargo?.name ?? "",
                         },
-                        profiles: res.data.roles ?? [],
+                        profileDepartments: res.data.roleDepartments ?? [],
                         password: "",
                     });
                 }
@@ -126,9 +152,8 @@ const UserManagement: React.FC = () => {
                 name: "",
                 email: "",
                 phone: "",
-                departments: [],
                 cargo: new Cargo(),
-                profiles: [],
+                profileDepartments: [],
                 password: "",
             });
         }
@@ -164,13 +189,12 @@ const UserManagement: React.FC = () => {
         e.preventDefault();
         try {
             let res;
-            const { departments, cargo, profiles, ...postData } = currentUser;
+            const { profileDepartments, cargo, ...postData } = currentUser;
 
             const postDataWithIds = {
                 ...postData,
-                departments: departments.map((department) => department.id),
                 cargoId: cargo.id,
-                profiles: profiles.map((profile) => profile.id),
+                profileDepartments,
             };
 
             switch (submitType) {
@@ -199,9 +223,8 @@ const UserManagement: React.FC = () => {
                     name: "",
                     email: "",
                     phone: "",
-                    departments: [],
                     cargo: new Cargo(),
-                    profiles: [],
+                    profileDepartments: [],
                     password: "",
                 });
 
@@ -312,22 +335,12 @@ const UserManagement: React.FC = () => {
                                                 isMulti
                                                 name="department"
                                                 id="department"
-                                                value={(currentUser.departments || []).map(
-                                                    (department) => ({
-                                                        value: department.id,
-                                                        label: department.name,
-                                                    })
-                                                )}
-                                                onChange={(selectedDepartments) => {
-                                                    const updatedDepartments = selectedDepartments.map(
-                                                        (department) => (new Department(department.value, department.label))
-                                                    );
-
-                                                    setCurrentUser({
-                                                        ...currentUser,
-                                                        departments: updatedDepartments || [],
-                                                    });
-                                                }}
+                                                value={departments
+                                                    .filter((d) => selectedDepartmentIds.includes(d.id))
+                                                    .map((d) => ({ value: d.id, label: d.name }))}
+                                                onChange={(selected) =>
+                                                    setSelectedDepartmentIds(selected.map((d) => d.value))
+                                                }
                                                 options={departments.map((department) => ({
                                                     value: department.id,
                                                     label: department.name,
@@ -335,6 +348,51 @@ const UserManagement: React.FC = () => {
                                                 className="basic-multi-select"
                                                 classNamePrefix="select"
                                             />
+                                            <select
+                                                className="form-select"
+                                                value={selectedProfileId}
+                                                onChange={(e) => setSelectedProfileId(e.target.value)}
+                                            >
+                                                <option value="">Perfil</option>
+                                                {profiles.map((p) => (
+                                                    <option key={p.id} value={p.id}>
+                                                        {p.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <button type="button" className="btn btn-outline-primary" onClick={handleAddProfileDepartment}>
+                                                Adicionar
+                                            </button>
+
+                                            {profileDepartments.length > 0 && (
+                                                <div className="mt-2">
+                                                    <label className="form-label">Perfis adicionados</label>
+                                                    <ul className="list-group">
+                                                        {profileDepartments.map((rd, index) => {
+                                                            const dept = departments.find((d) => d.id === rd.departmentId);
+                                                            const role = profiles.find((p) => p.id === rd.profileId);
+                                                            return (
+                                                                <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                                                                    <span>
+                                                                        {dept?.name || "Setor desconhecido"} + {role?.name || "Perfil desconhecido"}
+                                                                    </span>
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn btn-sm btn-danger"
+                                                                        onClick={() => {
+                                                                            setProfileDepartments((prev) =>
+                                                                                prev.filter((_, i) => i !== index)
+                                                                            );
+                                                                        }}
+                                                                    >
+                                                                        Remover
+                                                                    </button>
+                                                                </li>
+                                                            );
+                                                        })}
+                                                    </ul>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div className="mt-2">
@@ -356,44 +414,6 @@ const UserManagement: React.FC = () => {
                                                     </option>
                                                 ))}
                                             </select>
-                                        </div>
-
-                                        <div className="mt-2">
-                                            <label htmlFor="profile" className="form-label">
-                                                Perfis
-                                            </label>
-                                            <Select
-                                                isDisabled={modeModal === "readonly"}
-                                                isMulti
-                                                name="profile"
-                                                id="profile"
-                                                value={(currentUser.profiles || []).map(
-                                                    (profile) => ({
-                                                        value: profile.id,
-                                                        label: profile.name,
-                                                    })
-                                                )}
-                                                onChange={(selectedProfiles) => {
-                                                    const updatedProfiles = selectedProfiles.map(
-                                                        (profile) => ({
-                                                            id: profile.value,
-                                                            name: profile.label,
-                                                            permissions: [],
-                                                        })
-                                                    );
-
-                                                    setCurrentUser({
-                                                        ...currentUser,
-                                                        profiles: updatedProfiles || [],
-                                                    });
-                                                }}
-                                                options={profiles.map((profile) => ({
-                                                    value: profile.id,
-                                                    label: profile.name,
-                                                }))}
-                                                className="basic-multi-select"
-                                                classNamePrefix="select"
-                                            />
                                         </div>
 
                                         {modeModal !== "readonly" && (

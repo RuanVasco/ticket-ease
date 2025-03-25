@@ -1,32 +1,21 @@
 package com.chamados.api.Controllers;
 
+import com.chamados.api.DTO.RoleDepartmentDTO;
 import com.chamados.api.DTO.UserDTO;
-import com.chamados.api.DTO.UserRegisterDTO;
-import com.chamados.api.DTO.UserUpdateDTO;
-import com.chamados.api.Entities.Cargo;
-import com.chamados.api.Entities.Department;
-import com.chamados.api.Entities.Role;
-import com.chamados.api.Entities.User;
-import com.chamados.api.Repositories.CargoRepository;
-import com.chamados.api.Repositories.DepartmentRepository;
-import com.chamados.api.Repositories.RoleRepository;
+import com.chamados.api.Entities.*;
+import com.chamados.api.Repositories.*;
 import com.chamados.api.Services.CustomUserDetailsService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import com.chamados.api.Repositories.UserRepository;
-
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("users")
@@ -50,6 +39,11 @@ public class UserController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    private final UserRoleDepartmentRepository userRoleDepartmentRepository;
+
+    public UserController(UserRoleDepartmentRepository userRoleDepartmentRepository) {
+        this.userRoleDepartmentRepository = userRoleDepartmentRepository;
+    }
 
     @GetMapping("/")
     public ResponseEntity<?> getAll() {
@@ -60,10 +54,13 @@ public class UserController {
     public ResponseEntity<?> getDepartments() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        List<Department> sortedDepartments = user.getDepartments().stream()
+        Set<Department> departments = user.getRoleBindings().stream()
+                .map(UserRoleDepartment::getDepartment)
+                .collect(Collectors.toSet());
+
+        List<Department> sortedDepartments = departments.stream()
                 .sorted(Comparator.comparing(Department::getId))
                 .toList();
-
 
         return ResponseEntity.ok(sortedDepartments);
     }
@@ -93,7 +90,7 @@ public class UserController {
     }
 
     @PutMapping("/{userID}")
-    public ResponseEntity<?> updateUser(@PathVariable Long userID, @RequestBody UserUpdateDTO userUpdateDTO) {
+    public ResponseEntity<?> updateUser(@PathVariable Long userID, @RequestBody UserDTO userUpdateDTO) {
         Optional<User> optionalUser = userRepository.findById(userID);
 
         if (optionalUser.isEmpty()) {
@@ -110,72 +107,60 @@ public class UserController {
             }
         }
 
-        Set<Role> roles = new HashSet<>();
-        Set<Department> departmentSet = new HashSet<>();
-
-        for (Long roleId : userUpdateDTO.profiles()) {
-            Optional<Role> optionalRole = roleRepository.findById(roleId);
-
-            optionalRole.ifPresent(roles::add);
-        }
-
-        for (Long departmentId : userUpdateDTO.departments()) {
-            Optional<Department> optionalDepartment = departmentRepository.findById(departmentId);
-
-            optionalDepartment.ifPresent(departmentSet::add);
-        }
-
         user.setName(userUpdateDTO.name());
         user.setEmail(userUpdateDTO.email());
         user.setPhone(userUpdateDTO.phone());
-        user.setDepartments(departmentSet);
-        user.setRoles(roles);
 
         userRepository.save(user);
+
+        for (RoleDepartmentDTO pair : userUpdateDTO.roleDepartments()) {
+            Optional<Role> optionalRole = roleRepository.findById(pair.roleId());
+            Optional<Department> optionalDept = departmentRepository.findById(pair.departmentId());
+
+            if (optionalRole.isPresent() && optionalDept.isPresent()) {
+                UserRoleDepartment binding = new UserRoleDepartment();
+                binding.setUser(user);
+                binding.setRole(optionalRole.get());
+                binding.setDepartment(optionalDept.get());
+                userRoleDepartmentRepository.save(binding);
+            }
+        }
 
         return ResponseEntity.ok("User updated successfully");
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserRegisterDTO signUpDto) {
-        Long cargoId = signUpDto.cargoId();
-        List<Long> departments = signUpDto.departments();
-
+    public ResponseEntity<?> registerUser(@RequestBody UserDTO signUpDto) {
         if (userRepository.existsByEmail(signUpDto.email())) {
             return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
-        }
-
-        Set<Role> roles = new HashSet<>();
-
-        for (Long roleId : signUpDto.profiles()) {
-            Optional<Role> optionalRole = roleRepository.findById(roleId);
-
-            optionalRole.ifPresent(roles::add);
         }
 
         User user = new User();
         user.setName(signUpDto.name());
         user.setEmail(signUpDto.email());
         user.setPhone(signUpDto.phone());
-        user.setRoles(roles);
-
         user.setPassword(signUpDto.password(), passwordEncoder);
 
-        if (cargoId != null) {
-            cargoRepository.findById(cargoId).ifPresent(user::setCargo);
+        if (signUpDto.cargoId() != null) {
+            cargoRepository.findById(signUpDto.cargoId()).ifPresent(user::setCargo);
         }
-
-        Set<Department> departmentSet = new HashSet<>();
-        for (Long departmentId : departments) {
-            Optional<Department> optionalDepartment = departmentRepository.findById(departmentId);
-
-            optionalDepartment.ifPresent(departmentSet::add);
-        }
-
-        user.setDepartments(departmentSet);
 
         userRepository.save(user);
 
+        for (RoleDepartmentDTO pair : signUpDto.roleDepartments()) {
+            Optional<Role> optionalRole = roleRepository.findById(pair.roleId());
+            Optional<Department> optionalDept = departmentRepository.findById(pair.departmentId());
+
+            if (optionalRole.isPresent() && optionalDept.isPresent()) {
+                UserRoleDepartment binding = new UserRoleDepartment();
+                binding.setUser(user);
+                binding.setRole(optionalRole.get());
+                binding.setDepartment(optionalDept.get());
+                userRoleDepartmentRepository.save(binding);
+            }
+        }
+
         return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
     }
+
 }

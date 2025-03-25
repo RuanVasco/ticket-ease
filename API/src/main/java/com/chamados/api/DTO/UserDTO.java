@@ -1,39 +1,13 @@
 package com.chamados.api.DTO;
 
-import com.chamados.api.Entities.Cargo;
-import com.chamados.api.Entities.Department;
-import com.chamados.api.Entities.Role;
-import com.chamados.api.Entities.User;
-import lombok.Getter;
-import lombok.Setter;
+import java.util.List;
 
-import java.util.Set;
-
-@Setter
-@Getter
-public class UserDTO {
-    private Long id;
-    private String name;
-    private String email;
-    private String phone;
-    private Set<Department> departments;
-    private Cargo cargo;
-    private Set<Role> roles;
-
-    public UserDTO(User user) {
-        this.id = user.getId();
-        this.name = user.getName();
-        this.email = user.getEmail();
-        this.phone = user.getPhone();
-        this.departments = user.getDepartments();
-        this.roles = user.getRoles();
-        this.cargo = user.getCargo();
-    }
-
-    public UserDTO(Long id, String name, String email, String phone) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.phone = phone;
-    }
-}
+public record UserDTO(
+        Long id,
+        String name,
+        String phone,
+        String email,
+        String password,
+        Long cargoId,
+        List<RoleDepartmentDTO> roleDepartments
+) {}
