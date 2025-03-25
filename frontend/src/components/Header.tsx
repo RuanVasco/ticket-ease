@@ -15,11 +15,13 @@ const Header: React.FC = () => {
     const location = useLocation();
     const [user, setUser] = useState<User | null>(null);
     const [canManageTicket, setCanManageTicket] = useState(false);
+    const [canOpenTicket, setCanOpenTicket] = useState(false);
     const { hasPermission, isAdmin, permissions } = usePermissions();
     const { logout } = useAuth();
 
     useEffect(() => {
         setCanManageTicket(hasPermission("MANAGE_TICKET"));
+        setCanOpenTicket(hasPermission("CREATE_TICKET"));
     }, [permissions]);
 
     useEffect(() => {
@@ -46,9 +48,11 @@ const Header: React.FC = () => {
                         <h3 className="fw-bold my-auto">TicketEase</h3>
                     </div>
                     <div className="col-6 d-flex justify-content-center">
-                        <Link to="/" className={getActiveClass("/")}>
-                            Criar
-                        </Link>
+                        {canOpenTicket && (
+                            <Link to="/" className={getActiveClass("/")}>
+                                Criar
+                            </Link>
+                        )}
                         <Link to="/tickets" className={getActiveClass("/tickets")}>
                             Visualizar
                         </Link>

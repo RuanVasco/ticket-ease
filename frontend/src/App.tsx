@@ -16,9 +16,15 @@ import Login from "./pages/Login";
 import ManageTickets from "./pages/ManageTickets";
 import TicketDetails from "./pages/TicketDetails";
 import ViewTickets from "./pages/ViewTickets";
+import { useEffect, useState } from "react";
 
 function App() {
-    const { hasPermission, isAdmin, loading } = usePermissions();
+    const { hasPermission, isAdmin, loading, permissions } = usePermissions();
+    const [canOpenTicket, setCanOpenTicket] = useState(false);
+
+    useEffect(() => {
+        setCanOpenTicket(hasPermission("CREATE_TICKET"));
+    }, [permissions]);
 
     if (loading) {
         return <div>Carregando permissões...</div>;
@@ -32,7 +38,16 @@ function App() {
 
             <Route element={<ProtectedLayout />}>
                 <Route element={<MainLayout />}>
-                    <Route path="/" element={<CreateTicket />} />
+                    <Route
+                        path="/"
+                        element={
+                            canOpenTicket ? (
+                                <CreateTicket />
+                            ) : (
+                                <></>
+                            )
+                        }
+                    />
                     <Route path="/tickets" element={<ViewTickets />} />
                     <Route path="/tickets/:id" element={<TicketDetails />} />
                     {canManageTicket && (
