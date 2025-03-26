@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaGear } from "react-icons/fa6";
+import { FaBell, FaGear } from "react-icons/fa6";
 import { Link, useLocation } from "react-router-dom";
 
 import "../assets/styles/header.css";
@@ -72,11 +72,18 @@ const Header: React.FC = () => {
                     </div>
                     <div className="col-3 text-end">
                         <button
-                            className="btn btn-settings"
+                            className="btn btn-settings me-3"
                             data-bs-toggle="modal"
                             data-bs-target="#configModal"
                         >
                             <FaGear />
+                        </button>
+                        <button
+                            className="btn btn-settings"
+                            data-bs-toggle="modal"
+                            data-bs-target="#configModal"
+                        >
+                            <FaBell />
                         </button>
                     </div>
                 </div>

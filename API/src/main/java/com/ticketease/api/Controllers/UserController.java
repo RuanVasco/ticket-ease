@@ -6,6 +6,7 @@ import com.ticketease.api.DTO.User.UserDTO;
 import com.ticketease.api.Entities.*;
 import com.ticketease.api.Repositories.*;
 import com.ticketease.api.Services.CustomUserDetailsService;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +96,7 @@ public class UserController {
         return ResponseEntity.notFound().build();
     }
 
+    @Transactional
     @PutMapping("/{userID}")
     public ResponseEntity<?> updateUser(@PathVariable Long userID, @RequestBody UserDTO userUpdateDTO) {
         Optional<User> optionalUser = userRepository.findById(userID);
@@ -113,7 +115,7 @@ public class UserController {
             }
         }
 
-        if (userUpdateDTO.password() != "") {
+        if (userUpdateDTO.password() != null && !userUpdateDTO.password().isBlank()) {
             user.setPassword(userUpdateDTO.password(), passwordEncoder);
         }
 
@@ -122,6 +124,8 @@ public class UserController {
         user.setPhone(userUpdateDTO.phone());
 
         userRepository.save(user);
+
+        userRoleDepartmentRepository.deleteByUser(user);
 
         for (RoleDepartmentDTO pair : userUpdateDTO.roleDepartments()) {
             Optional<Role> optionalRole = roleRepository.findById(pair.role().getId());

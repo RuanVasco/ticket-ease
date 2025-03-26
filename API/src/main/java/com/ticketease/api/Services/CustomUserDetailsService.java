@@ -31,8 +31,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         List<RoleDepartmentDTO> roleDepartments = user.getRoleBindings().stream()
                 .map(binding -> new RoleDepartmentDTO(
-                        binding.getRole(),
-                        binding.getDepartment()
+                        binding.getDepartment(),
+                        binding.getRole()
                 ))
                 .toList();
 

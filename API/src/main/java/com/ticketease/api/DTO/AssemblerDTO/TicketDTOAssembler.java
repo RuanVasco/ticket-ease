@@ -43,8 +43,8 @@ public class TicketDTOAssembler implements RepresentationModelAssembler<Ticket, 
 
             List<RoleDepartmentDTO> roleDepartments = user.getRoleBindings().stream()
                     .map(binding -> new RoleDepartmentDTO(
-                            binding.getRole(),
-                            binding.getDepartment()
+                            binding.getDepartment(),
+                            binding.getRole()
                     ))
                     .toList();
 
@@ -61,8 +61,8 @@ public class TicketDTOAssembler implements RepresentationModelAssembler<Ticket, 
         Set<UserDTO> observers = ticket.getObservers().stream().map(observer -> {
             List<RoleDepartmentDTO> roleDepartments = observer.getRoleBindings().stream()
                     .map(binding -> new RoleDepartmentDTO(
-                            binding.getRole(),
-                            binding.getDepartment()
+                            binding.getDepartment(),
+                            binding.getRole()
                     ))
                     .toList();
 

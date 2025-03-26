@@ -45,6 +45,19 @@ public class DepartmentController {
 		return ResponseEntity.ok(department);
 	}
 
+	@GetMapping("/manager")
+	public ResponseEntity<?> getDepartmentsByManager() {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		List<Department> departmentList = departmentRepository.findAll();
+
+		List<Department> filtered = departmentList.stream()
+				.filter(department -> user.hasPermission("MANAGE_TICKET", department))
+				.toList();
+
+		return ResponseEntity.ok(filtered);
+	}
+
 	@GetMapping("/receiveRequests")
 	public ResponseEntity<?> findByReceivesRequests(@RequestParam(name = "receiveRequests") boolean receiveRequests) {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

@@ -211,6 +211,16 @@ const UserManagement: React.FC = () => {
         }
     };
 
+    const removeAssociation = (index: number) => {
+        setCurrentUser((prev) => {
+            const updated = {
+                ...prev,
+                profileDepartments: prev.profileDepartments.filter((_, i) => i !== index),
+            };
+            return updated;
+        });
+    };
+
     return (
         <main>
             <div className="container">
@@ -353,12 +363,7 @@ const UserManagement: React.FC = () => {
                                                         type="button"
                                                         className="btn btn-danger"
                                                         disabled={modeModal === "readonly"}
-                                                        onClick={() => {
-                                                            setCurrentUser((prev) => ({
-                                                                ...prev,
-                                                                profileDepartments: prev.profileDepartments.filter((_, i) => i !== index),
-                                                            }));
-                                                        }}
+                                                        onClick={() => removeAssociation(index)}
                                                     >
                                                         🗑️
                                                     </button>

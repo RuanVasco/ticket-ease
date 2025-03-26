@@ -1,5 +1,7 @@
 package com.ticketease.api.Controllers;
 
+import com.ticketease.api.DTO.PermissionDTO;
+import com.ticketease.api.Entities.Department;
 import com.ticketease.api.Entities.Permission;
 import com.ticketease.api.Entities.Role;
 import com.ticketease.api.Repositories.CargoRepository;
@@ -100,22 +102,33 @@ public class AuthController {
     }
 
     @GetMapping("/permissions")
-    public ResponseEntity<List<Permission>> getPermissions() {
+    public ResponseEntity<List<PermissionDTO>> getPermissions() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !(authentication.getPrincipal() instanceof User user)) {
             return ResponseEntity.status(403).build();
         }
 
-        List<Permission> permissions = user.getRoleBindings().stream()
+        List<PermissionDTO> permissionDTOs = user.getRoleBindings().stream()
                 .flatMap(binding -> {
                     Role role = binding.getRole();
-                    return role.getPermissions() != null ? role.getPermissions().stream() : Stream.empty();
+                    Department dept = binding.getDepartment();
+
+                    if (role.getPermissions() == null) return Stream.empty();
+
+                    return role.getPermissions().stream().map(permission ->
+                            new PermissionDTO(
+                                    permission.getName(),
+                                    permission.getScope(),
+                                    dept != null ? dept.getName() : null,
+                                    dept != null ? dept.getId() : null
+                            )
+                    );
                 })
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
 
-        return ResponseEntity.ok(permissions);
+        return ResponseEntity.ok(permissionDTOs);
     }
 
 }

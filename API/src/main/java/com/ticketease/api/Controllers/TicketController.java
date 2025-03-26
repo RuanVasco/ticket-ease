@@ -69,11 +69,20 @@ public class TicketController {
             @RequestParam(value = "sortDir", defaultValue = "DESC") String sortDir,
             @RequestParam(value = "status", defaultValue = "Novo") String status
     ) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         Optional<Department> optionalDepartment = departmentRepository.findById(departmentId);
         if (optionalDepartment.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-        Page<Ticket> tickets = ticketService.getUserManageableTickets(page, size, sortBy, sortDir, status, optionalDepartment.get());
+
+        Department department = optionalDepartment.get();
+
+        if (!user.hasPermission("MANAGE_TICKET", department)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        Page<Ticket> tickets = ticketService.getUserManageableTickets(page, size, sortBy, sortDir, status, department);
         PagedModel<TicketDTO> pagedModel = pagedResourcesAssembler.toModel(tickets, ticketDTOAssembler);
 
         return ResponseEntity.ok(pagedModel);

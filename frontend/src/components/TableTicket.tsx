@@ -56,7 +56,7 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
 
     const fetchUserDepartments = async () => {
         try {
-            const res = await axiosInstance.get(`${API_BASE_URL}/users/me/departments`);
+            const res = await axiosInstance.get(`${API_BASE_URL}/departments/manager`);
             if (res.status === 200 && res.data) {
                 setDepartments(res.data);
             }
