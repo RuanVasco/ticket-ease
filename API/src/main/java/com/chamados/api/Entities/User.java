@@ -59,35 +59,24 @@ public class User implements UserDetails {
 
         for (UserRoleDepartment binding : this.roleBindings) {
             Role role = binding.getRole();
+            boolean isDepartmentMatch = (department == null || binding.getDepartment().getId().equals(department.getId()));
+
+            if (!isDepartmentMatch) continue;
 
             for (Permission permission : role.getPermissions()) {
                 if (!permission.getName().equals(permissionName)) continue;
 
-                if (permission.getScope() == ScopeType.GLOBAL) {
+                if (permission.getScope() == ScopeType.DEPARTMENT && department != null) {
                     return true;
                 }
 
-                if (permission.getScope() == ScopeType.DEPARTMENT &&
-                        binding.getDepartment().equals(department)) {
+                if (permission.getScope() == ScopeType.GLOBAL) {
                     return true;
                 }
             }
         }
 
         return false;
-    }
-
-
-    public boolean hasGlobalPermission(String permissionName) {
-        if (permissionName == null || permissionName.isEmpty()) {
-            return false;
-        }
-
-        return this.roleBindings.stream()
-                .flatMap(binding -> binding.getRole().getPermissions().stream())
-                .anyMatch(permission ->
-                        permission.getName().equals(permissionName) &&
-                                permission.getScope() == ScopeType.GLOBAL);
     }
 
     @Override

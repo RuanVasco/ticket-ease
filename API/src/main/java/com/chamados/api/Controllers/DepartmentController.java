@@ -51,12 +51,8 @@ public class DepartmentController {
 
 		List<Department> departmentList = departmentRepository.findByReceivesRequests(receiveRequests);
 
-		if (user.hasGlobalPermission("CREATE_TICKET_CATEGORY")) {
-			return ResponseEntity.ok(departmentList);
-		}
-
 		List<Department> filteredDepartments = departmentList.stream()
-				.filter(department -> department != null && user.hasPermission("CREATE_TICKET_CATEGORY", department))
+				.filter(department -> department != null && user.hasPermission("MANAGE_TICKET_CATEGORY", department))
 				.toList();
 
 		return ResponseEntity.ok(filteredDepartments);

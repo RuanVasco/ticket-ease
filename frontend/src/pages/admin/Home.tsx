@@ -67,7 +67,11 @@ const HomeAdmin: React.FC = () => {
             for (const block of allBlocks) {
                 let entity = block.link.split("/").pop()?.toUpperCase() || "";
                 entity = removePlural(entity);
-                permissionResults[block.link] = (hasPermission("EDIT_" + entity));
+                if (entity === "TICKET_CATEGORY") {
+                    permissionResults[block.link] = (hasPermission("MANAGE_" + entity));
+                } else {
+                    permissionResults[block.link] = (hasPermission("EDIT_" + entity));
+                }
             }
 
             setPermissions(permissionResults);

@@ -70,10 +70,7 @@ public class DataInitializer implements CommandLineRunner {
             permissions.add(createPermission("CREATE_TICKET", "Permite criar chamados"));
             permissions.add(createPermission("MANAGE_TICKET", "Permite gerenciar chamados"));
 
-            permissions.add(createPermission("VIEW_TICKET_CATEGORY", "Permite ver categorias de chamado"));
-            permissions.add(createPermission("CREATE_TICKET_CATEGORY", "Permite criar categorias de chamado"));
-            permissions.add(createPermission("EDIT_TICKET_CATEGORY", "Permite editar categorias de chamado"));
-            permissions.add(createPermission("DELETE_TICKET_CATEGORY", "Permite deletar categorias de chamado"));
+            permissions.add(createPermission("MANAGE_TICKET_CATEGORY", "Permite gerenciar categorias de chamado"));
 
             permissions.add(createPermission("CREATE_UNIT", "Permite criar unidades"));
             permissions.add(createPermission("DELETE_UNIT", "Permite deletar unidades"));
@@ -88,9 +85,7 @@ public class DataInitializer implements CommandLineRunner {
             permissions.add(createPermission("DELETE_PROFILE", "Permite deletar perfis"));
 
             List<String> ticketCategoryPermissions = List.of(
-                    "CREATE_TICKET_CATEGORY",
-                    "EDIT_TICKET_CATEGORY",
-                    "DELETE_TICKET_CATEGORY",
+                    "MANAGE_TICKET_CATEGORY",
                     "MANAGE_TICKET"
             );
             List<Permission> departmentScopedPermissions = new ArrayList<>();

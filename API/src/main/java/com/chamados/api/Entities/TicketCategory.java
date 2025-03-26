@@ -30,4 +30,19 @@ public class TicketCategory {
     @ManyToOne
     @JoinColumn(name = "father_id", nullable = true)
     private TicketCategory father;
+
+    public Department getDepartment() {
+        TicketCategory ticketedCategory = this.getFather();
+        Department department = null;
+
+        while (ticketedCategory != null && ticketedCategory.getDepartment() == null) {
+            ticketedCategory = ticketedCategory.getFather();
+        }
+
+        if (ticketedCategory != null) {
+            department = ticketedCategory.getDepartment();
+        }
+
+        return department;
+    }
 }

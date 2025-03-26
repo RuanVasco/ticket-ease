@@ -37,16 +37,7 @@ const TicketCategoryManagement: React.FC = () => {
         department: { id: "", name: "" },
         father: { id: "", name: "" },
     });
-    const { hasPermission, permissions } = usePermissions();
-    const [canCreate, setCanCreate] = useState<boolean>(false);
-    const [canEdit, setCanEdit] = useState<boolean>(false);
-    const [canDelete, setCanDelete] = useState<boolean>(false);
-
-    useEffect(() => {
-        setCanCreate(hasPermission("CREATE_TICKET_CATEGORY"));
-        setCanEdit(hasPermission("EDIT_TICKET_CATEGORY"));
-        setCanDelete(hasPermission("DELETE_TICKET_CATEGORY"));
-    }, [hasPermission]);
+    const { permissions } = usePermissions();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -67,39 +58,11 @@ const TicketCategoryManagement: React.FC = () => {
 
         const fetchCategories = async () => {
             try {
-                const canManageGlobally = permissions.some(
-                    (p) =>
-                        ["CREATE_TICKET_CATEGORY", "EDIT_TICKET_CATEGORY", "DELETE_TICKET_CATEGORY"].includes(p.name) &&
-                        p.scope === "GLOBAL"
-                );
-
-                if (canManageGlobally) {
-                    const res = await axiosInstance.get(`${API_BASE_URL}/tickets-category`);
-                    if (res.status === 200) {
-                        setCategories(res.data);
-                    } else {
-                        console.error("Error fetching all categories:", res.status);
-                    }
+                const res = await axiosInstance.get(`${API_BASE_URL}/tickets-category/allowed`);
+                if (res.status === 200) {
+                    setCategories(res.data);
                 } else {
-                    const userDeptsRes = await axiosInstance.get(`${API_BASE_URL}/users/me/departments`);
-                    const userDepartments = userDeptsRes.data;
-
-                    const deptIds = userDepartments.map((d: any) => d.id);
-                    if (deptIds.length === 0) {
-                        setCategories([]);
-                        return;
-                    }
-
-                    const res = await axiosInstance.get(`${API_BASE_URL}/tickets-category/by-departments`, {
-                        params: { departmentIds: deptIds },
-                        paramsSerializer: { indexes: null },
-                    });
-
-                    if (res.status === 200) {
-                        setCategories(res.data);
-                    } else {
-                        console.error("Error fetching department categories:", res.status);
-                    }
+                    console.error("Error fetching all categories:", res.status);
                 }
             } catch (error) {
                 console.error("Error fetching categories:", error);
@@ -117,7 +80,7 @@ const TicketCategoryManagement: React.FC = () => {
 
                     const canManageGlobally = permissions.some(
                         (p) =>
-                            ["CREATE_TICKET_CATEGORY", "EDIT_TICKET_CATEGORY", "DELETE_TICKET_CATEGORY"].includes(p.name) &&
+                            ["MANAGE_TICKET_CATEGORY"].includes(p.name) &&
                             p.scope === "GLOBAL"
                     );
 
@@ -275,8 +238,8 @@ const TicketCategoryManagement: React.FC = () => {
                     filterText={filterText}
                     onPageSizeChange={handlePageSizeChange}
                     pageSize={pageSize}
-                    canCreate={canCreate}
-                    canDelete={canDelete}
+                    canCreate={true}
+                    canDelete={true}
                 />
                 <Table
                     columns={columns}
@@ -285,8 +248,8 @@ const TicketCategoryManagement: React.FC = () => {
                     mode="admin"
                     handleModalOpen={handleModalOpen}
                     filterText={filterText}
-                    canDelete={canDelete}
-                    canEdit={canEdit}
+                    canDelete={true}
+                    canEdit={true}
                 />
                 <Pagination
                     currentPage={currentPage}

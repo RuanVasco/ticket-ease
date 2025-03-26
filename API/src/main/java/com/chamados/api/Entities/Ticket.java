@@ -88,24 +88,12 @@ public class Ticket {
             return false;
         }
 
-        return user.hasPermission("MANAGE_TICKET", department)
-                || user.hasGlobalPermission("FULL_ACCESS");
+        return user.hasPermission("MANAGE_TICKET", department);
     }
 
 
     public Department getDepartment() {
-        TicketCategory ticketedCategory = this.getTicketCategory();
-        Department department = null;
-
-        while (ticketedCategory != null && ticketedCategory.getDepartment() == null) {
-            ticketedCategory = ticketedCategory.getFather();
-        }
-
-        if (ticketedCategory != null) {
-            department = ticketedCategory.getDepartment();
-        }
-
-        return department;
+        return this.getTicketCategory().getDepartment();
     }
 
 }
