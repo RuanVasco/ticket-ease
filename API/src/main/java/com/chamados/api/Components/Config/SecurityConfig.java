@@ -15,6 +15,7 @@ import org.springframework.security.config.annotation.web.socket.EnableWebSocket
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -28,7 +29,7 @@ public class SecurityConfig {
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-		return httpSecurity
+		DefaultSecurityFilterChain build = httpSecurity
 				.csrf(AbstractHttpConfigurer::disable)
 				.headers(headers -> headers
 						.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
@@ -58,9 +59,9 @@ public class SecurityConfig {
 
 						// TICKETS CATEGORY
 						.requestMatchers(HttpMethod.GET, "/tickets-category/**").permitAll()
-						.requestMatchers(HttpMethod.POST, "/tickets-category/**").hasAnyAuthority("CREATE_TICKET_CATEGORY")
-						.requestMatchers(HttpMethod.PUT, "/tickets-category/**").hasAnyAuthority("EDIT_TICKET_CATEGORY")
-						.requestMatchers(HttpMethod.DELETE, "/tickets-category/**").hasAnyAuthority("DELETE_TICKET_CATEGORY")
+						.requestMatchers(HttpMethod.POST, "/tickets-category/**").hasAnyAuthority("MANAGE_TICKET_CATEGORY")
+						.requestMatchers(HttpMethod.PUT, "/tickets-category/**").hasAnyAuthority("MANAGE_TICKET_CATEGORY")
+						.requestMatchers(HttpMethod.DELETE, "/tickets-category/**").hasAnyAuthority("MANAGE_TICKET_CATEGORY")
 
 						// USERS
 						.requestMatchers(HttpMethod.GET, "/users/**").permitAll()
@@ -97,6 +98,7 @@ public class SecurityConfig {
 				)
 				.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
 				.build();
+		return build;
 	}
 
 

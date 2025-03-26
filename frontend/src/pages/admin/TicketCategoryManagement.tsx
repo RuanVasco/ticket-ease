@@ -4,9 +4,8 @@ import ActionBar from "../../components/ActionBar";
 import axiosInstance from "../../components/AxiosConfig";
 import Pagination from "../../components/Pagination";
 import Table from "../../components/Table";
-import { Department } from "../../types/Department";
 import { TicketCategory } from "../../types/TicketCategory";
-import { usePermissions } from "../../context/PermissionsContext";
+import { Department } from "../../types/Department";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -22,14 +21,14 @@ const TicketCategoryManagement: React.FC = () => {
     const [modeModal, setModeModal] = useState<string>("");
     const [modalTitle, setModalTitle] = useState<string>("");
     const [data, setData] = useState<TicketCategory[]>([]);
+    const [departments, setDepartments] = useState<Department[]>([]);
+    const [categories, setCategories] = useState<TicketCategory[]>([]);
     const [filterText, setFilterText] = useState<string>("");
     const [submitType, setSubmitType] = useState<string>("");
     const [totalPages, setTotalPages] = useState<number>(1);
     const [currentPage, setCurrentPage] = useState<number>(0);
     const [pageSize, setPageSize] = useState<number>(10);
-    const [departments, setDepartments] = useState<Department[]>([]);
     const [rootCategory, setRootCategory] = useState<boolean>(false);
-    const [categories, setCategories] = useState<TicketCategory[]>([]);
     const [currentCategory, setCurrentCategory] = useState({
         id: "",
         name: "",
@@ -37,111 +36,57 @@ const TicketCategoryManagement: React.FC = () => {
         department: { id: "", name: "" },
         father: { id: "", name: "" },
     });
-    const { hasPermission, permissions } = usePermissions();
-    const [canCreate, setCanCreate] = useState<boolean>(false);
-    const [canEdit, setCanEdit] = useState<boolean>(false);
-    const [canDelete, setCanDelete] = useState<boolean>(false);
+
+    const fetchDepartments = async () => {
+        try {
+            const res = await axiosInstance.get(
+                `${API_BASE_URL}/tickets-category/departments/allowed`
+            );
+            if (res.status === 200) {
+                setDepartments(res.data);
+            }
+        } catch (error) {
+            console.error("Error fetching departments:", error);
+        }
+    }
+
+    const fetchCategories = async () => {
+        try {
+            const res = await axiosInstance.get(
+                `${API_BASE_URL}/tickets-category/fathers`
+            );
+            if (res.status === 200) {
+                setCategories(res.data);
+            }
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+        }
+    }
+
+    const fetchData = async () => {
+        try {
+            const res = await axiosInstance.get(
+                `${API_BASE_URL}/tickets-category/pageable?page=${currentPage}&size=${pageSize}`
+            );
+            if (res.status === 200) {
+                setData(res.data.content);
+                setTotalPages(res.data.totalPages);
+            } else {
+                console.error("Error fetching data:", res.status);
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    };
+
 
     useEffect(() => {
-        setCanCreate(hasPermission("CREATE_TICKET_CATEGORY"));
-        setCanEdit(hasPermission("EDIT_TICKET_CATEGORY"));
-        setCanDelete(hasPermission("DELETE_TICKET_CATEGORY"));
-    }, [hasPermission]);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const res = await axiosInstance.get(
-                    `${API_BASE_URL}/tickets-category/pageable?page=${currentPage}&size=${pageSize}`
-                );
-                if (res.status === 200) {
-                    setData(res.data.content);
-                    setTotalPages(res.data.totalPages);
-                } else {
-                    console.error("Error fetching data:", res.status);
-                }
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        };
-
-        const fetchCategories = async () => {
-            try {
-                const canManageGlobally = permissions.some(
-                    (p) =>
-                        ["CREATE_TICKET_CATEGORY", "EDIT_TICKET_CATEGORY", "DELETE_TICKET_CATEGORY"].includes(p.name) &&
-                        p.scope === "GLOBAL"
-                );
-
-                if (canManageGlobally) {
-                    const res = await axiosInstance.get(`${API_BASE_URL}/tickets-category`);
-                    if (res.status === 200) {
-                        setCategories(res.data);
-                    } else {
-                        console.error("Error fetching all categories:", res.status);
-                    }
-                } else {
-                    const userDeptsRes = await axiosInstance.get(`${API_BASE_URL}/users/me/departments`);
-                    const userDepartments = userDeptsRes.data;
-
-                    const deptIds = userDepartments.map((d: any) => d.id);
-                    if (deptIds.length === 0) {
-                        setCategories([]);
-                        return;
-                    }
-
-                    const res = await axiosInstance.get(`${API_BASE_URL}/tickets-category/by-departments`, {
-                        params: { departmentIds: deptIds },
-                        paramsSerializer: { indexes: null },
-                    });
-
-                    if (res.status === 200) {
-                        setCategories(res.data);
-                    } else {
-                        console.error("Error fetching department categories:", res.status);
-                    }
-                }
-            } catch (error) {
-                console.error("Error fetching categories:", error);
-            }
-        };
-
-        const fetchDepartments = async () => {
-            try {
-                const res = await axiosInstance.get(`${API_BASE_URL}/departments/receiveRequests`, {
-                    params: { receiveRequests: true },
-                });
-
-                if (res.status === 200) {
-                    const allDepartments = res.data;
-
-                    const canManageGlobally = permissions.some(
-                        (p) =>
-                            ["CREATE_TICKET_CATEGORY", "EDIT_TICKET_CATEGORY", "DELETE_TICKET_CATEGORY"].includes(p.name) &&
-                            p.scope === "GLOBAL"
-                    );
-
-                    if (canManageGlobally) {
-                        setDepartments(allDepartments);
-                    } else {
-                        const userDepartmentsRes = await axiosInstance.get(`${API_BASE_URL}/users/me/departments`);
-                        const userDepartments = userDepartmentsRes.data;
-                        setDepartments(userDepartments);
-                    }
-                } else {
-                    console.error("Error fetching departments:", res.status);
-                }
-            } catch (error) {
-                console.error("Error fetching departments:", error);
-            }
-        };
-
         fetchData();
-        fetchDepartments();
-        fetchCategories();
     }, [currentPage, pageSize]);
 
     const handleModalOpen = async (action: string, mode: string, idCategory?: string) => {
+        fetchDepartments();
+        fetchCategories();
         setModalTitle(`${action} Categoria de Formulário`);
         setModeModal(mode);
 
@@ -275,8 +220,8 @@ const TicketCategoryManagement: React.FC = () => {
                     filterText={filterText}
                     onPageSizeChange={handlePageSizeChange}
                     pageSize={pageSize}
-                    canCreate={canCreate}
-                    canDelete={canDelete}
+                    canCreate={true}
+                    canDelete={true}
                 />
                 <Table
                     columns={columns}
@@ -285,8 +230,8 @@ const TicketCategoryManagement: React.FC = () => {
                     mode="admin"
                     handleModalOpen={handleModalOpen}
                     filterText={filterText}
-                    canDelete={canDelete}
-                    canEdit={canEdit}
+                    canDelete={true}
+                    canEdit={true}
                 />
                 <Pagination
                     currentPage={currentPage}
@@ -411,7 +356,7 @@ const TicketCategoryManagement: React.FC = () => {
                                                     <option value="">----</option>
                                                     {categories.map((item) => (
                                                         <option key={item.id} value={item.id}>
-                                                            {item.path}
+                                                            {`${item.path} > ${item.name}`}
                                                         </option>
                                                     ))}
                                                 </select>

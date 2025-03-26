@@ -11,6 +11,7 @@ import java.util.Set;
 
 public interface TicketCategoryRepository extends JpaRepository<TicketCategory, Long> {
     Page<TicketCategory> findByDepartmentIn(Set<Department> departments, Pageable pageable);
+    Set<TicketCategory> findByDepartmentIn(Set<Department> departments);
     List<TicketCategory> findByDepartmentIdIn(List<Long> departmentIds);
 
 }

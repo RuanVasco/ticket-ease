@@ -1,14 +1,11 @@
 package com.chamados.api.Controllers;
 
 import com.chamados.api.DTO.UnitCreateDTO;
-import com.chamados.api.DTO.UserDTO;
 import com.chamados.api.Entities.Unit;
-import com.chamados.api.Entities.User;
 import com.chamados.api.Repositories.UnitRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

@@ -4,24 +4,22 @@ import com.chamados.api.DTO.TicketCategoryDTO;
 import com.chamados.api.Entities.Department;
 import com.chamados.api.Entities.TicketCategory;
 import com.chamados.api.Entities.User;
+import com.chamados.api.Entities.UserRoleDepartment;
 import com.chamados.api.Repositories.DepartmentRepository;
 import com.chamados.api.Repositories.TicketCategoryRepository;
 import com.chamados.api.Services.TicketCategoryService;
-import com.google.googlejavaformat.Op;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("tickets-category")
@@ -41,31 +39,45 @@ public class TicketCategoryController {
         return ResponseEntity.ok(ticketCategoryRepository.findAll());
     }
 
+    @GetMapping("/fathers")
+    public ResponseEntity<?> getRootCategories() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        List<TicketCategory> categories = ticketCategoryRepository.findAll().stream()
+                .filter(c -> c.getFather() == null)
+                .filter(c -> {
+                    Department dept = c.getDepartment();
+                    return dept != null && user.hasPermission("MANAGE_TICKET_CATEGORY", dept);
+                })
+                .toList();
+
+        return ResponseEntity.ok(categories);
+    }
+
     @GetMapping("/pageable")
     public ResponseEntity<?> getAllPageable(Pageable pageable) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (user.hasGlobalPermission("CREATE_TICKET_CATEGORY") || user.hasGlobalPermission("FULL_ACCESS")) {
-            return ResponseEntity.ok(ticketCategoryRepository.findAll(pageable));
-        }
+        List<TicketCategory> allCategories = ticketCategoryRepository.findAll();
 
-        Set<Department> allowedDepartments = user.getDepartments().stream()
-                .filter(department -> user.hasPermission("CREATE_TICKET_CATEGORY", department))
-                .collect(Collectors.toSet());
+        List<TicketCategory> filteredList = allCategories.stream()
+                .filter(category -> {
+                    Department dept = category.getDepartment();
+                    return dept != null && user.hasPermission("MANAGE_TICKET_CATEGORY", dept);
+                })
+                .toList();
 
-        if (allowedDepartments.isEmpty()) {
+        if (filteredList.isEmpty()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("Você não tem permissão para visualizar categorias.");
         }
 
-        Page<TicketCategory> filtered = ticketCategoryRepository
-                .findByDepartmentIn(allowedDepartments, pageable);
-
-        return ResponseEntity.ok(filtered);
+        Page<TicketCategory> filteredPage = new PageImpl<>(filteredList, pageable, filteredList.size());
+        return ResponseEntity.ok(filteredPage);
     }
 
     @GetMapping("/{categoryID}")
-    public ResponseEntity<TicketCategory> getTicketCategory(@PathVariable Long categoryID) {
+    public ResponseEntity<?> getTicketCategory(@PathVariable Long categoryID) {
         Optional<TicketCategory> optionalTicketCategory = ticketCategoryRepository.findById(categoryID);
 
         if (optionalTicketCategory.isEmpty()) {
@@ -73,13 +85,46 @@ public class TicketCategoryController {
         }
 
         TicketCategory ticketCategory = optionalTicketCategory.get();
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Department department = ticketCategory.getDepartment();
+
+        if (!user.hasPermission("MANAGE_TICKET_CATEGORY", department)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Você não tem permissão para visualizar essa categoria.");
+        }
 
         return ResponseEntity.ok(ticketCategory);
     }
 
+    @GetMapping("/departments/allowed")
+    public ResponseEntity<?> getAllowedDepartments() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        List<Department> all = departmentRepository.findByReceivesRequests(true);
+
+        List<Department> filtered = all.stream()
+                .filter(dept -> user.hasPermission("MANAGE_TICKET_CATEGORY", dept))
+                .toList();
+
+        return ResponseEntity.ok(filtered);
+    }
+
     @GetMapping("/by-departments")
     public ResponseEntity<?> getByDepartments(@RequestParam List<Long> departmentIds) {
-        List<TicketCategory> categories = ticketCategoryRepository.findByDepartmentIdIn(departmentIds);
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        List<Long> allowedDeptIds = departmentIds.stream()
+                .filter(id -> {
+                    Department d = departmentRepository.findById(id).orElse(null);
+                    return d != null && user.hasPermission("MANAGE_TICKET_CATEGORY", d);
+                })
+                .toList();
+
+        if (allowedDeptIds.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Você não tem permissão para esses departamentos.");
+        }
+
+        List<TicketCategory> categories = ticketCategoryRepository.findByDepartmentIdIn(allowedDeptIds);
         return ResponseEntity.ok(categories);
     }
 
@@ -91,29 +136,27 @@ public class TicketCategoryController {
         TicketCategory fatherCategory = null;
 
         if (ticketCategoryDTO.getDepartmentId() != null) {
-            department = departmentRepository.findById(ticketCategoryDTO.getDepartmentId())
-                    .orElse(null);
+            department = departmentRepository.findById(ticketCategoryDTO.getDepartmentId()).orElse(null);
 
             if (department == null) {
                 return ResponseEntity.badRequest().body("Departamento inválido.");
             }
 
-            if (!user.hasPermission("CREATE_TICKET_CATEGORY", department)) {
+            if (!user.hasPermission("MANAGE_TICKET_CATEGORY", department)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body("Você não tem permissão para criar categoria nesse departamento.");
             }
         }
 
         if (ticketCategoryDTO.getFatherId() != null) {
-            fatherCategory = ticketCategoryRepository.findById(ticketCategoryDTO.getFatherId())
-                    .orElse(null);
+            fatherCategory = ticketCategoryRepository.findById(ticketCategoryDTO.getFatherId()).orElse(null);
 
             if (fatherCategory == null) {
                 return ResponseEntity.badRequest().body("Categoria pai inválida.");
             }
 
             Department parentDept = fatherCategory.getDepartment();
-            if (!user.hasPermission("CREATE_TICKET_CATEGORY", parentDept)) {
+            if (!user.hasPermission("MANAGE_TICKET_CATEGORY", parentDept)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body("Você não tem permissão para criar categoria nesse departamento.");
             }
@@ -142,9 +185,15 @@ public class TicketCategoryController {
         }
 
         TicketCategory ticketCategory = optionalTicketCategory.get();
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Department department = ticketCategory.getDepartment();
+
+        if (!user.hasPermission("MANAGE_TICKET_CATEGORY", department)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Você não tem permissão para editar essa categoria.");
+        }
 
         ticketCategoryService.updateCategory(ticketCategory, ticketCategoryDTO);
-
         return ResponseEntity.ok().build();
     }
 
@@ -156,16 +205,22 @@ public class TicketCategoryController {
             return ResponseEntity.notFound().build();
         }
 
-        try {
-            TicketCategory ticketCategory = optionalTicketCategory.get();
-            ticketCategoryRepository.delete(ticketCategory);
+        TicketCategory ticketCategory = optionalTicketCategory.get();
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+        Department department = ticketCategory.getDepartment();
+
+        if (!user.hasPermission("MANAGE_TICKET_CATEGORY", department)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Você não tem permissão para excluir essa categoria.");
+        }
+
+        try {
+            ticketCategoryRepository.delete(ticketCategory);
             return ResponseEntity.ok().build();
         } catch (DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body("Não é possível excluir a categoria de formulário devido a registros associados.");
         }
-
     }
 
 }

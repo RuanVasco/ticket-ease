@@ -34,14 +34,13 @@ public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
                 throw new IllegalArgumentException("Token inválido ou ausente");
             }
 
-            User user = null;
+            User user;
             try {
                 user = tokenService.getUserFromToken(token);
+                accessor.setUser(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()));
             } catch (ParseException | JOSEException e) {
                 throw new RuntimeException(e);
             }
-
-            accessor.setUser(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()));
         }
 
         return message;

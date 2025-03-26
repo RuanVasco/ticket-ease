@@ -30,4 +30,18 @@ public class TicketCategory {
     @ManyToOne
     @JoinColumn(name = "father_id", nullable = true)
     private TicketCategory father;
+
+    public Department getDepartment() {
+        if (this.department != null) {
+            return this.department;
+        }
+
+        TicketCategory current = this;
+
+        while (current != null && current.department == null) {
+            current = current.getFather();
+        }
+
+        return current != null ? current.department : null;
+    }
 }

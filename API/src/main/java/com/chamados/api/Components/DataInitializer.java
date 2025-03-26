@@ -23,6 +23,12 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired private DepartmentRepository departmentRepository;
     @Autowired private TicketCategoryRepository ticketCategoryRepository;
 
+    private final UserRoleDepartmentRepository userRoleDepartmentRepository;
+
+    public DataInitializer(UserRoleDepartmentRepository userRoleDepartmentRepository) {
+        this.userRoleDepartmentRepository = userRoleDepartmentRepository;
+    }
+
     @Override
     @Transactional
     public void run(String... args) {
@@ -64,9 +70,7 @@ public class DataInitializer implements CommandLineRunner {
             permissions.add(createPermission("CREATE_TICKET", "Permite criar chamados"));
             permissions.add(createPermission("MANAGE_TICKET", "Permite gerenciar chamados"));
 
-            permissions.add(createPermission("CREATE_TICKET_CATEGORY", "Permite criar categorias de chamado"));
-            permissions.add(createPermission("EDIT_TICKET_CATEGORY", "Permite editar categorias de chamado"));
-            permissions.add(createPermission("DELETE_TICKET_CATEGORY", "Permite deletar categorias de chamado"));
+            permissions.add(createPermission("MANAGE_TICKET_CATEGORY", "Permite gerenciar categorias de chamado"));
 
             permissions.add(createPermission("CREATE_UNIT", "Permite criar unidades"));
             permissions.add(createPermission("DELETE_UNIT", "Permite deletar unidades"));
@@ -81,9 +85,7 @@ public class DataInitializer implements CommandLineRunner {
             permissions.add(createPermission("DELETE_PROFILE", "Permite deletar perfis"));
 
             List<String> ticketCategoryPermissions = List.of(
-                    "CREATE_TICKET_CATEGORY",
-                    "EDIT_TICKET_CATEGORY",
-                    "DELETE_TICKET_CATEGORY",
+                    "MANAGE_TICKET_CATEGORY",
                     "MANAGE_TICKET"
             );
             List<Permission> departmentScopedPermissions = new ArrayList<>();
@@ -145,9 +147,12 @@ public class DataInitializer implements CommandLineRunner {
             admin.setPassword("admin", passwordEncoder);
             admin.setName("Administrador");
             admin.setEmail("admin@admin");
-            admin.setRoles(rolesAdmin);
-            admin.setDepartments(Set.of(TI, RH));
             userRepository.save(admin);
+            List<UserRoleDepartment> adminBindings = List.of(
+                    new UserRoleDepartment(admin, roleAdmin, TI),
+                    new UserRoleDepartment(admin, roleAdmin, RH)
+            );
+            userRoleDepartmentRepository.saveAll(adminBindings);
             System.out.println("Usuário admin criado.");
 
             // Usuário comum
@@ -155,9 +160,11 @@ public class DataInitializer implements CommandLineRunner {
             commonUser.setPassword("user", passwordEncoder);
             commonUser.setName("Usuário Comum");
             commonUser.setEmail("user@user");
-            commonUser.setRoles(rolesUser);
-            commonUser.setDepartments(Set.of(RH));
             userRepository.save(commonUser);
+            List<UserRoleDepartment> userBindings = List.of(
+                    new UserRoleDepartment(commonUser, roleUser, RH)
+            );
+            userRoleDepartmentRepository.saveAll(userBindings);
             System.out.println("Usuário comum criado.");
         }
     }

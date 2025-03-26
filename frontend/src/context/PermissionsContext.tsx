@@ -61,8 +61,12 @@ export const PermissionsProvider: React.FC<{ children: React.ReactNode }> = ({ c
     };
 
     const isAdmin = useMemo(() => {
-        const entities = ["USER", "PROFILE", "DEPARTMENT", "UNIT", "CARGO", "TICKET_CATEGORY"];
+        const entities = ["USER", "PROFILE", "DEPARTMENT", "UNIT", "CARGO"];
         const actions = ["CREATE", "EDIT", "DELETE"];
+
+        if (permissions.some((p) => p.name === "MANAGE_TICKET_CATEGORY")) {
+            return true;
+        }
 
         return entities.some((entity) =>
             actions.some((action) => permissions.some(p => p.name === `${action}_${entity}`))

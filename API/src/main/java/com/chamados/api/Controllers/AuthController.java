@@ -104,13 +104,15 @@ public class AuthController {
             return ResponseEntity.status(403).build();
         }
 
-        Set<Role> roles = user.getRoles();
-
-        List<Permission> permissions = roles.stream()
-                .flatMap(role -> role.getPermissions() != null ? role.getPermissions().stream() : Stream.empty())
+        List<Permission> permissions = user.getRoleBindings().stream()
+                .flatMap(binding -> {
+                    Role role = binding.getRole();
+                    return role.getPermissions() != null ? role.getPermissions().stream() : Stream.empty();
+                })
                 .distinct()
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(permissions);
     }
+
 }

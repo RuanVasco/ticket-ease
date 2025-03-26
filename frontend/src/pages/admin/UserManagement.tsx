@@ -1,6 +1,5 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import { FaUserMinus, FaUserPlus } from "react-icons/fa6";
-import Select from "react-select";
 
 import ActionBar from "../../components/ActionBar";
 import axiosInstance from "../../components/AxiosConfig";
@@ -35,9 +34,8 @@ const UserManagement: React.FC = () => {
         name: "",
         email: "",
         phone: "",
-        departments: [],
         cargo: new Cargo(),
-        profiles: [],
+        profileDepartments: [],
         password: "",
     });
 
@@ -108,12 +106,11 @@ const UserManagement: React.FC = () => {
                         name: res.data.name,
                         email: res.data.email,
                         phone: res.data.phone ?? "",
-                        departments: res.data.departments ?? [],
                         cargo: {
                             id: res.data.cargo?.id ?? "",
                             name: res.data.cargo?.name ?? "",
                         },
-                        profiles: res.data.roles ?? [],
+                        profileDepartments: res.data.roleDepartments ?? [],
                         password: "",
                     });
                 }
@@ -126,9 +123,8 @@ const UserManagement: React.FC = () => {
                 name: "",
                 email: "",
                 phone: "",
-                departments: [],
                 cargo: new Cargo(),
-                profiles: [],
+                profileDepartments: [],
                 password: "",
             });
         }
@@ -164,26 +160,30 @@ const UserManagement: React.FC = () => {
         e.preventDefault();
         try {
             let res;
-            const { departments, cargo, profiles, ...postData } = currentUser;
 
-            const postDataWithIds = {
-                ...postData,
-                departments: departments.map((department) => department.id),
-                cargoId: cargo.id,
-                profiles: profiles.map((profile) => profile.id),
+            const userToSend = {
+                name: currentUser.name,
+                phone: currentUser.phone,
+                email: currentUser.email,
+                password: currentUser.password,
+                cargo: currentUser.cargo,
+                roleDepartments: currentUser.profileDepartments.map((a) => ({
+                    department: { id: a.department.id },
+                    role: { id: a.role.id }
+                })),
             };
 
             switch (submitType) {
                 case "add":
                     res = await axiosInstance.post(
                         `${API_BASE_URL}/users/register`,
-                        postDataWithIds
+                        userToSend
                     );
                     break;
                 case "update":
                     res = await axiosInstance.put(
                         `${API_BASE_URL}/users/${currentUser.id}`,
-                        postDataWithIds
+                        userToSend
                     );
                     break;
                 case "delete":
@@ -199,9 +199,8 @@ const UserManagement: React.FC = () => {
                     name: "",
                     email: "",
                     phone: "",
-                    departments: [],
                     cargo: new Cargo(),
-                    profiles: [],
+                    profileDepartments: [],
                     password: "",
                 });
 
@@ -289,7 +288,6 @@ const UserManagement: React.FC = () => {
                                                 required
                                             />
                                         </div>
-
                                         <div className="mt-2">
                                             <label htmlFor="phone" className="form-label">
                                                 Telefone
@@ -304,37 +302,88 @@ const UserManagement: React.FC = () => {
                                         </div>
 
                                         <div className="mt-2">
-                                            <label htmlFor="department" className="form-label">
-                                                Setor
+                                            <label className="form-label">
+                                                Departamentos
                                             </label>
-                                            <Select
-                                                isDisabled={modeModal === "readonly"}
-                                                isMulti
-                                                name="department"
-                                                id="department"
-                                                value={(currentUser.departments || []).map(
-                                                    (department) => ({
-                                                        value: department.id,
-                                                        label: department.name,
-                                                    })
-                                                )}
-                                                onChange={(selectedDepartments) => {
-                                                    const updatedDepartments = selectedDepartments.map(
-                                                        (department) => (new Department(department.value, department.label))
-                                                    );
+                                            {currentUser.profileDepartments.map((assoc, index) => (
+                                                <div className="d-flex gap-2 mb-2" key={index}>
+                                                    <select
+                                                        className="form-select"
+                                                        value={assoc.department.id}
+                                                        disabled={modeModal === "readonly"}
+                                                        onChange={(e) => {
+                                                            const newList = [...currentUser.profileDepartments];
+                                                            newList[index].department.id = e.target.value;
+                                                            setCurrentUser({
+                                                                ...currentUser,
+                                                                profileDepartments: newList,
+                                                            });
+                                                        }}
+                                                    >
+                                                        <option value="">Selecione o setor</option>
+                                                        {departments.map((department) => (
+                                                            <option key={department.id} value={department.id}>
+                                                                {department.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
 
+                                                    <select
+                                                        disabled={modeModal === "readonly"}
+                                                        className="form-select"
+                                                        value={assoc.role.id}
+                                                        onChange={(e) => {
+                                                            const newList = [...currentUser.profileDepartments];
+                                                            newList[index].role.id = e.target.value;
+                                                            setCurrentUser({
+                                                                ...currentUser,
+                                                                profileDepartments: newList,
+                                                            });
+                                                        }}
+                                                    >
+                                                        <option value="">Selecione o perfil</option>
+                                                        {profiles.map((profile) => (
+                                                            <option key={profile.id} value={profile.id}>
+                                                                {profile.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-danger"
+                                                        disabled={modeModal === "readonly"}
+                                                        onClick={() => {
+                                                            setCurrentUser((prev) => ({
+                                                                ...prev,
+                                                                profileDepartments: prev.profileDepartments.filter((_, i) => i !== index),
+                                                            }));
+                                                        }}
+                                                    >
+                                                        🗑️
+                                                    </button>
+                                                </div>
+                                            ))}
+
+                                            <button
+                                                type="button"
+                                                disabled={modeModal === "readonly"}
+                                                className="btn btn-outline-primary mt-2"
+                                                onClick={() =>
                                                     setCurrentUser({
                                                         ...currentUser,
-                                                        departments: updatedDepartments || [],
-                                                    });
-                                                }}
-                                                options={departments.map((department) => ({
-                                                    value: department.id,
-                                                    label: department.name,
-                                                }))}
-                                                className="basic-multi-select"
-                                                classNamePrefix="select"
-                                            />
+                                                        profileDepartments: [
+                                                            ...currentUser.profileDepartments,
+                                                            {
+                                                                department: {} as Department,
+                                                                role: {} as Profile,
+                                                            },
+                                                        ],
+                                                    })
+                                                }
+                                            >
+                                                ➕ Adicionar mais
+                                            </button>
                                         </div>
 
                                         <div className="mt-2">
@@ -356,44 +405,6 @@ const UserManagement: React.FC = () => {
                                                     </option>
                                                 ))}
                                             </select>
-                                        </div>
-
-                                        <div className="mt-2">
-                                            <label htmlFor="profile" className="form-label">
-                                                Perfis
-                                            </label>
-                                            <Select
-                                                isDisabled={modeModal === "readonly"}
-                                                isMulti
-                                                name="profile"
-                                                id="profile"
-                                                value={(currentUser.profiles || []).map(
-                                                    (profile) => ({
-                                                        value: profile.id,
-                                                        label: profile.name,
-                                                    })
-                                                )}
-                                                onChange={(selectedProfiles) => {
-                                                    const updatedProfiles = selectedProfiles.map(
-                                                        (profile) => ({
-                                                            id: profile.value,
-                                                            name: profile.label,
-                                                            permissions: [],
-                                                        })
-                                                    );
-
-                                                    setCurrentUser({
-                                                        ...currentUser,
-                                                        profiles: updatedProfiles || [],
-                                                    });
-                                                }}
-                                                options={profiles.map((profile) => ({
-                                                    value: profile.id,
-                                                    label: profile.name,
-                                                }))}
-                                                className="basic-multi-select"
-                                                classNamePrefix="select"
-                                            />
                                         </div>
 
                                         {modeModal !== "readonly" && (
@@ -458,8 +469,8 @@ const UserManagement: React.FC = () => {
                         </form>
                     </div>
                 </div>
-            </div>
-        </main>
+            </div >
+        </main >
     );
 };
 

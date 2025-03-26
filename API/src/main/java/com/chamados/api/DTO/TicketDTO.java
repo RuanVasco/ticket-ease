@@ -1,5 +1,6 @@
 package com.chamados.api.DTO;
 
+import com.chamados.api.DTO.User.UserDTO;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.hateoas.RepresentationModel;
