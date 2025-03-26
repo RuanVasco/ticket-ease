@@ -83,7 +83,12 @@ public class UserController {
         Optional<User> optionalUser = userRepository.findById(userID);
 
         if (optionalUser.isPresent()) {
-            userRepository.deleteById(userID);
+            User user = optionalUser.get();
+
+            user.getRoleBindings().clear();
+            userRepository.save(user);
+
+            userRepository.delete(user);
             return ResponseEntity.ok().build();
         }
 

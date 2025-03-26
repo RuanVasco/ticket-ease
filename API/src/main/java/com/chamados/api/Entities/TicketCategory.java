@@ -32,17 +32,16 @@ public class TicketCategory {
     private TicketCategory father;
 
     public Department getDepartment() {
-        TicketCategory ticketedCategory = this.getFather();
-        Department department = null;
-
-        while (ticketedCategory != null && ticketedCategory.getDepartment() == null) {
-            ticketedCategory = ticketedCategory.getFather();
+        if (this.department != null) {
+            return this.department;
         }
 
-        if (ticketedCategory != null) {
-            department = ticketedCategory.getDepartment();
+        TicketCategory current = this;
+
+        while (current != null && current.department == null) {
+            current = current.getFather();
         }
 
-        return department;
+        return current != null ? current.department : null;
     }
 }
