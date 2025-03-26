@@ -1,4 +1,7 @@
+import { Department } from "./Department";
+import { Profile } from "./Profile";
+
 export interface ProfileDepartments {
-    profileId: string;
-    departmentId: string;
-  }
+    role: Profile;
+    department: Department;
+}

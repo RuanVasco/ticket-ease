@@ -1,7 +1,8 @@
 package com.chamados.api.Services;
 
 import com.chamados.api.DTO.RoleDepartmentDTO;
-import com.chamados.api.DTO.UserDTO;
+import com.chamados.api.DTO.User.CompleteUserDTO;
+import com.chamados.api.DTO.User.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,7 +13,6 @@ import com.chamados.api.Entities.User;
 import com.chamados.api.Repositories.UserRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -22,29 +22,28 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
+        return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return user;
     }
 
-    public UserDTO getUser(Long userID) {
+    public CompleteUserDTO getUser(Long userID) {
         User user = userRepository.findById(userID)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<RoleDepartmentDTO> roleDepartments = user.getRoleBindings().stream()
                 .map(binding -> new RoleDepartmentDTO(
-                        binding.getRole().getId(),
-                        binding.getDepartment().getId()
+                        binding.getRole(),
+                        binding.getDepartment()
                 ))
                 .toList();
 
-        return new UserDTO(
+        return new CompleteUserDTO(
                 user.getId(),
                 user.getName(),
-                user.getEmail(),
                 user.getPhone(),
+                user.getEmail(),
                 null,
-                user.getCargo() != null ? user.getCargo().getId() : null,
+                user.getCargo() != null ? user.getCargo() : null,
                 roleDepartments
         );
     }

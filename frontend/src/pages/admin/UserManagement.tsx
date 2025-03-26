@@ -1,6 +1,5 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import { FaUserMinus, FaUserPlus } from "react-icons/fa6";
-import Select from "react-select";
 
 import ActionBar from "../../components/ActionBar";
 import axiosInstance from "../../components/AxiosConfig";
@@ -11,7 +10,6 @@ import { Department } from "../../types/Department";
 import { Profile } from "../../types/Profile";
 import { User } from "../../types/User";
 import { usePermissions } from "../../context/PermissionsContext";
-import { ProfileDepartments } from "../../types/ProfileDepartments";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -30,9 +28,6 @@ const UserManagement: React.FC = () => {
     const [pageSize, setPageSize] = useState<number>(10);
     const [totalPages, setTotalPages] = useState<number>(1);
     const [submitType, setSubmitType] = useState<string>("");
-    const [selectedDepartmentIds, setSelectedDepartmentIds] = useState<string[]>([]);
-    const [selectedProfileId, setSelectedProfileId] = useState<string>("");
-    const [profileDepartments, setProfileDepartments] = useState<ProfileDepartments[]>([]);
 
     const [currentUser, setCurrentUser] = useState<User>({
         id: "",
@@ -98,29 +93,6 @@ const UserManagement: React.FC = () => {
         fetchOptions("profiles", setProfiles);
     }, [currentPage, pageSize]);
 
-    const handleAddProfileDepartment = () => {
-        if (!selectedProfileId || selectedDepartmentIds.length === 0) return;
-
-        const newPairs = selectedDepartmentIds.map((departmentId) => ({
-            departmentId,
-            roleId: selectedProfileId,
-        }));
-
-        const unique = newPairs.filter(
-            (newItem) =>
-                !profileDepartments.some(
-                    (existing) =>
-                        existing.departmentId === newItem.departmentId &&
-                        existing.profileId === newItem.roleId
-                )
-        );
-
-        // setProfileDepartments((prev) => [...prev, ...unique]);
-
-        setSelectedDepartmentIds([]);
-        setSelectedProfileId("");
-    };
-
     const handleModalOpen = async (action: string, mode: string, idUser?: string) => {
         setModalTitle(`${action} Usuário`);
         setModeModal(mode);
@@ -129,7 +101,6 @@ const UserManagement: React.FC = () => {
             try {
                 const res = await axiosInstance.get(`${API_BASE_URL}/users/${idUser}`);
                 if (res.status === 200) {
-                    console.log(res.data)
                     setCurrentUser({
                         id: res.data.id,
                         name: res.data.name,
@@ -189,25 +160,30 @@ const UserManagement: React.FC = () => {
         e.preventDefault();
         try {
             let res;
-            const { profileDepartments, cargo, ...postData } = currentUser;
 
-            const postDataWithIds = {
-                ...postData,
-                cargoId: cargo.id,
-                profileDepartments,
+            const userToSend = {
+                name: currentUser.name,
+                phone: currentUser.phone,
+                email: currentUser.email,
+                password: currentUser.password,
+                cargo: currentUser.cargo,
+                roleDepartments: currentUser.profileDepartments.map((a) => ({
+                    department: { id: a.department.id },
+                    role: { id: a.role.id }
+                })),
             };
 
             switch (submitType) {
                 case "add":
                     res = await axiosInstance.post(
                         `${API_BASE_URL}/users/register`,
-                        postDataWithIds
+                        userToSend
                     );
                     break;
                 case "update":
                     res = await axiosInstance.put(
                         `${API_BASE_URL}/users/${currentUser.id}`,
-                        postDataWithIds
+                        userToSend
                     );
                     break;
                 case "delete":
@@ -312,7 +288,6 @@ const UserManagement: React.FC = () => {
                                                 required
                                             />
                                         </div>
-
                                         <div className="mt-2">
                                             <label htmlFor="phone" className="form-label">
                                                 Telefone
@@ -327,72 +302,88 @@ const UserManagement: React.FC = () => {
                                         </div>
 
                                         <div className="mt-2">
-                                            <label htmlFor="department" className="form-label">
-                                                Setor
+                                            <label className="form-label">
+                                                Departamentos
                                             </label>
-                                            <Select
-                                                isDisabled={modeModal === "readonly"}
-                                                isMulti
-                                                name="department"
-                                                id="department"
-                                                value={departments
-                                                    .filter((d) => selectedDepartmentIds.includes(d.id))
-                                                    .map((d) => ({ value: d.id, label: d.name }))}
-                                                onChange={(selected) =>
-                                                    setSelectedDepartmentIds(selected.map((d) => d.value))
-                                                }
-                                                options={departments.map((department) => ({
-                                                    value: department.id,
-                                                    label: department.name,
-                                                }))}
-                                                className="basic-multi-select"
-                                                classNamePrefix="select"
-                                            />
-                                            <select
-                                                className="form-select"
-                                                value={selectedProfileId}
-                                                onChange={(e) => setSelectedProfileId(e.target.value)}
-                                            >
-                                                <option value="">Perfil</option>
-                                                {profiles.map((p) => (
-                                                    <option key={p.id} value={p.id}>
-                                                        {p.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            <button type="button" className="btn btn-outline-primary" onClick={handleAddProfileDepartment}>
-                                                Adicionar
-                                            </button>
+                                            {currentUser.profileDepartments.map((assoc, index) => (
+                                                <div className="d-flex gap-2 mb-2" key={index}>
+                                                    <select
+                                                        className="form-select"
+                                                        value={assoc.department.id}
+                                                        disabled={modeModal === "readonly"}
+                                                        onChange={(e) => {
+                                                            const newList = [...currentUser.profileDepartments];
+                                                            newList[index].department.id = e.target.value;
+                                                            setCurrentUser({
+                                                                ...currentUser,
+                                                                profileDepartments: newList,
+                                                            });
+                                                        }}
+                                                    >
+                                                        <option value="">Selecione o setor</option>
+                                                        {departments.map((department) => (
+                                                            <option key={department.id} value={department.id}>
+                                                                {department.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
 
-                                            {profileDepartments.length > 0 && (
-                                                <div className="mt-2">
-                                                    <label className="form-label">Perfis adicionados</label>
-                                                    <ul className="list-group">
-                                                        {profileDepartments.map((rd, index) => {
-                                                            const dept = departments.find((d) => d.id === rd.departmentId);
-                                                            const role = profiles.find((p) => p.id === rd.profileId);
-                                                            return (
-                                                                <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-                                                                    <span>
-                                                                        {dept?.name || "Setor desconhecido"} + {role?.name || "Perfil desconhecido"}
-                                                                    </span>
-                                                                    <button
-                                                                        type="button"
-                                                                        className="btn btn-sm btn-danger"
-                                                                        onClick={() => {
-                                                                            setProfileDepartments((prev) =>
-                                                                                prev.filter((_, i) => i !== index)
-                                                                            );
-                                                                        }}
-                                                                    >
-                                                                        Remover
-                                                                    </button>
-                                                                </li>
-                                                            );
-                                                        })}
-                                                    </ul>
+                                                    <select
+                                                        disabled={modeModal === "readonly"}
+                                                        className="form-select"
+                                                        value={assoc.role.id}
+                                                        onChange={(e) => {
+                                                            const newList = [...currentUser.profileDepartments];
+                                                            newList[index].role.id = e.target.value;
+                                                            setCurrentUser({
+                                                                ...currentUser,
+                                                                profileDepartments: newList,
+                                                            });
+                                                        }}
+                                                    >
+                                                        <option value="">Selecione o perfil</option>
+                                                        {profiles.map((profile) => (
+                                                            <option key={profile.id} value={profile.id}>
+                                                                {profile.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-danger"
+                                                        disabled={modeModal === "readonly"}
+                                                        onClick={() => {
+                                                            setCurrentUser((prev) => ({
+                                                                ...prev,
+                                                                profileDepartments: prev.profileDepartments.filter((_, i) => i !== index),
+                                                            }));
+                                                        }}
+                                                    >
+                                                        🗑️
+                                                    </button>
                                                 </div>
-                                            )}
+                                            ))}
+
+                                            <button
+                                                type="button"
+                                                disabled={modeModal === "readonly"}
+                                                className="btn btn-outline-primary mt-2"
+                                                onClick={() =>
+                                                    setCurrentUser({
+                                                        ...currentUser,
+                                                        profileDepartments: [
+                                                            ...currentUser.profileDepartments,
+                                                            {
+                                                                department: {} as Department,
+                                                                role: {} as Profile,
+                                                            },
+                                                        ],
+                                                    })
+                                                }
+                                            >
+                                                ➕ Adicionar mais
+                                            </button>
                                         </div>
 
                                         <div className="mt-2">
@@ -478,8 +469,8 @@ const UserManagement: React.FC = () => {
                         </form>
                     </div>
                 </div>
-            </div>
-        </main>
+            </div >
+        </main >
     );
 };
 

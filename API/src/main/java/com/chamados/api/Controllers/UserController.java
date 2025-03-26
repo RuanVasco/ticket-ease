@@ -1,7 +1,8 @@
 package com.chamados.api.Controllers;
 
 import com.chamados.api.DTO.RoleDepartmentDTO;
-import com.chamados.api.DTO.UserDTO;
+import com.chamados.api.DTO.User.CompleteUserDTO;
+import com.chamados.api.DTO.User.UserDTO;
 import com.chamados.api.Entities.*;
 import com.chamados.api.Repositories.*;
 import com.chamados.api.Services.CustomUserDetailsService;
@@ -73,7 +74,7 @@ public class UserController {
     }
 
     @GetMapping("/{userID}")
-    public UserDTO getUser(@PathVariable Long userID) {
+    public CompleteUserDTO getUser(@PathVariable Long userID) {
         return userService.getUser(userID);
     }
 
@@ -99,12 +100,16 @@ public class UserController {
 
         User user = optionalUser.get();
 
-        if (userUpdateDTO.cargoId() != null) {
-            Optional<Cargo> optionalCargo = cargoRepository.findById(userUpdateDTO.cargoId());
+        if (userUpdateDTO.cargo() != null && userUpdateDTO.cargo().getId() != null) {
+            Optional<Cargo> optionalCargo = cargoRepository.findById(userUpdateDTO.cargo().getId());
             if (optionalCargo.isPresent()) {
                 Cargo cargo = optionalCargo.get();
                 user.setCargo(cargo);
             }
+        }
+
+        if (userUpdateDTO.password() != "") {
+            user.setPassword(userUpdateDTO.password(), passwordEncoder);
         }
 
         user.setName(userUpdateDTO.name());
@@ -114,8 +119,8 @@ public class UserController {
         userRepository.save(user);
 
         for (RoleDepartmentDTO pair : userUpdateDTO.roleDepartments()) {
-            Optional<Role> optionalRole = roleRepository.findById(pair.roleId());
-            Optional<Department> optionalDept = departmentRepository.findById(pair.departmentId());
+            Optional<Role> optionalRole = roleRepository.findById(pair.role().getId());
+            Optional<Department> optionalDept = departmentRepository.findById(pair.department().getId());
 
             if (optionalRole.isPresent() && optionalDept.isPresent()) {
                 UserRoleDepartment binding = new UserRoleDepartment();
@@ -141,15 +146,15 @@ public class UserController {
         user.setPhone(signUpDto.phone());
         user.setPassword(signUpDto.password(), passwordEncoder);
 
-        if (signUpDto.cargoId() != null) {
-            cargoRepository.findById(signUpDto.cargoId()).ifPresent(user::setCargo);
+        if (signUpDto.cargo() != null && signUpDto.cargo().getId() != null) {
+            cargoRepository.findById(signUpDto.cargo().getId()).ifPresent(user::setCargo);
         }
 
         userRepository.save(user);
 
         for (RoleDepartmentDTO pair : signUpDto.roleDepartments()) {
-            Optional<Role> optionalRole = roleRepository.findById(pair.roleId());
-            Optional<Department> optionalDept = departmentRepository.findById(pair.departmentId());
+            Optional<Role> optionalRole = roleRepository.findById(pair.role().getId());
+            Optional<Department> optionalDept = departmentRepository.findById(pair.department().getId());
 
             if (optionalRole.isPresent() && optionalDept.isPresent()) {
                 UserRoleDepartment binding = new UserRoleDepartment();

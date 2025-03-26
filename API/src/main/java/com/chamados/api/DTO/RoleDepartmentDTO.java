@@ -1,3 +1,6 @@
 package com.chamados.api.DTO;
 
-public record RoleDepartmentDTO(Long roleId, Long departmentId) {}
+import com.chamados.api.Entities.Department;
+import com.chamados.api.Entities.Role;
+
+public record RoleDepartmentDTO(Role role, Department department) {}

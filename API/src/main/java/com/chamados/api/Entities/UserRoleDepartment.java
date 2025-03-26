@@ -1,5 +1,6 @@
 package com.chamados.api.Entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +17,7 @@ public class UserRoleDepartment {
     private Long id;
 
     @ManyToOne(optional = false)
+    @JsonBackReference
     private User user;
 
     @ManyToOne(optional = false)

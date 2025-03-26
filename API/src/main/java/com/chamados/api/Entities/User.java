@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import com.chamados.api.Types.ScopeType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -39,6 +40,7 @@ public class User implements UserDetails {
     private String password;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    @JsonManagedReference
     private Set<UserRoleDepartment> roleBindings = new HashSet<>();
 
     @Setter

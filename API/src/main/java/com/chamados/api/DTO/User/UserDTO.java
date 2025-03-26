@@ -1,13 +1,15 @@
-package com.chamados.api.DTO;
+package com.chamados.api.DTO.User;
+
+import com.chamados.api.DTO.RoleDepartmentDTO;
+import com.chamados.api.Entities.Cargo;
 
 import java.util.List;
 
 public record UserDTO(
-        Long id,
         String name,
         String phone,
         String email,
         String password,
-        Long cargoId,
+        Cargo cargo,
         List<RoleDepartmentDTO> roleDepartments
 ) {}

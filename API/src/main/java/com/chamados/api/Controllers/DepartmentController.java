@@ -2,14 +2,17 @@ package com.chamados.api.Controllers;
 
 import com.chamados.api.DTO.DepartmentDTO;
 import com.chamados.api.Entities.Department;
+import com.chamados.api.Entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import com.chamados.api.Repositories.DepartmentRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -41,11 +44,24 @@ public class DepartmentController {
 		Department department = optionalDepartment.get();
 		return ResponseEntity.ok(department);
 	}
-	
+
 	@GetMapping("/receiveRequests")
-    public ResponseEntity<?> findByReceivesRequests(@RequestParam(name = "receiveRequests") boolean receiveRequests) {
-        return ResponseEntity.ok(departmentRepository.findByReceivesRequests(receiveRequests));
-    }
+	public ResponseEntity<?> findByReceivesRequests(@RequestParam(name = "receiveRequests") boolean receiveRequests) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		List<Department> departmentList = departmentRepository.findByReceivesRequests(receiveRequests);
+
+		if (user.hasGlobalPermission("CREATE_TICKET_CATEGORY")) {
+			return ResponseEntity.ok(departmentList);
+		}
+
+		List<Department> filteredDepartments = departmentList.stream()
+				.filter(department -> department != null && user.hasPermission("CREATE_TICKET_CATEGORY", department))
+				.toList();
+
+		return ResponseEntity.ok(filteredDepartments);
+	}
+
 
 	@PostMapping("/")
 	public ResponseEntity<?> createDepartment(@RequestBody DepartmentDTO departmentDTO) {

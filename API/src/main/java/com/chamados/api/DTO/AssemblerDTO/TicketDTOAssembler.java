@@ -4,9 +4,8 @@ import com.chamados.api.Controllers.TicketController;
 import com.chamados.api.DTO.RoleDepartmentDTO;
 import com.chamados.api.DTO.TicketDTO;
 import com.chamados.api.DTO.TicketCategoryDTO;
-import com.chamados.api.DTO.UserDTO;
+import com.chamados.api.DTO.User.UserDTO;
 import com.chamados.api.Entities.Ticket;
-import com.chamados.api.Entities.TicketCategory;
 import com.chamados.api.Entities.User;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
@@ -44,18 +43,17 @@ public class TicketDTOAssembler implements RepresentationModelAssembler<Ticket, 
 
             List<RoleDepartmentDTO> roleDepartments = user.getRoleBindings().stream()
                     .map(binding -> new RoleDepartmentDTO(
-                            binding.getRole().getId(),
-                            binding.getDepartment().getId()
+                            binding.getRole(),
+                            binding.getDepartment()
                     ))
                     .toList();
 
             dto.setUser(new UserDTO(
-                    user.getId(),
                     user.getName(),
                     user.getPhone(),
                     user.getEmail(),
                     null,
-                    user.getCargo() != null ? user.getCargo().getId() : null,
+                    user.getCargo() != null ? user.getCargo() : null,
                     roleDepartments
             ));
         }
@@ -63,18 +61,17 @@ public class TicketDTOAssembler implements RepresentationModelAssembler<Ticket, 
         Set<UserDTO> observers = ticket.getObservers().stream().map(observer -> {
             List<RoleDepartmentDTO> roleDepartments = observer.getRoleBindings().stream()
                     .map(binding -> new RoleDepartmentDTO(
-                            binding.getRole().getId(),
-                            binding.getDepartment().getId()
+                            binding.getRole(),
+                            binding.getDepartment()
                     ))
                     .toList();
 
             return new UserDTO(
-                    observer.getId(),
                     observer.getName(),
                     observer.getPhone(),
                     observer.getEmail(),
                     null,
-                    observer.getCargo() != null ? observer.getCargo().getId() : null,
+                    observer.getCargo() != null ? observer.getCargo() : null,
                     roleDepartments
             );
         }).collect(Collectors.toSet());
