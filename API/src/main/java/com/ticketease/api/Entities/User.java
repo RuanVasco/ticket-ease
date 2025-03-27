@@ -3,7 +3,6 @@ package com.ticketease.api.Entities;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.ticketease.api.Types.ScopeType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
@@ -59,18 +58,20 @@ public class User implements UserDetails {
 
         for (UserRoleDepartment binding : this.roleBindings) {
             Role role = binding.getRole();
-            boolean isDepartmentMatch = (department == null || binding.getDepartment().getId().equals(department.getId()));
+            Department bindingDept = binding.getDepartment();
 
-            if (!isDepartmentMatch) continue;
+            boolean isGlobal = bindingDept == null;
+            boolean isExactMatch = department != null && bindingDept != null &&
+                    bindingDept.getId().equals(department.getId());
+
+            // Verifica se deve considerar esse binding
+            boolean isDepartmentRelevant = (department == null && isGlobal)
+                    || (department != null && (isExactMatch /* || isGlobal */)); // <- depende da sua regra
+
+            if (!isDepartmentRelevant) continue;
 
             for (Permission permission : role.getPermissions()) {
-                if (!permission.getName().equals(permissionName)) continue;
-
-                if (permission.getScope() == ScopeType.DEPARTMENT && department != null) {
-                    return true;
-                }
-
-                if (permission.getScope() == ScopeType.GLOBAL) {
+                if (permissionName.equals(permission.getName())) {
                     return true;
                 }
             }

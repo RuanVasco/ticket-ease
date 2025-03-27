@@ -10,6 +10,7 @@ import { Department } from "../../types/Department";
 import { Profile } from "../../types/Profile";
 import { User } from "../../types/User";
 import { usePermissions } from "../../context/PermissionsContext";
+import PhoneInput from "../../components/PhoneInput";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -35,7 +36,12 @@ const UserManagement: React.FC = () => {
         email: "",
         phone: "",
         cargo: new Cargo(),
-        profileDepartments: [],
+        profileDepartments: [
+            {
+                department: {} as Department,
+                role: {} as Profile,
+            },
+        ],
         password: "",
     });
 
@@ -124,7 +130,12 @@ const UserManagement: React.FC = () => {
                 email: "",
                 phone: "",
                 cargo: new Cargo(),
-                profileDepartments: [],
+                profileDepartments: [
+                    {
+                        department: { id: "", name: "" } as Department,
+                        role: {} as Profile,
+                    },
+                ],
                 password: "",
             });
         }
@@ -169,16 +180,13 @@ const UserManagement: React.FC = () => {
                 cargo: currentUser.cargo,
                 roleDepartments: currentUser.profileDepartments.map((a) => ({
                     department: { id: a.department.id },
-                    role: { id: a.role.id }
+                    role: { id: a.role.id },
                 })),
             };
 
             switch (submitType) {
                 case "add":
-                    res = await axiosInstance.post(
-                        `${API_BASE_URL}/users/register`,
-                        userToSend
-                    );
+                    res = await axiosInstance.post(`${API_BASE_URL}/users/register`, userToSend);
                     break;
                 case "update":
                     res = await axiosInstance.put(
@@ -302,28 +310,31 @@ const UserManagement: React.FC = () => {
                                             <label htmlFor="phone" className="form-label">
                                                 Telefone
                                             </label>
-                                            <input
-                                                name="phone"
-                                                className="form-control"
-                                                readOnly={modeModal === "readonly"}
+                                            <PhoneInput
                                                 value={currentUser.phone ?? ""}
                                                 onChange={handleInputChange}
+                                                disabled={modeModal === "readonly"}
                                             />
-                                        </div>
-
+                                        </div>{" "}
                                         <div className="mt-2">
-                                            <label className="form-label">
-                                                Departamentos
-                                            </label>
+                                            <label className="form-label">Setores</label>
+                                            <br></br>
                                             {currentUser.profileDepartments.map((assoc, index) => (
                                                 <div className="d-flex gap-2 mb-2" key={index}>
                                                     <select
                                                         className="form-select"
-                                                        value={assoc.department.id}
+                                                        value={assoc.department?.id ?? "__GLOBAL__"}
                                                         disabled={modeModal === "readonly"}
                                                         onChange={(e) => {
-                                                            const newList = [...currentUser.profileDepartments];
-                                                            newList[index].department.id = e.target.value;
+                                                            const newList = [
+                                                                ...currentUser.profileDepartments,
+                                                            ];
+                                                            const selectedValue = e.target.value;
+                                                            newList[index].department.id =
+                                                                selectedValue === "__GLOBAL__"
+                                                                    ? null
+                                                                    : selectedValue;
+
                                                             setCurrentUser({
                                                                 ...currentUser,
                                                                 profileDepartments: newList,
@@ -331,8 +342,12 @@ const UserManagement: React.FC = () => {
                                                         }}
                                                     >
                                                         <option value="">Selecione o setor</option>
+                                                        <option value="__GLOBAL__">GLOBAL</option>
                                                         {departments.map((department) => (
-                                                            <option key={department.id} value={department.id}>
+                                                            <option
+                                                                key={department.id}
+                                                                value={department.id ?? ""}
+                                                            >
                                                                 {department.name}
                                                             </option>
                                                         ))}
@@ -343,7 +358,9 @@ const UserManagement: React.FC = () => {
                                                         className="form-select"
                                                         value={assoc.role.id}
                                                         onChange={(e) => {
-                                                            const newList = [...currentUser.profileDepartments];
+                                                            const newList = [
+                                                                ...currentUser.profileDepartments,
+                                                            ];
                                                             newList[index].role.id = e.target.value;
                                                             setCurrentUser({
                                                                 ...currentUser,
@@ -353,7 +370,10 @@ const UserManagement: React.FC = () => {
                                                     >
                                                         <option value="">Selecione o perfil</option>
                                                         {profiles.map((profile) => (
-                                                            <option key={profile.id} value={profile.id}>
+                                                            <option
+                                                                key={profile.id}
+                                                                value={profile.id}
+                                                            >
                                                                 {profile.name}
                                                             </option>
                                                         ))}
@@ -363,7 +383,15 @@ const UserManagement: React.FC = () => {
                                                         type="button"
                                                         className="btn btn-danger"
                                                         disabled={modeModal === "readonly"}
-                                                        onClick={() => removeAssociation(index)}
+                                                        onClick={() => {
+                                                            setCurrentUser((prev) => ({
+                                                                ...prev,
+                                                                profileDepartments:
+                                                                    prev.profileDepartments.filter(
+                                                                        (_, i) => i !== index
+                                                                    ),
+                                                            }));
+                                                        }}
                                                     >
                                                         🗑️
                                                     </button>
@@ -390,7 +418,6 @@ const UserManagement: React.FC = () => {
                                                 ➕ Adicionar mais
                                             </button>
                                         </div>
-
                                         <div className="mt-2">
                                             <label htmlFor="cargo" className="form-label">
                                                 Cargo
@@ -411,7 +438,6 @@ const UserManagement: React.FC = () => {
                                                 ))}
                                             </select>
                                         </div>
-
                                         {modeModal !== "readonly" && (
                                             <div className="mt-2">
                                                 <label htmlFor="password" className="form-label">
@@ -474,8 +500,8 @@ const UserManagement: React.FC = () => {
                         </form>
                     </div>
                 </div>
-            </div >
-        </main >
+            </div>
+        </main>
     );
 };
 

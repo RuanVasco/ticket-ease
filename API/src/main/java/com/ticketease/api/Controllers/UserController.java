@@ -99,6 +99,11 @@ public class UserController {
     @Transactional
     @PutMapping("/{userID}")
     public ResponseEntity<?> updateUser(@PathVariable Long userID, @RequestBody UserDTO userUpdateDTO) {
+        User sender = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!sender.hasPermission("EDIT_USER", null)){
+            return new ResponseEntity<>("Acesso negado. Você não tem permissão para editar usuários.", HttpStatus.FORBIDDEN);
+        }
+
         Optional<User> optionalUser = userRepository.findById(userID);
 
         if (optionalUser.isEmpty()) {
@@ -108,11 +113,7 @@ public class UserController {
         User user = optionalUser.get();
 
         if (userUpdateDTO.cargo() != null && userUpdateDTO.cargo().getId() != null) {
-            Optional<Cargo> optionalCargo = cargoRepository.findById(userUpdateDTO.cargo().getId());
-            if (optionalCargo.isPresent()) {
-                Cargo cargo = optionalCargo.get();
-                user.setCargo(cargo);
-            }
+            cargoRepository.findById(userUpdateDTO.cargo().getId()).ifPresent(user::setCargo);
         }
 
         if (userUpdateDTO.password() != null && !userUpdateDTO.password().isBlank()) {
@@ -129,15 +130,19 @@ public class UserController {
 
         for (RoleDepartmentDTO pair : userUpdateDTO.roleDepartments()) {
             Optional<Role> optionalRole = roleRepository.findById(pair.role().getId());
-            Optional<Department> optionalDept = departmentRepository.findById(pair.department().getId());
+            if (optionalRole.isEmpty()) continue;
 
-            if (optionalRole.isPresent() && optionalDept.isPresent()) {
-                UserRoleDepartment binding = new UserRoleDepartment();
-                binding.setUser(user);
-                binding.setRole(optionalRole.get());
-                binding.setDepartment(optionalDept.get());
-                userRoleDepartmentRepository.save(binding);
+            UserRoleDepartment binding = new UserRoleDepartment();
+            binding.setUser(user);
+            binding.setRole(optionalRole.get());
+
+            if (pair.department() != null && pair.department().getId() != null) {
+                departmentRepository.findById(pair.department().getId()).ifPresent(binding::setDepartment);
+            } else {
+                binding.setDepartment(null); // GLOBAL
             }
+
+            userRoleDepartmentRepository.save(binding);
         }
 
         return ResponseEntity.ok("User updated successfully");
@@ -145,6 +150,11 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserDTO signUpDto) {
+        User sender = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!sender.hasPermission("CREATE_USER", null)){
+            return new ResponseEntity<>("Acesso negado. Você não tem permissão para criar usuários.", HttpStatus.FORBIDDEN);
+        }
+
         if (userRepository.existsByEmail(signUpDto.email())) {
             return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
         }
@@ -163,15 +173,20 @@ public class UserController {
 
         for (RoleDepartmentDTO pair : signUpDto.roleDepartments()) {
             Optional<Role> optionalRole = roleRepository.findById(pair.role().getId());
-            Optional<Department> optionalDept = departmentRepository.findById(pair.department().getId());
 
-            if (optionalRole.isPresent() && optionalDept.isPresent()) {
-                UserRoleDepartment binding = new UserRoleDepartment();
-                binding.setUser(user);
-                binding.setRole(optionalRole.get());
-                binding.setDepartment(optionalDept.get());
-                userRoleDepartmentRepository.save(binding);
+            if (optionalRole.isEmpty()) continue;
+
+            UserRoleDepartment binding = new UserRoleDepartment();
+            binding.setUser(user);
+            binding.setRole(optionalRole.get());
+
+            if (pair.department() != null && pair.department().getId() != null) {
+                departmentRepository.findById(pair.department().getId()).ifPresent(binding::setDepartment);
+            } else {
+                binding.setDepartment(null);
             }
+
+            userRoleDepartmentRepository.save(binding);
         }
 
         return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
