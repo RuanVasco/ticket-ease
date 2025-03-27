@@ -219,16 +219,6 @@ const UserManagement: React.FC = () => {
         }
     };
 
-    const removeAssociation = (index: number) => {
-        setCurrentUser((prev) => {
-            const updated = {
-                ...prev,
-                profileDepartments: prev.profileDepartments.filter((_, i) => i !== index),
-            };
-            return updated;
-        });
-    };
-
     return (
         <main>
             <div className="container">
