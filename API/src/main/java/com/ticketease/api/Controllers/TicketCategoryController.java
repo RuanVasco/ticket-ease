@@ -66,10 +66,6 @@ public class TicketCategoryController {
                 })
                 .toList();
 
-        if (filteredList.isEmpty()) {
-            return ResponseEntity.ok().build();
-        }
-
         Page<TicketCategory> filteredPage = new PageImpl<>(filteredList, pageable, filteredList.size());
         return ResponseEntity.ok(filteredPage);
     }

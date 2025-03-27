@@ -27,13 +27,11 @@ public class TicketCategoryService {
     @Transactional
     public void addCategory(String name, Boolean receiveTickets, Department department, TicketCategory father) {
         try {
-            String path = buildPath(father, department, name);
             TicketCategory category = new TicketCategory();
             category.setName(name);
             category.setReceiveTickets(receiveTickets);
             category.setDepartment(department);
             category.setFather(father);
-            category.setPath(path);
             ticketCategoryRepository.save(category);
         } catch (Exception e) {
             logger.error("Error adding category", e);
@@ -58,40 +56,11 @@ public class TicketCategoryService {
             father = optionalFather.orElse(null);
         }
 
-        String path = buildPath(father, department, ticketCategoryDTO.getName());
-
         ticketCategory.setName(ticketCategoryDTO.getName());
         ticketCategory.setReceiveTickets(ticketCategoryDTO.getReceiveTickets());
         ticketCategory.setDepartment(department);
         ticketCategory.setFather(father);
-        ticketCategory.setPath(path);
         ticketCategoryRepository.save(ticketCategory);
-    }
-
-    private String buildPath(TicketCategory father, Department department, String name) {
-        StringBuilder pathBuilder = new StringBuilder();
-
-        TicketCategory current = father;
-
-        if (current != null) {
-            Department temp = current.getDepartment();
-            while (current != null) {
-                pathBuilder.insert(0, current.getName());
-                if (current.getFather() != null) {
-                    pathBuilder.insert(0, " > ");
-                }
-                temp = current.getDepartment();
-                current = current.getFather();
-            }
-
-            pathBuilder.insert(0, temp.getName() + " > ");
-        } else {
-            pathBuilder.insert(0, department.getName());
-        }
-
-        pathBuilder.append(" > ").append(name);
-
-        return pathBuilder.toString();
     }
 
 }

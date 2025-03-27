@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -32,109 +31,158 @@ public class DataInitializer implements CommandLineRunner {
     @Transactional
     public void run(String... args) {
         if (userRepository.count() == 0) {
+            // Roles
             Role roleAdmin = roleRepository.findByName("ADMIN")
                     .orElseGet(() -> roleRepository.save(new Role("ADMIN")));
-
             Role roleUser = roleRepository.findByName("USER")
                     .orElseGet(() -> roleRepository.save(new Role("USER")));
 
-            Unit matriz = new Unit();
-            matriz.setName("Matriz");
-            matriz.setAddress("Matriz");
-            unitRepository.save(matriz);
+            // Unidade
+            Unit matriz = unitRepository.findByName("Matriz").orElseGet(() -> {
+                Unit u = new Unit();
+                u.setName("Matriz");
+                u.setAddress("Matriz");
+                return unitRepository.save(u);
+            });
 
-            Department TI = new Department();
-            TI.setName("TI");
-            TI.setUnit(matriz);
-            TI.setReceivesRequests(true);
-            departmentRepository.save(TI);
+            // Departamentos
+            Department TI = departmentRepository.findByName("TI").orElseGet(() -> {
+                Department d = new Department();
+                d.setName("TI");
+                d.setUnit(matriz);
+                d.setReceivesRequests(true);
+                return departmentRepository.save(d);
+            });
 
-            Department RH = new Department();
-            RH.setName("RH");
-            RH.setUnit(matriz);
-            RH.setReceivesRequests(true);
-            departmentRepository.save(RH);
+            Department RH = departmentRepository.findByName("RH").orElseGet(() -> {
+                Department d = new Department();
+                d.setName("RH");
+                d.setUnit(matriz);
+                d.setReceivesRequests(true);
+                return departmentRepository.save(d);
+            });
 
-            List<Permission> permissions = new ArrayList<>();
+            // Permissões
+            List<Permission> allPermissions = new ArrayList<>();
 
-            permissions.add(createPermission("CREATE_CARGO", "Permite criar cargos"));
-            permissions.add(createPermission("EDIT_CARGO", "Permite editar cargos"));
-            permissions.add(createPermission("DELETE_CARGO", "Permite deletar cargos"));
+            Permission permissionCreateCargo = new Permission();
+            permissionCreateCargo.setName("CREATE_CARGO");
+            permissionCreateCargo.setDescription("Permite criar cargos");
+            allPermissions.add(permissionCreateCargo);
 
-            permissions.add(createPermission("CREATE_DEPARTMENT", "Permite criar departamentos"));
-            permissions.add(createPermission("DELETE_DEPARTMENT", "Permite deletar departamentos"));
-            permissions.add(createPermission("EDIT_DEPARTMENT", "Permite editar departamentos"));
+            Permission permissionEditCargo = new Permission();
+            permissionEditCargo.setName("EDIT_CARGO");
+            permissionEditCargo.setDescription("Permite editar cargos");
+            allPermissions.add(permissionEditCargo);
 
-            permissions.add(createPermission("CREATE_MESSAGE", "Permite enviar mensagens"));
-            permissions.add(createPermission("CREATE_TICKET", "Permite criar chamados"));
+            Permission permissionDeleteCargo = new Permission();
+            permissionDeleteCargo.setName("DELETE_CARGO");
+            permissionDeleteCargo.setDescription("Permite deletar cargos");
+            allPermissions.add(permissionDeleteCargo);
 
-            permissions.add(createPermission("CREATE_UNIT", "Permite criar unidades"));
-            permissions.add(createPermission("DELETE_UNIT", "Permite deletar unidades"));
-            permissions.add(createPermission("EDIT_UNIT", "Permite editar unidades"));
+            Permission permissionCreateDepartment = new Permission();
+            permissionCreateDepartment.setName("CREATE_DEPARTMENT");
+            permissionCreateDepartment.setDescription("Permite criar departamentos");
+            allPermissions.add(permissionCreateDepartment);
 
-            permissions.add(createPermission("CREATE_USER", "Permite criar usuários"));
-            permissions.add(createPermission("EDIT_USER", "Permite editar usuários"));
-            permissions.add(createPermission("DELETE_USER", "Permite deletar usuários"));
+            Permission permissionDeleteDepartment = new Permission();
+            permissionDeleteDepartment.setName("DELETE_DEPARTMENT");
+            permissionDeleteDepartment.setDescription("Permite deletar departamentos");
+            allPermissions.add(permissionDeleteDepartment);
 
-            permissions.add(createPermission("CREATE_PROFILE", "Permite criar perfis"));
-            permissions.add(createPermission("EDIT_PROFILE", "Permite editar perfis"));
-            permissions.add(createPermission("DELETE_PROFILE", "Permite deletar perfis"));
+            Permission permissionEditDepartment = new Permission();
+            permissionEditDepartment.setName("EDIT_DEPARTMENT");
+            permissionEditDepartment.setDescription("Permite editar departamentos");
+            allPermissions.add(permissionEditDepartment);
 
-            List<String> ticketCategoryPermissions = List.of(
-                    "MANAGE_TICKET_CATEGORY",
-                    "MANAGE_TICKET"
-            );
-            List<Permission> departmentScopedPermissions = new ArrayList<>();
+            Permission permissionCreateMessage = new Permission();
+            permissionCreateMessage.setName("CREATE_MESSAGE");
+            permissionCreateMessage.setDescription("Permite enviar mensagens");
+            allPermissions.add(permissionCreateMessage);
 
+            Permission permissionCreateTicket = new Permission();
+            permissionCreateTicket.setName("CREATE_TICKET");
+            permissionCreateTicket.setDescription("Permite criar chamados");
+            allPermissions.add(permissionCreateTicket);
 
-            for (String permissionName : ticketCategoryPermissions) {
-                Permission permission = new Permission();
-                permission.setName(permissionName);
-                permission.setDescription(String.format("Permissão %s no escopo de departamento", permissionName));
+            Permission permissionManageTicket = new Permission();
+            permissionManageTicket.setName("MANAGE_TICKET");
+            permissionManageTicket.setDescription("Permite gerenciar chamados");
+            allPermissions.add(permissionManageTicket);
 
-                departmentScopedPermissions.add(permission);
+            Permission permissionManageTicketCategory = new Permission();
+            permissionManageTicketCategory.setName("MANAGE_TICKET_CATEGORY");
+            permissionManageTicketCategory.setDescription("Permite gerenciar categorias de tickets");
+            allPermissions.add(permissionManageTicketCategory);
+
+            Permission permissionCreateUnit = new Permission();
+            permissionCreateUnit.setName("CREATE_UNIT");
+            permissionCreateUnit.setDescription("Permite criar unidades");
+            allPermissions.add(permissionCreateUnit);
+
+            Permission permissionDeleteUnit = new Permission();
+            permissionDeleteUnit.setName("DELETE_UNIT");
+            permissionDeleteUnit.setDescription("Permite deletar unidades");
+            allPermissions.add(permissionDeleteUnit);
+
+            Permission permissionEditUnit = new Permission();
+            permissionEditUnit.setName("EDIT_UNIT");
+            permissionEditUnit.setDescription("Permite editar unidades");
+            allPermissions.add(permissionEditUnit);
+
+            Permission permissionCreateUser = new Permission();
+            permissionCreateUser.setName("CREATE_USER");
+            permissionCreateUser.setDescription("Permite criar usuários");
+            allPermissions.add(permissionCreateUser);
+
+            Permission permissionEditUser = new Permission();
+            permissionEditUser.setName("EDIT_USER");
+            permissionEditUser.setDescription("Permite editar usuários");
+            allPermissions.add(permissionEditUser);
+
+            Permission permissionDeleteUser = new Permission();
+            permissionDeleteUser.setName("DELETE_USER");
+            permissionDeleteUser.setDescription("Permite deletar usuários");
+            allPermissions.add(permissionDeleteUser);
+
+            Permission permissionCreateProfile = new Permission();
+            permissionCreateProfile.setName("CREATE_PROFILE");
+            permissionCreateProfile.setDescription("Permite criar perfis");
+            allPermissions.add(permissionCreateProfile);
+
+            Permission permissionEditProfile = new Permission();
+            permissionEditProfile.setName("EDIT_PROFILE");
+            permissionEditProfile.setDescription("Permite editar perfis");
+            allPermissions.add(permissionEditProfile);
+
+            Permission permissionDeleteProfile = new Permission();
+            permissionDeleteProfile.setName("DELETE_PROFILE");
+            permissionDeleteProfile.setDescription("Permite deletar perfis");
+            allPermissions.add(permissionDeleteProfile);
+
+            // Salvar permissões evitando duplicação
+            List<Permission> savedPermissions = new ArrayList<>();
+            for (Permission p : allPermissions) {
+                permissionRepository.findByName(p.getName())
+                        .ifPresentOrElse(
+                                savedPermissions::add,
+                                () -> savedPermissions.add(permissionRepository.save(p))
+                        );
             }
 
-
-            // Persistir todas as permissões globais
-            permissionRepository.saveAll(permissions);
-            permissionRepository.saveAll(departmentScopedPermissions);
-
-            // Associar permissões aos papéis
-            Set<Permission> adminPermissions = new HashSet<>(permissions);
-            roleAdmin.setPermissions(adminPermissions);
+            // Permissões por perfil
+            roleAdmin.setPermissions(new HashSet<>(savedPermissions));
 
             Set<Permission> userPermissions = new HashSet<>();
-            userPermissions.add(getPermissionByName(permissions, "CREATE_MESSAGE"));
-            userPermissions.add(getPermissionByName(permissions, "CREATE_TICKET"));
+            userPermissions.add(findByName(savedPermissions, "CREATE_MESSAGE"));
+            userPermissions.add(findByName(savedPermissions, "CREATE_TICKET"));
             roleUser.setPermissions(userPermissions);
 
-            Set<Role> rolesAdmin = new HashSet<>();
-            rolesAdmin.add(roleAdmin);
-
-            Set<Role> rolesUser = new HashSet<>();
-            rolesUser.add(roleUser);
-
-            Role roleManager = roleRepository.findByName("MANAGER")
-                    .orElseGet(() -> roleRepository.save(new Role("MANAGER")));
-
-            Set<Permission> managerPermissions = departmentScopedPermissions.stream()
-                    .filter(p -> List.of(
-                            "CREATE_TICKET_CATEGORY",
-                            "EDIT_TICKET_CATEGORY",
-                            "DELETE_TICKET_CATEGORY",
-                            "MANAGE_TICKET"
-                    ).contains(p.getName()))
-                    .collect(Collectors.toSet());
-
-            roleManager.setPermissions(managerPermissions);
-
-            // Categoria inicial
+            // Categoria de ticket (sempre cria, sem verificar)
             TicketCategory ticketCategory = new TicketCategory();
             ticketCategory.setName("Infraestrutura");
             ticketCategory.setReceiveTickets(true);
             ticketCategory.setDepartment(TI);
-            ticketCategory.setPath("TI");
             ticketCategoryRepository.save(ticketCategory);
 
             // Usuário admin
@@ -143,8 +191,7 @@ public class DataInitializer implements CommandLineRunner {
             admin.setName("Administrador");
             admin.setEmail("admin@admin");
             userRepository.save(admin);
-            UserRoleDepartment adminBinding = new UserRoleDepartment(admin, roleAdmin, null);
-            userRoleDepartmentRepository.save(adminBinding);
+            userRoleDepartmentRepository.save(new UserRoleDepartment(admin, roleAdmin, null));
             System.out.println("Usuário admin criado.");
 
             // Usuário comum
@@ -153,22 +200,12 @@ public class DataInitializer implements CommandLineRunner {
             commonUser.setName("Usuário Comum");
             commonUser.setEmail("user@user");
             userRepository.save(commonUser);
-            List<UserRoleDepartment> userBindings = List.of(
-                    new UserRoleDepartment(commonUser, roleUser, RH)
-            );
-            userRoleDepartmentRepository.saveAll(userBindings);
+            userRoleDepartmentRepository.save(new UserRoleDepartment(commonUser, roleUser, null));
             System.out.println("Usuário comum criado.");
         }
     }
 
-    private Permission createPermission(String name, String description) {
-        Permission permission = new Permission();
-        permission.setName(name);
-        permission.setDescription(description);
-        return permission;
-    }
-
-    private Permission getPermissionByName(List<Permission> list, String name) {
+    private Permission findByName(List<Permission> list, String name) {
         return list.stream()
                 .filter(p -> p.getName().equals(name))
                 .findFirst()

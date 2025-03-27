@@ -34,8 +34,6 @@ public class TicketDTOAssembler implements RepresentationModelAssembler<Ticket, 
 
         if (ticket.getTicketCategory() != null) {
             dto.setTicketCategory(new TicketCategoryDTO(ticket.getTicketCategory()));
-
-            dto.setCategoryPath((ticket.getTicketCategory().getPath()));
         }
 
         if (ticket.getUser() != null) {

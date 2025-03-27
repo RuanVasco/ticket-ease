@@ -16,9 +16,6 @@ public class TicketCategory {
     private String name;
 
     @Setter
-    private String path;
-
-    @Setter
     private Boolean receiveTickets;
 
     @Setter
