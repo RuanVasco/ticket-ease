@@ -4,12 +4,18 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.lang.Nullable;
 
 import java.util.Objects;
 
 @Getter
 @Setter
 @Entity
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"user_id", "role_id", "department_id"})
+        }
+)
 public class UserRoleDepartment {
 
     @Id
@@ -18,12 +24,15 @@ public class UserRoleDepartment {
 
     @ManyToOne(optional = false)
     @JsonBackReference
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne(optional = false)
+    @JoinColumn(name = "role_id")
     private Role role;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "department_id")
     private Department department;
 
     public UserRoleDepartment() {

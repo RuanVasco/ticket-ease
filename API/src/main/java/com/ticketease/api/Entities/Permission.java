@@ -1,6 +1,5 @@
 package com.ticketease.api.Entities;
 
-import com.ticketease.api.Types.ScopeType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,8 +16,4 @@ public class Permission {
     private String name;
 
     private String description;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ScopeType scope = ScopeType.GLOBAL;
 }

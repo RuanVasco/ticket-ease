@@ -1,7 +1,6 @@
 package com.ticketease.api.Components;
 
 import com.ticketease.api.Entities.*;
-import com.ticketease.api.Types.ScopeType;
 import com.ticketease.api.Repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -94,7 +93,6 @@ public class DataInitializer implements CommandLineRunner {
             for (String permissionName : ticketCategoryPermissions) {
                 Permission permission = new Permission();
                 permission.setName(permissionName);
-                permission.setScope(ScopeType.DEPARTMENT);
                 permission.setDescription(String.format("Permissão %s no escopo de departamento", permissionName));
 
                 departmentScopedPermissions.add(permission);
@@ -173,7 +171,6 @@ public class DataInitializer implements CommandLineRunner {
         Permission permission = new Permission();
         permission.setName(name);
         permission.setDescription(description);
-        permission.setScope(ScopeType.GLOBAL);
         return permission;
     }
 

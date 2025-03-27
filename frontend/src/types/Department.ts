@@ -1,12 +1,5 @@
-export interface IDepartment {
-    id: string;
-    name: string;
-    unit: { id: string; name: string; address: string };
-    receivesRequests: boolean;
-}
-
-export class Department implements IDepartment {
-    id: string;
+export class Department  {
+    id: string | null;;
     name: string;
     unit: { id: string; name: string; address: string };
     receivesRequests: boolean;

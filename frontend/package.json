@@ -12,6 +12,7 @@
     "dependencies": {
         "@stomp/stompjs": "^7.0.1",
         "axios": "^1.8.3",
+        "imask": "^7.6.1",
         "jwt-decode": "^4.0.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",

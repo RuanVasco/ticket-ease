@@ -55,22 +55,27 @@ export const PermissionsProvider: React.FC<{ children: React.ReactNode }> = ({ c
         }
     };
 
-    const hasPermission = (permission: string, scopes: string[] = ["GLOBAL", "DEPARTMENT"]): boolean => {
-        if (isAdmin) return permissions.some((p) => p.name === permission);
-        return permissions.some((p) => p.name === permission && scopes.includes(p.scope));
+    const hasPermission = (permission: string): boolean => {        
+        return permissions.some((p) => p.name === permission);
     };
 
     const isAdmin = useMemo(() => {
         const entities = ["USER", "PROFILE", "DEPARTMENT", "UNIT", "CARGO"];
         const actions = ["CREATE", "EDIT", "DELETE"];
-
-        if (permissions.some((p) => p.name === "MANAGE_TICKET_CATEGORY")) {
+    
+        if (hasPermission("MANAGE_TICKET_CATEGORY")) {
             return true;
         }
-
-        return entities.some((entity) =>
-            actions.some((action) => permissions.some(p => p.name === `${action}_${entity}`))
-        );
+    
+        for (const action of actions) {
+            for (const entity of entities) {
+                if (hasPermission(`${action}_${entity}`)) {
+                    return true;
+                }
+            }
+        }
+    
+        return false;
     }, [permissions]);
 
     const clearPermissions = () => {
