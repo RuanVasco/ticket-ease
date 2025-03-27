@@ -119,7 +119,6 @@ public class AuthController {
                     return role.getPermissions().stream().map(permission ->
                             new PermissionDTO(
                                     permission.getName(),
-                                    permission.getScope(),
                                     dept != null ? dept.getName() : null,
                                     dept != null ? dept.getId() : null
                             )

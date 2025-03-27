@@ -67,9 +67,6 @@ public class DataInitializer implements CommandLineRunner {
 
             permissions.add(createPermission("CREATE_MESSAGE", "Permite enviar mensagens"));
             permissions.add(createPermission("CREATE_TICKET", "Permite criar chamados"));
-            permissions.add(createPermission("MANAGE_TICKET", "Permite gerenciar chamados"));
-
-            permissions.add(createPermission("MANAGE_TICKET_CATEGORY", "Permite gerenciar categorias de chamado"));
 
             permissions.add(createPermission("CREATE_UNIT", "Permite criar unidades"));
             permissions.add(createPermission("DELETE_UNIT", "Permite deletar unidades"));
@@ -146,11 +143,8 @@ public class DataInitializer implements CommandLineRunner {
             admin.setName("Administrador");
             admin.setEmail("admin@admin");
             userRepository.save(admin);
-            List<UserRoleDepartment> adminBindings = List.of(
-                    new UserRoleDepartment(admin, roleAdmin, TI),
-                    new UserRoleDepartment(admin, roleAdmin, RH)
-            );
-            userRoleDepartmentRepository.saveAll(adminBindings);
+            UserRoleDepartment adminBinding = new UserRoleDepartment(admin, roleAdmin, null);
+            userRoleDepartmentRepository.save(adminBinding);
             System.out.println("Usuário admin criado.");
 
             // Usuário comum
