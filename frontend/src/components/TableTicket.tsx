@@ -179,7 +179,7 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                                 id="departmentSelect"
                             >
                                 {departments.map((dep) => (
-                                    <option key={dep.id} value={dep.id}>
+                                    <option key={dep.id} value={dep.id ?? ""}>
                                         {dep.name}
                                     </option>
                                 ))}

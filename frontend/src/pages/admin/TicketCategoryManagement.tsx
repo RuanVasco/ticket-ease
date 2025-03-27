@@ -329,7 +329,7 @@ const TicketCategoryManagement: React.FC = () => {
                                                         {departments.map((department) => (
                                                             <option
                                                                 key={department.id}
-                                                                value={department.id}
+                                                                value={department.id ?? ""}
                                                             >
                                                                 {department.name}
                                                             </option>

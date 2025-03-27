@@ -225,7 +225,6 @@ const ProfileManagement: React.FC = () => {
                                                         <th>Habilitar</th>
                                                         <th>Permissão</th>
                                                         <th>Descrição</th>
-                                                        <th>Escopo</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -241,7 +240,6 @@ const ProfileManagement: React.FC = () => {
                                                             </td>
                                                             <td id={permission.id}>{permission.name}</td>
                                                             <td>{permission.description}</td>
-                                                            <td>{permission.scope}</td>
                                                         </tr>
                                                     ))}
                                                 </tbody>
