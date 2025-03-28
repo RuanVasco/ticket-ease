@@ -2,6 +2,7 @@ package com.ticketease.api.Controllers;
 
 import com.ticketease.api.DTO.TicketCategoryDTO;
 import com.ticketease.api.Entities.Department;
+import com.ticketease.api.Entities.Ticket;
 import com.ticketease.api.Entities.TicketCategory;
 import com.ticketease.api.Entities.User;
 import com.ticketease.api.Repositories.DepartmentRepository;
@@ -43,7 +44,6 @@ public class TicketCategoryController {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         List<TicketCategory> categories = ticketCategoryRepository.findAll().stream()
-                .filter(c -> c.getFather() == null)
                 .filter(c -> {
                     Department dept = c.getDepartment();
                     return dept != null && user.hasPermission("MANAGE_TICKET_CATEGORY", dept);

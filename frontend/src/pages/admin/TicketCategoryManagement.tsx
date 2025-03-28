@@ -56,7 +56,8 @@ const TicketCategoryManagement: React.FC = () => {
                 `${API_BASE_URL}/tickets-category/fathers`
             );
             if (res.status === 200) {
-                setCategories(res.data);
+                const newData = res.data.map((c: any) => TicketCategory.fromJSON(c));
+                setCategories(newData);
             }
         } catch (error) {
             console.error("Error fetching categories:", error);
@@ -356,7 +357,7 @@ const TicketCategoryManagement: React.FC = () => {
                                                     <option value="">----</option>
                                                     {categories.map((item) => (
                                                         <option key={item.id} value={item.id}>
-                                                            {`${item.path} > ${item.name}`}
+                                                            {`${item.path}`}
                                                         </option>
                                                     ))}
                                                 </select>

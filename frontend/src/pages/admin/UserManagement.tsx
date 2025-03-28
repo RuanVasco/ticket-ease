@@ -178,10 +178,12 @@ const UserManagement: React.FC = () => {
                 email: currentUser.email,
                 password: currentUser.password,
                 cargo: currentUser.cargo,
-                roleDepartments: currentUser.profileDepartments.map((a) => ({
-                    department: { id: a.department.id },
-                    role: { id: a.role.id },
-                })),
+                roleDepartments: currentUser.profileDepartments
+                    .filter(a => a.department && a.role)
+                    .map((a) => ({
+                        department: { id: a.department.id },
+                        role: { id: a.role.id },
+                    }))
             };
 
             switch (submitType) {
@@ -316,14 +318,15 @@ const UserManagement: React.FC = () => {
                                                         value={assoc.department?.id ?? "__GLOBAL__"}
                                                         disabled={modeModal === "readonly"}
                                                         onChange={(e) => {
-                                                            const newList = [
-                                                                ...currentUser.profileDepartments,
-                                                            ];
+                                                            const newList = [...currentUser.profileDepartments];
                                                             const selectedValue = e.target.value;
+
+                                                            if (!newList[index].department) {
+                                                                newList[index].department = {} as Department;
+                                                            }
+
                                                             newList[index].department.id =
-                                                                selectedValue === "__GLOBAL__"
-                                                                    ? null
-                                                                    : selectedValue;
+                                                                selectedValue === "__GLOBAL__" ? null : selectedValue;
 
                                                             setCurrentUser({
                                                                 ...currentUser,

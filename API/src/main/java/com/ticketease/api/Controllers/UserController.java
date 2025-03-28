@@ -128,18 +128,26 @@ public class UserController {
 
         userRoleDepartmentRepository.deleteByUser(user);
 
+        Set<String> uniqueKeys = new HashSet<>();
+
         for (RoleDepartmentDTO pair : userUpdateDTO.roleDepartments()) {
-            Optional<Role> optionalRole = roleRepository.findById(pair.role().getId());
+            Long roleId = pair.role().getId();
+            Long departmentId = pair.department() != null ? pair.department().getId() : null;
+
+            String key = roleId + "-" + (departmentId != null ? departmentId : "GLOBAL");
+            if (!uniqueKeys.add(key)) continue;
+
+            Optional<Role> optionalRole = roleRepository.findById(roleId);
             if (optionalRole.isEmpty()) continue;
 
             UserRoleDepartment binding = new UserRoleDepartment();
             binding.setUser(user);
             binding.setRole(optionalRole.get());
 
-            if (pair.department() != null && pair.department().getId() != null) {
-                departmentRepository.findById(pair.department().getId()).ifPresent(binding::setDepartment);
+            if (departmentId != null) {
+                departmentRepository.findById(departmentId).ifPresent(binding::setDepartment);
             } else {
-                binding.setDepartment(null); // GLOBAL
+                binding.setDepartment(null);
             }
 
             userRoleDepartmentRepository.save(binding);

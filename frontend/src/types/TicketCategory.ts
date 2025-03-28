@@ -15,7 +15,6 @@ export class TicketCategory {
         receiveTickets: boolean,
         department: Department,
         father: TicketCategory | null = null,
-        path?: string,
         children?: TicketCategory[]
     ) {
         this.id = id;
@@ -23,7 +22,7 @@ export class TicketCategory {
         this.receiveTickets = receiveTickets;
         this.department = department;
         this.father = father;
-        this.path = path;
+        this.path = this.buildPath();
         this.children = children;
     }
 
@@ -38,9 +37,9 @@ export class TicketCategory {
         return current ? current.department : null;
     }
 
-    static buildPath(father: TicketCategory | null, department: Department, name: string): string {
+    buildPath(): string {
         let path = "";
-        let current = father;
+        let current: TicketCategory | null = this.father;
         let temp: Department | null = null;
 
         if (current) {
@@ -56,11 +55,28 @@ export class TicketCategory {
                 path = `${temp.name} > ${path}`;
             }
         } else {
-            path = department.name;
+            path = this.department.name;
         }
 
-        path += ` > ${name}`;
+        path += ` > ${this.name}`;
 
         return path;
+    }
+
+    static fromJSON(data: any): TicketCategory {
+        const father = data.father ? TicketCategory.fromJSON(data.father) : null;
+        const category = new TicketCategory(
+            data.id,
+            data.name,
+            data.receiveTickets,
+            data.department,
+            father
+        );
+
+        if (data.children) {
+            category.children = data.children.map((child: any) => TicketCategory.fromJSON(child));
+        }
+
+        return category;
     }
 }
