@@ -1,5 +1,5 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
-import { FaUserMinus, FaUserPlus } from "react-icons/fa6";
+import { FaPlus, FaTrash, FaUserMinus, FaUserPlus } from "react-icons/fa6";
 
 import ActionBar from "../../components/ActionBar";
 import axiosInstance from "../../components/AxiosConfig";
@@ -386,7 +386,7 @@ const UserManagement: React.FC = () => {
                                                             }));
                                                         }}
                                                     >
-                                                        🗑️
+                                                        <FaTrash />
                                                     </button>
                                                 </div>
                                             ))}
@@ -394,7 +394,7 @@ const UserManagement: React.FC = () => {
                                             <button
                                                 type="button"
                                                 disabled={modeModal === "readonly"}
-                                                className="btn btn-outline-primary mt-2"
+                                                className="btn btn-outline-primary mt-2 align-self-start"
                                                 onClick={() =>
                                                     setCurrentUser({
                                                         ...currentUser,
@@ -408,7 +408,7 @@ const UserManagement: React.FC = () => {
                                                     })
                                                 }
                                             >
-                                                ➕ Adicionar mais
+                                                <FaPlus /> Adicionar mais
                                             </button>
                                         </div>
                                         <div className="mt-2">

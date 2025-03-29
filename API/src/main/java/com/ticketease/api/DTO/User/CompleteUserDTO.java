@@ -1,6 +1,6 @@
 package com.ticketease.api.DTO.User;
 
-import com.ticketease.api.DTO.RoleDepartmentDTO;
+import com.ticketease.api.DTO.UserRoleDepartmentDTO;
 import com.ticketease.api.Entities.Cargo;
 
 import java.util.List;
@@ -12,5 +12,5 @@ public record CompleteUserDTO (
         String email,
         String password,
         Cargo cargo,
-        List<RoleDepartmentDTO> roleDepartments
+        List<UserRoleDepartmentDTO> roleDepartments
 ){}

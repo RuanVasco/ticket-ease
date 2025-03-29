@@ -3,4 +3,4 @@ package com.ticketease.api.DTO;
 import com.ticketease.api.Entities.Department;
 import com.ticketease.api.Entities.Role;
 
-public record RoleDepartmentDTO(Department department, Role role) {}
+public record UserRoleDepartmentDTO(Department department, Role role) {}

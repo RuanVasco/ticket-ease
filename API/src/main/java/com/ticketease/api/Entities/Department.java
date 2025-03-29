@@ -1,16 +1,14 @@
 package com.ticketease.api.Entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Getter
 @Entity
@@ -30,6 +28,12 @@ public class Department {
 	@JoinColumn(name = "unit_id")
 	@Setter
     private Unit unit;
+
+	@Getter
+    @OneToMany(mappedBy = "department", fetch = FetchType.EAGER)
+	@JsonManagedReference
+	@JsonIgnore
+	private Set<UserRoleDepartment> roleBindings = new HashSet<>();
 	
 	public Department() {}
 	
@@ -39,7 +43,7 @@ public class Department {
 		this.unit = unit;
 	}
 
-	@Override
+    @Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;

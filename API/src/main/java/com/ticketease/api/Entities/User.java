@@ -40,6 +40,7 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     @JsonManagedReference
+    @JsonIgnore
     private Set<UserRoleDepartment> roleBindings = new HashSet<>();
 
     @Setter

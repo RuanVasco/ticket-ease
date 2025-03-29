@@ -8,6 +8,7 @@ import com.ticketease.api.Entities.Ticket;
 import com.ticketease.api.Entities.User;
 import com.ticketease.api.Repositories.DepartmentRepository;
 import com.ticketease.api.Repositories.TicketRepository;
+import com.ticketease.api.Services.NotificationService;
 import com.ticketease.api.Services.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -22,6 +23,7 @@ import org.springframework.hateoas.PagedModel;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("tickets")
@@ -31,6 +33,7 @@ public class TicketController {
     private final PagedResourcesAssembler<Ticket> pagedResourcesAssembler;
     private final TicketDTOAssembler ticketDTOAssembler;
     private final DepartmentRepository departmentRepository;
+    private final NotificationService notificationService;
 
     @Autowired
     TicketRepository ticketRepository;
@@ -38,11 +41,13 @@ public class TicketController {
     public TicketController(TicketService ticketService,
                             PagedResourcesAssembler<Ticket> pagedResourcesAssembler,
                             TicketDTOAssembler ticketDTOAssembler,
-                            DepartmentRepository departmentRepository) {
+                            DepartmentRepository departmentRepository,
+                            NotificationService notificationService) {
         this.ticketService = ticketService;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.ticketDTOAssembler = ticketDTOAssembler;
         this.departmentRepository = departmentRepository;
+        this.notificationService = notificationService;
     }
 
     @PostMapping("/")
@@ -57,6 +62,13 @@ public class TicketController {
         }
 
         Ticket ticket = ticketService.openTicket(ticketInputDTO, files, user);
+
+        Set<User> relatedUsers = ticket.getRelatedUsers();
+        String notificationContent = "Novo chamado de " + ticket.getUser().getName() + "para " + ticket.getDepartment().getName();
+        for (User targetUser : relatedUsers) {
+            notificationService.createNotification(targetUser, ticket.getId(), "Ticket", notificationContent);
+        }
+
         return ResponseEntity.ok(ticket.getId());
     }
 
@@ -78,7 +90,7 @@ public class TicketController {
 
         Department department = optionalDepartment.get();
 
-        if (!user.hasPermission("MANAGE_TICKET", department)) {
+        if (!user.hasPermission("MANAGE_TICKET", department) && !user.hasPermission("MANAGE_TICKET", null)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -158,6 +170,4 @@ public class TicketController {
         PagedModel<TicketDTO> pagedModel = pagedResourcesAssembler.toModel(tickets, ticketDTOAssembler);
         return ResponseEntity.ok(pagedModel);
     }
-
-
 }

@@ -14,7 +14,11 @@ public class NotificationService {
         this.messagingTemplate = messagingTemplate;
     }
 
-    public void sendNotification(User user, Notification notification) {
-        messagingTemplate.convertAndSend("/queue/user/" + user.getId() + "/notifications", notification);
+    public void createNotification(User user, Long referenceId, String type, String content) {
+        sendNotification(new Notification(user, content, referenceId, type));
+    }
+
+    public void sendNotification(Notification notification) {
+        messagingTemplate.convertAndSend("/queue/user/" + notification.getUser().getId() + "/notifications", notification);
     }
 }

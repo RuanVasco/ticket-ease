@@ -1,6 +1,6 @@
 package com.ticketease.api.Controllers;
 
-import com.ticketease.api.DTO.RoleDepartmentDTO;
+import com.ticketease.api.DTO.UserRoleDepartmentDTO;
 import com.ticketease.api.DTO.User.CompleteUserDTO;
 import com.ticketease.api.DTO.User.UserDTO;
 import com.ticketease.api.Entities.*;
@@ -79,31 +79,9 @@ public class UserController {
         return userService.getUser(userID);
     }
 
+    @Transactional
     @DeleteMapping("/{userID}")
     public ResponseEntity<?> deleteUser(@PathVariable Long userID) {
-        Optional<User> optionalUser = userRepository.findById(userID);
-
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-
-            user.getRoleBindings().clear();
-            userRepository.save(user);
-
-            userRepository.delete(user);
-            return ResponseEntity.ok().build();
-        }
-
-        return ResponseEntity.notFound().build();
-    }
-
-    @Transactional
-    @PutMapping("/{userID}")
-    public ResponseEntity<?> updateUser(@PathVariable Long userID, @RequestBody UserDTO userUpdateDTO) {
-        User sender = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!sender.hasPermission("EDIT_USER", null)){
-            return new ResponseEntity<>("Acesso negado. Você não tem permissão para editar usuários.", HttpStatus.FORBIDDEN);
-        }
-
         Optional<User> optionalUser = userRepository.findById(userID);
 
         if (optionalUser.isEmpty()) {
@@ -111,6 +89,37 @@ public class UserController {
         }
 
         User user = optionalUser.get();
+
+        user.getRoleBindings().clear();
+        userRepository.save(user);
+
+        userRoleDepartmentRepository.deleteByUser(user);
+        userRoleDepartmentRepository.flush();
+
+        userRepository.delete(user);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @Transactional
+    @PutMapping("/{userID}")
+    public ResponseEntity<?> updateUser(@PathVariable Long userID, @RequestBody UserDTO userUpdateDTO) {
+        User sender = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!sender.hasPermission("EDIT_USER", null)) {
+            return new ResponseEntity<>("Acesso negado. Você não tem permissão para editar usuários.", HttpStatus.FORBIDDEN);
+        }
+
+        Optional<User> optionalUser = userRepository.findById(userID);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        User user = optionalUser.get();
+
+        user.getRoleBindings().clear();
+
+        userRoleDepartmentRepository.deleteByUser(user);
+        userRoleDepartmentRepository.flush();
 
         if (userUpdateDTO.cargo() != null && userUpdateDTO.cargo().getId() != null) {
             cargoRepository.findById(userUpdateDTO.cargo().getId()).ifPresent(user::setCargo);
@@ -126,16 +135,9 @@ public class UserController {
 
         userRepository.save(user);
 
-        userRoleDepartmentRepository.deleteByUser(user);
-
-        Set<String> uniqueKeys = new HashSet<>();
-
-        for (RoleDepartmentDTO pair : userUpdateDTO.roleDepartments()) {
+        for (UserRoleDepartmentDTO pair : userUpdateDTO.roleDepartments()) {
             Long roleId = pair.role().getId();
             Long departmentId = pair.department() != null ? pair.department().getId() : null;
-
-            String key = roleId + "-" + (departmentId != null ? departmentId : "GLOBAL");
-            if (!uniqueKeys.add(key)) continue;
 
             Optional<Role> optionalRole = roleRepository.findById(roleId);
             if (optionalRole.isEmpty()) continue;
@@ -179,7 +181,7 @@ public class UserController {
 
         userRepository.save(user);
 
-        for (RoleDepartmentDTO pair : signUpDto.roleDepartments()) {
+        for (UserRoleDepartmentDTO pair : signUpDto.roleDepartments()) {
             Optional<Role> optionalRole = roleRepository.findById(pair.role().getId());
 
             if (optionalRole.isEmpty()) continue;

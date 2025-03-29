@@ -21,14 +21,14 @@ public class Notification {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private String referenceId;
+    private Long referenceId;
     private String type;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public Notification() {}
 
-    public Notification(User user, String message, String referenceId, String type) {
+    public Notification(User user, String message, Long referenceId, String type) {
         this.user = user;
         this.message = message;
         this.referenceId = referenceId;
