@@ -68,9 +68,9 @@ const HomeAdmin: React.FC = () => {
                 let entity = block.link.split("/").pop()?.toUpperCase() || "";
                 entity = removePlural(entity);
                 if (entity === "TICKET_CATEGORY") {
-                    permissionResults[block.link] = (hasPermission("MANAGE_" + entity));
+                    permissionResults[block.link] = hasPermission("MANAGE_" + entity);
                 } else {
-                    permissionResults[block.link] = (hasPermission("EDIT_" + entity));
+                    permissionResults[block.link] = hasPermission("EDIT_" + entity);
                 }
             }
 

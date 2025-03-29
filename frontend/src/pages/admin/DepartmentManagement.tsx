@@ -4,9 +4,9 @@ import ActionBar from "../../components/ActionBar";
 import axiosInstance from "../../components/AxiosConfig";
 import Pagination from "../../components/Pagination";
 import Table from "../../components/Table";
+import { usePermissions } from "../../context/PermissionsContext";
 import { Department } from "../../types/Department";
 import { Unit } from "../../types/Unit";
-import { usePermissions } from "../../context/PermissionsContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 

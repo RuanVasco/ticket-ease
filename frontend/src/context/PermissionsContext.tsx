@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState, useMemo } from "react";
+
 import axiosInstance from "../components/AxiosConfig";
 import { Permission } from "../types/Permission";
+
 import { useAuth } from "./AuthContext";
 
 interface PermissionsContextType {
@@ -55,18 +57,18 @@ export const PermissionsProvider: React.FC<{ children: React.ReactNode }> = ({ c
         }
     };
 
-    const hasPermission = (permission: string): boolean => {        
+    const hasPermission = (permission: string): boolean => {
         return permissions.some((p) => p.name === permission);
     };
 
     const isAdmin = useMemo(() => {
         const entities = ["USER", "PROFILE", "DEPARTMENT", "UNIT", "CARGO"];
         const actions = ["CREATE", "EDIT", "DELETE"];
-    
+
         if (hasPermission("MANAGE_TICKET_CATEGORY")) {
             return true;
         }
-    
+
         for (const action of actions) {
             for (const entity of entities) {
                 if (hasPermission(`${action}_${entity}`)) {
@@ -74,7 +76,7 @@ export const PermissionsProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 }
             }
         }
-    
+
         return false;
     }, [permissions]);
 
@@ -88,7 +90,20 @@ export const PermissionsProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
 
     if (!isAuthenticated) {
-        return <PermissionsContext.Provider value={{ permissions: [], loading: false, fetchPermissions, hasPermission: () => false, isAdmin: false, clearPermissions }}>{children}</PermissionsContext.Provider>;
+        return (
+            <PermissionsContext.Provider
+                value={{
+                    permissions: [],
+                    loading: false,
+                    fetchPermissions,
+                    hasPermission: () => false,
+                    isAdmin: false,
+                    clearPermissions,
+                }}
+            >
+                {children}
+            </PermissionsContext.Provider>
+        );
     }
 
     return (

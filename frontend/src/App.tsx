@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import { usePermissions } from "./context/PermissionsContext";
@@ -16,7 +17,6 @@ import Login from "./pages/Login";
 import ManageTickets from "./pages/ManageTickets";
 import TicketDetails from "./pages/TicketDetails";
 import ViewTickets from "./pages/ViewTickets";
-import { useEffect, useState } from "react";
 
 function App() {
     const { hasPermission, isAdmin, loading, permissions } = usePermissions();
@@ -24,7 +24,7 @@ function App() {
 
     useEffect(() => {
         setCanOpenTicket(hasPermission("CREATE_TICKET"));
-    }, [permissions]);
+    }, [permissions, hasPermission]);
 
     if (loading) {
         return <div>Carregando permissões...</div>;
@@ -38,16 +38,7 @@ function App() {
 
             <Route element={<ProtectedLayout />}>
                 <Route element={<MainLayout />}>
-                    <Route
-                        path="/"
-                        element={
-                            canOpenTicket ? (
-                                <CreateTicket />
-                            ) : (
-                                <></>
-                            )
-                        }
-                    />
+                    <Route path="/" element={canOpenTicket ? <CreateTicket /> : <></>} />
                     <Route path="/tickets" element={<ViewTickets />} />
                     <Route path="/tickets/:id" element={<TicketDetails />} />
                     {canManageTicket && (

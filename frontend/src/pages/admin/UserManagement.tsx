@@ -4,13 +4,13 @@ import { FaPlus, FaTrash, FaUserMinus, FaUserPlus } from "react-icons/fa6";
 import ActionBar from "../../components/ActionBar";
 import axiosInstance from "../../components/AxiosConfig";
 import Pagination from "../../components/Pagination";
+import PhoneInput from "../../components/PhoneInput";
 import Table from "../../components/Table";
+import { usePermissions } from "../../context/PermissionsContext";
 import { Cargo } from "../../types/Cargo";
 import { Department } from "../../types/Department";
 import { Profile } from "../../types/Profile";
 import { User } from "../../types/User";
-import { usePermissions } from "../../context/PermissionsContext";
-import PhoneInput from "../../components/PhoneInput";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -179,11 +179,11 @@ const UserManagement: React.FC = () => {
                 password: currentUser.password,
                 cargo: currentUser.cargo,
                 roleDepartments: currentUser.profileDepartments
-                    .filter(a => a.department && a.role)
+                    .filter((a) => a.department && a.role)
                     .map((a) => ({
                         department: { id: a.department.id },
                         role: { id: a.role.id },
-                    }))
+                    })),
             };
 
             switch (submitType) {
@@ -318,15 +318,20 @@ const UserManagement: React.FC = () => {
                                                         value={assoc.department?.id ?? "__GLOBAL__"}
                                                         disabled={modeModal === "readonly"}
                                                         onChange={(e) => {
-                                                            const newList = [...currentUser.profileDepartments];
+                                                            const newList = [
+                                                                ...currentUser.profileDepartments,
+                                                            ];
                                                             const selectedValue = e.target.value;
 
                                                             if (!newList[index].department) {
-                                                                newList[index].department = {} as Department;
+                                                                newList[index].department =
+                                                                    {} as Department;
                                                             }
 
                                                             newList[index].department.id =
-                                                                selectedValue === "__GLOBAL__" ? null : selectedValue;
+                                                                selectedValue === "__GLOBAL__"
+                                                                    ? null
+                                                                    : selectedValue;
 
                                                             setCurrentUser({
                                                                 ...currentUser,

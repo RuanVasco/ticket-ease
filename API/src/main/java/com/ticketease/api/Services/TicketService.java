@@ -91,19 +91,17 @@ public class TicketService {
     }
 
     @Transactional
-    public Page<Ticket> getUserManageableTickets(int page, int size, String sortBy, String sortDir, String status, Department department) {
-        Sort.Direction direction = Sort.Direction.fromString(sortDir.toUpperCase());
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-
+    public Page<Ticket> getUserManageableTickets(Pageable pageable, String status, Department department) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        Page<Ticket> relatedTickets = ticketRepository.findByStatus(status, pageable);
-        List<Ticket> filteredTickets = relatedTickets
+        Page<Ticket> allTickets = ticketRepository.findByStatus(status, pageable);
+
+        List<Ticket> filtered = allTickets
                 .stream()
-                .filter((ticket -> ticket.canManage(user) && ticket.getDepartment().equals(department)))
+                .filter(t -> t.canManage(user) && t.getDepartment().equals(department))
                 .toList();
 
-        return new PageImpl<>(filteredTickets, pageable, filteredTickets.size());
+        return new PageImpl<>(filtered, pageable, filtered.size());
     }
 
     @Transactional

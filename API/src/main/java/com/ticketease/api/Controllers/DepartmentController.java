@@ -52,7 +52,7 @@ public class DepartmentController {
 		List<Department> departmentList = departmentRepository.findAll();
 
 		List<Department> filtered = departmentList.stream()
-				.filter(department -> user.hasPermission("MANAGE_TICKET", department))
+				.filter(department -> user.hasPermission("MANAGE_TICKET", department) || user.hasPermission("MANAGE_TICKET", null))
 				.toList();
 
 		return ResponseEntity.ok(filtered);

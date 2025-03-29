@@ -65,9 +65,8 @@ public class User implements UserDetails {
             boolean isExactMatch = department != null && bindingDept != null &&
                     bindingDept.getId().equals(department.getId());
 
-            // Verifica se deve considerar esse binding
             boolean isDepartmentRelevant = (department == null && isGlobal)
-                    || (department != null && (isExactMatch /* || isGlobal */)); // <- depende da sua regra
+                    || (department != null && (isExactMatch));
 
             if (!isDepartmentRelevant) continue;
 

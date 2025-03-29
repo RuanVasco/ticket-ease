@@ -60,28 +60,11 @@ public class MessageController {
         this.notificationService = notificationService;
     }
 
-    @MessageMapping("/user/{userId}/tickets")
-    public void receiveTickets(@DestinationVariable Long userId, Principal principal) {
+    @MessageMapping("/user/tickets")
+    public void receiveTickets(Principal principal) {
         User user = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
 
-        if (!user.getId().equals(userId)) {
-            System.out.println("Erro de permissão: O usuário não tem permissão para acessar os tickets de outro usuário.");
-            return;
-        }
-
-        List<Ticket> tickets = ticketService.getTicketsByRelatedUser(user);
-        List<Long> ticketsId = new ArrayList<>();
-
-        for (Ticket ticket : tickets) {
-            if (!ticket.getUser().equals(user) && !ticket.canManage(user)) {
-                System.out.println("Erro de permissão: O usuário" + user.getName() + "não tem permissão para acessar o ticket " + ticket.getId());
-                continue;
-            }
-
-            ticketsId.add(ticket.getId());
-        }
-
-        simpMessagingTemplate.convertAndSend("/queue/user/" + userId + "/tickets", ticketsId);
+        messageService.sendTicketsId(user);
     }
 
     @Transactional
@@ -102,16 +85,14 @@ public class MessageController {
 
         Message message = messageService.addMessage(ticket, user, messageDTO);
 
-        System.out.println("Enviando mensagem para o tópico /topic/ticket/" + ticketId);
         simpMessagingTemplate.convertAndSend("/topic/ticket/" + ticketId, message);
 
         Set<User> relatedUsers = ticket.getRelatedUsers();
         String notificationContent = "Mensagem recebida no ticket " +  ticketId;
         for (User targetUser : relatedUsers) {
-            notificationService.createNotification(targetUser, ticket.getId(), "Ticket", notificationContent);
+            if (user.equals(targetUser)) continue;
+            notificationService.createNotification(targetUser, ticket.getId(), "Message", notificationContent);
         }
-
-        System.out.println("Mensagem enviada para o tópico /topic/ticket/" + ticketId);
     }
 
     @GetMapping("/ticket/{ticketID}")

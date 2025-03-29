@@ -5,6 +5,7 @@ import axiosInstance from "./AxiosConfig";
 import DateFormatter from "./DateFormatter";
 import ItemsPerPage from "./ItemsPerPage";
 import Pagination from "./Pagination";
+
 import "../assets/styles/table.css";
 import { Department } from "../types/Department";
 

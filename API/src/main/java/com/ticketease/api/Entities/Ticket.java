@@ -98,13 +98,13 @@ public class Ticket {
 
         for (UserRoleDepartment binding : department.getRoleBindings()) {
             User user = binding.getUser();
-            if (user.hasPermission("MANAGE_TICKET", department) ||
-                    user.hasPermission("MANAGE_TICKET", null)) {
+            if (user.hasPermission("MANAGE_TICKET", department)) {
                 relatedUsers.add(user);
             }
         }
 
         relatedUsers.addAll(this.getObservers());
+        relatedUsers.add(this.user);
 
         return relatedUsers;
     }

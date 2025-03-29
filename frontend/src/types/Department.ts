@@ -1,5 +1,5 @@
-export class Department  {
-    id: string | null;;
+export class Department {
+    id: string | null;
     name: string;
     unit: { id: string; name: string; address: string };
     receivesRequests: boolean;

@@ -4,8 +4,8 @@ import ActionBar from "../../components/ActionBar";
 import axiosInstance from "../../components/AxiosConfig";
 import Pagination from "../../components/Pagination";
 import Table from "../../components/Table";
-import { TicketCategory } from "../../types/TicketCategory";
 import { Department } from "../../types/Department";
+import { TicketCategory } from "../../types/TicketCategory";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -48,13 +48,11 @@ const TicketCategoryManagement: React.FC = () => {
         } catch (error) {
             console.error("Error fetching departments:", error);
         }
-    }
+    };
 
     const fetchCategories = async () => {
         try {
-            const res = await axiosInstance.get(
-                `${API_BASE_URL}/tickets-category/fathers`
-            );
+            const res = await axiosInstance.get(`${API_BASE_URL}/tickets-category/fathers`);
             if (res.status === 200) {
                 const newData = res.data.map((c: any) => TicketCategory.fromJSON(c));
                 setCategories(newData);
@@ -62,7 +60,7 @@ const TicketCategoryManagement: React.FC = () => {
         } catch (error) {
             console.error("Error fetching categories:", error);
         }
-    }
+    };
 
     const fetchData = async () => {
         try {
@@ -79,7 +77,6 @@ const TicketCategoryManagement: React.FC = () => {
             console.error("Error fetching data:", error);
         }
     };
-
 
     useEffect(() => {
         fetchData();
@@ -379,8 +376,9 @@ const TicketCategoryManagement: React.FC = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className={`btn btn-${modeModal === "delete" ? "danger" : "primary"
-                                        }`}
+                                    className={`btn btn-${
+                                        modeModal === "delete" ? "danger" : "primary"
+                                    }`}
                                     onClick={() => setSubmitType(modeModal)}
                                 >
                                     {modeModal === "delete" ? "Excluir" : "Salvar"}

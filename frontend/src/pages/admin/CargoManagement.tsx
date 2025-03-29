@@ -4,8 +4,8 @@ import ActionBar from "../../components/ActionBar";
 import axiosInstance from "../../components/AxiosConfig";
 import Pagination from "../../components/Pagination";
 import Table from "../../components/Table";
-import { Cargo } from "../../types/Cargo";
 import { usePermissions } from "../../context/PermissionsContext";
+import { Cargo } from "../../types/Cargo";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 

@@ -1,8 +1,8 @@
 import { JwtPayload, jwtDecode } from "jwt-decode";
 
+import { Cargo } from "../types/Cargo";
 import { Profile } from "../types/Profile";
 import { User } from "../types/User";
-import { Cargo } from "../types/Cargo";
 
 interface UserData extends JwtPayload {
     id: number;
@@ -28,7 +28,7 @@ const GetUserData = (): User | null => {
                 decodedToken.sub,
                 "",
                 {} as Cargo,
-                [],
+                []
             );
         }
     }
