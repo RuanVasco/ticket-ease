@@ -145,7 +145,7 @@ const TicketDetails: React.FC = () => {
         };
 
         fetchMessages();
-        return () => { };
+        return () => {};
     }, [id, data?.status]);
 
     useEffect(() => {

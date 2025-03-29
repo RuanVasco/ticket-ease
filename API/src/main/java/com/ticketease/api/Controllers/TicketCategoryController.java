@@ -2,6 +2,7 @@ package com.ticketease.api.Controllers;
 
 import com.ticketease.api.DTO.TicketCategoryDTO;
 import com.ticketease.api.Entities.Department;
+import com.ticketease.api.Entities.Ticket;
 import com.ticketease.api.Entities.TicketCategory;
 import com.ticketease.api.Entities.User;
 import com.ticketease.api.Repositories.DepartmentRepository;
@@ -43,10 +44,9 @@ public class TicketCategoryController {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         List<TicketCategory> categories = ticketCategoryRepository.findAll().stream()
-                .filter(c -> c.getFather() == null)
                 .filter(c -> {
                     Department dept = c.getDepartment();
-                    return dept != null && user.hasPermission("MANAGE_TICKET_CATEGORY", dept);
+                    return user.hasPermission("MANAGE_TICKET_CATEGORY", dept) || user.hasPermission("MANAGE_TICKET_CATEGORY", null);
                 })
                 .toList();
 
@@ -62,13 +62,9 @@ public class TicketCategoryController {
         List<TicketCategory> filteredList = allCategories.stream()
                 .filter(category -> {
                     Department dept = category.getDepartment();
-                    return dept != null && user.hasPermission("MANAGE_TICKET_CATEGORY", dept);
+                    return user.hasPermission("MANAGE_TICKET_CATEGORY", dept) || user.hasPermission("MANAGE_TICKET_CATEGORY", null);
                 })
                 .toList();
-
-        if (filteredList.isEmpty()) {
-            return ResponseEntity.ok().build();
-        }
 
         Page<TicketCategory> filteredPage = new PageImpl<>(filteredList, pageable, filteredList.size());
         return ResponseEntity.ok(filteredPage);
@@ -101,7 +97,7 @@ public class TicketCategoryController {
         List<Department> all = departmentRepository.findByReceivesRequests(true);
 
         List<Department> filtered = all.stream()
-                .filter(dept -> user.hasPermission("MANAGE_TICKET_CATEGORY", dept))
+                .filter(dept -> user.hasPermission("MANAGE_TICKET_CATEGORY", dept) || user.hasPermission("MANAGE_TICKET_CATEGORY", null))
                 .toList();
 
         return ResponseEntity.ok(filtered);
@@ -140,7 +136,10 @@ public class TicketCategoryController {
                 return ResponseEntity.badRequest().body("Departamento inválido.");
             }
 
-            if (!user.hasPermission("MANAGE_TICKET_CATEGORY", department)) {
+            boolean hasDeptPermission = user.hasPermission("MANAGE_TICKET_CATEGORY", department);
+            boolean hasGlobalPermission = user.hasPermission("MANAGE_TICKET_CATEGORY", null);
+
+            if (!hasDeptPermission && !hasGlobalPermission) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body("Você não tem permissão para criar categoria nesse departamento.");
             }

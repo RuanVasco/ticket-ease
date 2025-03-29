@@ -1,16 +1,16 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
-import { FaUserMinus, FaUserPlus } from "react-icons/fa6";
+import { FaPlus, FaTrash, FaUserMinus, FaUserPlus } from "react-icons/fa6";
 
 import ActionBar from "../../components/ActionBar";
 import axiosInstance from "../../components/AxiosConfig";
 import Pagination from "../../components/Pagination";
+import PhoneInput from "../../components/PhoneInput";
 import Table from "../../components/Table";
+import { usePermissions } from "../../context/PermissionsContext";
 import { Cargo } from "../../types/Cargo";
 import { Department } from "../../types/Department";
 import { Profile } from "../../types/Profile";
 import { User } from "../../types/User";
-import { usePermissions } from "../../context/PermissionsContext";
-import PhoneInput from "../../components/PhoneInput";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -178,10 +178,12 @@ const UserManagement: React.FC = () => {
                 email: currentUser.email,
                 password: currentUser.password,
                 cargo: currentUser.cargo,
-                roleDepartments: currentUser.profileDepartments.map((a) => ({
-                    department: { id: a.department.id },
-                    role: { id: a.role.id },
-                })),
+                roleDepartments: currentUser.profileDepartments
+                    .filter((a) => a.department && a.role)
+                    .map((a) => ({
+                        department: { id: a.department.id },
+                        role: { id: a.role.id },
+                    })),
             };
 
             switch (submitType) {
@@ -320,6 +322,12 @@ const UserManagement: React.FC = () => {
                                                                 ...currentUser.profileDepartments,
                                                             ];
                                                             const selectedValue = e.target.value;
+
+                                                            if (!newList[index].department) {
+                                                                newList[index].department =
+                                                                    {} as Department;
+                                                            }
+
                                                             newList[index].department.id =
                                                                 selectedValue === "__GLOBAL__"
                                                                     ? null
@@ -383,7 +391,7 @@ const UserManagement: React.FC = () => {
                                                             }));
                                                         }}
                                                     >
-                                                        🗑️
+                                                        <FaTrash />
                                                     </button>
                                                 </div>
                                             ))}
@@ -391,7 +399,7 @@ const UserManagement: React.FC = () => {
                                             <button
                                                 type="button"
                                                 disabled={modeModal === "readonly"}
-                                                className="btn btn-outline-primary mt-2"
+                                                className="btn btn-outline-primary mt-2 align-self-start"
                                                 onClick={() =>
                                                     setCurrentUser({
                                                         ...currentUser,
@@ -405,7 +413,7 @@ const UserManagement: React.FC = () => {
                                                     })
                                                 }
                                             >
-                                                ➕ Adicionar mais
+                                                <FaPlus /> Adicionar mais
                                             </button>
                                         </div>
                                         <div className="mt-2">

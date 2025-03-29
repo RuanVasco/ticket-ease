@@ -1,6 +1,6 @@
+import { JSX } from "react";
 import { Link } from "react-router-dom";
 import "../assets/styles/block.css";
-import { JSX } from "react";
 
 interface BlockProps {
     text: string;

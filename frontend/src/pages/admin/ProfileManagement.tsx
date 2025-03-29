@@ -4,9 +4,9 @@ import ActionBar from "../../components/ActionBar";
 import axiosInstance from "../../components/AxiosConfig";
 import Pagination from "../../components/Pagination";
 import Table from "../../components/Table";
+import { usePermissions } from "../../context/PermissionsContext";
 import { Permission } from "../../types/Permission";
 import { Profile } from "../../types/Profile";
-import { usePermissions } from "../../context/PermissionsContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -25,7 +25,7 @@ const ProfileManagement: React.FC = () => {
     const [currentProfile, setCurrentProfile] = useState<Profile>({
         id: "",
         name: "",
-        permissions: []
+        permissions: [],
     });
     const { hasPermission } = usePermissions();
     const [canCreate, setCanCreate] = useState<boolean>(false);
@@ -56,9 +56,7 @@ const ProfileManagement: React.FC = () => {
 
     const fetchPermissions = async () => {
         try {
-            const res = await axiosInstance.get(
-                `${API_BASE_URL}/permissions`
-            );
+            const res = await axiosInstance.get(`${API_BASE_URL}/permissions`);
 
             if (res.status === 200) {
                 setPermissions(res.data);
@@ -66,7 +64,7 @@ const ProfileManagement: React.FC = () => {
         } catch (error) {
             console.error(error);
         }
-    }
+    };
 
     useEffect(() => {
         fetchData();
@@ -126,7 +124,10 @@ const ProfileManagement: React.FC = () => {
             } else if (submitType === "add") {
                 res = await axiosInstance.post(`${API_BASE_URL}/profiles`, payload);
             } else if (submitType === "update") {
-                res = await axiosInstance.put(`${API_BASE_URL}/profiles/${currentProfile.id}`, payload);
+                res = await axiosInstance.put(
+                    `${API_BASE_URL}/profiles/${currentProfile.id}`,
+                    payload
+                );
             } else {
                 console.error("Invalid submit type");
                 return;
@@ -225,7 +226,6 @@ const ProfileManagement: React.FC = () => {
                                                         <th>Habilitar</th>
                                                         <th>Permissão</th>
                                                         <th>Descrição</th>
-                                                        <th>Escopo</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -234,14 +234,27 @@ const ProfileManagement: React.FC = () => {
                                                             <td>
                                                                 <input
                                                                     type="checkbox"
-                                                                    checked={currentProfile.permissions?.some((p) => p.id === permission.id) || false}
-                                                                    onChange={() => handlePermissionToggle(permission)}
-                                                                    disabled={modeModal === "readonly"}
+                                                                    checked={
+                                                                        currentProfile.permissions?.some(
+                                                                            (p) =>
+                                                                                p.id ===
+                                                                                permission.id
+                                                                        ) || false
+                                                                    }
+                                                                    onChange={() =>
+                                                                        handlePermissionToggle(
+                                                                            permission
+                                                                        )
+                                                                    }
+                                                                    disabled={
+                                                                        modeModal === "readonly"
+                                                                    }
                                                                 />
                                                             </td>
-                                                            <td id={permission.id}>{permission.name}</td>
+                                                            <td id={permission.id}>
+                                                                {permission.name}
+                                                            </td>
                                                             <td>{permission.description}</td>
-                                                            <td>{permission.scope}</td>
                                                         </tr>
                                                     ))}
                                                 </tbody>

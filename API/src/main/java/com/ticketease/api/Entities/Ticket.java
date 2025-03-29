@@ -88,7 +88,25 @@ public class Ticket {
             return false;
         }
 
-        return user.hasPermission("MANAGE_TICKET", department);
+        return user.hasPermission("MANAGE_TICKET", department) || user.hasPermission("MANAGE_TICKET", null);
+    }
+
+    public Set<User> getRelatedUsers() {
+        Set<User> relatedUsers = new HashSet<>();
+
+        Department department = this.getDepartment();
+
+        for (UserRoleDepartment binding : department.getRoleBindings()) {
+            User user = binding.getUser();
+            if (user.hasPermission("MANAGE_TICKET", department)) {
+                relatedUsers.add(user);
+            }
+        }
+
+        relatedUsers.addAll(this.getObservers());
+        relatedUsers.add(this.user);
+
+        return relatedUsers;
     }
 
 

@@ -5,6 +5,7 @@ import axiosInstance from "./AxiosConfig";
 import DateFormatter from "./DateFormatter";
 import ItemsPerPage from "./ItemsPerPage";
 import Pagination from "./Pagination";
+
 import "../assets/styles/table.css";
 import { Department } from "../types/Department";
 
@@ -56,7 +57,7 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
 
     const fetchUserDepartments = async () => {
         try {
-            const res = await axiosInstance.get(`${API_BASE_URL}/users/me/departments`);
+            const res = await axiosInstance.get(`${API_BASE_URL}/departments/manager`);
             if (res.status === 200 && res.data) {
                 setDepartments(res.data);
             }
@@ -179,7 +180,7 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                                 id="departmentSelect"
                             >
                                 {departments.map((dep) => (
-                                    <option key={dep.id} value={dep.id}>
+                                    <option key={dep.id} value={dep.id ?? ""}>
                                         {dep.name}
                                     </option>
                                 ))}

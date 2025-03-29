@@ -7,10 +7,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
-public class ChamadosApi {
+public class TicketEaseApi {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ChamadosApi.class, args);
+		SpringApplication.run(TicketEaseApi.class, args);
 	}
 
 	@Bean

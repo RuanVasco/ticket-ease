@@ -18,7 +18,7 @@
         "react-dom": "^19.0.0",
         "react-icons": "^5.5.0",
         "react-router-dom": "^7.3.0",
-        "react-select": "^5.10.1",
+        "react-toastify": "^11.0.5",
         "uuid": "^11.1.0"
     },
     "devDependencies": {
@@ -28,11 +28,9 @@
         "@types/react-icons": "^3.0.0",
         "@types/uuid": "^10.0.0",
         "@vitejs/plugin-react-swc": "^3.8.0",
-        "eslint": "^9.22.0",
-        "eslint-config-prettier": "^10.1.1",
+        "eslint": "^9.23.0",
         "eslint-plugin-import": "^2.31.0",
-        "eslint-plugin-prettier": "^5.2.3",
-        "eslint-plugin-react": "^7.37.4",
+        "eslint-plugin-prettier": "^5.2.5",
         "eslint-plugin-react-hooks": "^5.2.0",
         "eslint-plugin-react-refresh": "^0.4.19",
         "globals": "^15.15.0",

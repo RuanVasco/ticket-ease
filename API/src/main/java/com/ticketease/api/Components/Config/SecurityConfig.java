@@ -94,6 +94,9 @@ public class SecurityConfig {
 						// PERMISSIONS
 						.requestMatchers(HttpMethod.GET, "/permissions/**").permitAll()
 
+						.requestMatchers(HttpMethod.PATCH, "/notifications/**").permitAll()
+						.requestMatchers(HttpMethod.GET, "/notifications/**").permitAll()
+
 						.anyRequest().authenticated()
 				)
 				.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

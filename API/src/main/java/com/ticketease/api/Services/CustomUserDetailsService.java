@@ -1,6 +1,6 @@
 package com.ticketease.api.Services;
 
-import com.ticketease.api.DTO.RoleDepartmentDTO;
+import com.ticketease.api.DTO.UserRoleDepartmentDTO;
 import com.ticketease.api.DTO.User.CompleteUserDTO;
 import com.ticketease.api.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +29,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findById(userID)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<RoleDepartmentDTO> roleDepartments = user.getRoleBindings().stream()
-                .map(binding -> new RoleDepartmentDTO(
-                        binding.getRole(),
-                        binding.getDepartment()
+        List<UserRoleDepartmentDTO> roleDepartments = user.getRoleBindings().stream()
+                .map(binding -> new UserRoleDepartmentDTO(
+                        binding.getDepartment(),
+                        binding.getRole()
                 ))
                 .toList();
 

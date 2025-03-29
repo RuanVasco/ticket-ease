@@ -1,7 +1,7 @@
 package com.ticketease.api.DTO.AssemblerDTO;
 
 import com.ticketease.api.Controllers.TicketController;
-import com.ticketease.api.DTO.RoleDepartmentDTO;
+import com.ticketease.api.DTO.UserRoleDepartmentDTO;
 import com.ticketease.api.DTO.TicketDTO;
 import com.ticketease.api.DTO.TicketCategoryDTO;
 import com.ticketease.api.DTO.User.UserDTO;
@@ -34,17 +34,18 @@ public class TicketDTOAssembler implements RepresentationModelAssembler<Ticket, 
 
         if (ticket.getTicketCategory() != null) {
             dto.setTicketCategory(new TicketCategoryDTO(ticket.getTicketCategory()));
-
-            dto.setCategoryPath((ticket.getTicketCategory().getPath()));
+            dto.setCategoryPath(ticket.getTicketCategory().getName());
+        } else {
+            dto.setCategoryPath(ticket.getDepartment().getName());
         }
 
         if (ticket.getUser() != null) {
             User user = ticket.getUser();
 
-            List<RoleDepartmentDTO> roleDepartments = user.getRoleBindings().stream()
-                    .map(binding -> new RoleDepartmentDTO(
-                            binding.getRole(),
-                            binding.getDepartment()
+            List<UserRoleDepartmentDTO> roleDepartments = user.getRoleBindings().stream()
+                    .map(binding -> new UserRoleDepartmentDTO(
+                            binding.getDepartment(),
+                            binding.getRole()
                     ))
                     .toList();
 
@@ -59,10 +60,10 @@ public class TicketDTOAssembler implements RepresentationModelAssembler<Ticket, 
         }
 
         Set<UserDTO> observers = ticket.getObservers().stream().map(observer -> {
-            List<RoleDepartmentDTO> roleDepartments = observer.getRoleBindings().stream()
-                    .map(binding -> new RoleDepartmentDTO(
-                            binding.getRole(),
-                            binding.getDepartment()
+            List<UserRoleDepartmentDTO> roleDepartments = observer.getRoleBindings().stream()
+                    .map(binding -> new UserRoleDepartmentDTO(
+                            binding.getDepartment(),
+                            binding.getRole()
                     ))
                     .toList();
 

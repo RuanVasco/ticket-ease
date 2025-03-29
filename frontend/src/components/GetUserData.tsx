@@ -1,6 +1,6 @@
 import { JwtPayload, jwtDecode } from "jwt-decode";
 
-import { Department } from "../types/Department";
+import { Cargo } from "../types/Cargo";
 import { Profile } from "../types/Profile";
 import { User } from "../types/User";
 
@@ -27,9 +27,8 @@ const GetUserData = (): User | null => {
                 decodedToken.name,
                 decodedToken.sub,
                 "",
-                [],
-                {} as Department,
-                decodedToken.roles
+                {} as Cargo,
+                []
             );
         }
     }

@@ -1,15 +1,16 @@
-import { useEffect, useState } from "react";
-import { FaGear } from "react-icons/fa6";
+import { useEffect, useRef, useState } from "react";
+import { FaBell, FaEye, FaEyeSlash, FaGear } from "react-icons/fa6";
+import { MdExitToApp } from "react-icons/md";
 import { Link, useLocation } from "react-router-dom";
 
 import "../assets/styles/header.css";
+import { useAuth } from "../context/AuthContext";
 import { usePermissions } from "../context/PermissionsContext";
+import { useWebSocket } from "../context/WebSocketContext";
 import { User } from "../types/User";
 
 import GetUserData from "./GetUserData";
 import ThemeSelector from "./ThemeSwitcher";
-import { useAuth } from "../context/AuthContext";
-import { MdExitToApp } from "react-icons/md";
 
 const Header: React.FC = () => {
     const location = useLocation();
@@ -18,11 +19,15 @@ const Header: React.FC = () => {
     const [canOpenTicket, setCanOpenTicket] = useState(false);
     const { hasPermission, isAdmin, permissions } = usePermissions();
     const { logout } = useAuth();
+    const { notifications, unreadNotifications, markAsRead, markAllAsRead } = useWebSocket();
+    const [dropdownVisible, setDropdownVisible] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement | null>(null);
+    const bellButtonRef = useRef<HTMLButtonElement | null>(null);
 
     useEffect(() => {
         setCanManageTicket(hasPermission("MANAGE_TICKET"));
         setCanOpenTicket(hasPermission("CREATE_TICKET"));
-    }, [permissions]);
+    }, [permissions, hasPermission]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -30,6 +35,26 @@ const Header: React.FC = () => {
             setUser(userData);
         };
         fetchData();
+    }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as Node;
+
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(target) &&
+                bellButtonRef.current &&
+                !bellButtonRef.current.contains(target)
+            ) {
+                setDropdownVisible(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
     }, []);
 
     const handleLogout = () => {
@@ -72,12 +97,51 @@ const Header: React.FC = () => {
                     </div>
                     <div className="col-3 text-end">
                         <button
-                            className="btn btn-settings"
+                            className="btn btn-settings me-3"
                             data-bs-toggle="modal"
                             data-bs-target="#configModal"
                         >
                             <FaGear />
                         </button>
+                        <div className="notification-wrapper">
+                            <button
+                                className="btn btn-settings position-relative"
+                                onClick={() => setDropdownVisible((prev) => !prev)}
+                                ref={bellButtonRef}
+                            >
+                                <FaBell />
+                                {unreadNotifications > 0 && (
+                                    <span className="notification-badge">{unreadNotifications}</span>
+                                )}
+                            </button>
+                            {dropdownVisible && (
+                                <div className="notification-dropdown" ref={dropdownRef}>
+                                    <div className="dropdown-header">
+                                        <span><FaBell /> {unreadNotifications} novas notificações</span>
+                                        <span onClick={markAllAsRead} className="mark-as-readed-btn mt-1"><FaEye /> Marcar tudo como lido</span>
+                                    </div>
+                                    <ul>
+                                        {notifications.map((n, i) => (
+                                            <li key={i} className={`${!n.read ? "unread" : ""}`}>
+                                                <div className="notification-content">
+                                                    <Link to={`/tickets/${n.typeId}`} className="notification-message">{n.message}</Link>
+                                                    <span>{new Date(n.createdAt).toLocaleString("pt-BR", {
+                                                        day: "2-digit",
+                                                        month: "2-digit",
+                                                        year: "2-digit",
+                                                        hour: "2-digit",
+                                                        minute: "2-digit"
+                                                    })}</span>
+                                                </div>
+                                                <span className="mark-as-readed-btn" onClick={() => markAsRead(Number(n.id))}>
+                                                    {!n.read ? <FaEye /> : <FaEyeSlash />}
+                                                </span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -121,7 +185,7 @@ const Header: React.FC = () => {
                     </div>
                 </div>
             </div>
-        </nav>
+        </nav >
     );
 };
 
