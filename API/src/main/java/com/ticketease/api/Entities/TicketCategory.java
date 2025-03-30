@@ -16,9 +16,6 @@ public class TicketCategory {
     private String name;
 
     @Setter
-    private Boolean receiveTickets;
-
-    @Setter
     @ManyToOne
     @JoinColumn(name = "department_id", nullable = true)
     private Department department;

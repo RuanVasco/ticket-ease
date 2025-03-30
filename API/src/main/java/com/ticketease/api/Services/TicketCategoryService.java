@@ -25,11 +25,10 @@ public class TicketCategoryService {
     private DepartmentRepository departmentRepository;
 
     @Transactional
-    public void addCategory(String name, Boolean receiveTickets, Department department, TicketCategory father) {
+    public void addCategory(String name, Department department, TicketCategory father) {
         try {
             TicketCategory category = new TicketCategory();
             category.setName(name);
-            category.setReceiveTickets(receiveTickets);
             category.setDepartment(department);
             category.setFather(father);
             ticketCategoryRepository.save(category);
@@ -57,7 +56,6 @@ public class TicketCategoryService {
         }
 
         ticketCategory.setName(ticketCategoryDTO.getName());
-        ticketCategory.setReceiveTickets(ticketCategoryDTO.getReceiveTickets());
         ticketCategory.setDepartment(department);
         ticketCategory.setFather(father);
         ticketCategoryRepository.save(ticketCategory);

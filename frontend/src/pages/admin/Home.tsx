@@ -1,5 +1,5 @@
 import { useState, useEffect, JSX } from "react";
-import { FaSuitcase, FaUser, FaUsers, FaStore, FaFolderOpen, FaIdBadge } from "react-icons/fa6";
+import { FaSuitcase, FaUser, FaUsers, FaStore, FaFolderOpen, FaIdBadge, FaClipboardList } from "react-icons/fa6";
 
 import Block from "../../components/Block";
 import { usePermissions } from "../../context/PermissionsContext";
@@ -18,6 +18,12 @@ const HomeAdmin: React.FC = () => {
             icon: <FaFolderOpen />,
             link: "/admin/ticket_category",
             description: "Gerenciar Categorias",
+        },
+        {
+            text: "Formulários",
+            icon: <FaClipboardList />,
+            link: "/admin/forms",
+            description: "Gerenciar Formulários",
         },
     ];
 
@@ -67,7 +73,9 @@ const HomeAdmin: React.FC = () => {
             for (const block of allBlocks) {
                 let entity = block.link.split("/").pop()?.toUpperCase() || "";
                 entity = removePlural(entity);
-                if (entity === "TICKET_CATEGORY") {
+
+                if (entity === "TICKET_CATEGORY" || entity === "FORM") {
+                    console.log(hasPermission("MANAGE_" + entity))
                     permissionResults[block.link] = hasPermission("MANAGE_" + entity);
                 } else {
                     permissionResults[block.link] = hasPermission("EDIT_" + entity);

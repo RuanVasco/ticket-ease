@@ -165,7 +165,6 @@ public class TicketCategoryController {
 
         ticketCategoryService.addCategory(
                 ticketCategoryDTO.getName(),
-                ticketCategoryDTO.getReceiveTickets(),
                 department,
                 fatherCategory
         );

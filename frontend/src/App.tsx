@@ -17,6 +17,7 @@ import Login from "./pages/Login";
 import ManageTickets from "./pages/ManageTickets";
 import TicketDetails from "./pages/TicketDetails";
 import ViewTickets from "./pages/ViewTickets";
+import FormManagement from "./pages/admin/FormManagement";
 
 function App() {
     const { hasPermission, isAdmin, loading, permissions } = usePermissions();
@@ -56,6 +57,7 @@ function App() {
                     <Route path="/admin/cargos" element={<CargoManagement />} />
                     <Route path="/admin/profiles" element={<ProfileManagement />} />
                     <Route path="/admin/ticket_category" element={<TicketCategoryManagement />} />
+                    <Route path="/admin/forms" element={<FormManagement />} />
                 </Route>
             )}
 

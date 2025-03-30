@@ -45,10 +45,6 @@
     border-bottom: 1px solid var(--static-secondary-color);
 }
 
-.page_title {
-    padding: 5px;
-}
-
 .notification-wrapper {
     position: relative;
     display: inline-block;

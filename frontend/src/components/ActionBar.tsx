@@ -6,7 +6,7 @@ import { FaPlus, FaMinus } from "react-icons/fa6";
 import ItemsPerPage from "./ItemsPerPage";
 
 interface ActionBarProps {
-    modalTargetId: string;
+    modalTargetId?: string;
     delEntityEndPoint: string;
     onCreate: () => void;
     onFilterChange: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -20,7 +20,7 @@ interface ActionBarProps {
 }
 
 const ActionBar: React.FC<ActionBarProps> = ({
-    modalTargetId,
+    modalTargetId = "",
     delEntityEndPoint,
     onCreate,
     onFilterChange,
@@ -75,8 +75,10 @@ const ActionBar: React.FC<ActionBarProps> = ({
                         {canCreate && (
                             <button
                                 className="btn btn-massive-actions me-2"
-                                data-bs-toggle="modal"
-                                data-bs-target={`#${modalTargetId}`}
+                                {...(modalTargetId !== "" && {
+                                    "data-bs-toggle": "modal",
+                                    "data-bs-target": `#${modalTargetId}`,
+                                })}
                                 onClick={onCreate}
                             >
                                 <AddIcon />
@@ -141,7 +143,7 @@ const ActionBar: React.FC<ActionBarProps> = ({
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

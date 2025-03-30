@@ -97,6 +97,11 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.PATCH, "/notifications/**").permitAll()
 						.requestMatchers(HttpMethod.GET, "/notifications/**").permitAll()
 
+						.requestMatchers(HttpMethod.GET, "/forms/**").permitAll()
+						.requestMatchers(HttpMethod.POST, "/forms/**").hasAnyAuthority("MANAGE_FORM")
+						.requestMatchers(HttpMethod.PUT, "/forms/**").hasAnyAuthority("MANAGE_FORM")
+						.requestMatchers(HttpMethod.DELETE, "/forms/**").hasAnyAuthority("MANAGE_FORM")
+
 						.anyRequest().authenticated()
 				)
 				.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

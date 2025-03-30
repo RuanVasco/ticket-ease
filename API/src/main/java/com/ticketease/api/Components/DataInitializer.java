@@ -115,6 +115,11 @@ public class DataInitializer implements CommandLineRunner {
             permissionManageTicketCategory.setDescription("Permite gerenciar categorias de tickets");
             allPermissions.add(permissionManageTicketCategory);
 
+            Permission permissionManageForms = new Permission();
+            permissionManageForms.setName("MANAGE_FORM");
+            permissionManageForms.setDescription("Permite gerenciar formulários");
+            allPermissions.add(permissionManageForms);
+
             Permission permissionCreateUnit = new Permission();
             permissionCreateUnit.setName("CREATE_UNIT");
             permissionCreateUnit.setDescription("Permite criar unidades");
@@ -181,7 +186,6 @@ public class DataInitializer implements CommandLineRunner {
             // Categoria de ticket (sempre cria, sem verificar)
             TicketCategory ticketCategory = new TicketCategory();
             ticketCategory.setName("Infraestrutura");
-            ticketCategory.setReceiveTickets(true);
             ticketCategory.setDepartment(TI);
             ticketCategoryRepository.save(ticketCategory);
 

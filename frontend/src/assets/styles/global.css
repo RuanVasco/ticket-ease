@@ -11,22 +11,22 @@
 } */
 
 :root {
-    --primary-color: #1f1f1f;
-    --secondary-color: #f9f9f9;
-    --primary-color-hover: #0e0e0e;
-    --secondary-color-hover: #e7e7e7;
+    --primary-color: #12263b;
+    --secondary-color: #f8f8ff;
+    --primary-color-hover: #060d14;
+    --secondary-color-hover: #e5e5ff;
 
-    --static-secondary-color: #f9f9f9;
-    --static-primary-color: #1f1f1f;
-    --static-secondary-color-hover: #e7e7e7;
-    --static-primary-color-hover: #0e0e0e;
+    --static-secondary-color: #f8f8ff;
+    --static-primary-color: #12263b;
+    --static-secondary-color-hover: #e5e5ff;
+    --static-primary-color-hover: #060d14;
 }
 
 [data-theme="dark"] {
-    --primary-color: #f9f9f9;
-    --secondary-color: #1f1f1f;
-    --primary-color-hover: #e7e7e7;
-    --secondary-color-hover: #0e0e0e;
+    --primary-color: #f8f8ff;
+    --secondary-color: #12263b;
+    --primary-color-hover: #e5e5ff;
+    --secondary-color-hover: #060d14;
 }
 
 body {

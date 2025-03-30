@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { FaBell, FaEye, FaEyeSlash, FaGear } from "react-icons/fa6";
-import { MdExitToApp } from "react-icons/md";
+import { FaBell, FaEye, FaEyeSlash, FaGear, FaPlus } from "react-icons/fa6";
 import { Link, useLocation } from "react-router-dom";
 
 import "../assets/styles/header.css";
+import logo from '../assets/logo_claro.png';
 import { useAuth } from "../context/AuthContext";
 import { usePermissions } from "../context/PermissionsContext";
 import { useWebSocket } from "../context/WebSocketContext";
@@ -11,6 +11,7 @@ import { User } from "../types/User";
 
 import GetUserData from "./GetUserData";
 import ThemeSelector from "./ThemeSwitcher";
+import { FaSlidersH, FaTasks } from "react-icons/fa";
 
 const Header: React.FC = () => {
     const location = useLocation();
@@ -23,6 +24,11 @@ const Header: React.FC = () => {
     const [dropdownVisible, setDropdownVisible] = useState(false);
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const bellButtonRef = useRef<HTMLButtonElement | null>(null);
+
+    const Logo = () => (
+        <img src={logo} alt="Logo" style={{ height: '35px' }} />
+    );
+
 
     useEffect(() => {
         setCanManageTicket(hasPermission("MANAGE_TICKET"));
@@ -69,33 +75,33 @@ const Header: React.FC = () => {
         <nav className="navbar navbar-expand-lg header-style">
             <div className="container">
                 <div className="row w-100 py-2">
-                    <div className="col-3">
-                        <h3 className="fw-bold my-auto">TicketEase</h3>
+                    <div className="col-2">
+                        <Logo />
                     </div>
-                    <div className="col-6 d-flex justify-content-center">
+                    <div className="col d-flex justify-content-center">
                         {canOpenTicket && (
                             <Link to="/" className={getActiveClass("/")}>
-                                Criar
+                                <FaPlus /><span className="ms-2">Abrir Ticket</span>
                             </Link>
                         )}
                         <Link to="/tickets" className={getActiveClass("/tickets")}>
-                            Visualizar
+                            <FaEye /><span className="ms-2">Visualizar Tickets</span>
                         </Link>
                         {canManageTicket && (
                             <Link
                                 to="/gerenciar-tickets"
                                 className={getActiveClass("/gerenciar-tickets")}
                             >
-                                Gerenciar
+                                <FaTasks /><span className="ms-2">Gerenciar Tickets</span>
                             </Link>
                         )}
                         {isAdmin && (
                             <Link to="/admin" className={getActiveClass("/admin")} target="_blank">
-                                Admin <MdExitToApp />
+                                <FaSlidersH /> Administação
                             </Link>
                         )}
                     </div>
-                    <div className="col-3 text-end">
+                    <div className="col-2 text-end">
                         <button
                             className="btn btn-settings me-3"
                             data-bs-toggle="modal"
@@ -124,7 +130,7 @@ const Header: React.FC = () => {
                                         {notifications.map((n, i) => (
                                             <li key={i} className={`${!n.read ? "unread" : ""}`}>
                                                 <div className="notification-content">
-                                                    <Link to={`/tickets/${n.typeId}`} className="notification-message">{n.message}</Link>
+                                                    <Link to={`/tickets/${n.typeId}`} className="notification-message" onClick={() => markAsRead(Number(n.id))}>{n.message}</Link>
                                                     <span>{new Date(n.createdAt).toLocaleString("pt-BR", {
                                                         day: "2-digit",
                                                         month: "2-digit",
