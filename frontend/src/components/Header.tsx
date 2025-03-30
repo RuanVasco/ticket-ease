@@ -72,85 +72,86 @@ const Header: React.FC = () => {
         location.pathname === path ? "tab_item_link tab_item_link_active" : "tab_item_link";
 
     return (
-        <nav className="navbar navbar-expand-lg header-style">
-            <div className="container">
-                <div className="row w-100 py-2">
-                    <div className="col-2">
-                        <Logo />
-                    </div>
-                    <div className="col d-flex justify-content-center">
-                        {canOpenTicket && (
-                            <Link to="/" className={getActiveClass("/")}>
-                                <FaPlus /><span className="ms-2">Abrir Ticket</span>
-                            </Link>
-                        )}
-                        <Link to="/tickets" className={getActiveClass("/tickets")}>
-                            <FaEye /><span className="ms-2">Visualizar Tickets</span>
+        <nav className="navbar navbar-expand-lg header-style px-4">
+            <div className="row w-100 py-2">
+                <div className="col-2">
+                    <Logo />
+                </div>
+                <div className="col d-flex justify-content-center">
+                    {canOpenTicket && (
+                        <Link to="/" className={getActiveClass("/")}>
+                            <FaPlus /><span className="ms-2">Abrir Ticket</span>
                         </Link>
-                        {canManageTicket && (
-                            <Link
-                                to="/gerenciar-tickets"
-                                className={getActiveClass("/gerenciar-tickets")}
-                            >
-                                <FaTasks /><span className="ms-2">Gerenciar Tickets</span>
-                            </Link>
-                        )}
-                        {isAdmin && (
-                            <Link to="/admin" className={getActiveClass("/admin")} target="_blank">
-                                <FaSlidersH /> Administação
-                            </Link>
-                        )}
-                    </div>
-                    <div className="col-2 text-end">
+                    )}
+                    <Link to="/tickets" className={getActiveClass("/tickets")}>
+                        <FaEye /><span className="ms-2">Visualizar Tickets</span>
+                    </Link>
+                    {canManageTicket && (
+                        <Link
+                            to="/gerenciar-tickets"
+                            className={getActiveClass("/gerenciar-tickets")}
+                        >
+                            <FaTasks /><span className="ms-2">Gerenciar Tickets</span>
+                        </Link>
+                    )}
+                    {isAdmin && (
+                        <Link to="/admin" className={getActiveClass("/admin")} target="_blank">
+                            <FaSlidersH /> Administação
+                        </Link>
+                    )}
+                </div>
+                <div className="col-2 d-flex justify-content-end p-0">
+                    <div className="me-3">
                         <button
-                            className="btn btn-settings me-3"
+                            className="btn btn-settings"
                             data-bs-toggle="modal"
                             data-bs-target="#configModal"
                         >
                             <FaGear />
                         </button>
-                        <div className="notification-wrapper">
-                            <button
-                                className="btn btn-settings position-relative"
-                                onClick={() => setDropdownVisible((prev) => !prev)}
-                                ref={bellButtonRef}
-                            >
-                                <FaBell />
-                                {unreadNotifications > 0 && (
-                                    <span className="notification-badge">{unreadNotifications}</span>
-                                )}
-                            </button>
-                            {dropdownVisible && (
-                                <div className="notification-dropdown" ref={dropdownRef}>
-                                    <div className="dropdown-header">
-                                        <span><FaBell /> {unreadNotifications} novas notificações</span>
-                                        <span onClick={markAllAsRead} className="mark-as-readed-btn mt-1"><FaEye /> Marcar tudo como lido</span>
-                                    </div>
-                                    <ul>
-                                        {notifications.map((n, i) => (
-                                            <li key={i} className={`${!n.read ? "unread" : ""}`}>
-                                                <div className="notification-content">
-                                                    <Link to={`/tickets/${n.typeId}`} className="notification-message" onClick={() => markAsRead(Number(n.id))}>{n.message}</Link>
-                                                    <span>{new Date(n.createdAt).toLocaleString("pt-BR", {
-                                                        day: "2-digit",
-                                                        month: "2-digit",
-                                                        year: "2-digit",
-                                                        hour: "2-digit",
-                                                        minute: "2-digit"
-                                                    })}</span>
-                                                </div>
-                                                <span className="mark-as-readed-btn" onClick={() => markAsRead(Number(n.id))}>
-                                                    {!n.read ? <FaEye /> : <FaEyeSlash />}
-                                                </span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
+                    </div>
+                    <div className="notification-wrapper">
+                        <button
+                            className="btn btn-settings position-relative"
+                            onClick={() => setDropdownVisible((prev) => !prev)}
+                            ref={bellButtonRef}
+                        >
+                            <FaBell />
+                            {unreadNotifications > 0 && (
+                                <span className="notification-badge">{unreadNotifications}</span>
                             )}
-                        </div>
+                        </button>
+                        {dropdownVisible && (
+                            <div className="notification-dropdown" ref={dropdownRef}>
+                                <div className="dropdown-header">
+                                    <span><FaBell /> {unreadNotifications} novas notificações</span>
+                                    <span onClick={markAllAsRead} className="mark-as-readed-btn mt-1"><FaEye /> Marcar tudo como lido</span>
+                                </div>
+                                <ul>
+                                    {notifications.map((n, i) => (
+                                        <li key={i} className={`${!n.read ? "unread" : ""}`}>
+                                            <div className="notification-content">
+                                                <Link to={`/tickets/${n.typeId}`} className="notification-message" onClick={() => markAsRead(Number(n.id))}>{n.message}</Link>
+                                                <span>{new Date(n.createdAt).toLocaleString("pt-BR", {
+                                                    day: "2-digit",
+                                                    month: "2-digit",
+                                                    year: "2-digit",
+                                                    hour: "2-digit",
+                                                    minute: "2-digit"
+                                                })}</span>
+                                            </div>
+                                            <span className="mark-as-readed-btn" onClick={() => markAsRead(Number(n.id))}>
+                                                {!n.read ? <FaEye /> : <FaEyeSlash />}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
+
             <div className="modal fade" id="configModal" tabIndex={-1}>
                 <div className="modal-dialog">
                     <div className="modal-content">
