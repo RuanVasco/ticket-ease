@@ -1,6 +1,5 @@
 package com.ticketease.api.Entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -21,7 +20,6 @@ public class Form {
 
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonBackReference
     private TicketCategory ticketCategory;
 
     private String title;

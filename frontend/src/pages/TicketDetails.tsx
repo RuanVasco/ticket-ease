@@ -109,7 +109,7 @@ const TicketDetails: React.FC = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const response = await axiosInstance.get(`${API_BASE_URL}/tickets/${id}`);
+                const response = await axiosInstance.get(`${API_BASE_URL}/ticket/${id}`);
                 setData(response.data);
             } catch (error: any) {
                 if (error.response?.status === 403) {

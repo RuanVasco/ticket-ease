@@ -43,7 +43,7 @@ function App() {
                 <Route element={<MainLayout />}>
                     <Route path="/" element={canOpenTicket ? <CreateTicket /> : <></>} />
                     <Route path="/tickets" element={<ViewTickets />} />
-                    <Route path="/tickets/:id" element={<TicketDetails />} />
+                    <Route path="/ticket/:id" element={<TicketDetails />} />
                     {canManageTicket && (
                         <Route path="/gerenciar-tickets" element={<ManageTickets />} />
                     )}

@@ -6,14 +6,19 @@ import "../assets/styles/create_ticket.css";
 import { TicketCategory } from "../types/TicketCategory";
 import { Form } from "../types/Form";
 import { DynamicForm } from "../components/DynamicForm";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 const CreateTicket: React.FC = () => {
     const [categories, setCategories] = useState<TicketCategory[]>([]);
     const [forms, setForms] = useState<Form[]>([]);
+    const [formData, setFormData] = useState<Record<string, any>>({});
     const [categoryPath, setCategoryPath] = useState<TicketCategory[]>([]);
     const [currentForm, setCurrentForm] = useState<Form>({} as Form);
+
+    const navigate = useNavigate();
 
     const fetchCategories = async (fatherId: string | null = null) => {
         try {
@@ -58,6 +63,25 @@ const CreateTicket: React.FC = () => {
         setCurrentForm(form);
     };
 
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        const data = {
+            formId: currentForm.id,
+            responses: Object.entries(formData).map(([fieldId, value]) => ({ fieldId, value }))
+        };
+
+        try {
+            const res = await axiosInstance.post(`${API_BASE_URL}/ticket`, data);
+            if (res.status === 200) {
+                toast.success("Ticket criado");
+                navigate(`/ticket/${res.data}`);
+            }
+        } catch (error) {
+            toast.error("Erro ao criar ticket");
+            console.error(error);
+        }
+    };
 
     const handleBack = () => {
         const newPath = [...categoryPath];
@@ -99,7 +123,7 @@ const CreateTicket: React.FC = () => {
                                         <div>
                                             <a
                                                 onClick={() => handleFormClick(item)}
-                                                className="d-flex align-items-center"
+                                                className="d-flex align-items-center tree_item"
                                                 role="button"
                                                 style={{ cursor: "pointer" }}
                                             >
@@ -110,11 +134,13 @@ const CreateTicket: React.FC = () => {
                                     </li>
                                 ))}
                                 {categories.map((item) => (
-                                    <li key={item.id}>
+                                    <li
+                                        key={item.id}
+                                        className="nav_forms_cat_item">
                                         <div>
                                             <a
                                                 onClick={() => handleCategoryClick(item)}
-                                                className="d-flex align-items-center"
+                                                className="d-flex align-items-center tree_item"
                                                 role="button"
                                                 style={{ cursor: "pointer" }}
                                             >
@@ -132,7 +158,10 @@ const CreateTicket: React.FC = () => {
                         {currentForm.fields && currentForm.fields.length != 0 && (
                             <DynamicForm
                                 form={currentForm}
+                                formData={formData}
+                                setFormData={setFormData}
                                 preview={false}
+                                handleSubmit={handleSubmit}
                             />
                         )}
                     </div>

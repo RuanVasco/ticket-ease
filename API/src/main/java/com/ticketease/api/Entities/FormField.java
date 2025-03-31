@@ -18,8 +18,6 @@ public class FormField {
 
     private String label;
 
-    private String name;
-
     @Enumerated(EnumType.STRING)
     private FieldTypeEnum type;
 

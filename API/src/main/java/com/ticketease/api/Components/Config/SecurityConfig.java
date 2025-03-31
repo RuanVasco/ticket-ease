@@ -70,10 +70,10 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.DELETE, "/users/**").hasAnyAuthority("DELETE_USER")
 
 						// TICKETS
-						.requestMatchers(HttpMethod.GET, "/tickets/**").permitAll()
-						.requestMatchers(HttpMethod.POST, "/tickets/**").hasAnyAuthority("CREATE_TICKET")
-						.requestMatchers(HttpMethod.PUT, "/tickets/**").hasAnyAuthority("EDIT_TICKET")
-						.requestMatchers(HttpMethod.DELETE, "/tickets/**").hasAnyAuthority("DELETE_TICKET")
+						.requestMatchers(HttpMethod.GET, "/ticket/**").permitAll()
+						.requestMatchers(HttpMethod.POST, "/ticket/**").hasAnyAuthority("CREATE_TICKET")
+						.requestMatchers(HttpMethod.PUT, "/ticket/**").hasAnyAuthority("EDIT_TICKET")
+						.requestMatchers(HttpMethod.DELETE, "/ticket/**").hasAnyAuthority("DELETE_TICKET")
 
 						// MESSAGES
 						.requestMatchers(HttpMethod.GET, "/messages/ticket/**").permitAll()

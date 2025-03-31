@@ -32,36 +32,7 @@ public class Ticket {
     private Set<User> observers = new HashSet<>();
 
     @Setter
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    @NotNull(message = "Name cannot be null")
-    TicketCategory ticketCategory;
-
-    @Setter
-    @NotNull(message = "Name cannot be null")
-    @Column(nullable = false)
-    private String name;
-
-    @Setter
-    @NotNull(message = "Name cannot be null")
-    @Column(nullable = false)
-    private String description;
-
-    @Setter
-    @Column(nullable = true)
-    private String observation;
-
-    @Setter
-    @ElementCollection
-    @CollectionTable(name = "ticket_files", joinColumns = @JoinColumn(name = "ticket_id"))
-    @Column(name = "file_path")
-    private List<String> filePaths;
-
-    @Setter
     private String status;
-
-    @Setter
-    private String urgency;
 
     @Setter
     private Boolean receiveEmail;
@@ -80,6 +51,15 @@ public class Ticket {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "closedAt", nullable = true)
     private Date closedAt;
+
+    @Setter
+    @ManyToOne
+    @JoinColumn(name = "form_id")
+    private Form form;
+
+    @Setter
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TicketResponse> responses;
 
     public boolean canManage(User user) {
         Department department = this.getDepartment();
@@ -111,7 +91,7 @@ public class Ticket {
 
 
     public Department getDepartment() {
-        return this.getTicketCategory().getDepartment();
+        return this.form.getDepartment();
     }
 
 }

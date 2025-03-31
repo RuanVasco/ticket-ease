@@ -1,5 +1,6 @@
 package com.ticketease.api.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -32,7 +33,7 @@ public class TicketCategory {
     private TicketCategory father;
 
     @OneToMany(mappedBy = "ticketCategory")
-    @JsonManagedReference
+    @JsonIgnore
     private List<Form> forms;
 
     public Department getDepartment() {

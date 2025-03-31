@@ -1,84 +1,26 @@
 package com.ticketease.api.Services;
 
-import com.ticketease.api.DTO.InputDTO.TicketInputDTO;
-import com.ticketease.api.Entities.Department;
-import com.ticketease.api.Entities.Ticket;
-import com.ticketease.api.Entities.TicketCategory;
-import com.ticketease.api.Entities.User;
-import com.ticketease.api.Repositories.TicketCategoryRepository;
+import com.ticketease.api.DTO.TicketDTO.TicketRequestDTO;
+import com.ticketease.api.Entities.*;
+import com.ticketease.api.Repositories.FormRepository;
 import com.ticketease.api.Repositories.TicketRepository;
-import com.ticketease.api.Repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
-import org.springframework.security.core.context.SecurityContextHolder;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class TicketService {
+    private final TicketRepository ticketRepository;
+    private final FormRepository formRepository;
 
-    @Autowired
-    TicketRepository ticketRepository;
-
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    TicketCategoryRepository ticketCategoryRepository;
-
-    @Autowired
-    FileStorageService fileStorageService;
-
-    public Ticket openTicket(TicketInputDTO ticketInputDTO, List<MultipartFile> files, User user) {
-        Ticket ticket = new Ticket();
-
-        Optional<TicketCategory> optionalTicketCategory = ticketCategoryRepository.findById(ticketInputDTO.ticketCategory_id());
-
-        if (optionalTicketCategory.isEmpty()) {
-            return null;
-        }
-
-        if (ticketInputDTO.name().isEmpty()) {
-            return null;
-        }
-
-        if (ticketInputDTO.description().isEmpty()) {
-            return null;
-        }
-
-        ticket.setUser(user);
-        ticket.setTicketCategory(optionalTicketCategory.get());
-        ticket.setName(ticketInputDTO.name());
-        ticket.setDescription(ticketInputDTO.description());
-        ticket.setStatus("Novo");
-        ticket.setUrgency(ticketInputDTO.urgency());
-        ticket.setReceiveEmail(ticketInputDTO.receiveEmail());
-        ticket.setCreatedAt(new Date());
-        ticket.setUpdatedAt(new Date());
-
-        if (ticketInputDTO.observation() != null) {
-            ticket.setObservation(ticketInputDTO.observation());
-        }
-
-        List<String> filePaths = new ArrayList<>();
-
-        if (files != null && !files.isEmpty()) {
-            for (MultipartFile file : files) {
-                String filePath = fileStorageService.store(file);
-                filePaths.add(filePath);
-            }
-        }
-
-        ticket.setFilePaths(filePaths);
-
-        return ticketRepository.save(ticket);
-    }
-
-    public Page<Ticket> getTicketsByUserId(Long userId, String status, Pageable pageable) {
-        return ticketRepository.findByUserIdAndStatus(userId, status, pageable);
+    public Optional<Ticket> findById(Long ticketId) {
+        return ticketRepository.findById(ticketId);
     }
 
     public List<Ticket> getTicketsByRelatedUser(User user) {
@@ -90,41 +32,35 @@ public class TicketService {
                 .toList();
     }
 
-    @Transactional
-    public Page<Ticket> getUserManageableTickets(Pageable pageable, String status, Department department) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public Ticket create(TicketRequestDTO ticketRequestDTO, User user) {
+        Form form = formRepository.findById(ticketRequestDTO.formId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Formulário não encontrado"));
 
-        Page<Ticket> allTickets = ticketRepository.findByStatus(status, pageable);
+        Ticket ticket = new Ticket();
+        ticket.setUser(user);
+        ticket.setForm(form);
+        ticket.setStatus("ABERTO");
+        ticket.setCreatedAt(new Date());
+        ticket.setUpdatedAt(new Date());
+        ticket.setReceiveEmail(true);
 
-        List<Ticket> filtered = allTickets
-                .stream()
-                .filter(t -> t.canManage(user) && t.getDepartment().equals(department))
+        List<TicketResponse> responses = ticketRequestDTO.responses().stream()
+                .map(dto -> {
+                    FormField field = form.getFields().stream()
+                            .filter(f -> f.getId().equals(dto.fieldId()))
+                            .findFirst()
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Campo não encontrado no formulário"));
+                    TicketResponse response = new TicketResponse();
+                    response.setField(field);
+                    response.setValue(dto.value());
+                    response.setTicket(ticket);
+                    return response;
+                })
                 .toList();
 
-        return new PageImpl<>(filtered, pageable, filtered.size());
+        ticket.setResponses(responses);
+
+        return ticketRepository.save(ticket);
     }
 
-    @Transactional
-    public Page<Ticket> searchUserTickets(String query, String status, Pageable pageable) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        return ticketRepository.findByUserAndStatus(user, status, query, pageable);
-    }
-
-    @Transactional
-    public Page<Ticket> searchUserManageableTickets(String query, String status, Pageable pageable) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        Page<Ticket> relatedTickets = ticketRepository.findByStatusAndQuery(status, query, pageable);
-        List<Ticket> filteredTickets = relatedTickets
-                .stream()
-                .filter((ticket -> ticket.canManage(user)))
-                .toList();
-
-        return new PageImpl<>(filteredTickets, pageable, filteredTickets.size());
-    }
-
-    public Optional<Ticket> findById(Long ticketId) {
-        return ticketRepository.findById(ticketId);
-    }
 }

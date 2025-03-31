@@ -128,7 +128,7 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
 
     return (
         <div className="p-3 border rounded shadow-sm bg-light">
-            <h4 className="fw-bold mb-2">Criar Formulário</h4>
+            <h3 className="fw-bold mb-3 text-center border-bottom pb-2">Criar Formulário</h3>
             <label htmlFor="form_title" className="form-label">Título</label>
             <input
                 className="form-control"

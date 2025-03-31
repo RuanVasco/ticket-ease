@@ -94,7 +94,6 @@ public class FormController {
         for (FormFieldDTO dto : formDTO.getFields()) {
             FormField field = new FormField();
             field.setLabel(dto.getLabel());
-            field.setName(dto.getName());
             field.setType(FieldTypeEnum.valueOf(dto.getType().toUpperCase()));
             field.setRequired(dto.isRequired());
             field.setPlaceholder(dto.getPlaceholder());
@@ -130,7 +129,6 @@ public class FormController {
         for (FormFieldDTO dto : formDTO.getFields()) {
             FormField field = new FormField();
             field.setLabel(dto.getLabel());
-            field.setName(dto.getName());
             field.setType(FieldTypeEnum.valueOf(dto.getType().toUpperCase()));
             field.setRequired(dto.isRequired());
             field.setPlaceholder(dto.getPlaceholder());
