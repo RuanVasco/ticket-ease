@@ -8,10 +8,8 @@ import java.util.List;
 @Getter
 @Setter
 public class FormDTO {
-    private Long id;
     private String title;
     private String description;
-    private Long userId;
     private Long ticketCategoryId;
     private List<FormFieldDTO> fields;
 }

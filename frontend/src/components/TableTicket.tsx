@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 import axiosInstance from "./AxiosConfig";
-import DateFormatter from "./DateFormatter";
+import DateFormatter from "./Util/DateFormatter";
 import ItemsPerPage from "./ItemsPerPage";
 import Pagination from "./Pagination";
 

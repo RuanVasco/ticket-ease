@@ -4,7 +4,7 @@ import { FaPlus, FaTrash, FaUserMinus, FaUserPlus } from "react-icons/fa6";
 import ActionBar from "../../components/ActionBar";
 import axiosInstance from "../../components/AxiosConfig";
 import Pagination from "../../components/Pagination";
-import PhoneInput from "../../components/PhoneInput";
+import PhoneInput from "../../components/Fields/PhoneInput";
 import Table from "../../components/Table";
 import { usePermissions } from "../../context/PermissionsContext";
 import { Cargo } from "../../types/Cargo";

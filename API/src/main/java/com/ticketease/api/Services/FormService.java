@@ -42,4 +42,12 @@ public class FormService {
     public void deleteForm(Long id) {
         formRepository.deleteById(id);
     }
+
+    public Form save(Form existingForm) {
+        return formRepository.save(existingForm);
+    }
+
+    public List<Form> findByTicketCategory(Long categoryId) {
+        return  formRepository.findByTicketCategoryId(categoryId);
+    }
 }

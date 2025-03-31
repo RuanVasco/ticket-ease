@@ -1,5 +1,6 @@
 package com.ticketease.api.Entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.ticketease.api.Enums.FieldTypeEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -30,5 +31,6 @@ public class FormField {
     private List<String> options;
 
     @ManyToOne
+    @JsonBackReference
     private Form form;
 }

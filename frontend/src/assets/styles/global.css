@@ -108,3 +108,15 @@ a:hover {
     color: var(--primary-color-hover);
     border: 1px solid var(--primary-color-hover);
 }
+
+input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+    -webkit-appearance: none;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}

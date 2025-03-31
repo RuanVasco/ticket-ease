@@ -3,6 +3,8 @@ package com.ticketease.api.Entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @Entity
@@ -23,6 +25,7 @@ public class TicketCategory {
     @Setter
     @ManyToOne
     @JoinColumn(name = "father_id", nullable = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private TicketCategory father;
 
     public Department getDepartment() {

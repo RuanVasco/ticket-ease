@@ -1,13 +1,12 @@
 package com.ticketease.api.Controllers;
 
 import com.ticketease.api.DTO.TicketCategoryDTO;
-import com.ticketease.api.Entities.Department;
-import com.ticketease.api.Entities.Ticket;
-import com.ticketease.api.Entities.TicketCategory;
-import com.ticketease.api.Entities.User;
+import com.ticketease.api.Entities.*;
 import com.ticketease.api.Repositories.DepartmentRepository;
 import com.ticketease.api.Repositories.TicketCategoryRepository;
+import com.ticketease.api.Services.FormService;
 import com.ticketease.api.Services.TicketCategoryService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -23,6 +22,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("tickets-category")
+@RequiredArgsConstructor
 public class TicketCategoryController {
 
     @Autowired
@@ -34,9 +34,15 @@ public class TicketCategoryController {
     @Autowired
     DepartmentRepository departmentRepository;
 
-    @GetMapping("/")
-    public ResponseEntity<?> getAll() {
-        return ResponseEntity.ok(ticketCategoryRepository.findAll());
+    private final FormService formService;
+
+    @GetMapping
+    public ResponseEntity<?> getAllByFather(@RequestParam(required = false) Long fatherId) {
+        if (fatherId == null) {
+            return ResponseEntity.ok(ticketCategoryService.findRootCategories());
+        } else {
+            return ResponseEntity.ok(ticketCategoryService.findByFather(fatherId));
+        }
     }
 
     @GetMapping("/fathers")
@@ -62,7 +68,7 @@ public class TicketCategoryController {
         List<TicketCategory> filteredList = allCategories.stream()
                 .filter(category -> {
                     Department dept = category.getDepartment();
-                    return user.hasPermission("MANAGE_TICKET_CATEGORY", dept) || user.hasPermission("MANAGE_TICKET_CATEGORY", null);
+                    return user.hasPermission("MANAGE_TICKET_CATEGORY", dept);
                 })
                 .toList();
 
@@ -97,7 +103,7 @@ public class TicketCategoryController {
         List<Department> all = departmentRepository.findByReceivesRequests(true);
 
         List<Department> filtered = all.stream()
-                .filter(dept -> user.hasPermission("MANAGE_TICKET_CATEGORY", dept) || user.hasPermission("MANAGE_TICKET_CATEGORY", null))
+                .filter(dept -> user.hasPermission("MANAGE_TICKET_CATEGORY", dept))
                 .toList();
 
         return ResponseEntity.ok(filtered);
@@ -120,6 +126,11 @@ public class TicketCategoryController {
 
         List<TicketCategory> categories = ticketCategoryRepository.findByDepartmentIdIn(allowedDeptIds);
         return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping("/forms/{formId}")
+    public ResponseEntity<?> getForms(@PathVariable Long formId) {
+        return ResponseEntity.ok(formService.findByTicketCategory(formId));
     }
 
     @PostMapping
@@ -153,7 +164,7 @@ public class TicketCategoryController {
             }
 
             Department parentDept = fatherCategory.getDepartment();
-            if (!user.hasPermission("MANAGE_TICKET_CATEGORY", parentDept)) {
+            if (!user.hasPermission("MANAGE_TICKET_CATEGORY", parentDept) && !user.hasPermission("MANAGE_TICKET_CATEGORY", null)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body("Você não tem permissão para criar categoria nesse departamento.");
             }

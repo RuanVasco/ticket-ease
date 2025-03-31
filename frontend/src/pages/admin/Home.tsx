@@ -75,7 +75,6 @@ const HomeAdmin: React.FC = () => {
                 entity = removePlural(entity);
 
                 if (entity === "TICKET_CATEGORY" || entity === "FORM") {
-                    console.log(hasPermission("MANAGE_" + entity))
                     permissionResults[block.link] = hasPermission("MANAGE_" + entity);
                 } else {
                     permissionResults[block.link] = hasPermission("EDIT_" + entity);

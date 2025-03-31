@@ -52,6 +52,15 @@ public class User implements UserDetails {
         this.password = passwordEncoder.encode(password);
     }
 
+    public boolean hasPermissionInAnyDepartment(String permissionName) {
+        if (permissionName == null || permissionName.isEmpty()) return false;
+
+        return roleBindings.stream()
+                .map(UserRoleDepartment::getRole)
+                .flatMap(role -> role.getPermissions().stream())
+                .anyMatch(permission -> permissionName.equals(permission.getName()));
+    }
+
     public boolean hasPermission(String permissionName, Department department) {
         if (permissionName == null || permissionName.isEmpty()) {
             return false;
@@ -65,8 +74,9 @@ public class User implements UserDetails {
             boolean isExactMatch = department != null && bindingDept != null &&
                     bindingDept.getId().equals(department.getId());
 
-            boolean isDepartmentRelevant = (department == null && isGlobal)
-                    || (department != null && (isExactMatch));
+            boolean isDepartmentRelevant = department == null
+                    ? isGlobal
+                    : (isExactMatch || isGlobal);
 
             if (!isDepartmentRelevant) continue;
 

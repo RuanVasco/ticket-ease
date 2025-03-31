@@ -9,23 +9,29 @@ interface Column {
 interface TableProps {
     columns: Column[];
     data: Record<string, any>[];
-    modalID: string;
+    modalID?: string;
     mode?: "admin" | "readonly";
-    handleModalOpen: (action: string, mode: string, id: string) => void;
+    handleModalOpen?: (action: string, mode: string, id: string) => void;
     filterText: string;
     canEdit?: boolean;
     canDelete?: boolean;
+    showView?: boolean;
+    onEditClick?: (row: any) => void;
+    onDeleteClick?: (row: any) => void;
 }
 
 const Table: React.FC<TableProps> = ({
     columns,
     data,
-    modalID,
+    modalID = "",
     mode = "admin",
-    handleModalOpen,
+    handleModalOpen = null,
     filterText,
     canDelete = false,
     canEdit = false,
+    showView = true,
+    onEditClick,
+    onDeleteClick,
 }) => {
     const filteredData = data.filter((row) =>
         columns.some((column) => {
@@ -59,38 +65,58 @@ const Table: React.FC<TableProps> = ({
                                 <input type="checkbox" className="massive-actions" value={row.id} />
                             </td>
                             <td className="col-auto-width">
-                                <button
-                                    className="btn btn-warning me-1"
-                                    data-bs-toggle="modal"
-                                    data-bs-target={`#${modalID}`}
-                                    onClick={() =>
-                                        handleModalOpen("Visualizar", "readonly", row.id)
-                                    }
-                                >
-                                    <FaEye />
-                                </button>
+                                {showView && (
+                                    <button
+                                        className="btn btn-warning me-1"
+                                        data-bs-toggle="modal"
+                                        data-bs-target={`#${modalID}`}
+                                        onClick={handleModalOpen ? () => handleModalOpen("Visualizar", "readonly", row.id) : undefined}
+                                    >
+                                        <FaEye />
+                                    </button>
+                                )}
                                 {mode !== "readonly" && (
                                     <>
                                         {canEdit && (
                                             <button
                                                 className="btn btn-secondary me-1"
-                                                data-bs-toggle="modal"
-                                                data-bs-target={`#${modalID}`}
+                                                {...(modalID && !onEditClick
+                                                    ? {
+                                                        "data-bs-toggle": "modal",
+                                                        "data-bs-target": `#${modalID}`,
+                                                    }
+                                                    : {})}
                                                 onClick={() =>
-                                                    handleModalOpen("Editar", "update", row.id)
+                                                    onEditClick
+                                                        ? onEditClick(row)
+                                                        : handleModalOpen?.("Editar", "update", row.id)
                                                 }
                                             >
                                                 <FaPencil />
                                             </button>
                                         )}
+
                                         {canDelete && (
                                             <button
                                                 className="btn btn-danger"
-                                                data-bs-toggle="modal"
-                                                data-bs-target={`#${modalID}`}
-                                                onClick={() =>
-                                                    handleModalOpen("Excluir", "delete", row.id)
-                                                }
+                                                {...(modalID && !onDeleteClick
+                                                    ? {
+                                                        "data-bs-toggle": "modal",
+                                                        "data-bs-target": `#${modalID}`,
+                                                    }
+                                                    : {})}
+                                                onClick={() => {
+                                                    if (onDeleteClick) {
+                                                        onDeleteClick(row);
+                                                        const modalElement = document.getElementById(modalID!);
+                                                        if (modalElement) {
+                                                            const modal = new (window as any).bootstrap.Modal(modalElement);
+                                                            modal.show();
+                                                        }
+                                                    } else {
+                                                        handleModalOpen?.("Excluir", "delete", row.id);
+                                                    }
+                                                }}
                                             >
                                                 <FaCircleXmark />
                                             </button>

@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("forms")
@@ -35,6 +37,21 @@ public class FormController {
     @GetMapping
     public ResponseEntity<List<Form>> getAllForms() {
         return ResponseEntity.ok(formService.getAllForms());
+    }
+
+    @GetMapping("/field-types")
+    public ResponseEntity<List<String>> getFieldTypeNames() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (!user.hasPermissionInAnyDepartment("MANAGE_FORM")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(List.of("Você não tem permissão."));
+        }
+
+        List<String> names = Arrays.stream(FieldTypeEnum.values())
+                .map(Enum::name)
+                .toList();
+
+        return ResponseEntity.ok(names);
     }
 
     @GetMapping("/pageable")
@@ -55,19 +72,23 @@ public class FormController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Form> getFormById(@PathVariable Long id) {
-        return formService.getFormById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> getFormById(@PathVariable Long id) {
+        Form form = formService.getFormById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Form not found"));
+
+        return ResponseEntity.ok(form);
     }
 
     @PostMapping
     public ResponseEntity<Form> createForm(@RequestBody FormDTO formDTO) {
-        User user = userRepository.findById(formDTO.getUserId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         TicketCategory ticketCategory = ticketCategoryRepository.findById(formDTO.getTicketCategoryId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket category not found"));
+
+        if (!user.hasPermission("MANAGE_FORM", ticketCategory.getDepartment()) && !user.hasPermission("MANAGE_FORM", null)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         List<FormField> fields = new ArrayList<>();
         for (FormFieldDTO dto : formDTO.getFields()) {
@@ -87,8 +108,57 @@ public class FormController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedForm);
     }
 
+    @PutMapping("{formId}")
+    public ResponseEntity<Form> updateForm(@PathVariable Long formId, @RequestBody FormDTO formDTO) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Form existingForm = formService.getFormById(formId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Formulário não encontrado"));
+
+        if (!user.hasPermission("MANAGE_FORM", existingForm.getDepartment()) && !user.hasPermission("MANAGE_FORM", null)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        TicketCategory ticketCategory = ticketCategoryRepository.findById(formDTO.getTicketCategoryId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket category not found"));
+
+        existingForm.getFields().clear();
+        existingForm.setTitle(formDTO.getTitle());
+        existingForm.setDescription(formDTO.getDescription());
+        existingForm.setTicketCategory(ticketCategory);
+
+        for (FormFieldDTO dto : formDTO.getFields()) {
+            FormField field = new FormField();
+            field.setLabel(dto.getLabel());
+            field.setName(dto.getName());
+            field.setType(FieldTypeEnum.valueOf(dto.getType().toUpperCase()));
+            field.setRequired(dto.isRequired());
+            field.setPlaceholder(dto.getPlaceholder());
+            field.setOptions(dto.getOptions());
+            field.setForm(existingForm);
+            existingForm.getFields().add(field);
+        }
+
+        Form updatedForm = formService.save(existingForm);
+
+        return ResponseEntity.ok(updatedForm);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteForm(@PathVariable Long id) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Optional<Form> optionalForm = formService.getFormById(id);
+        if (optionalForm.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Form existingForm = optionalForm.get();
+
+        if (!user.hasPermission("MANAGE_FORM", existingForm.getDepartment()) && !user.hasPermission("MANAGE_FORM", null)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         formService.deleteForm(id);
         return ResponseEntity.noContent().build();
     }

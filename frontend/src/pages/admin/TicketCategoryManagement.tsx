@@ -7,6 +7,8 @@ import Table from "../../components/Table";
 import { Department } from "../../types/Department";
 import { TicketCategory } from "../../types/TicketCategory";
 import { fetchCategories } from "../../services/TicketCategoryService";
+import { closeModal } from "../../components/Util/CloseModal";
+import { toast } from "react-toastify";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -67,17 +69,16 @@ const TicketCategoryManagement: React.FC = () => {
 
     useEffect(() => {
         fetchData();
+        fetchDepartments();
+        loadCategories();
     }, [currentPage, pageSize]);
 
-    useEffect(() => {
-        const loadCategories = async () => {
-            const categories = await fetchCategories();
-            setCategories(categories);
-        };
-        loadCategories();
-    }, []);
+    const loadCategories = async () => {
+        const categories = await fetchCategories();
+        setCategories(categories);
+    };
+
     const handleModalOpen = async (action: string, mode: string, idCategory?: string) => {
-        fetchDepartments();
         setModalTitle(`${action} Categoria de Formulário`);
         setModeModal(mode);
 
@@ -131,20 +132,24 @@ const TicketCategoryManagement: React.FC = () => {
             };
 
             let res;
+            let message;
             switch (submitType) {
                 case "delete":
                     res = await axiosInstance.delete(
                         `${API_BASE_URL}/tickets-category/${currentCategory.id}`
                     );
+                    message = "Categoria removida com sucesso!"
                     break;
                 case "add":
                     res = await axiosInstance.post(`${API_BASE_URL}/tickets-category`, payload);
+                    message = "Categoria criada com sucesso!"
                     break;
                 case "update":
                     res = await axiosInstance.put(
                         `${API_BASE_URL}/tickets-category/${currentCategory.id}`,
                         payload
                     );
+                    message = "Categoria atualizada com sucesso!"
                     break;
                 default:
                     console.error("Invalid submit type");
@@ -160,9 +165,11 @@ const TicketCategoryManagement: React.FC = () => {
                 });
 
                 setCurrentPage(0);
-                window.location.reload();
-            } else {
-                console.error("Error submitting data:", res.status);
+                fetchData();
+                loadCategories();
+                fetchDepartments();
+                closeModal("modal");
+                toast.success(message);
             }
         } catch (error) {
             console.error("Error submitting data:", error);

@@ -35,29 +35,15 @@ export class TicketCategory {
     }
 
     buildPath(): string {
-        let path = "";
-        let current: TicketCategory | null = this.father;
-        let temp: Department | null = null;
+        const parts: string[] = [];
+        let current: TicketCategory | null = this;
 
-        if (current) {
-            temp = current.getDepartment();
-
-            while (current) {
-                path = `${current.name}${path ? " > " + path : ""}`;
-                temp = current.getDepartment();
-                current = current.father ?? null;
-            }
-
-            if (temp) {
-                path = `${temp.name} > ${path}`;
-            }
-        } else {
-            path = this.department.name;
+        while (current) {
+            parts.unshift(current.name);
+            current = current.father ?? null;
         }
 
-        path += ` > ${this.name}`;
-
-        return path;
+        return parts.join(" > ");
     }
 
     static fromJSON(data: any): TicketCategory {

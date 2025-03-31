@@ -4,7 +4,7 @@ import { FaPaperclip } from "react-icons/fa6";
 import { useParams } from "react-router-dom";
 
 import axiosInstance from "../components/AxiosConfig";
-import DateFormatter from "../components/DateFormatter";
+import DateFormatter from "../components/Util/DateFormatter";
 import getUserData from "../components/GetUserData";
 import { usePermissions } from "../context/PermissionsContext";
 import { useWebSocket } from "../context/WebSocketContext";
@@ -145,7 +145,7 @@ const TicketDetails: React.FC = () => {
         };
 
         fetchMessages();
-        return () => {};
+        return () => { };
     }, [id, data?.status]);
 
     useEffect(() => {
