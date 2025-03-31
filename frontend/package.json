@@ -12,6 +12,7 @@
     "dependencies": {
         "@stomp/stompjs": "^7.0.1",
         "axios": "^1.8.3",
+        "bootstrap": "^5.3.3",
         "imask": "^7.6.1",
         "jwt-decode": "^4.0.0",
         "react": "^19.0.0",
@@ -23,6 +24,7 @@
     },
     "devDependencies": {
         "@eslint/js": "^9.21.0",
+        "@types/bootstrap": "^5.2.10",
         "@types/react": "^19.0.10",
         "@types/react-dom": "^19.0.4",
         "@types/react-icons": "^3.0.0",

@@ -1,5 +1,6 @@
 import { FaEye, FaPencil, FaCircleXmark } from "react-icons/fa6";
 import "../assets/styles/table.css";
+import { Modal } from "bootstrap";
 
 interface Column {
     value: string;
@@ -108,9 +109,10 @@ const Table: React.FC<TableProps> = ({
                                                 onClick={() => {
                                                     if (onDeleteClick) {
                                                         onDeleteClick(row);
+
                                                         const modalElement = document.getElementById(modalID!);
                                                         if (modalElement) {
-                                                            const modal = new (window as any).bootstrap.Modal(modalElement);
+                                                            const modal = Modal.getInstance(modalElement) || new Modal(modalElement);
                                                             modal.show();
                                                         }
                                                     } else {

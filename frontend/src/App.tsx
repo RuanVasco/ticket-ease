@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 import { usePermissions } from "./context/PermissionsContext";
 import AdminLayout from "./layouts/AdminLayout";
 import MainLayout from "./layouts/MainLayout";

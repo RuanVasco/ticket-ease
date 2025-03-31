@@ -5,6 +5,7 @@ import axiosInstance from "../components/AxiosConfig";
 import "../assets/styles/create_ticket.css";
 import { TicketCategory } from "../types/TicketCategory";
 import { Form } from "../types/Form";
+import { DynamicForm } from "../components/DynamicForm";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -12,6 +13,7 @@ const CreateTicket: React.FC = () => {
     const [categories, setCategories] = useState<TicketCategory[]>([]);
     const [forms, setForms] = useState<Form[]>([]);
     const [categoryPath, setCategoryPath] = useState<TicketCategory[]>([]);
+    const [currentForm, setCurrentForm] = useState<Form>({} as Form);
 
     const fetchCategories = async (fatherId: string | null = null) => {
         try {
@@ -44,10 +46,18 @@ const CreateTicket: React.FC = () => {
     }, []);
 
     const handleCategoryClick = (category: TicketCategory) => {
+        setCategories([]);
+        setForms([]);
+
         setCategoryPath([...categoryPath, category]);
         fetchCategories(category.id);
         fetchForms(category.id);
     };
+
+    const handleFormClick = (form: Form) => {
+        setCurrentForm(form);
+    };
+
 
     const handleBack = () => {
         const newPath = [...categoryPath];
@@ -76,15 +86,19 @@ const CreateTicket: React.FC = () => {
                                         <span className="ms-2">{categoryPath[categoryPath.length - 1]?.name}</span>
                                     </button>
                                 ) : (
-                                    <span>Departamentos</span>
+                                    <span>Selecione um categoria</span>
                                 )}
                             </div>
 
                             <ul className="mt-2 nav_forms_cat_list">
                                 {forms.map((item) => (
-                                    <li key={item.id}>
+                                    <li
+                                        key={item.id}
+                                        className={`nav_forms_cat_item${currentForm.id === item.id ? " item_selected" : ""}`}
+                                    >
                                         <div>
                                             <a
+                                                onClick={() => handleFormClick(item)}
                                                 className="d-flex align-items-center"
                                                 role="button"
                                                 style={{ cursor: "pointer" }}
@@ -114,7 +128,14 @@ const CreateTicket: React.FC = () => {
                             </ul>
                         </div>
                     </div>
-                    <div className="col border-start ps-4 form_box"></div>
+                    <div className="col border-start ps-4 form_box">
+                        {currentForm.fields && currentForm.fields.length != 0 && (
+                            <DynamicForm
+                                form={currentForm}
+                                preview={false}
+                            />
+                        )}
+                    </div>
                 </div>
             </div>
         </main>

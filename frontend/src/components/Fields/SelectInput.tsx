@@ -1,12 +1,13 @@
 interface SelectInputProps {
     label: string;
     required?: boolean;
+    disabled?: boolean;
     value: string;
-    setValue: (value: string) => void;
     options: string[];
+    onChange: (value: string) => void;
 }
 
-const SelectInput: React.FC<SelectInputProps> = ({ value, setValue, label, required = false, options }) => {
+const SelectInput: React.FC<SelectInputProps> = ({ value, label, required = false, disabled = false, options, onChange }) => {
     return (
         <div>
             <label className="form-label">
@@ -15,7 +16,8 @@ const SelectInput: React.FC<SelectInputProps> = ({ value, setValue, label, requi
             <select
                 className="form-select"
                 value={value}
-                onChange={(e) => setValue(e.target.value)}
+                disabled={disabled}
+                onChange={(e) => onChange(e.target.value)}
             >
                 <option value="">Selecione...</option>
                 {options?.map((opt, i) => (

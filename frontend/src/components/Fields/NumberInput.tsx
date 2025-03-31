@@ -1,11 +1,12 @@
 interface NumberInputProps {
     label: string;
     required?: boolean;
+    disabled?: boolean;
     value: number;
-    setValue: (value: number) => void;
+    onChange: (value: string) => void;
 }
 
-const NumberInput: React.FC<NumberInputProps> = ({ value, setValue, label, required = false }) => {
+const NumberInput: React.FC<NumberInputProps> = ({ value, label, required = false, disabled = false, onChange }) => {
     return (
         <div>
             <label className="form-label">
@@ -20,7 +21,8 @@ const NumberInput: React.FC<NumberInputProps> = ({ value, setValue, label, requi
                 min={0}
                 max={100}
                 step={1}
-                onChange={(e) => setValue(Number(e.target.value))}
+                disabled={disabled}
+                onChange={(e) => onChange(e.target.value)}
             />
         </div>
     );
