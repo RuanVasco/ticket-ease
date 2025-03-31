@@ -36,13 +36,9 @@ public class TicketCategoryController {
 
     private final FormService formService;
 
-    @GetMapping
-    public ResponseEntity<?> getAllByFather(@RequestParam(required = false) Long fatherId) {
-        if (fatherId == null) {
-            return ResponseEntity.ok(ticketCategoryService.findRootCategories());
-        } else {
-            return ResponseEntity.ok(ticketCategoryService.findByFather(fatherId));
-        }
+    @GetMapping("/with-form")
+    public ResponseEntity<?> getCategoriesWithFormLeaf(@RequestParam(required = false) Long fatherId) {
+        return ResponseEntity.ok(ticketCategoryService.findChildrenWithFormDescendants(fatherId));
     }
 
     @GetMapping("/fathers")

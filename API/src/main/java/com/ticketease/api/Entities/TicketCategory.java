@@ -1,10 +1,13 @@
 package com.ticketease.api.Entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+
+import java.util.List;
 
 @Getter
 @Entity
@@ -27,6 +30,10 @@ public class TicketCategory {
     @JoinColumn(name = "father_id", nullable = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private TicketCategory father;
+
+    @OneToMany(mappedBy = "ticketCategory")
+    @JsonManagedReference
+    private List<Form> forms;
 
     public Department getDepartment() {
         if (this.department != null) {

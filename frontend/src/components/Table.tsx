@@ -34,6 +34,8 @@ const Table: React.FC<TableProps> = ({
     onEditClick,
     onDeleteClick,
 }) => {
+    if (!data || data.length === 0) return (<div className="text-center">Sem dados</div>);
+
     const filteredData = data.filter((row) =>
         columns.some((column) => {
             const cellValue = row[column.value];

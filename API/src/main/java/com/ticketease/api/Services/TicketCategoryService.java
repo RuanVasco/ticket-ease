@@ -4,17 +4,19 @@ import com.ticketease.api.DTO.TicketCategoryDTO;
 import com.ticketease.api.Entities.Department;
 import com.ticketease.api.Entities.TicketCategory;
 import com.ticketease.api.Repositories.DepartmentRepository;
+import com.ticketease.api.Repositories.FormRepository;
 import com.ticketease.api.Repositories.TicketCategoryRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class TicketCategoryService {
 
     private static final Logger logger = LoggerFactory.getLogger(TicketCategoryService.class);
@@ -24,6 +26,8 @@ public class TicketCategoryService {
 
     @Autowired
     private DepartmentRepository departmentRepository;
+
+    private final FormRepository formRepository;
 
     @Transactional
     public void addCategory(String name, Department department, TicketCategory father) {
@@ -68,5 +72,30 @@ public class TicketCategoryService {
 
     public List<TicketCategory> findByFather(Long categoryId) {
         return ticketCategoryRepository.findByFather(categoryId);
+    }
+
+    public List<TicketCategory> findChildrenWithFormDescendants(Long fatherId) {
+        List<TicketCategory> children = (fatherId == null)
+                ? ticketCategoryRepository.findAllRoot()
+                : ticketCategoryRepository.findByFather(fatherId);
+
+        return children.stream()
+                .filter(this::hasFormInSubtree)
+                .toList();
+    }
+
+    private boolean hasFormInSubtree(TicketCategory category) {
+        if (!formRepository.findByTicketCategoryId(category.getId()).isEmpty()) {
+            return true;
+        }
+
+        List<TicketCategory> children = ticketCategoryRepository.findByFather(category.getId());
+        for (TicketCategory child : children) {
+            if (hasFormInSubtree(child)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
