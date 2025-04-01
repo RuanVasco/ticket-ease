@@ -4,7 +4,9 @@ import com.ticketease.api.DTO.User.UserResponseDTO;
 import com.ticketease.api.Entities.Ticket;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public record TicketResponseDTO(
         Long id,
@@ -14,10 +16,13 @@ public record TicketResponseDTO(
         Date closedAt,
         UserResponseDTO user,
         List<UserResponseDTO> observers,
-        Long formId,
+        Map<Long, String> form,
         List<TicketAnswerResponseDTO> responses
 ) {
     public static TicketResponseDTO from(Ticket ticket) {
+        Map<Long, String> form = new HashMap<>();
+        form.put(ticket.getForm().getId(), ticket.getForm().getTitle());
+
         return new TicketResponseDTO(
                 ticket.getId(),
                 ticket.getStatus(),
@@ -28,7 +33,7 @@ public record TicketResponseDTO(
                 ticket.getObservers().stream()
                         .map(UserResponseDTO::from)
                         .toList(),
-                ticket.getForm().getId(),
+                form,
                 ticket.getResponses().stream()
                         .map(response -> new TicketAnswerResponseDTO(
                                 response.getField().getId(),
@@ -37,4 +42,5 @@ public record TicketResponseDTO(
                         .toList()
         );
     }
+
 }
