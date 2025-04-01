@@ -1,6 +1,8 @@
 package com.ticketease.api.Services;
 
 import com.ticketease.api.DTO.TicketDTO.TicketRequestDTO;
+import com.ticketease.api.DTO.TicketDTO.TicketAnswerResponseDTO;
+import com.ticketease.api.DTO.TicketDTO.TicketPropertiesDTO;
 import com.ticketease.api.Entities.*;
 import com.ticketease.api.Repositories.FormRepository;
 import com.ticketease.api.Repositories.TicketRepository;
@@ -42,19 +44,27 @@ public class TicketService {
         ticket.setStatus("ABERTO");
         ticket.setCreatedAt(new Date());
         ticket.setUpdatedAt(new Date());
-        ticket.setReceiveEmail(true);
+
+        TicketAnswerResponseDTO answerDTO = ticketRequestDTO.responses().get(0);
+        TicketPropertiesDTO properties = answerDTO.ticketPropertiesDTO();
+
+        ticket.setUrgency(properties.urgency());
+        ticket.setReceiveEmail(Boolean.TRUE.equals(properties.receiveEmail()));
 
         List<TicketResponse> responses = ticketRequestDTO.responses().stream()
-                .map(dto -> {
+                .flatMap(response -> response.fieldAnswerDTO().stream())
+                .map(fieldAnswer -> {
                     FormField field = form.getFields().stream()
-                            .filter(f -> f.getId().equals(dto.fieldId()))
+                            .filter(f -> f.equals(fieldAnswer.field()))
                             .findFirst()
-                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Campo não encontrado no formulário"));
-                    TicketResponse response = new TicketResponse();
-                    response.setField(field);
-                    response.setValue(dto.value());
-                    response.setTicket(ticket);
-                    return response;
+                            .orElseThrow(() -> new ResponseStatusException(
+                                    HttpStatus.BAD_REQUEST, "Campo não encontrado no formulário"));
+
+                    TicketResponse ticketResponse = new TicketResponse();
+                    ticketResponse.setField(field);
+                    ticketResponse.setValue(fieldAnswer.value());
+                    ticketResponse.setTicket(ticket);
+                    return ticketResponse;
                 })
                 .toList();
 

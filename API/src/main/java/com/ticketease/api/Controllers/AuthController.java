@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -58,17 +59,22 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginDTO data) {
-        var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
-        Authentication auth = authenticationManager.authenticate(usernamePassword);
+        try {
+            var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
+            Authentication auth = authenticationManager.authenticate(usernamePassword);
 
-        User user = (User) auth.getPrincipal();
+            User user = (User) auth.getPrincipal();
 
-        if (user == null) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Usuário não encontrado");
+            var token = tokenService.generateAccessToken(user);
+            var refreshToken = tokenService.generateRefreshToken(user);
 
-        var token = tokenService.generateAccessToken(user);
-        var refreshToken = tokenService.generateRefreshToken(user);
-        
-        return ResponseEntity.ok(new LoginResponseDTO(token, refreshToken));        
+            return ResponseEntity.ok(new LoginResponseDTO(token, refreshToken));
+
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais incorretas");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao autenticar");
+        }
     }
     
     @PostMapping("/refresh")

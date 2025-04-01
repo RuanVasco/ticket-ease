@@ -172,7 +172,7 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
                     ))}
                 </select>
             </div>
-            <div style={{ maxHeight: "50vh", overflowY: "auto" }}>
+            <div style={{ maxHeight: "35vh", overflowY: "auto" }}>
                 {form.fields.map((field, index) => (
                     <div key={index} className="border-bottom p-3">
                         <h4 className="fw-semibold">Campo {index + 1}</h4>

@@ -9,28 +9,10 @@ import getUserData from "../components/GetUserData";
 import { usePermissions } from "../context/PermissionsContext";
 import { useWebSocket } from "../context/WebSocketContext";
 import "../assets/styles/ticket_details.css";
+import { Ticket } from "../types/Ticket";
+import { Message } from "../types/Message";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
-
-interface Message {
-    id: string;
-    text: string;
-    sentAt: string;
-    user: { id: string; name: string };
-}
-
-interface Ticket {
-    id: string;
-    name: string;
-    description: string;
-    filePaths?: string[];
-    createdAt: string;
-    observation?: string;
-    urgency: string;
-    status: string;
-    ticketCategory?: { path: string };
-    user?: { name: string; department?: { name: string }; cargo?: { name: string } };
-}
 
 const TicketDetails: React.FC = () => {
     const { id } = useParams<{ id: string }>();

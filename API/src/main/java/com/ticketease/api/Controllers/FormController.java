@@ -1,10 +1,9 @@
 package com.ticketease.api.Controllers;
 
-import com.ticketease.api.DTO.FormDTO;
-import com.ticketease.api.DTO.FormFieldDTO;
+import com.ticketease.api.DTO.FormDTO.FormDTO;
+import com.ticketease.api.DTO.FormDTO.FormFieldDTO;
 import com.ticketease.api.Entities.*;
 import com.ticketease.api.Enums.FieldTypeEnum;
-import com.ticketease.api.Repositories.FormFieldRepository;
 import com.ticketease.api.Repositories.FormRepository;
 import com.ticketease.api.Repositories.TicketCategoryRepository;
 import com.ticketease.api.Repositories.UserRepository;

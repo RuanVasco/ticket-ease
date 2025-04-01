@@ -1,7 +1,11 @@
 package com.ticketease.api.DTO.TicketDTO;
 
+import com.ticketease.api.DTO.FormDTO.FormFieldAnswerDTO;
+import com.ticketease.api.DTO.TicketDTO.TicketAnswerResponseDTO;
+import com.ticketease.api.DTO.TicketDTO.TicketPropertiesDTO;
 import com.ticketease.api.DTO.User.UserResponseDTO;
 import com.ticketease.api.Entities.Ticket;
+import com.ticketease.api.Entities.User;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -23,6 +27,26 @@ public record TicketResponseDTO(
         Map<Long, String> form = new HashMap<>();
         form.put(ticket.getForm().getId(), ticket.getForm().getTitle());
 
+        List<FormFieldAnswerDTO> fieldAnswers = ticket.getResponses().stream()
+                .map(response -> new FormFieldAnswerDTO(
+                        response.getField(),
+                        response.getValue()
+                ))
+                .toList();
+
+        TicketPropertiesDTO properties = new TicketPropertiesDTO(
+                ticket.getObservers().stream()
+                        .map(User::getId)
+                        .toList(),
+                ticket.getUrgency(),
+                ticket.getReceiveEmail()
+        );
+
+        TicketAnswerResponseDTO answerResponseDTO = new TicketAnswerResponseDTO(
+                properties,
+                fieldAnswers
+        );
+
         return new TicketResponseDTO(
                 ticket.getId(),
                 ticket.getStatus(),
@@ -34,13 +58,7 @@ public record TicketResponseDTO(
                         .map(UserResponseDTO::from)
                         .toList(),
                 form,
-                ticket.getResponses().stream()
-                        .map(response -> new TicketAnswerResponseDTO(
-                                response.getField().getId(),
-                                response.getValue()
-                        ))
-                        .toList()
+                List.of(answerResponseDTO)
         );
     }
-
 }

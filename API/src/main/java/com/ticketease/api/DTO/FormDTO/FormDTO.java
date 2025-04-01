@@ -1,4 +1,4 @@
-package com.ticketease.api.DTO;
+package com.ticketease.api.DTO.FormDTO;
 
 import lombok.Getter;
 import lombok.Setter;

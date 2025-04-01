@@ -47,7 +47,7 @@ public class UserController {
         this.userRoleDepartmentRepository = userRoleDepartmentRepository;
     }
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<?> getAll() {
         return ResponseEntity.ok(userRepository.findAll());
     }

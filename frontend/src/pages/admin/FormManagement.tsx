@@ -153,7 +153,7 @@ const FormManagement: React.FC = () => {
                 </div>
             ) : (
                 <div className="row">
-                    <div className="ps-5 col-7">
+                    <div className="ps-4 col-7">
                         <FormBuilder
                             screenType={screenType}
                             setScreenType={setScreenType}
@@ -161,7 +161,7 @@ const FormManagement: React.FC = () => {
                             setForm={setForm}
                         />
                     </div>
-                    <div className="pe-5 col-5"><FormPreview form={form} /></div>
+                    <div className="pe-4 col-5"><FormPreview form={form} /></div>
                 </div>
             )}
 

@@ -1,7 +1,7 @@
 package com.ticketease.api.Entities;
 
+import com.ticketease.api.Enums.UrgencyEnum;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,6 +22,11 @@ public class Ticket {
     @ManyToOne
     @JoinColumn(name = "user_id")
     User user;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Setter
+    private UrgencyEnum urgency;
 
     @ManyToMany
     @JoinTable(

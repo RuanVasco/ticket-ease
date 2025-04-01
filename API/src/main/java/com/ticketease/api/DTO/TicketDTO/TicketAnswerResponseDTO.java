@@ -1,6 +1,10 @@
 package com.ticketease.api.DTO.TicketDTO;
 
+import com.ticketease.api.DTO.FormDTO.FormFieldAnswerDTO;
+
+import java.util.List;
+
 public record TicketAnswerResponseDTO(
-        Long fieldId,
-        String value
+        TicketPropertiesDTO ticketPropertiesDTO,
+        List<FormFieldAnswerDTO> fieldAnswerDTO
 ) {}
