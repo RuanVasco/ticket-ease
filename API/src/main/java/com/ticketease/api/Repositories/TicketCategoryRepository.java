@@ -1,10 +1,7 @@
 package com.ticketease.api.Repositories;
 
-import com.ticketease.api.Entities.Department;
 import com.ticketease.api.Entities.TicketCategory;
-import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 

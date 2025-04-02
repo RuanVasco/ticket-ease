@@ -8,7 +8,7 @@ import { Form } from "../types/Form";
 import { DynamicForm } from "../components/DynamicForm";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { TicketProperty } from "../types/TicketProperty";
+import { TicketProperty } from "../types/TicketProperties";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -76,15 +76,15 @@ const CreateTicket: React.FC = () => {
 
         const data = {
             formId: currentForm.id,
-            responses: [
-                {
-                    ticketPropertiesDTO: properties,
-                    fieldAnswerDTO: Object.entries(formData).map(([fieldId, value]) => ({
-                        field: { id: Number(fieldId) },
-                        value
-                    }))
-                }
-            ]
+            responses: Object.entries(formData).map(([fieldId, value]) => ({
+                fieldId: Number(fieldId),
+                value
+            })),
+            properties: {
+                observersId: properties.observers ?? [],
+                urgency: properties.urgency,
+                receiveEmail: properties.receiveEmail
+            }
         };
 
         try {

@@ -70,18 +70,11 @@ public class User implements UserDetails {
             Role role = binding.getRole();
             Department bindingDept = binding.getDepartment();
 
-            boolean isGlobal = bindingDept == null;
-            boolean isExactMatch = department != null && bindingDept != null &&
-                    bindingDept.getId().equals(department.getId());
-
-            boolean isDepartmentRelevant = department == null
-                    ? isGlobal
-                    : (isExactMatch || isGlobal);
-
-            if (!isDepartmentRelevant) continue;
-
             for (Permission permission : role.getPermissions()) {
-                if (permissionName.equals(permission.getName())) {
+                if (
+                        permissionName.equals(permission.getName()) &&
+                                (bindingDept == null || (bindingDept.equals(department)))
+                ) {
                     return true;
                 }
             }

@@ -2,8 +2,7 @@ package com.ticketease.api.DTO.FormDTO;
 
 import com.ticketease.api.Entities.FormField;
 
-public record FormFieldAnswerDTO(
+public record FormFieldAnswerResponseDTO (
         FormField field,
         String value
-) {
-}
+) {}

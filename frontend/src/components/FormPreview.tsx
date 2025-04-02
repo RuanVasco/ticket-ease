@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Form } from "../types/Form";
 import { DynamicForm } from "./DynamicForm";
-import { TicketProperty } from "../types/TicketProperty";
+import { TicketProperty } from "../types/TicketProperties";
 
 interface Props {
     form: Form;

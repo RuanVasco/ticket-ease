@@ -1,64 +1,48 @@
 package com.ticketease.api.DTO.TicketDTO;
 
-import com.ticketease.api.DTO.FormDTO.FormFieldAnswerDTO;
-import com.ticketease.api.DTO.TicketDTO.TicketAnswerResponseDTO;
-import com.ticketease.api.DTO.TicketDTO.TicketPropertiesDTO;
+import com.ticketease.api.DTO.FormDTO.FormFieldAnswerResponseDTO;
 import com.ticketease.api.DTO.User.UserResponseDTO;
+import com.ticketease.api.Entities.Form;
 import com.ticketease.api.Entities.Ticket;
-import com.ticketease.api.Entities.User;
 
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public record TicketResponseDTO(
         Long id,
-        String status,
-        Date createdAt,
-        Date updatedAt,
-        Date closedAt,
-        UserResponseDTO user,
-        List<UserResponseDTO> observers,
-        Map<Long, String> form,
-        List<TicketAnswerResponseDTO> responses
+        TicketPropertiesResponseDTO properties,
+        Form form,
+        List<FormFieldAnswerResponseDTO> responses
 ) {
     public static TicketResponseDTO from(Ticket ticket) {
-        Map<Long, String> form = new HashMap<>();
-        form.put(ticket.getForm().getId(), ticket.getForm().getTitle());
+        Form form = ticket.getForm();
 
-        List<FormFieldAnswerDTO> fieldAnswers = ticket.getResponses().stream()
-                .map(response -> new FormFieldAnswerDTO(
+        List<UserResponseDTO> observers = ticket.getObservers().stream()
+                .map(UserResponseDTO::from)
+                .toList();
+
+        TicketPropertiesResponseDTO ticketProperties = new TicketPropertiesResponseDTO(
+                observers,
+                ticket.getUrgency(),
+                ticket.getReceiveEmail(),
+                ticket.getStatus(),
+                ticket.getCreatedAt(),
+                ticket.getUpdatedAt(),
+                ticket.getClosedAt(),
+                UserResponseDTO.from(ticket.getUser())
+        );
+
+        List<FormFieldAnswerResponseDTO> fieldAnswers = ticket.getResponses().stream()
+                .map(response -> new FormFieldAnswerResponseDTO(
                         response.getField(),
                         response.getValue()
                 ))
                 .toList();
 
-        TicketPropertiesDTO properties = new TicketPropertiesDTO(
-                ticket.getObservers().stream()
-                        .map(User::getId)
-                        .toList(),
-                ticket.getUrgency(),
-                ticket.getReceiveEmail()
-        );
-
-        TicketAnswerResponseDTO answerResponseDTO = new TicketAnswerResponseDTO(
-                properties,
-                fieldAnswers
-        );
-
         return new TicketResponseDTO(
                 ticket.getId(),
-                ticket.getStatus(),
-                ticket.getCreatedAt(),
-                ticket.getUpdatedAt(),
-                ticket.getClosedAt(),
-                UserResponseDTO.from(ticket.getUser()),
-                ticket.getObservers().stream()
-                        .map(UserResponseDTO::from)
-                        .toList(),
+                ticketProperties,
                 form,
-                List.of(answerResponseDTO)
+                fieldAnswers
         );
     }
 }

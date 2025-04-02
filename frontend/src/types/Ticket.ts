@@ -1,40 +1,17 @@
+import { TicketProperties } from "./TicketProperties";
 import { Form } from "./Form";
 import { FormAnswer } from "./FormAnswer";
-import { User } from "./User";
 
 export class Ticket {
-	id?: string;
-	status: string;
-	createdAt: Date;
-	updatedAt: Date;
-	closedAt: Date;
-	user: User;
-	observers: User[];
+	id: number;
+	properties: TicketProperties;
 	form: Form;
-	answer: FormAnswer;
-	urgency: string;
+	responses: FormAnswer[];
 
-	constructor(
-		id = "",
-		status = "",
-		createdAt = new Date(),
-		updatedAt = new Date(),
-		closedAt = new Date(),
-		user = {} as User,
-		observers = [],
-		form = {} as Form,
-		answer = {} as FormAnswer,
-		urgency = ""
-	) {
+	constructor(id: number, properties: TicketProperties, form: Form, responses: FormAnswer[]) {
 		this.id = id;
-		this.status = status;
-		this.createdAt = createdAt;
-		this.updatedAt = updatedAt;
-		this.closedAt = closedAt;
-		this.user = user;
-		this.observers = observers;
+		this.properties = properties;
 		this.form = form;
-		this.answer = answer;
-		this.urgency = urgency;
+		this.responses = responses;
 	}
 }

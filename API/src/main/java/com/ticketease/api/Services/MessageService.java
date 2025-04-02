@@ -1,6 +1,7 @@
 package com.ticketease.api.Services;
 
-import com.ticketease.api.DTO.MessageDTO;
+import com.ticketease.api.DTO.MessageDTO.MessageRequestDTO;
+import com.ticketease.api.DTO.MessageDTO.MessageResponseDTO;
 import com.ticketease.api.Entities.Message;
 import com.ticketease.api.Entities.Ticket;
 import com.ticketease.api.Entities.User;
@@ -54,19 +55,19 @@ public class MessageService {
 
     }
 
-    public Message addMessage(Ticket ticket, User user, MessageDTO messageDTO) throws IOException {
+    public Message addMessage(Ticket ticket, User user, MessageRequestDTO messageRequestDTO) throws IOException {
         String ticketStatus = ticket.getStatus();
 
         if (ticketStatus.equals("Novo") && (user != ticket.getUser() && ticket.canManage(user))) {
             ticket.setStatus("Em Andamento");
         }
 
-        if (Boolean.TRUE.equals(messageDTO.getCloseTicket()) && ticket.canManage(user)) {
+        if (Boolean.TRUE.equals(messageRequestDTO.getCloseTicket()) && ticket.canManage(user)) {
             ticket.setStatus("Fechado");
         }
 
         Message message = new Message();
-        message.setText(messageDTO.getText());
+        message.setText(messageRequestDTO.getText());
         message.setUser(user);
         message.setTicket(ticket);
         message.setSentAt(new Date());

@@ -1,5 +1,6 @@
 package com.ticketease.api.Entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,5 +21,6 @@ public class TicketResponse {
 
     @ManyToOne
     @JoinColumn(name = "ticket_id")
+    @JsonBackReference
     private Ticket ticket;
 }

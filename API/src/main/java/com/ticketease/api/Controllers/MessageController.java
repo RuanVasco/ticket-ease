@@ -1,13 +1,11 @@
 package com.ticketease.api.Controllers;
 
-import com.ticketease.api.DTO.MessageDTO;
+import com.ticketease.api.DTO.MessageDTO.MessageRequestDTO;
+import com.ticketease.api.DTO.MessageDTO.MessageResponseDTO;
+import com.ticketease.api.DTO.User.UserResponseDTO;
 import com.ticketease.api.Entities.Message;
 import com.ticketease.api.Entities.Ticket;
 import com.ticketease.api.Entities.User;
-import com.ticketease.api.Repositories.MessageRepository;
-import com.ticketease.api.Repositories.NotificationRepository;
-import com.ticketease.api.Repositories.TicketRepository;
-import com.ticketease.api.Repositories.UserRepository;
 import com.ticketease.api.Services.MessageService;
 import com.ticketease.api.Services.NotificationService;
 import com.ticketease.api.Services.TicketService;
@@ -36,22 +34,13 @@ import java.util.Set;
 public class MessageController {
 
     @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    TicketRepository ticketRepository;
-
-    @Autowired
     MessageService messageService;
-
-    @Autowired
-    MessageRepository messageRepository;
 
     private final TicketService ticketService;
     private final NotificationService notificationService;
     private final SimpMessagingTemplate simpMessagingTemplate;
 
-    public MessageController(TicketService ticketService, SimpMessagingTemplate simpMessagingTemplate, NotificationService notificationService, NotificationRepository notificationRepository) {
+    public MessageController(TicketService ticketService, SimpMessagingTemplate simpMessagingTemplate, NotificationService notificationService) {
         this.ticketService = ticketService;
         this.simpMessagingTemplate = simpMessagingTemplate;
         this.notificationService = notificationService;
@@ -66,7 +55,7 @@ public class MessageController {
 
     @Transactional
     @MessageMapping("/ticket/{ticketId}")
-    public void sendMessage(@DestinationVariable Long ticketId, @Payload MessageDTO messageDTO, Principal principal) throws IOException {
+    public void sendMessage(@DestinationVariable Long ticketId, @Payload MessageRequestDTO messageRequestDTO, Principal principal) throws IOException {
         User user = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
         Ticket ticket = ticketService.findById(ticketId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
@@ -80,11 +69,11 @@ public class MessageController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Este ticket está fechado.");
         }
 
-        Message message = messageService.addMessage(ticket, user, messageDTO);
+        Message message = messageService.addMessage(ticket, user, messageRequestDTO);
 
         simpMessagingTemplate.convertAndSend("/topic/ticket/" + ticketId, message);
 
-        Set<User> relatedUsers = ticket.getRelatedUsers();
+        Set<User> relatedUsers = ticketService.getRelatedUsers(ticket);
         String notificationContent = "Mensagem recebida no ticket " +  ticketId;
         for (User targetUser : relatedUsers) {
             if (user.equals(targetUser)) continue;
@@ -93,15 +82,21 @@ public class MessageController {
     }
 
     @GetMapping("/ticket/{ticketID}")
-    public ResponseEntity<Page<Message>> getMessages(
+    public ResponseEntity<Page<MessageResponseDTO>> getMessages(
             @PathVariable Long ticketID,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        //Verificar usuário;
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("sentAt"));
         Page<Message> messages = messageService.getByTicketId(ticketID, pageable);
 
-        return ResponseEntity.ok(messages);
+        Page<MessageResponseDTO> messageDTOs = messages.map(message -> new MessageResponseDTO(
+                message.getId(),
+                message.getText(),
+                UserResponseDTO.from(message.getUser()),
+                message.getSentAt()
+        ));
+
+        return ResponseEntity.ok(messageDTOs);
     }
 }

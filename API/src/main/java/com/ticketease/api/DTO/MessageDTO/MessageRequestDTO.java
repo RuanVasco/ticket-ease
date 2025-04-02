@@ -1,8 +1,7 @@
-package com.ticketease.api.DTO;
+package com.ticketease.api.DTO.MessageDTO;
 
 import com.ticketease.api.Entities.Message;
 import com.ticketease.api.Entities.Ticket;
-import com.ticketease.api.Entities.User;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,21 +9,19 @@ import java.util.Date;
 
 @Getter
 @Setter
-public class MessageDTO {
+public class MessageRequestDTO {
     String text;
     Boolean closeTicket;
-    User user;
     Ticket ticket;
     Date sentAt;
 
-    public MessageDTO(String text, Boolean closeTicket) {
+    public MessageRequestDTO(String text, Boolean closeTicket) {
         this.text = text;
         this.closeTicket = closeTicket;
     }
 
-    public MessageDTO(Message message) {
+    public MessageRequestDTO(Message message) {
         this.text = message.getText();
-        this.user = message.getUser();
         this.ticket = message.getTicket();
         this.sentAt = message.getSentAt();
     }

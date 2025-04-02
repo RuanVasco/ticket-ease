@@ -108,7 +108,6 @@ const FormManagement: React.FC = () => {
         }
     };
 
-
     return (
         <main>
             <div className="container">

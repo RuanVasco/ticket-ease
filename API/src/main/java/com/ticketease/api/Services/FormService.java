@@ -33,7 +33,7 @@ public class FormService {
 
         for (FormField field : form.getFields()) {
             field.setForm(savedForm);
-            FormField savedField = fieldRepository.save(field);
+            fieldRepository.save(field);
         }
 
         return savedForm;

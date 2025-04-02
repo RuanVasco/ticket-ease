@@ -136,6 +136,7 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
                 name="form_title"
                 value={form.title}
                 onChange={e => setForm({ ...form, title: e.target.value })}
+                required
             />
             <div className="my-2">
                 <label htmlFor="form_description" className="form-label">Descrição</label>

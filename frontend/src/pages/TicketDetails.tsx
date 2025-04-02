@@ -11,16 +11,16 @@ import { useWebSocket } from "../context/WebSocketContext";
 import "../assets/styles/ticket_details.css";
 import { Ticket } from "../types/Ticket";
 import { Message } from "../types/Message";
+import { toast } from "react-toastify";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 const TicketDetails: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-
     const { ticketMessages, sendMessage } = useWebSocket();
     const [allMessages, setAllMessages] = useState<Message[]>([]);
     const userData = getUserData();
-    const [data, setData] = useState<Ticket | null>(null);
+    const [ticket, setTicket] = useState<Ticket>({} as Ticket);
     const [oldMessages, setOldMessages] = useState<Message[]>([]);
     const [message, setMessage] = useState<{ text: string; closeTicket: boolean }>({
         text: "",
@@ -63,20 +63,26 @@ const TicketDetails: React.FC = () => {
     };
 
     useEffect(() => {
-        const messagesArray = Array.isArray(ticketMessages)
+        const allIncomingMessages = Array.isArray(ticketMessages)
             ? ticketMessages
             : Object.values(ticketMessages).flat();
 
-        const filteredMessages = messagesArray.filter((m) => Number(m.ticket.id) === Number(id));
+        const currentTicketMessages = allIncomingMessages.filter(
+            (message) => Number(message.ticket.id) === Number(id)
+        );
 
-        const mergedMessages = [...oldMessages, ...filteredMessages];
+        const combinedMessages = [...oldMessages, ...currentTicketMessages];
 
-        const uniqueMessages = Array.from(new Map(mergedMessages.map((m) => [m.id, m])).values());
+        const deduplicatedMessages = Array.from(
+            new Map(combinedMessages.map((msg) => [msg.id, msg])).values()
+        );
 
-        uniqueMessages.sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
+        deduplicatedMessages.sort(
+            (a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime()
+        );
 
-        setAllMessages(uniqueMessages);
-    }, [oldMessages, ticketMessages]);
+        setAllMessages(deduplicatedMessages);
+    }, [oldMessages, ticketMessages, id]);
 
     useEffect(() => {
         const checkUserPermission = async () => {
@@ -92,9 +98,10 @@ const TicketDetails: React.FC = () => {
             setLoading(true);
             try {
                 const response = await axiosInstance.get(`${API_BASE_URL}/ticket/${id}`);
-                setData(response.data);
+                setTicket(response.data);
             } catch (error: any) {
                 if (error.response?.status === 403) {
+                    toast.error("Sem permissão para acessar esse ticket.")
                     window.location.href = "../../";
                 } else {
                     console.error("Erro ao buscar dados:", error);
@@ -128,7 +135,7 @@ const TicketDetails: React.FC = () => {
 
         fetchMessages();
         return () => { };
-    }, [id, data?.status]);
+    }, [id]);
 
     useEffect(() => {
         if (allMessages.length === 0) return;
@@ -176,9 +183,9 @@ const TicketDetails: React.FC = () => {
                         <div className="d-flex flex-column">
                             <div className="box_description p-2 rounded mb-2 d-flex">
                                 <div className="fw-semibold">
-                                    Ticket {data?.id} - {data?.description || ""}
+                                    Ticket {ticket.id} - {ticket.form.title || ""}
                                 </div>
-                                {data?.filePaths && data.filePaths.length > 0 && (
+                                {/* {data?.filePaths && data.filePaths.length > 0 && (
                                     <button
                                         type="button"
                                         className="btn-clean ms-auto"
@@ -187,7 +194,7 @@ const TicketDetails: React.FC = () => {
                                     >
                                         Anexos <FaPaperclip />
                                     </button>
-                                )}
+                                )} */}
                             </div>
                             <div className="chat_content rounded px-2 pb-3" onScroll={handleScroll}>
                                 {allMessages.length > 0 ? (
@@ -221,7 +228,7 @@ const TicketDetails: React.FC = () => {
                                 ) : null}
                                 <div ref={chatEndRef} />
                             </div>
-                            {data?.status !== "Fechado" && (
+                            {ticket.properties.status !== "Fechado" && (
                                 <form className="mt-3 input-group" onSubmit={handleSubmit}>
                                     <input
                                         type="text"
@@ -265,11 +272,11 @@ const TicketDetails: React.FC = () => {
                         <span>Por </span>
                         <br />
                         <div className="box_user_identity rounded p-2 mt-2">
-                            <span>{data?.user?.name || ""}</span> <br />
-                            <span className="fw-lighter">{data?.user?.cargo?.name || ""}</span>{" "}
+                            <span>{ticket.properties.user.name || ""}</span> <br />
+                            <span className="fw-lighter">{ticket.properties.user.cargo?.name || ""}</span>{" "}
                             <br />
                         </div>
-                        <label htmlFor="user" className="col-form-label">
+                        {/* <label htmlFor="user" className="col-form-label">
                             Setor
                         </label>
                         <input
@@ -278,7 +285,7 @@ const TicketDetails: React.FC = () => {
                             type="text"
                             value={data?.user?.department?.name || ""}
                             readOnly
-                        />
+                        /> */}
                         <label htmlFor="department" className="col-form-label">
                             Categoria
                         </label>
@@ -286,7 +293,7 @@ const TicketDetails: React.FC = () => {
                             id="department"
                             className="input-text"
                             type="text"
-                            value={data?.ticketCategory?.path || ""}
+                            value={ticket.form.ticketCategory.name || ""}
                             readOnly
                         />
                         <label htmlFor="created_at" className="col-form-label">
@@ -296,16 +303,7 @@ const TicketDetails: React.FC = () => {
                             id="created_at"
                             className="input-text"
                             type="text"
-                            value={data?.createdAt ? DateFormatter(data.createdAt) : ""}
-                            readOnly
-                        />
-                        <label htmlFor="observation" className="col-form-label">
-                            Observação
-                        </label>
-                        <textarea
-                            id="observation"
-                            className="input-text"
-                            value={data?.observation || ""}
+                            value={ticket.properties.createdAt ? DateFormatter(ticket.properties.createdAt) : ""}
                             readOnly
                         />
                         <label htmlFor="urgency" className="col-form-label">
@@ -315,7 +313,7 @@ const TicketDetails: React.FC = () => {
                             id="urgency"
                             className="input-text"
                             type="text"
-                            value={data?.urgency || ""}
+                            value={ticket.properties.urgency || ""}
                             readOnly
                         />
                         <label htmlFor="status" className="col-form-label">
@@ -325,7 +323,7 @@ const TicketDetails: React.FC = () => {
                             id="status"
                             className="input-text"
                             type="text"
-                            value={data?.status || ""}
+                            value={ticket.properties.status || ""}
                             readOnly
                         />
                     </div>

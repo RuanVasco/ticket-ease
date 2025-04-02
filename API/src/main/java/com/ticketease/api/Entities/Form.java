@@ -20,13 +20,16 @@ public class Form {
 
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(nullable = false)
     private TicketCategory ticketCategory;
 
+    @Column(nullable = false)
     private String title;
 
     private String description;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
+    @JoinColumn(nullable = false)
     private User creator;
 
     @OneToMany(mappedBy = "form", cascade = CascadeType.ALL, orphanRemoval = true)

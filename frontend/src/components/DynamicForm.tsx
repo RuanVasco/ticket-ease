@@ -1,7 +1,7 @@
 import { Form } from "../types/Form";
 import SelectInput from "./Fields/SelectInput";
 import NumberInput from "./Fields/NumberInput";
-import { TicketProperty } from "../types/TicketProperty";
+import { TicketProperty } from "../types/TicketProperties";
 import Select from "react-select";
 import { useEffect, useState } from "react";
 import { MultiValue } from "react-select";

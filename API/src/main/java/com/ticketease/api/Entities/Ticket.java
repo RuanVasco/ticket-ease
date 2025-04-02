@@ -1,5 +1,6 @@
 package com.ticketease.api.Entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.ticketease.api.Enums.UrgencyEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -29,6 +30,7 @@ public class Ticket {
     private UrgencyEnum urgency;
 
     @ManyToMany
+    @Setter
     @JoinTable(
             name = "ticket_observers",
             joinColumns = @JoinColumn(name = "ticket_id"),
@@ -64,6 +66,7 @@ public class Ticket {
 
     @Setter
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<TicketResponse> responses;
 
     public boolean canManage(User user) {
@@ -75,25 +78,6 @@ public class Ticket {
 
         return user.hasPermission("MANAGE_TICKET", department) || user.hasPermission("MANAGE_TICKET", null);
     }
-
-    public Set<User> getRelatedUsers() {
-        Set<User> relatedUsers = new HashSet<>();
-
-        Department department = this.getDepartment();
-
-        for (UserRoleDepartment binding : department.getRoleBindings()) {
-            User user = binding.getUser();
-            if (user.hasPermission("MANAGE_TICKET", department)) {
-                relatedUsers.add(user);
-            }
-        }
-
-        relatedUsers.addAll(this.getObservers());
-        relatedUsers.add(this.user);
-
-        return relatedUsers;
-    }
-
 
     public Department getDepartment() {
         return this.form.getDepartment();

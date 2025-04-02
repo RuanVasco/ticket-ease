@@ -1,25 +1,24 @@
 package com.ticketease.api.Services;
 
 import com.ticketease.api.DTO.TicketDTO.TicketRequestDTO;
-import com.ticketease.api.DTO.TicketDTO.TicketAnswerResponseDTO;
 import com.ticketease.api.DTO.TicketDTO.TicketPropertiesDTO;
 import com.ticketease.api.Entities.*;
 import com.ticketease.api.Repositories.FormRepository;
 import com.ticketease.api.Repositories.TicketRepository;
+import com.ticketease.api.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class TicketService {
     private final TicketRepository ticketRepository;
     private final FormRepository formRepository;
+    private final UserRepository userRepository;
 
     public Optional<Ticket> findById(Long ticketId) {
         return ticketRepository.findById(ticketId);
@@ -45,17 +44,25 @@ public class TicketService {
         ticket.setCreatedAt(new Date());
         ticket.setUpdatedAt(new Date());
 
-        TicketAnswerResponseDTO answerDTO = ticketRequestDTO.responses().get(0);
-        TicketPropertiesDTO properties = answerDTO.ticketPropertiesDTO();
+        TicketPropertiesDTO properties = ticketRequestDTO.properties();
 
         ticket.setUrgency(properties.urgency());
         ticket.setReceiveEmail(Boolean.TRUE.equals(properties.receiveEmail()));
 
+        Set<User> observers = new HashSet<>();
+        for (Long userId : properties.observersId()) {
+            if (userId == null) {
+                continue;
+            }
+            Optional<User> optionalUser = userRepository.findById(userId);
+            optionalUser.ifPresent(observers::add);
+        }
+        ticket.setObservers(observers);
+
         List<TicketResponse> responses = ticketRequestDTO.responses().stream()
-                .flatMap(response -> response.fieldAnswerDTO().stream())
                 .map(fieldAnswer -> {
                     FormField field = form.getFields().stream()
-                            .filter(f -> f.equals(fieldAnswer.field()))
+                            .filter(f -> f.getId().equals(fieldAnswer.fieldId()))
                             .findFirst()
                             .orElseThrow(() -> new ResponseStatusException(
                                     HttpStatus.BAD_REQUEST, "Campo não encontrado no formulário"));
@@ -71,6 +78,24 @@ public class TicketService {
         ticket.setResponses(responses);
 
         return ticketRepository.save(ticket);
+    }
+
+    public Set<User> getRelatedUsers(Ticket ticket) {
+        Set<User> relatedUsers = new HashSet<>();
+
+        Department department = ticket.getDepartment();
+
+        List<User> users = userRepository.findAllUsersWithRoles();
+        for (User user : users) {
+            if (user.hasPermission("MANAGE_TICKET", department)) {
+                relatedUsers.add(user);
+            }
+        }
+
+        relatedUsers.addAll(ticket.getObservers());
+        relatedUsers.add(ticket.getUser());
+
+        return relatedUsers;
     }
 
 }
