@@ -1,7 +1,7 @@
 import { Form } from "../types/Form";
 import SelectInput from "./Fields/SelectInput";
 import NumberInput from "./Fields/NumberInput";
-import { TicketProperty } from "../types/TicketProperties";
+import { TicketProperties } from "../types/TicketProperties";
 import Select from "react-select";
 import { useEffect, useState } from "react";
 import { MultiValue } from "react-select";
@@ -17,8 +17,8 @@ interface Props {
     form: Form;
     handleSubmit?: (e: React.FormEvent) => void;
     preview?: boolean;
-    properties: TicketProperty;
-    setProperties: React.Dispatch<React.SetStateAction<TicketProperty>>;
+    properties: TicketProperties;
+    setProperties: React.Dispatch<React.SetStateAction<TicketProperties>>;
 }
 
 interface OptionType {
@@ -54,7 +54,7 @@ export const DynamicForm: React.FC<Props> = ({ form, preview = false, handleSubm
         setFormData(prev => ({ ...prev, [id]: value }));
     };
 
-    const handlePropertiesChange = (name: string, value: any) => {
+    const handlePropertiesChange = (name: keyof TicketProperties, value: any) => {
         setProperties(prev => ({ ...prev, [name]: value }));
     };
 

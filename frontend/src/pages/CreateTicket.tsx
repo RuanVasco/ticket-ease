@@ -8,7 +8,7 @@ import { Form } from "../types/Form";
 import { DynamicForm } from "../components/DynamicForm";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { TicketProperty } from "../types/TicketProperties";
+import { defaultProperties, TicketProperties } from "../types/TicketProperties";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -18,11 +18,7 @@ const CreateTicket: React.FC = () => {
     const [formData, setFormData] = useState<Record<string, any>>({});
     const [categoryPath, setCategoryPath] = useState<TicketCategory[]>([]);
     const [currentForm, setCurrentForm] = useState<Form>({} as Form);
-    const [properties, setProperties] = useState<TicketProperty>({
-        urgency: "BAIXA",
-        receiveEmail: false,
-        observers: []
-    });
+    const [properties, setProperties] = useState<TicketProperties>(defaultProperties);
 
     const navigate = useNavigate();
 
@@ -74,6 +70,8 @@ const CreateTicket: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        const observersId = properties.observers.map((user) => user.id);
+
         const data = {
             formId: currentForm.id,
             responses: Object.entries(formData).map(([fieldId, value]) => ({
@@ -81,7 +79,7 @@ const CreateTicket: React.FC = () => {
                 value
             })),
             properties: {
-                observersId: properties.observers ?? [],
+                observersId: observersId,
                 urgency: properties.urgency,
                 receiveEmail: properties.receiveEmail
             }

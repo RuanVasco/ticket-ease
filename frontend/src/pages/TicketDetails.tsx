@@ -63,6 +63,7 @@ const TicketDetails: React.FC = () => {
     };
 
     useEffect(() => {
+        console.log(ticketMessages)
         const allIncomingMessages = Array.isArray(ticketMessages)
             ? ticketMessages
             : Object.values(ticketMessages).flat();
@@ -134,7 +135,6 @@ const TicketDetails: React.FC = () => {
         };
 
         fetchMessages();
-        return () => { };
     }, [id]);
 
     useEffect(() => {
@@ -272,8 +272,8 @@ const TicketDetails: React.FC = () => {
                         <span>Por </span>
                         <br />
                         <div className="box_user_identity rounded p-2 mt-2">
-                            <span>{ticket.properties.user.name || ""}</span> <br />
-                            <span className="fw-lighter">{ticket.properties.user.cargo?.name || ""}</span>{" "}
+                            <span>{ticket.properties.user?.name || ""}</span> <br />
+                            <span className="fw-lighter">{ticket.properties.user?.cargo?.name || ""}</span>{" "}
                             <br />
                         </div>
                         {/* <label htmlFor="user" className="col-form-label">
