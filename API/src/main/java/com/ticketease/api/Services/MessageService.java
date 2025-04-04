@@ -5,6 +5,7 @@ import com.ticketease.api.DTO.MessageDTO.MessageResponseDTO;
 import com.ticketease.api.Entities.Message;
 import com.ticketease.api.Entities.Ticket;
 import com.ticketease.api.Entities.User;
+import com.ticketease.api.Enums.StatusEnum;
 import com.ticketease.api.Repositories.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -56,14 +57,14 @@ public class MessageService {
     }
 
     public Message addMessage(Ticket ticket, User user, MessageRequestDTO messageRequestDTO) throws IOException {
-        String ticketStatus = ticket.getStatus();
+        StatusEnum ticketStatus = ticket.getStatus();
 
-        if (ticketStatus.equals("Novo") && (user != ticket.getUser() && ticket.canManage(user))) {
-            ticket.setStatus("Em Andamento");
+        if (ticketStatus.equals(StatusEnum.NOVO) && (user != ticket.getUser() && ticket.canManage(user))) {
+            ticket.setStatus(StatusEnum.EM_ANDAMENTO);
         }
 
         if (Boolean.TRUE.equals(messageRequestDTO.getCloseTicket()) && ticket.canManage(user)) {
-            ticket.setStatus("Fechado");
+            ticket.setStatus(StatusEnum.RESOLVIDO);
         }
 
         Message message = new Message();
@@ -72,7 +73,7 @@ public class MessageService {
         message.setTicket(ticket);
         message.setSentAt(new Date());
 
-        Message savedMessage = messageRepository.save(message);
+        messageRepository.save(message);
 
         return message;
     }

@@ -2,24 +2,76 @@ package com.ticketease.api.Controllers;
 
 import com.ticketease.api.DTO.TicketDTO.TicketRequestDTO;
 import com.ticketease.api.DTO.TicketDTO.TicketResponseDTO;
-import com.ticketease.api.Entities.Form;
+import com.ticketease.api.Entities.Department;
 import com.ticketease.api.Entities.Ticket;
 import com.ticketease.api.Entities.User;
-import com.ticketease.api.Repositories.TicketRepository;
+import com.ticketease.api.Enums.StatusEnum;
+import com.ticketease.api.Repositories.DepartmentRepository;
+import com.ticketease.api.Services.DepartmentService;
 import com.ticketease.api.Services.TicketService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import org.springframework.data.domain.Pageable;
+
+import java.util.Optional;
+
 @RestController
 @RequestMapping("ticket")
 @RequiredArgsConstructor
 public class TicketController {
+
     private final TicketService ticketService;
-    private final TicketRepository ticketRepository;
+    private final DepartmentService departmentService;
+
+    @GetMapping("/my-tickets")
+    public ResponseEntity<Page<TicketResponseDTO>> getUserTickets(
+            @RequestParam(value = "status", required = false) StatusEnum status,
+            Pageable pageable
+    ) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Page<Ticket> ticketsPage;
+        if (status != null) {
+            ticketsPage = ticketService.findByOwnerOrObserverAndStatus(user, status, pageable);
+        } else {
+            ticketsPage = ticketService.findByOwnerOrObserver(user, pageable);
+        }
+
+        Page<TicketResponseDTO> ticketsDTOPage = ticketsPage.map(TicketResponseDTO::from);
+
+        return ResponseEntity.ok(ticketsDTOPage);
+    }
+
+    @GetMapping("/by-department/{departmentId}")
+    public ResponseEntity<?> getDepartmentTickets(
+            @PathVariable Long departmentId,
+            @RequestParam(value = "status", required = false) StatusEnum status,
+            Pageable pageable
+    ) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Department department = departmentService.findById(departmentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "Setor não encontrado"
+                ));
+
+        Page<Ticket> ticketsPage;
+        if (status != null) {
+            ticketsPage = ticketService.findByDepartmentAndStatus(department, user, status, pageable);
+        } else {
+            ticketsPage = ticketService.findByDepartment(department, user, pageable);
+        }
+
+        Page<TicketResponseDTO> ticketsDTOPage = ticketsPage.map(TicketResponseDTO::from);
+
+        return ResponseEntity.ok(ticketsDTOPage);
+    }
 
     @GetMapping("/{ticketId}")
     public ResponseEntity<?> getTicket(@PathVariable Long ticketId) {

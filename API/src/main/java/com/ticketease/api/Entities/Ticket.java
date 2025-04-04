@@ -1,6 +1,7 @@
 package com.ticketease.api.Entities;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.ticketease.api.Enums.StatusEnum;
 import com.ticketease.api.Enums.UrgencyEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -39,7 +40,7 @@ public class Ticket {
     private Set<User> observers = new HashSet<>();
 
     @Setter
-    private String status;
+    private StatusEnum status;
 
     @Setter
     private Boolean receiveEmail;

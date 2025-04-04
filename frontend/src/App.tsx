@@ -4,7 +4,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import { usePermissions } from "./context/PermissionsContext";
-import AdminLayout from "./layouts/AdminLayout";
 import MainLayout from "./layouts/MainLayout";
 import ProtectedLayout from "./layouts/ProtectedLayout";
 import CargoManagement from "./pages/admin/CargoManagement";
@@ -47,21 +46,20 @@ function App() {
                     {canManageTicket && (
                         <Route path="/gerenciar-tickets" element={<ManageTickets />} />
                     )}
+                    {isAdmin && (
+                        <>
+                            <Route path="/admin" element={<Home />} />
+                            <Route path="/admin/users" element={<UserManagement />} />
+                            <Route path="/admin/units" element={<UnitManagement />} />
+                            <Route path="/admin/departments" element={<DepartmentManagement />} />
+                            <Route path="/admin/cargos" element={<CargoManagement />} />
+                            <Route path="/admin/profiles" element={<ProfileManagement />} />
+                            <Route path="/admin/ticket_category" element={<TicketCategoryManagement />} />
+                            <Route path="/admin/forms" element={<FormManagement />} />
+                        </>
+                    )}
                 </Route>
             </Route>
-
-            {isAdmin && (
-                <Route element={<AdminLayout />}>
-                    <Route path="/admin" element={<Home />} />
-                    <Route path="/admin/users" element={<UserManagement />} />
-                    <Route path="/admin/units" element={<UnitManagement />} />
-                    <Route path="/admin/departments" element={<DepartmentManagement />} />
-                    <Route path="/admin/cargos" element={<CargoManagement />} />
-                    <Route path="/admin/profiles" element={<ProfileManagement />} />
-                    <Route path="/admin/ticket_category" element={<TicketCategoryManagement />} />
-                    <Route path="/admin/forms" element={<FormManagement />} />
-                </Route>
-            )}
 
             <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

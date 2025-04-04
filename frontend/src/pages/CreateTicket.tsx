@@ -70,8 +70,6 @@ const CreateTicket: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const observersId = properties.observers.map((user) => user.id);
-
         const data = {
             formId: currentForm.id,
             responses: Object.entries(formData).map(([fieldId, value]) => ({
@@ -79,7 +77,7 @@ const CreateTicket: React.FC = () => {
                 value
             })),
             properties: {
-                observersId: observersId,
+                observersId: properties.observers,
                 urgency: properties.urgency,
                 receiveEmail: properties.receiveEmail
             }

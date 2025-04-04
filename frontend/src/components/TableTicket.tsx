@@ -8,19 +8,10 @@ import Pagination from "./Pagination";
 
 import "../assets/styles/table.css";
 import { Department } from "../types/Department";
+import { Ticket } from "../types/Ticket";
+import { StatusEnum } from "../enums/StatusEnum";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
-
-interface Ticket {
-    id: string;
-    name: string;
-    categoryPath: string;
-    status: string;
-    urgency: string;
-    createdAt: string;
-    updatedAt: string;
-    user?: { name: string };
-}
 
 interface TableTicketProps {
     viewMode?: "readonly" | "edit";
@@ -31,29 +22,25 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
     const [currentPage, setCurrentPage] = useState<number>(0);
     const [totalPages, setTotalPages] = useState<number>(1);
     const [pageSize, setPageSize] = useState<number>(10);
-    const [status, setStatus] = useState<string>("Novo");
+    const [status, setStatus] = useState<StatusEnum | null>(StatusEnum.NOVO);
     const [noResultsMessage, setNoResultsMessage] = useState<string>("");
     const [departments, setDepartments] = useState<Department[]>([]);
     const [department, setDepartment] = useState<Department>();
     const [searchQuery, setSearchQuery] = useState<string>("");
 
-    const columns: { label: string; value: string }[] = [
-        { label: "ID", value: "id" },
-        { label: "Assunto", value: "name" },
-        { label: "Categoria", value: "categoryPath" },
-        { label: "Status", value: "status" },
-        { label: "Urgência", value: "urgency" },
-        { label: "Data de Criação", value: "createdAt" },
-        { label: "Última Atualização", value: "updatedAt" },
+    const columns: string[] = [
+        "ID",
+        "Assunto",
+        "Categoria",
+        "Status",
+        "Urgência",
+        "Data de Criação",
+        "Última Atualização",
     ];
 
     if (viewMode === "edit") {
-        columns.push({ label: "Usuário", value: "user.name" });
+        columns.push("Usuário");
     }
-
-    const getNestedValue = (obj: any, path: string): any => {
-        return path.split(".").reduce((acc, part) => acc && acc[part], obj);
-    };
 
     const fetchUserDepartments = async () => {
         try {
@@ -78,9 +65,9 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
             } else {
                 if (viewMode === "edit") {
                     if (!department) return;
-                    url = `${API_BASE_URL}/tickets/department/${department.id}`;
+                    url = `${API_BASE_URL}/ticket/by-department/${department.id}`;
                 } else {
-                    url = `${API_BASE_URL}/tickets/user`;
+                    url = `${API_BASE_URL}/ticket/my-tickets`;
                 }
             }
 
@@ -96,9 +83,9 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
 
             const res = await axiosInstance.get(url, { params });
 
-            if (res.status === 200 && res.data?._embedded?.ticketDTOList?.length > 0) {
-                setData(res.data._embedded.ticketDTOList);
-                setTotalPages(res.data.page.totalPages);
+            if (res.status === 200 && res.data?.content?.length > 0) {
+                setData(res.data.content);
+                setTotalPages(res.data.totalPages);
                 setNoResultsMessage("");
             } else {
                 setData([]);
@@ -113,8 +100,10 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
     };
 
     useEffect(() => {
-        fetchUserDepartments();
-    }, []);
+        if (viewMode === "edit") {
+            fetchUserDepartments();
+        }
+    }, [viewMode]);
 
     useEffect(() => {
         if (departments.length > 0 && !department) {
@@ -134,7 +123,12 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
     };
 
     const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setStatus(e.target.value);
+        const value = e.target.value;
+        if (value === "") {
+            setStatus(null);
+        } else {
+            setStatus(value as StatusEnum);
+        }
         setCurrentPage(0);
     };
 
@@ -159,15 +153,18 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                     <div className="ms-3">
                         <label htmlFor="statusSelect">Status: </label>
                         <select
-                            value={status}
+                            value={status || ""}
                             onChange={handleStatusChange}
                             className="form-select"
                             id="statusSelect"
                         >
-                            <option value="Novo">Novos</option>
-                            <option value="Em Andamento">Em Andamento</option>
-                            <option value="Fechado">Fechados</option>
-                            <option value="ALL">Todos</option>
+                            <option value="">Todos</option>
+                            <option value={StatusEnum.NOVO}>Novos</option>
+                            <option value={StatusEnum.EM_ANDAMENTO}>Em Andamento</option>
+                            <option value={StatusEnum.PENDENTE}>Pendentes</option>
+                            <option value={StatusEnum.RESOLVIDO}>Resolvidos</option>
+                            <option value={StatusEnum.FECHADO}>Fechados</option>
+                            <option value={StatusEnum.CANCELADO}>Cancelados</option>
                         </select>
                     </div>
                     {viewMode === "edit" && departments.length > 1 && (
@@ -201,7 +198,7 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                 <thead>
                     <tr>
                         {columns.map((column, index) => (
-                            <th key={index}>{column.label}</th>
+                            <th key={index}>{column}</th>
                         ))}
                     </tr>
                 </thead>
@@ -215,30 +212,42 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                     ) : (
                         data.map((item, index) => (
                             <tr key={index}>
-                                {columns.map((column, colIndex) => {
-                                    const value = getNestedValue(item, column.value);
-                                    const isDate =
-                                        column.value === "createdAt" ||
-                                        column.value === "updatedAt" ||
-                                        column.value === "closedAt";
-
-                                    return (
-                                        <td key={colIndex}>
-                                            {column.value === "name" ? (
-                                                <Link
-                                                    to={`/tickets/${item.id}`}
-                                                    className="fw-semibold text-decoration-underline"
-                                                >
-                                                    {value}
-                                                </Link>
-                                            ) : isDate ? (
-                                                DateFormatter(value || "")
-                                            ) : (
-                                                value || "N/A"
-                                            )}
-                                        </td>
-                                    );
-                                })}
+                                <td>
+                                    <Link
+                                        to={`/ticket/${item.id}`}
+                                        className="fw-semibold text-decoration-underline"
+                                    >
+                                        {item.id}
+                                    </Link>
+                                </td>
+                                <td>
+                                    <Link
+                                        to={`/ticket/${item.id}`}
+                                        className="fw-semibold text-decoration-underline"
+                                    >
+                                        {item.form.title}
+                                    </Link>
+                                </td>
+                                <td>
+                                    {item.form.ticketCategory.name}
+                                </td>
+                                <td>
+                                    {item.properties.status}
+                                </td>
+                                <td>
+                                    {item.properties.urgency}
+                                </td>
+                                <td>
+                                    {DateFormatter(item.properties.createdAt || "")}
+                                </td>
+                                <td>
+                                    {DateFormatter(item.properties.updatedAt || "")}
+                                </td>
+                                {viewMode === "edit" && (
+                                    <td>
+                                        {item.properties.user?.name || ""}
+                                    </td>
+                                )}
                             </tr>
                         ))
                     )}

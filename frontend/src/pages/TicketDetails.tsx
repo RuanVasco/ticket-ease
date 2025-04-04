@@ -63,7 +63,6 @@ const TicketDetails: React.FC = () => {
     };
 
     useEffect(() => {
-        console.log(ticketMessages)
         const allIncomingMessages = Array.isArray(ticketMessages)
             ? ticketMessages
             : Object.values(ticketMessages).flat();
@@ -177,7 +176,46 @@ const TicketDetails: React.FC = () => {
 
     return (
         <main>
-            <div className="container">
+            <nav className="p-4 text-center">
+                <h4 className="fw-bold">Gerenciamento do Ticket - #{ticket.id} - {ticket.form.title || ""}</h4>
+            </nav>
+            <div className="row mx-2">
+                <div className="col-3">
+                    <h5 className="fw-bold mb-3 border-bottom pb-2">Propriedades</h5>
+                    <div className="p-3 border rounded shadow-sm bg-light d-flex flex-column">
+                        <span>Usuário: {ticket.properties.user?.name || ""}</span>
+                        {ticket.properties.observers.length > 0 && (
+                            <div>
+                                <span>Observadores: </span>
+                                <div className="d-flex flex-column ps-3">
+                                    {ticket.properties.observers.map((observer, index) => (
+                                        <span key={index}>
+                                            - {observer.name || ""}
+                                            {/* {index < ticket.properties.observers.length - 1 ? ", " : ""} */}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        <span>
+                            Data de abertura: {ticket.properties.createdAt ? DateFormatter(ticket.properties.createdAt) : ""}
+                        </span>
+                        <span>
+                            Última atualização: {ticket.properties.updatedAt ? DateFormatter(ticket.properties.updatedAt) : ""}
+                        </span>
+                        <span>Status: {ticket.properties.status}</span>
+                    </div>
+                </div>
+                <div className="col-6">
+                    <h5 className="fw-bold mb-3 border-bottom pb-2">Chat</h5>
+                    <div className="p-3 border rounded shadow-sm bg-light">asd</div>
+                </div>
+                <div className="col-3">
+                    <h5 className="fw-bold mb-3 border-bottom pb-2">Formulário</h5>
+                    <div className="p-3 border rounded shadow-sm bg-light">asd</div>
+                </div>
+            </div>
+            {/* <div className="container">
                 <div className="row mt-3">
                     <div className="col-9">
                         <div className="d-flex flex-column">
@@ -185,7 +223,7 @@ const TicketDetails: React.FC = () => {
                                 <div className="fw-semibold">
                                     Ticket {ticket.id} - {ticket.form.title || ""}
                                 </div>
-                                {/* {data?.filePaths && data.filePaths.length > 0 && (
+                                {data?.filePaths && data.filePaths.length > 0 && (
                                     <button
                                         type="button"
                                         className="btn-clean ms-auto"
@@ -194,7 +232,7 @@ const TicketDetails: React.FC = () => {
                                     >
                                         Anexos <FaPaperclip />
                                     </button>
-                                )} */}
+                                )}
                             </div>
                             <div className="chat_content rounded px-2 pb-3" onScroll={handleScroll}>
                                 {allMessages.length > 0 ? (
@@ -276,7 +314,7 @@ const TicketDetails: React.FC = () => {
                             <span className="fw-lighter">{ticket.properties.user?.cargo?.name || ""}</span>{" "}
                             <br />
                         </div>
-                        {/* <label htmlFor="user" className="col-form-label">
+                        <label htmlFor="user" className="col-form-label">
                             Setor
                         </label>
                         <input
@@ -285,7 +323,7 @@ const TicketDetails: React.FC = () => {
                             type="text"
                             value={data?.user?.department?.name || ""}
                             readOnly
-                        /> */}
+                        />
                         <label htmlFor="department" className="col-form-label">
                             Categoria
                         </label>
@@ -328,7 +366,7 @@ const TicketDetails: React.FC = () => {
                         />
                     </div>
                 </div>
-            </div>
+            </div> */}
         </main>
     );
 };

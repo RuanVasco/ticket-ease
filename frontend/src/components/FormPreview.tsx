@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Form } from "../types/Form";
 import { DynamicForm } from "./DynamicForm";
-import { TicketProperty } from "../types/TicketProperties";
+import { TicketProperties } from "../types/TicketProperties";
 
 interface Props {
     form: Form;
@@ -9,7 +9,7 @@ interface Props {
 
 const FormPreview: React.FC<Props> = ({ form }) => {
     const [formData] = useState<Record<string, any>>({});
-    const [properties] = useState<TicketProperty>({} as TicketProperty);
+    const [properties] = useState<TicketProperties>({} as TicketProperties);
 
     return (
         <div className="p-3 border rounded shadow-sm bg-light">

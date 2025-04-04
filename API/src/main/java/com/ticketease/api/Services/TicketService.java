@@ -3,15 +3,20 @@ package com.ticketease.api.Services;
 import com.ticketease.api.DTO.TicketDTO.TicketRequestDTO;
 import com.ticketease.api.DTO.TicketDTO.TicketPropertiesDTO;
 import com.ticketease.api.Entities.*;
+import com.ticketease.api.Enums.StatusEnum;
 import com.ticketease.api.Repositories.FormRepository;
 import com.ticketease.api.Repositories.TicketRepository;
 import com.ticketease.api.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +45,7 @@ public class TicketService {
         Ticket ticket = new Ticket();
         ticket.setUser(user);
         ticket.setForm(form);
-        ticket.setStatus("ABERTO");
+        ticket.setStatus(StatusEnum.NOVO);
         ticket.setCreatedAt(new Date());
         ticket.setUpdatedAt(new Date());
 
@@ -98,4 +103,44 @@ public class TicketService {
         return relatedUsers;
     }
 
+    public Page<Ticket> findByOwnerOrObserver(User user, Pageable pageable) {
+        return ticketRepository.findByOwnerOrObserver(user.getId(), pageable);
+    }
+    public Page<Ticket> findByOwnerOrObserverAndStatus(User user, StatusEnum status, Pageable pageable) {
+        return ticketRepository.findByOwnerOrObserverAndStatus(user.getId(), status, pageable);
+    }
+
+    public Page<Ticket> findByDepartmentAndStatus(Department department, User user, StatusEnum status, Pageable pageable) {
+        Collection<Ticket> tickets = ticketRepository.findByStatus(status);
+        return filterAndPaginate(tickets, department, user, pageable);
+    }
+
+    public Page<Ticket> findByDepartment(Department department, User user, Pageable pageable) {
+        Collection<Ticket> tickets = ticketRepository.findAll();
+        return filterAndPaginate(tickets, department, user, pageable);
+    }
+
+    private Page<Ticket> filterAndPaginate(
+            Collection<Ticket> tickets,
+            Department department,
+            User user,
+            Pageable pageable
+    ) {
+
+        List<Ticket> filteredList = tickets.stream()
+                .filter(t -> t.canManage(user) && t.getDepartment().equals(department))
+                .distinct()
+                .toList();
+
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), filteredList.size());
+
+        List<Ticket> pageContent = (start >= filteredList.size())
+                ? List.of()
+                : filteredList.subList(start, end);
+
+
+        return new PageImpl<>(pageContent, pageable, filteredList.size());
+    }
 }
