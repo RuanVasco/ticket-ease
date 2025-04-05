@@ -15,9 +15,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -42,17 +45,20 @@ public class TicketCategoryController {
     }
 
     @GetMapping("/fathers")
-    public ResponseEntity<?> getRootCategories() {
+    public ResponseEntity<?> getFathersCategories() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        List<TicketCategory> categories = ticketCategoryRepository.findAll().stream()
-                .filter(c -> {
-                    Department dept = c.getDepartment();
-                    return user.hasPermission("MANAGE_TICKET_CATEGORY", dept) || user.hasPermission("MANAGE_TICKET_CATEGORY", null);
-                })
-                .toList();
+        List<TicketCategory> allCategories = ticketCategoryRepository.findAll();
+        List<TicketCategory> filteredCategories = new ArrayList<>();
 
-        return ResponseEntity.ok(categories);
+        for (TicketCategory tc : allCategories) {
+            Department dept = tc.getDepartment();
+            if (user.hasPermission("MANAGE_TICKET_CATEGORY", dept)) {
+                filteredCategories.add(tc);
+            }
+        }
+
+        return ResponseEntity.ok(filteredCategories);
     }
 
     @GetMapping("/pageable")
@@ -188,6 +194,11 @@ public class TicketCategoryController {
         }
 
         TicketCategory ticketCategory = optionalTicketCategory.get();
+
+        if (Objects.equals(ticketCategory.getId(), ticketCategoryDTO.getFatherId())){
+            return ResponseEntity.badRequest().body("A própria categoria não pode ser pai dela mesma.");
+        }
+
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Department department = ticketCategory.getDepartment();
@@ -218,7 +229,7 @@ public class TicketCategoryController {
         }
 
         try {
-            ticketCategoryRepository.delete(ticketCategory);
+            ticketCategoryService.delete(ticketCategory);
             return ResponseEntity.ok().build();
         } catch (DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)

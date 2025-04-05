@@ -12,210 +12,327 @@ import "../assets/styles/ticket_details.css";
 import { Ticket } from "../types/Ticket";
 import { Message } from "../types/Message";
 import { toast } from "react-toastify";
+import { DynamicForm } from "../components/DynamicForm";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 const TicketDetails: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
-    const { ticketMessages, sendMessage } = useWebSocket();
-    const [allMessages, setAllMessages] = useState<Message[]>([]);
-    const userData = getUserData();
-    const [ticket, setTicket] = useState<Ticket>({} as Ticket);
-    const [oldMessages, setOldMessages] = useState<Message[]>([]);
-    const [message, setMessage] = useState<{ text: string; closeTicket: boolean }>({
-        text: "",
-        closeTicket: false,
-    });
-    const [loading, setLoading] = useState(true);
-    const [isManager, setIsManager] = useState(false);
+	const { id } = useParams<{ id: string }>();
+	const { ticketMessages, sendMessage } = useWebSocket();
+	const [allMessages, setAllMessages] = useState<Message[]>([]);
+	const userData = getUserData();
+	const [ticket, setTicket] = useState<Ticket>({} as Ticket);
+	const [oldMessages, setOldMessages] = useState<Message[]>([]);
+	const [message, setMessage] = useState<{ text: string; closeTicket: boolean }>({
+		text: "",
+		closeTicket: false,
+	});
+	const [loading, setLoading] = useState(true);
+	const [isManager, setIsManager] = useState(false);
 
-    const chatEndRef = useRef<HTMLDivElement | null>(null);
+	const chatEndRef = useRef<HTMLDivElement | null>(null);
 
-    const [page, setPage] = useState(0);
-    const [hasMore, setHasMore] = useState(true);
-    const pageSize = 10;
+	const [page, setPage] = useState(0);
+	const [hasMore, setHasMore] = useState(true);
+	const pageSize = 10;
+	const [activeTab, setActiveTab] = useState("props");
 
-    const getFirstName = (fullName: string) => fullName.split(" ")[0];
-    const { hasPermission } = usePermissions();
+	const getFirstName = (fullName: string) => fullName.split(" ")[0];
+	const { hasPermission } = usePermissions();
 
-    const loadOlderMessages = async () => {
-        if (!hasMore) return;
+	const loadOlderMessages = async () => {
+		if (!hasMore) return;
 
-        try {
-            const response = await axiosInstance.get(
-                `${API_BASE_URL}/messages/ticket/${id}?page=${page}&size=${pageSize}&sort=sentAt`
-            );
+		try {
+			const response = await axiosInstance.get(
+				`${API_BASE_URL}/messages/ticket/${id}?page=${page}&size=${pageSize}&sort=sentAt`
+			);
 
-            if (response.status === 200 || response.status === 201) {
-                setOldMessages((prevMessages) => [...response.data.content, ...prevMessages]);
-                setPage((prevPage) => prevPage + 1);
-                setHasMore(!response.data.last);
-            }
-        } catch (error) {
-            console.error("Erro ao buscar mensagens:", error);
-        }
-    };
+			if (response.status === 200 || response.status === 201) {
+				setOldMessages((prevMessages) => [...response.data.content, ...prevMessages]);
+				setPage((prevPage) => prevPage + 1);
+				setHasMore(!response.data.last);
+			}
+		} catch (error) {
+			console.error("Erro ao buscar mensagens:", error);
+		}
+	};
 
-    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        if (e.currentTarget.scrollTop === 0 && hasMore) {
-            loadOlderMessages();
-        }
-    };
+	const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+		if (e.currentTarget.scrollTop === 0 && hasMore) {
+			loadOlderMessages();
+		}
+	};
 
-    useEffect(() => {
-        const allIncomingMessages = Array.isArray(ticketMessages)
-            ? ticketMessages
-            : Object.values(ticketMessages).flat();
+	useEffect(() => {
+		const allIncomingMessages = Array.isArray(ticketMessages)
+			? ticketMessages
+			: Object.values(ticketMessages).flat();
 
-        const currentTicketMessages = allIncomingMessages.filter(
-            (message) => Number(message.ticket.id) === Number(id)
-        );
+		const currentTicketMessages = allIncomingMessages.filter(
+			(message) => Number(message.ticket.id) === Number(id)
+		);
 
-        const combinedMessages = [...oldMessages, ...currentTicketMessages];
+		const combinedMessages = [...oldMessages, ...currentTicketMessages];
 
-        const deduplicatedMessages = Array.from(
-            new Map(combinedMessages.map((msg) => [msg.id, msg])).values()
-        );
+		const deduplicatedMessages = Array.from(
+			new Map(combinedMessages.map((msg) => [msg.id, msg])).values()
+		);
 
-        deduplicatedMessages.sort(
-            (a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime()
-        );
+		deduplicatedMessages.sort(
+			(a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime()
+		);
 
-        setAllMessages(deduplicatedMessages);
-    }, [oldMessages, ticketMessages, id]);
+		setAllMessages(deduplicatedMessages);
+	}, [oldMessages, ticketMessages, id]);
 
-    useEffect(() => {
-        const checkUserPermission = async () => {
-            const isManager = hasPermission("MANAGE_TICKET");
-            setIsManager(isManager);
-        };
+	useEffect(() => {
+		const checkUserPermission = async () => {
+			const isManager = hasPermission("MANAGE_TICKET");
+			setIsManager(isManager);
+		};
 
-        checkUserPermission();
-    }, []);
+		checkUserPermission();
+	}, []);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const response = await axiosInstance.get(`${API_BASE_URL}/ticket/${id}`);
-                setTicket(response.data);
-            } catch (error: any) {
-                if (error.response?.status === 403) {
-                    toast.error("Sem permissão para acessar esse ticket.")
-                    window.location.href = "../../";
-                } else {
-                    console.error("Erro ao buscar dados:", error);
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
+	useEffect(() => {
+		const fetchData = async () => {
+			setLoading(true);
+			try {
+				const response = await axiosInstance.get(`${API_BASE_URL}/ticket/${id}`);
+				setTicket(response.data);
+			} catch (error: any) {
+				if (error.response?.status === 403) {
+					toast.error("Sem permissão para acessar esse ticket.");
+					window.location.href = "../../";
+				} else {
+					console.error("Erro ao buscar dados:", error);
+				}
+			} finally {
+				setLoading(false);
+			}
+		};
 
-        if (id) {
-            fetchData();
-        }
-    }, [id]);
+		if (id) {
+			fetchData();
+		}
+	}, [id]);
 
-    useEffect(() => {
-        const fetchMessages = async () => {
-            if (!id) {
-                console.error("ticketId não está definido.");
-                return;
-            }
+	useEffect(() => {
+		const fetchMessages = async () => {
+			if (!id) {
+				console.error("ticketId não está definido.");
+				return;
+			}
 
-            try {
-                setOldMessages([]);
-                setPage(0);
-                setHasMore(true);
-                loadOlderMessages();
-            } catch (error) {
-                console.error("Erro ao buscar mensagens:", error);
-            }
-        };
+			try {
+				setOldMessages([]);
+				setPage(0);
+				setHasMore(true);
+				loadOlderMessages();
+			} catch (error) {
+				console.error("Erro ao buscar mensagens:", error);
+			}
+		};
 
-        fetchMessages();
-    }, [id]);
+		fetchMessages();
+	}, [id]);
 
-    useEffect(() => {
-        if (allMessages.length === 0) return;
+	useEffect(() => {
+		if (allMessages.length === 0) return;
 
-        const chatContainer = chatEndRef.current?.parentNode as HTMLDivElement;
-        if (!chatContainer) return;
+		const chatContainer = chatEndRef.current?.parentNode as HTMLDivElement;
+		if (!chatContainer) return;
 
-        const isAtBottom =
-            chatContainer.scrollHeight - chatContainer.scrollTop === chatContainer.clientHeight;
+		const isAtBottom =
+			chatContainer.scrollHeight - chatContainer.scrollTop === chatContainer.clientHeight;
 
-        if (!isAtBottom) {
-            chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        }
-    }, [allMessages]);
+		if (!isAtBottom) {
+			chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+		}
+	}, [allMessages]);
 
-    const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const { name, value, type, checked } = event.target;
-        setMessage((prevMessage) => ({
-            ...prevMessage,
-            [name]: type === "checkbox" ? checked : value,
-        }));
-    };
+	const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+		const { name, value, type, checked } = event.target;
+		setMessage((prevMessage) => ({
+			...prevMessage,
+			[name]: type === "checkbox" ? checked : value,
+		}));
+	};
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        if (message.text.trim() === "" || !id) return;
+	const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		if (message.text.trim() === "" || !id) return;
 
-        const submitEvent = e.nativeEvent as SubmitEvent;
-        const submitter = submitEvent.submitter as HTMLButtonElement;
-        const close = submitter?.name === "close";
+		const submitEvent = e.nativeEvent as SubmitEvent;
+		const submitter = submitEvent.submitter as HTMLButtonElement;
+		const close = submitter?.name === "close";
 
-        sendMessage(message.text, close, id);
-        setMessage({ ...message, text: "" });
-    };
+		sendMessage(message.text, close, id);
+		setMessage({ ...message, text: "" });
+	};
 
-    if (loading) {
-        return <></>;
-    }
+	if (loading) {
+		return <></>;
+	}
 
-    return (
-        <main>
-            <nav className="p-4 text-center">
-                <h4 className="fw-bold">Gerenciamento do Ticket - #{ticket.id} - {ticket.form.title || ""}</h4>
-            </nav>
-            <div className="row mx-2">
-                <div className="col-3">
-                    <h5 className="fw-bold mb-3 border-bottom pb-2">Propriedades</h5>
-                    <div className="p-3 border rounded shadow-sm bg-light d-flex flex-column">
-                        <span>Usuário: {ticket.properties.user?.name || ""}</span>
-                        {ticket.properties.observers.length > 0 && (
-                            <div>
-                                <span>Observadores: </span>
-                                <div className="d-flex flex-column ps-3">
-                                    {ticket.properties.observers.map((observer, index) => (
-                                        <span key={index}>
-                                            - {observer.name || ""}
-                                            {/* {index < ticket.properties.observers.length - 1 ? ", " : ""} */}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                        <span>
-                            Data de abertura: {ticket.properties.createdAt ? DateFormatter(ticket.properties.createdAt) : ""}
-                        </span>
-                        <span>
-                            Última atualização: {ticket.properties.updatedAt ? DateFormatter(ticket.properties.updatedAt) : ""}
-                        </span>
-                        <span>Status: {ticket.properties.status}</span>
-                    </div>
-                </div>
-                <div className="col-6">
-                    <h5 className="fw-bold mb-3 border-bottom pb-2">Chat</h5>
-                    <div className="p-3 border rounded shadow-sm bg-light">asd</div>
-                </div>
-                <div className="col-3">
-                    <h5 className="fw-bold mb-3 border-bottom pb-2">Formulário</h5>
-                    <div className="p-3 border rounded shadow-sm bg-light">asd</div>
-                </div>
-            </div>
-            {/* <div className="container">
+	return (
+		<main>
+			<nav className="p-4 text-center">
+				<h4 className="fw-bold">
+					Gerenciamento do Ticket - #{ticket.id} - {ticket.form.title || ""}
+				</h4>
+			</nav>
+			<div className="row mx-2">
+				<div className="col-8">
+					<h5 className="fw-bold mb-3 border-bottom pb-2">Chat</h5>
+					<div className="p-3 border rounded shadow-sm bg-light">
+						<div className="chat_content rounded px-2 pb-3" onScroll={handleScroll}>
+							{allMessages.length > 0 ? (
+								allMessages.map((msg) =>
+									Number(msg.user.id) === Number(userData?.id) ? (
+										<div key={msg.id} className="mt-3 message-box-sent">
+											<div className="message-bubble">
+												<div className="box_message_details mb-2">
+													{getFirstName(msg.user.name)}
+													<span> - </span>
+													{DateFormatter(msg.sentAt)}
+												</div>
+												{msg.text}
+											</div>
+										</div>
+									) : (
+										<div key={msg.id} className="mt-3 message-box-received">
+											<div className="message-bubble">
+												<div className="box_message_details mb-2">
+													{getFirstName(msg.user.name)}
+													<span> - </span>
+													{DateFormatter(msg.sentAt)}
+												</div>
+												{msg.text}
+											</div>
+										</div>
+									)
+								)
+							) : isManager ? (
+								<p>Envie uma mensagem para iniciar o chamado.</p>
+							) : null}
+							<div ref={chatEndRef} />
+						</div>
+						{ticket.properties.status !== "Fechado" && (
+							<form className="mt-3 input-group" onSubmit={handleSubmit}>
+								<input
+									type="text"
+									className="input-text form-control"
+									name="text"
+									value={message.text}
+									onChange={handleInputChange}
+									placeholder="Digite sua mensagem..."
+								/>
+								<button type="submit" className="btn_send_message">
+									Enviar
+									<BsSend className="ms-2" />
+								</button>
+								{isManager && (
+									<div className="dropup">
+										<button
+											type="button"
+											className="btn_send_message_dropdown_togle dropdown-toggle dropdown-toggle-split"
+											data-bs-toggle="dropdown"
+											aria-expanded="false"
+										></button>
+										<ul className="dropdown-menu dropdown_options_message dropdown-menu-end ">
+											<li>
+												<button
+													className="dropdown-item"
+													type="submit"
+													name="close"
+												>
+													Enviar e finalizar chamado
+													<BsSendCheck className="ms-2" />
+												</button>
+											</li>
+										</ul>
+									</div>
+								)}
+							</form>
+						)}
+					</div>
+				</div>
+				<div className="col-4">
+					<h5 className="fw-bold mb-3 border-bottom pb-2">Detalhes</h5>
+
+					<ul className="nav nav-tabs mb-3">
+						<li className="nav-item">
+							<button
+								className={`nav-link ${activeTab === "props" ? "active" : ""}`}
+								onClick={() => setActiveTab("props")}
+							>
+								Propriedades
+							</button>
+						</li>
+						<li className="nav-item">
+							<button
+								className={`nav-link ${activeTab === "form" ? "active" : ""}`}
+								onClick={() => setActiveTab("form")}
+							>
+								Respostas do Formulário
+							</button>
+						</li>
+					</ul>
+
+					<div className="p-3 border rounded shadow-sm bg-light">
+						{activeTab === "props" && (
+							<div className="d-flex flex-column">
+								<span>Usuário: {ticket.properties.user?.name || ""}</span>
+
+								{ticket.properties.observers.length > 0 && (
+									<div>
+										<span>Observadores: </span>
+										<div className="d-flex flex-column ps-3">
+											{ticket.properties.observers.map((observer, index) => (
+												<span key={index}>- {observer.name || ""}</span>
+											))}
+										</div>
+									</div>
+								)}
+
+								<span>
+									Data de abertura:{" "}
+									{ticket.properties.createdAt
+										? DateFormatter(ticket.properties.createdAt)
+										: ""}
+								</span>
+								<span>
+									Última atualização:{" "}
+									{ticket.properties.updatedAt
+										? DateFormatter(ticket.properties.updatedAt)
+										: ""}
+								</span>
+								<span>Status: {ticket.properties.status}</span>
+								<span>Urgência: {ticket.properties.urgency}</span>
+							</div>
+						)}
+
+						{activeTab === "form" && (
+							<div>
+								{ticket.responses?.length > 0 ? (
+									<div className="d-flex flex-column gap-2">
+										{ticket.responses.map((resp, index) => (
+											<div key={index}>
+												<strong>{resp.field.label}:</strong> {resp.value}
+											</div>
+										))}
+									</div>
+								) : (
+									<span>Nenhuma resposta preenchida.</span>
+								)}
+							</div>
+						)}
+					</div>
+				</div>
+			</div>
+			{/* <div className="container">
                 <div className="row mt-3">
                     <div className="col-9">
                         <div className="d-flex flex-column">
@@ -367,8 +484,8 @@ const TicketDetails: React.FC = () => {
                     </div>
                 </div>
             </div> */}
-        </main>
-    );
+		</main>
+	);
 };
 
 export default TicketDetails;
