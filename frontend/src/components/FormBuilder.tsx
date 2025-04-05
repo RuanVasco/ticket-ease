@@ -7,6 +7,7 @@ import { FaArrowRotateRight, FaFloppyDisk, FaPlus } from "react-icons/fa6";
 import { fetchCategories } from "../services/TicketCategoryService";
 import { toast } from "react-toastify";
 import { User } from "../types/User";
+import OptionEditor from "./Fields/OptionEditor";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -208,14 +209,9 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
                         {(field.type === "SELECT" || field.type === "CHECKBOX" || field.type === "RADIO") && (
                             <div className="mb-2">
                                 <label className="form-label">Opções (separadas por vírgula)</label>
-                                <textarea
-                                    required
-                                    className="form-control"
-                                    placeholder="Opção 1, Opção 2, Opção 3"
-                                    value={field.options?.join(",") || ""}
-                                    onChange={e =>
-                                        updateField(index, { options: e.target.value.split(",") })
-                                    }
+                                <OptionEditor
+                                    value={field.options}
+                                    onChange={(options) => updateField(index, { options })}
                                 />
                             </div>
                         )}

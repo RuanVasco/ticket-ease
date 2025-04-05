@@ -8,6 +8,7 @@ import { MultiValue } from "react-select";
 import { User } from "../types/User";
 import { toast } from "react-toastify";
 import axiosInstance from "./AxiosConfig";
+import SelectDepartment from "./Fields/SelectDepartment";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -114,17 +115,38 @@ export const DynamicForm: React.FC<Props> = ({ form, preview = false, handleSubm
                         />
                     )}
 
+                    {field.type === "DEPARTMENT_SELECT" && (
+                        <SelectDepartment
+                            value={formData[field.id] || ""}
+                            label={field.label}
+                            required={field.required}
+                            disabled={false}
+                            onChange={(value) => handleChange(field.id, value)}
+                        />
+                    )}
+
+                    {field.type === "USER_DEPARTMENT_SELECT" && (
+                        <SelectDepartment
+                            value={formData[field.id] || ""}
+                            label={field.label}
+                            required={field.required}
+                            disabled={false}
+                            onChange={(value) => handleChange(field.id, value)}
+                            scope="user"
+                        />
+                    )}
+
                     {field.type === "CHECKBOX" && (
                         <div>
-                            {field.options?.map((opt, i) => (
-                                <div key={i} className="form-check">
+                            {field.options?.map((opt) => (
+                                <div key={opt.value} className="form-check">
                                     <input
                                         className="form-check-input"
                                         type="checkbox"
                                         disabled={preview}
                                         onChange={e => handleChange(field.id, e.target.value)}
                                     />
-                                    <label className="form-check-label">{opt}</label>
+                                    <label className="form-check-label">{opt.label}</label>
                                 </div>
                             ))}
                         </div>
@@ -132,16 +154,17 @@ export const DynamicForm: React.FC<Props> = ({ form, preview = false, handleSubm
 
                     {field.type === "RADIO" && (
                         <div>
-                            {field.options?.map((opt, i) => (
-                                <div key={i} className="form-check">
+                            {field.options?.map((opt) => (
+                                <div key={opt.value} className="form-check">
                                     <input
                                         className="form-check-input"
                                         type="radio"
                                         disabled={preview}
                                         onChange={e => handleChange(field.id, e.target.value)}
                                     />
-                                    <label className="form-check-label">{opt}</label>
+                                    <label className="form-check-label">{opt.label}</label>
                                 </div>
+
                             ))}
                         </div>
                     )}
