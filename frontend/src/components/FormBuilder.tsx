@@ -81,6 +81,8 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
             return;
         }
 
+        console.log(form.fields)
+
         const data = {
             title: form.title,
             description: form.description,
@@ -174,11 +176,9 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
                     ))}
                 </select>
             </div>
-            <div style={{ maxHeight: "35vh", overflowY: "auto" }}>
+            <div>
                 {form.fields.map((field, index) => (
-                    <div key={index} className="border-bottom p-3">
-                        <h4 className="fw-semibold">Campo {index + 1}</h4>
-
+                    <div key={index} className="border mt-3 rounded p-3">
                         <div className="mb-2">
                             <label htmlFor={`field_label_${index}`} className="form-label">Nome</label>
                             <input
@@ -189,7 +189,6 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
                                 onChange={e => updateField(index, { label: e.target.value })}
                             />
                         </div>
-
                         <div className="mb-2">
                             <label className="form-label">Tipo</label>
                             <select

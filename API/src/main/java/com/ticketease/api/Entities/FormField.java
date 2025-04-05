@@ -26,7 +26,8 @@ public class FormField {
     private String placeholder;
 
     @ElementCollection
-    private List<String> options;
+    @CollectionTable(name = "form_field_option", joinColumns = @JoinColumn(name = "form_field_id"))
+    private List<Option> options;
 
     @ManyToOne
     @JsonBackReference

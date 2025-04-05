@@ -2,6 +2,7 @@ package com.ticketease.api.Controllers;
 
 import com.ticketease.api.DTO.FormDTO.FormDTO;
 import com.ticketease.api.DTO.FormDTO.FormFieldDTO;
+import com.ticketease.api.DTO.FormDTO.OptionDTO;
 import com.ticketease.api.Entities.*;
 import com.ticketease.api.Enums.FieldTypeEnum;
 import com.ticketease.api.Repositories.FormRepository;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("forms")
@@ -89,6 +91,7 @@ public class FormController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
+
         List<FormField> fields = new ArrayList<>();
         for (FormFieldDTO dto : formDTO.getFields()) {
             FormField field = new FormField();
@@ -96,7 +99,14 @@ public class FormController {
             field.setType(FieldTypeEnum.valueOf(dto.getType().toUpperCase()));
             field.setRequired(dto.isRequired());
             field.setPlaceholder(dto.getPlaceholder());
-            field.setOptions(dto.getOptions());
+
+            if (dto.getOptions() != null) {
+                List<Option> options = dto.getOptions().stream()
+                        .map(OptionDTO::toEntity)
+                        .collect(Collectors.toList()); 
+                field.setOptions(options);
+            }
+
             fields.add(field);
         }
 
@@ -131,7 +141,14 @@ public class FormController {
             field.setType(FieldTypeEnum.valueOf(dto.getType().toUpperCase()));
             field.setRequired(dto.isRequired());
             field.setPlaceholder(dto.getPlaceholder());
-            field.setOptions(dto.getOptions());
+
+            if (dto.getOptions() != null) {
+                List<Option> options = dto.getOptions().stream()
+                        .map(OptionDTO::toEntity)
+                        .toList();
+                field.setOptions(options);
+            }
+
             field.setForm(existingForm);
             existingForm.getFields().add(field);
         }
