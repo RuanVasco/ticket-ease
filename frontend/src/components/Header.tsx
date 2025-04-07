@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { FaArrowLeft, FaBell, FaEye, FaEyeSlash, FaGear, FaPlus } from "react-icons/fa6";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { FaBell, FaEye, FaEyeSlash, FaGear, FaPlus } from "react-icons/fa6";
+import { Link, useLocation } from "react-router-dom";
 
 import "../assets/styles/header.css";
 import logo from "../assets/logo_claro.png";
@@ -14,7 +14,6 @@ import ThemeSelector from "./ThemeSwitcher";
 import { FaSlidersH, FaTasks } from "react-icons/fa";
 
 const Header: React.FC = () => {
-    const navigate = useNavigate();
     const location = useLocation();
     const [user, setUser] = useState<User | null>(null);
     const [canManageTicket, setCanManageTicket] = useState(false);
@@ -71,13 +70,12 @@ const Header: React.FC = () => {
             return location.pathname === "/"
                 ? "tab_item_link tab_item_link_active"
                 : "tab_item_link";
-        }
-        else {
+        } else {
             return location.pathname.startsWith(path)
                 ? "tab_item_link tab_item_link_active"
                 : "tab_item_link";
         }
-    }
+    };
 
     return (
         <nav className="navbar navbar-expand-lg header-style px-4">
@@ -86,11 +84,6 @@ const Header: React.FC = () => {
                     <Logo />
                 </div>
                 <div className="col d-flex justify-content-center">
-                    {location.pathname !== "/admin" && location.pathname.startsWith("/admin/") && (
-                        <button onClick={() => navigate("/admin")} className="btn btn-go-back">
-                            <FaArrowLeft /> Voltar
-                        </button>
-                    )}
                     {canOpenTicket && (
                         <Link to="/" className={`d-flex align-items-center ${getActiveClass("/")}`}>
                             <FaPlus />

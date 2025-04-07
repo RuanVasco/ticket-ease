@@ -8,5 +8,7 @@ public enum FieldTypeEnum {
     EMAIL,
     CHECKBOX,
     RADIO,
-    SELECT
+    SELECT,
+    DEPARTMENT_SELECT,
+    USER_DEPARTMENT_SELECT
 }

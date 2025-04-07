@@ -3,7 +3,7 @@ interface SelectInputProps {
     required?: boolean;
     disabled?: boolean;
     value: string;
-    options: string[];
+    options: { value: string; label: string }[];
     onChange: (value: string) => void;
 }
 
@@ -20,8 +20,10 @@ const SelectInput: React.FC<SelectInputProps> = ({ value, label, required = fals
                 onChange={(e) => onChange(e.target.value)}
             >
                 <option value="">Selecione...</option>
-                {options?.map((opt, i) => (
-                    <option key={i} value={opt}>{opt}</option>
+                {options.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                    </option>
                 ))}
             </select>
         </div>

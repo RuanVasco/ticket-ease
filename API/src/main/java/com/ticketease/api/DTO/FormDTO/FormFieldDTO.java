@@ -14,5 +14,5 @@ public class FormFieldDTO {
     private String type;
     private boolean required;
     private String placeholder;
-    private List<String> options;
+    private List<OptionDTO> options;
 }

@@ -2,6 +2,7 @@ package com.ticketease.api.Services;
 
 import com.ticketease.api.DTO.TicketCategoryDTO;
 import com.ticketease.api.Entities.Department;
+import com.ticketease.api.Entities.Form;
 import com.ticketease.api.Entities.TicketCategory;
 import com.ticketease.api.Repositories.DepartmentRepository;
 import com.ticketease.api.Repositories.FormRepository;
@@ -28,6 +29,7 @@ public class TicketCategoryService {
     private DepartmentRepository departmentRepository;
 
     private final FormRepository formRepository;
+    private final FormService formService;
 
     @Transactional
     public void addCategory(String name, Department department, TicketCategory father) {
@@ -97,5 +99,16 @@ public class TicketCategoryService {
         }
 
         return false;
+    }
+
+    public void delete(TicketCategory ticketCategory) {
+        TicketCategory parent = ticketCategory.getFather();
+
+        for (Form child : ticketCategory.getForms()) {
+            child.setTicketCategory(parent);
+            formService.save(child);
+        }
+
+        ticketCategoryRepository.delete(ticketCategory);
     }
 }
