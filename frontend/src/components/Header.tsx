@@ -86,7 +86,7 @@ const Header: React.FC = () => {
                     <Logo />
                 </div>
                 <div className="col d-flex justify-content-center">
-                    {location.pathname !== "/admin" && (
+                    {location.pathname !== "/admin" && location.pathname.startsWith("/admin/") && (
                         <button onClick={() => navigate("/admin")} className="btn btn-go-back">
                             <FaArrowLeft /> Voltar
                         </button>
