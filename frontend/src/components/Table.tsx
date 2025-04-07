@@ -34,8 +34,6 @@ const Table: React.FC<TableProps> = ({
     onEditClick,
     onDeleteClick,
 }) => {
-    if (!data || data.length === 0) return (<div className="text-center">Sem dados</div>);
-
     const filteredData = data.filter((row) =>
         columns.some((column) => {
             const cellValue = row[column.value];
@@ -62,7 +60,13 @@ const Table: React.FC<TableProps> = ({
                     </tr>
                 </thead>
                 <tbody>
-                    {filteredData.map((row, rowIndex) => (
+                    {filteredData.length === 0 ? (
+                        <tr>
+                            <td colSpan={columns.length + 2} className="text-center">
+                                Nenhum dado encontrado
+                            </td>
+                        </tr>
+                    ) : filteredData.map((row, rowIndex) => (
                         <tr key={rowIndex}>
                             <td className="col-auto-width">
                                 <input type="checkbox" className="massive-actions" value={row.id} />

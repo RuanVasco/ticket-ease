@@ -56,8 +56,16 @@ public class UserController {
     public ResponseEntity<?> getDepartments() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+        boolean allDepartmentsNull = user.getRoleBindings().stream()
+                .allMatch(binding -> binding.getDepartment() == null);
+
+        if (allDepartmentsNull) {
+            return ResponseEntity.noContent().build();
+        }
+
         Set<Department> departments = user.getRoleBindings().stream()
                 .map(UserRoleDepartment::getDepartment)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
         List<Department> sortedDepartments = departments.stream()

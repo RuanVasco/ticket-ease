@@ -10,5 +10,7 @@ public enum FieldTypeEnum {
     RADIO,
     SELECT,
     DEPARTMENT_SELECT,
-    USER_DEPARTMENT_SELECT
+    USER_DEPARTMENT_SELECT,
+    FILE,             
+    FILE_MULTIPLE
 }

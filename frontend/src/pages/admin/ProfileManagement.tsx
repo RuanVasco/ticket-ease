@@ -7,6 +7,8 @@ import Table from "../../components/Table";
 import { usePermissions } from "../../context/PermissionsContext";
 import { Permission } from "../../types/Permission";
 import { Profile } from "../../types/Profile";
+import { closeModal } from "../../components/Util/CloseModal";
+import { toast } from "react-toastify";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -119,15 +121,20 @@ const ProfileManagement: React.FC = () => {
             };
 
             let res;
+            let message;
+
             if (submitType === "delete") {
                 res = await axiosInstance.delete(`${API_BASE_URL}/profiles/${currentProfile.id}`);
+                message = "Perfil excluído com sucesso!";
             } else if (submitType === "add") {
                 res = await axiosInstance.post(`${API_BASE_URL}/profiles`, payload);
+                message = "Perfil criado com sucesso!";
             } else if (submitType === "update") {
                 res = await axiosInstance.put(
                     `${API_BASE_URL}/profiles/${currentProfile.id}`,
                     payload
                 );
+                message = "Perfil atualizado com sucesso!";
             } else {
                 console.error("Invalid submit type");
                 return;
@@ -135,11 +142,18 @@ const ProfileManagement: React.FC = () => {
 
             if (res.status === 200 || res.status === 201) {
                 setCurrentProfile({ id: "", name: "", permissions: [] });
-                window.location.reload();
-            } else {
-                console.error("Error", res.status);
+                fetchData();
+                fetchPermissions();
+                setCurrentPage(0);
+                closeModal("modal");
+                toast.success(message);
             }
         } catch (error) {
+            fetchData();
+            fetchPermissions();
+            setCurrentPage(0);
+            closeModal("modal");
+            toast.error(String(error));
             console.error(error);
         }
     };

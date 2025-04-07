@@ -11,7 +11,7 @@ const ItemsPerPage: React.FC<ItemsPerPageProps> = ({ pageSize, onPageSizeChange 
             </label>
             <select
                 id="page-size"
-                className="select-page-selector"
+                className="form-select"
                 value={pageSize}
                 onChange={(e) => onPageSizeChange(parseInt(e.target.value, 10))}
             >

@@ -82,6 +82,12 @@ const TicketCategoryManagement: React.FC = () => {
         setModalTitle(`${action} Categoria de Formulário`);
         setModeModal(mode);
 
+        if (idCategory) {
+            setCategories(prev =>
+                prev.filter(category => category.id !== idCategory)
+            );
+        }
+
         if (mode !== "add") {
             try {
                 const res = await axiosInstance.get(
@@ -172,7 +178,9 @@ const TicketCategoryManagement: React.FC = () => {
                 toast.success(message);
             }
         } catch (error) {
-            console.error("Error submitting data:", error);
+            closeModal("modal");
+            toast.error(String(error));
+            console.error(error)
         }
     };
 
