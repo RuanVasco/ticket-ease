@@ -1,130 +1,138 @@
 import { useState, useEffect, JSX } from "react";
-import { FaSuitcase, FaUser, FaUsers, FaStore, FaFolderOpen, FaIdBadge, FaClipboardList } from "react-icons/fa6";
+import {
+	FaSuitcase,
+	FaUser,
+	FaUsers,
+	FaStore,
+	FaFolderOpen,
+	FaIdBadge,
+	FaClipboardList,
+} from "react-icons/fa6";
 
 import Block from "../../components/Block";
 import { usePermissions } from "../../context/PermissionsContext";
 
 interface BlockData {
-    text: string;
-    icon: JSX.Element;
-    link: string;
-    description: string;
+	text: string;
+	icon: JSX.Element;
+	link: string;
+	description: string;
 }
 
 const HomeAdmin: React.FC = () => {
-    const blocksForms: BlockData[] = [
-        {
-            text: "Categorias de Formulário",
-            icon: <FaFolderOpen />,
-            link: "/admin/ticket_category",
-            description: "Gerenciar Categorias",
-        },
-        {
-            text: "Formulários",
-            icon: <FaClipboardList />,
-            link: "/admin/forms",
-            description: "Gerenciar Formulários",
-        },
-    ];
+	const blocksForms: BlockData[] = [
+		{
+			text: "Categorias de Formulário",
+			icon: <FaFolderOpen />,
+			link: "/admin/ticket_category",
+			description: "Gerenciar Categorias",
+		},
+		{
+			text: "Formulários",
+			icon: <FaClipboardList />,
+			link: "/admin/forms",
+			description: "Gerenciar Formulários",
+		},
+	];
 
-    const blocksCadastro: BlockData[] = [
-        {
-            text: "Usuários",
-            icon: <FaUser />,
-            link: "/admin/users",
-            description: "Gerenciar usuários",
-        },
-        {
-            text: "Perfis",
-            icon: <FaIdBadge />,
-            link: "/admin/profiles",
-            description: "Gerenciar perfis.",
-        },
-        {
-            text: "Setores",
-            icon: <FaUsers />,
-            link: "/admin/departments",
-            description: "Gerenciar Setores",
-        },
-        {
-            text: "Unidades",
-            icon: <FaStore />,
-            link: "/admin/units",
-            description: "Gerenciar Unidades",
-        },
-        {
-            text: "Cargos",
-            icon: <FaSuitcase />,
-            link: "/admin/cargos",
-            description: "Gerenciar Cargos",
-        },
-    ];
+	const blocksCadastro: BlockData[] = [
+		{
+			text: "Usuários",
+			icon: <FaUser />,
+			link: "/admin/users",
+			description: "Gerenciar usuários",
+		},
+		{
+			text: "Perfis",
+			icon: <FaIdBadge />,
+			link: "/admin/profiles",
+			description: "Gerenciar perfis.",
+		},
+		{
+			text: "Setores",
+			icon: <FaUsers />,
+			link: "/admin/departments",
+			description: "Gerenciar Setores",
+		},
+		{
+			text: "Unidades",
+			icon: <FaStore />,
+			link: "/admin/units",
+			description: "Gerenciar Unidades",
+		},
+		{
+			text: "Cargos",
+			icon: <FaSuitcase />,
+			link: "/admin/cargos",
+			description: "Gerenciar Cargos",
+		},
+	];
 
-    const [permissions, setPermissions] = useState<Record<string, boolean>>({});
-    const { hasPermission } = usePermissions();
+	const [permissions, setPermissions] = useState<Record<string, boolean>>({});
+	const { hasPermission } = usePermissions();
 
-    useEffect(() => {
-        const fetchPermissions = async () => {
-            const permissionResults: Record<string, boolean> = {};
-            const allBlocks = [...blocksCadastro, ...blocksForms];
+	useEffect(() => {
+		const fetchPermissions = async () => {
+			const permissionResults: Record<string, boolean> = {};
+			const allBlocks = [...blocksCadastro, ...blocksForms];
 
-            const removePlural = (word: string) => (word.endsWith("S") ? word.slice(0, -1) : word);
+			const removePlural = (word: string) => (word.endsWith("S") ? word.slice(0, -1) : word);
 
-            for (const block of allBlocks) {
-                let entity = block.link.split("/").pop()?.toUpperCase() || "";
-                entity = removePlural(entity);
+			for (const block of allBlocks) {
+				let entity = block.link.split("/").pop()?.toUpperCase() || "";
+				entity = removePlural(entity);
 
-                if (entity === "TICKET_CATEGORY" || entity === "FORM") {
-                    permissionResults[block.link] = hasPermission("MANAGE_" + entity);
-                } else {
-                    permissionResults[block.link] = hasPermission("EDIT_" + entity);
-                }
-            }
+				if (entity === "TICKET_CATEGORY" || entity === "FORM") {
+					permissionResults[block.link] = hasPermission("MANAGE_" + entity);
+				} else {
+					permissionResults[block.link] = hasPermission("EDIT_" + entity);
+				}
+			}
 
-            setPermissions(permissionResults);
-        };
+			setPermissions(permissionResults);
+		};
 
-        fetchPermissions();
-    }, []);
+		fetchPermissions();
+	}, []);
 
-    return (
-        <main>
-            <div className="container mt-4">
-                <div className="d-block pt-4">
-                    <h5 className="border-bottom fw-semibold pb-1 ps-3">Cadastros</h5>
-                </div>
-                <div className="d-flex align-items-start flex-wrap">
-                    {blocksCadastro.map((block, index) =>
-                        permissions[block.link] ? (
-                            <Block
-                                key={index}
-                                text={block.text}
-                                icon={block.icon}
-                                link={block.link}
-                                description={block.description}
-                            />
-                        ) : null
-                    )}
-                </div>
-                <div className="d-block pt-4">
-                    <h5 className="border-bottom fw-semibold pb-1 ps-3">Formulários</h5>
-                </div>
-                <div className="d-flex align-items-start flex-wrap">
-                    {blocksForms.map((block, index) =>
-                        permissions[block.link] ? (
-                            <Block
-                                key={index}
-                                text={block.text}
-                                icon={block.icon}
-                                link={block.link}
-                                description={block.description}
-                            />
-                        ) : null
-                    )}
-                </div>
-            </div>
-        </main>
-    );
+	return (
+		<main>
+			<div className="container-xxl mt-4">
+				<div className="d-block pt-4">
+					<h5 className="border-bottom fw-semibold pb-1 ps-3">Cadastros</h5>
+				</div>
+				<div className="d-flex align-items-start flex-wrap">
+					{blocksCadastro.map((block, index) =>
+						permissions[block.link] ? (
+							<Block
+								key={index}
+								text={block.text}
+								icon={block.icon}
+								link={block.link}
+								description={block.description}
+							/>
+						) : null
+					)}
+				</div>
+				<div className="d-block pt-4">
+					<h5 className="border-bottom fw-semibold pb-1 ps-3">Formulários</h5>
+				</div>
+				<div className="d-flex align-items-start flex-wrap">
+					{blocksForms.map((block, index) =>
+						permissions[block.link] ? (
+							<Block
+								key={index}
+								text={block.text}
+								icon={block.icon}
+								link={block.link}
+								description={block.description}
+							/>
+						) : null
+					)}
+				</div>
+			</div>
+		</main>
+	);
 };
 
 export default HomeAdmin;

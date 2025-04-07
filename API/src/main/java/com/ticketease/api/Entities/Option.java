@@ -15,6 +15,8 @@ public class Option {
     private String value;
 
     public Option(String label, String value) {
+        this.setLabel(label);
+        this.setValue(value);
     }
 
     public Option() {
