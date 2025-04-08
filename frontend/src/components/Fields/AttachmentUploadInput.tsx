@@ -8,6 +8,7 @@ interface AttachmentUploadInputProps {
     disabled?: boolean;
     multiple?: boolean;
     onChange: (value: File[] | File | null) => void;
+    fileType?: {};
 }
 
 const AttachmentUploadInput: React.FC<AttachmentUploadInputProps> = ({
@@ -16,6 +17,10 @@ const AttachmentUploadInput: React.FC<AttachmentUploadInputProps> = ({
     disabled = false,
     multiple = false,
     onChange,
+    fileType = {
+        'image/*': [],
+        'application/pdf': [],
+    },
 }) => {
     const [files, setFiles] = useState<File[]>([]);
     const inputRef = useRef<HTMLInputElement | null>(null);
@@ -28,10 +33,7 @@ const AttachmentUploadInput: React.FC<AttachmentUploadInputProps> = ({
             setFiles(newFiles);
             onChange(multiple ? newFiles : droppedFiles[0] || null);
         },
-        accept: {
-            'image/*': [],
-            'application/pdf': [],
-        },
+        accept: fileType,
     });
 
     useEffect(() => {
@@ -48,19 +50,9 @@ const AttachmentUploadInput: React.FC<AttachmentUploadInputProps> = ({
 
     return (
         <div>
-            <div className="d-flex align-items-center justify-content-between">
-                <label className="form-label">
-                    {label} {required && <span className="text-danger">*</span>}
-
-                </label>
-                <button
-                    type="button"
-                    className="btn btn-sm btn-primary"
-                    onClick={() => inputRef.current?.click()}
-                >
-                    <FaPlus className="me-1" /> Adicionar
-                </button>
-            </div>
+            <label className="form-label">
+                {label} {required && <span className="text-danger">*</span>}
+            </label>
             <div
                 {...getRootProps()}
             >
@@ -85,6 +77,13 @@ const AttachmentUploadInput: React.FC<AttachmentUploadInputProps> = ({
                         }
                     </div >
                 )}
+                <button
+                    type="button"
+                    className="btn btn-sm btn-primary"
+                    onClick={() => inputRef.current?.click()}
+                >
+                    <FaPlus className="me-1" /> Adicionar
+                </button>
             </div >
         </div >
     );
