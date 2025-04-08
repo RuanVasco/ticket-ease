@@ -179,7 +179,7 @@ export const DynamicForm: React.FC<Props> = ({
                         </div>
                     )}
 
-                    {field.type === "FILE" || field.type === "FILE_MULTIPLE" && (
+                    {(field.type === "FILE" || field.type === "FILE_MULTIPLE") && (
                         <AttachmentUploadInput
                             label={field.label}
                             required={field.required}
