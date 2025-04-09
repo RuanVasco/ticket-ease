@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { FaMinus, FaPlus } from 'react-icons/fa6';
 
@@ -35,12 +35,6 @@ const AttachmentUploadInput: React.FC<AttachmentUploadInputProps> = ({
         },
         accept: fileType,
     });
-
-    useEffect(() => {
-        if (files.length === 0) {
-            onChange(multiple ? [] : null);
-        }
-    }, [files, multiple, onChange]);
 
     const removeFile = (indexToRemove: number) => {
         const updatedFiles = files.filter((_, index) => index !== indexToRemove);

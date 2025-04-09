@@ -15,10 +15,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -88,7 +90,10 @@ public class TicketController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createTicket(@RequestBody TicketRequestDTO ticketRequestDTO) {
+    public ResponseEntity<?> createTicket(
+            @RequestBody TicketRequestDTO ticketRequestDTO,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
+    ) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Ticket savedTicket = ticketService.create(ticketRequestDTO, user);
