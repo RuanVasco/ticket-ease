@@ -9,7 +9,7 @@ import java.util.Date;
 @Entity
 @Getter
 @Setter
-public class TicketAttachment {
+public class Attachment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +20,7 @@ public class TicketAttachment {
     private String filePath;
 
     @ManyToOne
-    private Ticket ticket;
+    private TicketResponse ticketResponse;
 
     private Date uploadedAt;
 }

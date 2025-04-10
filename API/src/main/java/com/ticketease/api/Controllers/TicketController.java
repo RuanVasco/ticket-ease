@@ -24,7 +24,9 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("ticket")
@@ -97,20 +99,26 @@ public class TicketController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createTicket(
             @RequestPart("data") TicketRequestDTO ticketRequestDTO,
-            @RequestPart(value = "files", required = false) List<MultipartFile> files
+            @RequestPart(value = "files", required = false) Map<Long, MultipartFile> files
     ) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Form form = formRepository.findById(ticketRequestDTO.formId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Formulário não encontrado"));
 
+        Set<Long> fieldIds = files.keySet();
         List<FormField> fileFields = form.getFields().stream()
-                .filter(f -> f.getType() == FieldTypeEnum.FILE || f.getType() == FieldTypeEnum.FILE_MULTIPLE)
+                .filter(f -> fieldIds.contains(f.getId()))
                 .toList();
 
-        boolean requiresAttachment = fileFields.stream().anyMatch(FormField::isRequired);
-        if (requiresAttachment && (files == null || files.isEmpty())) {
-            return ResponseEntity.badRequest().body("Anexos obrigatórios não foram enviados.");
+        List<FormField> requiredFileFields = form.getFields().stream()
+                .filter(f -> (f.getType() == FieldTypeEnum.FILE || f.getType() == FieldTypeEnum.FILE_MULTIPLE) && f.isRequired())
+                .toList();
+
+        for (FormField requiredField : requiredFileFields) {
+            if (files == null || !files.containsKey(requiredField.getId())) {
+                return ResponseEntity.badRequest().body("Campo obrigatório não preenchido: " + requiredField.getLabel());
+            }
         }
 
         List<String> allowedMimeTypes = fileFields.stream()
@@ -119,12 +127,10 @@ public class TicketController {
                 .distinct()
                 .toList();
 
-        if (files != null) {
-            for (MultipartFile file : files) {
-                String contentType = file.getContentType();
-                if (!isValidFileType(contentType, allowedMimeTypes)) {
-                    return ResponseEntity.badRequest().body("Tipo de arquivo não permitido: " + contentType);
-                }
+        for (MultipartFile file : files.values()) {
+            String contentType = file.getContentType();
+            if (!isValidFileType(contentType, allowedMimeTypes)) {
+                return ResponseEntity.badRequest().body("Tipo de arquivo não permitido: " + contentType);
             }
         }
 
