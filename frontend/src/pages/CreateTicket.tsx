@@ -122,7 +122,11 @@ const CreateTicket: React.FC = () => {
         });
 
         try {
-            await axiosInstance.post(`${API_BASE_URL}/ticket/${ticketId}/attachments`, formData);
+            const res = await axiosInstance.post(`${API_BASE_URL}/ticket/${ticketId}/attachments`, formData);
+
+            if (res.status === 200 || res.status === 201) {
+                toast.success("Arquivos enviados!");
+            }
         } catch (error) {
             toast.error("Erro ao enviar arquivos");
             console.error(error);

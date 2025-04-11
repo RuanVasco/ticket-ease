@@ -13,6 +13,7 @@ import { Ticket } from "../types/Ticket";
 import { Message } from "../types/Message";
 import { toast } from "react-toastify";
 import { DynamicForm } from "../components/DynamicForm";
+import { StatusEnum } from "../enums/StatusEnum";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -64,6 +65,38 @@ const TicketDetails: React.FC = () => {
         }
     };
 
+    const checkUserPermission = async () => {
+        const isManager = hasPermission("MANAGE_TICKET");
+        setIsManager(isManager);
+    };
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const response = await axiosInstance.get(`${API_BASE_URL}/ticket/${id}`);
+            setTicket(response.data);
+        } catch (error: any) {
+            if (error.response?.status === 403) {
+                toast.error("Sem permissão para acessar esse ticket.");
+                window.location.href = "../../";
+            } else {
+                console.error("Erro ao buscar dados:", error);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchAttachments = async () => {
+        try {
+            const response = await axiosInstance.get(`${API_BASE_URL}/ticket/${id}/attachments`);
+            console.log(response.data)
+        } catch (error) {
+            console.error("Erro ao buscar anexos:", error);
+            return [];
+        }
+    }
+
     useEffect(() => {
         const allIncomingMessages = Array.isArray(ticketMessages)
             ? ticketMessages
@@ -87,38 +120,6 @@ const TicketDetails: React.FC = () => {
     }, [oldMessages, ticketMessages, id]);
 
     useEffect(() => {
-        const checkUserPermission = async () => {
-            const isManager = hasPermission("MANAGE_TICKET");
-            setIsManager(isManager);
-        };
-
-        checkUserPermission();
-    }, []);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const response = await axiosInstance.get(`${API_BASE_URL}/ticket/${id}`);
-                setTicket(response.data);
-            } catch (error: any) {
-                if (error.response?.status === 403) {
-                    toast.error("Sem permissão para acessar esse ticket.");
-                    window.location.href = "../../";
-                } else {
-                    console.error("Erro ao buscar dados:", error);
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (id) {
-            fetchData();
-        }
-    }, [id]);
-
-    useEffect(() => {
         const fetchMessages = async () => {
             if (!id) {
                 console.error("ticketId não está definido.");
@@ -135,8 +136,23 @@ const TicketDetails: React.FC = () => {
             }
         };
 
-        fetchMessages();
+        checkUserPermission();
+        if (id) {
+            fetchData();
+            fetchMessages();
+        }
     }, [id]);
+
+    useEffect(() => {
+        if (
+            ticket.form?.fields &&
+            ticket.form.fields.some(field =>
+                field.type === "FILE" || field.type === "FILE_MULTIPLE"
+            )
+        ) {
+            fetchAttachments();
+        }
+    }, [ticket]);
 
     useEffect(() => {
         if (allMessages.length === 0) return;

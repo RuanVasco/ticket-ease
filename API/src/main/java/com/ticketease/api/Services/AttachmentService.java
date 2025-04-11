@@ -1,7 +1,9 @@
 package com.ticketease.api.Services;
 
+import com.ticketease.api.DTO.FormDTO.FormFieldAttachmentAnswerResponseDTO;
 import com.ticketease.api.DTO.FormDTO.FormFieldFileAnswerDTO;
 import com.ticketease.api.Entities.*;
+import com.ticketease.api.Enums.FieldTypeEnum;
 import com.ticketease.api.Repositories.AttachmentRepository;
 import com.ticketease.api.Repositories.TicketResponseRepository;
 import jakarta.annotation.PostConstruct;
@@ -14,9 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -82,6 +82,26 @@ public class AttachmentService {
                 throw new RuntimeException("Erro ao salvar arquivo: " + file.getOriginalFilename(), e);
             }
         }
+    }
+
+    public List<FormFieldAttachmentAnswerResponseDTO> getAttachmentsByTicket(Ticket ticket) {
+        Set<TicketResponse> ticketResponses = ticketResponseRepository.findByTicket(ticket);
+
+        Map<FormField, List<Attachment>> grouped = new HashMap<>();
+
+        for (TicketResponse tr : ticketResponses) {
+            if (tr.getField().getType() == FieldTypeEnum.FILE || tr.getField().getType() == FieldTypeEnum.FILE_MULTIPLE) {
+                grouped.computeIfAbsent(tr.getField(), k -> new ArrayList<>()).addAll(tr.getAttachments());
+            }
+        }
+
+        return grouped.entrySet().stream()
+                .map(entry -> new FormFieldAttachmentAnswerResponseDTO(
+                        entry.getKey().getId(),
+                        entry.getKey().getLabel(),
+                        entry.getValue()
+                ))
+                .toList();
     }
 
 }
