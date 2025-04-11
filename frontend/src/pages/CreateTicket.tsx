@@ -70,7 +70,7 @@ const CreateTicket: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const formPayload = new FormData();
+        const files: { fieldId: number; files: any[]; }[] = [];
 
         const ticketData = {
             formId: currentForm.id,
@@ -83,29 +83,25 @@ const CreateTicket: React.FC = () => {
         };
 
         Object.entries(formData).forEach(([fieldId, value]) => {
-            if (value instanceof File) {
-                formPayload.append("files", value);
-            } else if (Array.isArray(value) && value[0] instanceof File) {
-                value.forEach((file: File) => formPayload.append("files", file));
-            } else {
+            if (!(value instanceof File) && !(Array.isArray(value) && value[0] instanceof File)) {
                 ticketData.responses.push({
                     fieldId: Number(fieldId),
                     value,
                 });
+            } else {
+                files.push({
+                    fieldId: Number(fieldId),
+                    files: Array.isArray(value) ? value : [value],
+                });
             }
         });
 
-        formPayload.append(
-            "data",
-            new Blob([JSON.stringify(ticketData)], { type: "application/json" })
-        );
-
         try {
-            const res = await axiosInstance.post(`${API_BASE_URL}/ticket`, formPayload, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
+            const res = await axiosInstance.post(`${API_BASE_URL}/ticket`, ticketData);
 
-            if (res.status === 200) {
+            if ((res.status === 200 || res.status === 201)) {
+                files.length > 0 && handleSubmitFiles(res.data, files);
+
                 toast.success("Ticket criado");
                 navigate(`/ticket/${res.data}`);
             }
@@ -114,6 +110,24 @@ const CreateTicket: React.FC = () => {
             console.error(error);
         }
     };
+
+    const handleSubmitFiles = async (ticketId: number, files: { fieldId: number; files: File[] }[]) => {
+        const formData = new FormData();
+
+        files.forEach((entry, index) => {
+            formData.append(`fileAnswers[${index}].fieldId`, entry.fieldId.toString());
+            entry.files.forEach((file: File) => {
+                formData.append(`fileAnswers[${index}].files`, file);
+            });
+        });
+
+        try {
+            await axiosInstance.post(`${API_BASE_URL}/ticket/${ticketId}/attachments`, formData);
+        } catch (error) {
+            toast.error("Erro ao enviar arquivos");
+            console.error(error);
+        }
+    }
 
     const handleBack = () => {
         const newPath = [...categoryPath];

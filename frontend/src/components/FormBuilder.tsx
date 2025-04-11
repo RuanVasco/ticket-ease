@@ -226,7 +226,7 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
                                 <label className="form-label">Tipos de arquivos permitidos</label>
                                 <Select
                                     className="form-select"
-                                    isMulti={field.type === "FILE_MULTIPLE"}
+                                    isMulti
                                     value={field.options}
                                     onChange={(selected) => handleAllowedTypesChange(selected, index)}
                                     options={[
@@ -244,6 +244,7 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
 
                         <div className="form-check mb-2">
                             <input
+                                disabled={field.type === "FILE" || field.type === "FILE_MULTIPLE"}
                                 type="checkbox"
                                 className="form-check-input"
                                 id={`required_${index}`}

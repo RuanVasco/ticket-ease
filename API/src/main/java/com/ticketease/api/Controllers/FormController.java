@@ -94,10 +94,13 @@ public class FormController {
 
         List<FormField> fields = new ArrayList<>();
         for (FormFieldDTO dto : formDTO.getFields()) {
+            FieldTypeEnum fieldTypeEnum = FieldTypeEnum.valueOf(dto.getType().toUpperCase());
             FormField field = new FormField();
             field.setLabel(dto.getLabel());
-            field.setType(FieldTypeEnum.valueOf(dto.getType().toUpperCase()));
-            field.setRequired(dto.isRequired());
+            field.setType(fieldTypeEnum);
+            if (fieldTypeEnum != FieldTypeEnum.FILE && fieldTypeEnum != FieldTypeEnum.FILE_MULTIPLE) {
+                field.setRequired(dto.isRequired());
+            }
             field.setPlaceholder(dto.getPlaceholder());
 
             if (dto.getOptions() != null) {
@@ -136,10 +139,13 @@ public class FormController {
         existingForm.setTicketCategory(ticketCategory);
 
         for (FormFieldDTO dto : formDTO.getFields()) {
+            FieldTypeEnum fieldTypeEnum = FieldTypeEnum.valueOf(dto.getType().toUpperCase());
             FormField field = new FormField();
             field.setLabel(dto.getLabel());
-            field.setType(FieldTypeEnum.valueOf(dto.getType().toUpperCase()));
-            field.setRequired(dto.isRequired());
+            field.setType(fieldTypeEnum);
+            if (fieldTypeEnum != FieldTypeEnum.FILE && fieldTypeEnum != FieldTypeEnum.FILE_MULTIPLE) {
+                field.setRequired(dto.isRequired());
+            }
             field.setPlaceholder(dto.getPlaceholder());
 
             if (dto.getOptions() != null) {

@@ -1,5 +1,6 @@
 package com.ticketease.api.Entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,12 +16,13 @@ public class Attachment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "ticket_response_id")
+    @JsonBackReference
+    private TicketResponse ticketResponse;
+
     private String fileName;
     private String fileType;
     private String filePath;
-
-    @ManyToOne
-    private TicketResponse ticketResponse;
-
     private Date uploadedAt;
 }

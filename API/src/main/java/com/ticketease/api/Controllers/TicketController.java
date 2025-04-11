@@ -1,5 +1,6 @@
 package com.ticketease.api.Controllers;
 
+import com.ticketease.api.DTO.FormDTO.FormFieldFileAnswerDTO;
 import com.ticketease.api.DTO.TicketDTO.TicketRequestDTO;
 import com.ticketease.api.DTO.TicketDTO.TicketResponseDTO;
 import com.ticketease.api.Entities.*;
@@ -23,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import org.springframework.data.domain.Pageable;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -96,63 +98,15 @@ public class TicketController {
         return ResponseEntity.ok(TicketResponseDTO.from(ticket));
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping
     public ResponseEntity<?> createTicket(
-            @RequestPart("data") TicketRequestDTO ticketRequestDTO,
-            @RequestPart(value = "files", required = false) Map<Long, MultipartFile> files
+            @RequestBody TicketRequestDTO ticketRequestDTO
     ) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        Form form = formRepository.findById(ticketRequestDTO.formId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Formulário não encontrado"));
-
-        Set<Long> fieldIds = files.keySet();
-        List<FormField> fileFields = form.getFields().stream()
-                .filter(f -> fieldIds.contains(f.getId()))
-                .toList();
-
-        List<FormField> requiredFileFields = form.getFields().stream()
-                .filter(f -> (f.getType() == FieldTypeEnum.FILE || f.getType() == FieldTypeEnum.FILE_MULTIPLE) && f.isRequired())
-                .toList();
-
-        for (FormField requiredField : requiredFileFields) {
-            if (files == null || !files.containsKey(requiredField.getId())) {
-                return ResponseEntity.badRequest().body("Campo obrigatório não preenchido: " + requiredField.getLabel());
-            }
-        }
-
-        List<String> allowedMimeTypes = fileFields.stream()
-                .flatMap(field -> field.getOptions().stream())
-                .map(Option::getValue)
-                .distinct()
-                .toList();
-
-        for (MultipartFile file : files.values()) {
-            String contentType = file.getContentType();
-            if (!isValidFileType(contentType, allowedMimeTypes)) {
-                return ResponseEntity.badRequest().body("Tipo de arquivo não permitido: " + contentType);
-            }
-        }
-
         Ticket savedTicket = ticketService.create(ticketRequestDTO, user);
-        if (files != null && !files.isEmpty()) {
-            attachmentService.saveAttachments(savedTicket, files);
-        }
 
-        return ResponseEntity.ok(savedTicket.getId());
-    }
-
-    private boolean isValidFileType(String contentType, List<String> allowedMimeTypes) {
-        for (String allowed : allowedMimeTypes) {
-            if (allowed.endsWith("/*")) {
-                String category = allowed.split("/")[0];
-                if (contentType != null && contentType.startsWith(category + "/")) {
-                    return true;
-                }
-            } else if (allowed.equals(contentType)) {
-                return true;
-            }
-        }
-        return false;
+        URI location = URI.create("/ticket/" + savedTicket.getId());
+        return ResponseEntity.created(location).body(savedTicket.getId());
     }
 }
