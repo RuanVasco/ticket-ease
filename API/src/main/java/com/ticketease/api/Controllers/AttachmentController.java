@@ -1,14 +1,14 @@
 package com.ticketease.api.Controllers;
 
-import com.ticketease.api.DTO.FormDTO.FormFieldAttachmentAnswerResponseDTO;
 import com.ticketease.api.DTO.FormDTO.FormFieldFileAnswerDTO;
-import com.ticketease.api.Entities.Attachment;
-import com.ticketease.api.Entities.FormField;
 import com.ticketease.api.Entities.Ticket;
 import com.ticketease.api.Entities.User;
 import com.ticketease.api.Repositories.TicketRepository;
 import com.ticketease.api.Services.AttachmentService;
+import com.ticketease.api.Services.TicketService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,31 +18,41 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/ticket/{ticketId}/attachments")
+@RequestMapping("ticket/{ticketId}/attachments")
 @RequiredArgsConstructor
 public class AttachmentController {
 
-    private final TicketRepository ticketRepository;
+    private final TicketService ticketService;
     private final AttachmentService attachmentService;
 
-    @GetMapping
-    public ResponseEntity<?> getAttachments(@PathVariable Long ticketId) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        Ticket ticket = ticketRepository.findById(ticketId)
+    @GetMapping("{attachmentName:.+}")
+    public ResponseEntity<?> getAttachment(
+            @PathVariable Long ticketId,
+            @PathVariable String attachmentName
+    ) {
+        Ticket ticket = ticketService.findById(ticketId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
 
-        if (!ticket.getUser().equals(user) && !ticket.canManage(user)) {
-            return new ResponseEntity<>("Acesso negado. Você não tem permissão para acessar esse ticket.", HttpStatus.FORBIDDEN);
-        }
+        Resource attachment = attachmentService.getAttachmentsByTicket(ticket, attachmentName);
 
-        List<FormFieldAttachmentAnswerResponseDTO> attachments = attachmentService.getAttachmentsByTicket(ticket);
-        return ResponseEntity.ok(attachments);
+        String contentType = "application/octet-stream";
+        try {
+            contentType = Files.probeContentType(Paths.get(attachment.getFile().getAbsolutePath()));
+        } catch (IOException ignored) {}
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + attachment.getFilename() + "\"")
+                .body(attachment);
     }
+
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadAttachments(
@@ -51,7 +61,7 @@ public class AttachmentController {
     ) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        Ticket ticket = ticketRepository.findById(ticketId)
+        Ticket ticket = ticketService.findById(ticketId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
 
         if (!ticket.getUser().equals(user) && !ticket.canManage(user)) {

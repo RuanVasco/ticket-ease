@@ -9,6 +9,8 @@ import com.ticketease.api.Repositories.TicketResponseRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +18,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 @Service
@@ -68,7 +73,7 @@ public class AttachmentService {
                 ticketResponse.setValue(fileName);
 
                 Attachment attachment = new Attachment();
-                attachment.setFileName(file.getOriginalFilename());
+                attachment.setFileName(fileName);
                 attachment.setFileType(file.getContentType());
                 attachment.setFilePath(filePath);
                 attachment.setUploadedAt(new Date());
@@ -84,24 +89,28 @@ public class AttachmentService {
         }
     }
 
-    public List<FormFieldAttachmentAnswerResponseDTO> getAttachmentsByTicket(Ticket ticket) {
+    public Resource getAttachmentsByTicket(Ticket ticket, String attachmentName) {
         Set<TicketResponse> ticketResponses = ticketResponseRepository.findByTicket(ticket);
-
-        Map<FormField, List<Attachment>> grouped = new HashMap<>();
 
         for (TicketResponse tr : ticketResponses) {
             if (tr.getField().getType() == FieldTypeEnum.FILE || tr.getField().getType() == FieldTypeEnum.FILE_MULTIPLE) {
-                grouped.computeIfAbsent(tr.getField(), k -> new ArrayList<>()).addAll(tr.getAttachments());
+                List<Attachment> attachments = tr.getAttachments();
+                for (Attachment attachment : attachments) {
+                    if (attachment.getFileName().equals(attachmentName)) {
+                        try {
+                            Path filePath = Paths.get(attachment.getFilePath());
+                            Resource resource = new UrlResource(filePath.toUri());
+                            if (resource.exists() && resource.isReadable()) {
+                                return resource;
+                            }
+                        } catch (MalformedURLException e) {
+                            throw new RuntimeException("Erro ao carregar o arquivo: " + attachment.getFileName(), e);
+                        }
+                    }
+                }
             }
         }
-
-        return grouped.entrySet().stream()
-                .map(entry -> new FormFieldAttachmentAnswerResponseDTO(
-                        entry.getKey().getId(),
-                        entry.getKey().getLabel(),
-                        entry.getValue()
-                ))
-                .toList();
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhum anexo encontrado para este ticket.");
     }
 
 }

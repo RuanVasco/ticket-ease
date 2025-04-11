@@ -30,13 +30,16 @@ const TicketDetails: React.FC = () => {
     });
     const [loading, setLoading] = useState(true);
     const [isManager, setIsManager] = useState(false);
-
     const chatEndRef = useRef<HTMLDivElement | null>(null);
-
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const pageSize = 10;
     const [activeTab, setActiveTab] = useState("props");
+    const [files, setFiles] = useState<{
+        fieldId: number;
+        label: string;
+        fileNames: string[];
+    }[]>([]);
 
     const getFirstName = (fullName: string) => fullName.split(" ")[0];
     const { hasPermission } = usePermissions();
@@ -87,16 +90,6 @@ const TicketDetails: React.FC = () => {
         }
     };
 
-    const fetchAttachments = async () => {
-        try {
-            const response = await axiosInstance.get(`${API_BASE_URL}/ticket/${id}/attachments`);
-            console.log(response.data)
-        } catch (error) {
-            console.error("Erro ao buscar anexos:", error);
-            return [];
-        }
-    }
-
     useEffect(() => {
         const allIncomingMessages = Array.isArray(ticketMessages)
             ? ticketMessages
@@ -144,17 +137,6 @@ const TicketDetails: React.FC = () => {
     }, [id]);
 
     useEffect(() => {
-        if (
-            ticket.form?.fields &&
-            ticket.form.fields.some(field =>
-                field.type === "FILE" || field.type === "FILE_MULTIPLE"
-            )
-        ) {
-            fetchAttachments();
-        }
-    }, [ticket]);
-
-    useEffect(() => {
         if (allMessages.length === 0) return;
 
         const chatContainer = chatEndRef.current?.parentNode as HTMLDivElement;
@@ -167,6 +149,37 @@ const TicketDetails: React.FC = () => {
             chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
         }
     }, [allMessages]);
+
+    useEffect(() => {
+        if (ticket.responses) {
+            const fileResponses = ticket.responses.filter(
+                (resp) => resp.field.type === "FILE" || resp.field.type === "FILE_MULTIPLE"
+            );
+
+            const fieldsMap: {
+                [fieldId: number]: {
+                    fieldId: number;
+                    label: string;
+                    fileNames: string[];
+                };
+            } = {};
+
+            fileResponses.forEach((resp) => {
+                const fieldId = Number(resp.field.id);
+                if (!fieldsMap[fieldId]) {
+                    fieldsMap[fieldId] = {
+                        fieldId,
+                        label: resp.field.label,
+                        fileNames: [],
+                    };
+                }
+                fieldsMap[fieldId].fileNames.push(resp.value);
+            });
+
+            const formattedFiles = Object.values(fieldsMap);
+            setFiles(formattedFiles);
+        }
+    }, [ticket.responses]);
 
     const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
         const { name, value, type, checked } = event.target;
@@ -335,19 +348,38 @@ const TicketDetails: React.FC = () => {
                                 {ticket.responses?.length > 0 ? (
                                     <div className="d-flex flex-column gap-2">
                                         {ticket.responses.map((resp, index) => (
-                                            <div key={index}>
-                                                <strong>{resp.field.label}:</strong> {resp.value}
-                                            </div>
+                                            resp.field.type != "FILE" && resp.field.type != "FILE_MULTIPLE" && (
+                                                <div key={index}>
+                                                    <strong>{resp.field.label}:</strong> {resp.value}
+                                                </div>
+                                            )
                                         ))}
+
                                     </div>
                                 ) : (
                                     <span>Nenhuma resposta preenchida.</span>
+                                )}
+                                {files.length > 0 && (
+                                    files.map((field) => (
+                                        <div key={field.fieldId}>
+                                            <strong>{field.label}</strong>
+                                            <ul>
+                                                {field.fileNames.map((fileName, i) => (
+                                                    <li key={i}>
+                                                        <a href={`${API_BASE_URL}/ticket/${ticket.id}/attachments/${fileName}`} target="_blank" rel="noreferrer">
+                                                            {fileName}
+                                                        </a>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    ))
                                 )}
                             </div>
                         )}
                     </div>
                 </div>
-            </div>
+            </div >
             {/* <div className="container">
                 <div className="row mt-3">
                     <div className="col-9">
@@ -500,7 +532,7 @@ const TicketDetails: React.FC = () => {
                     </div>
                 </div>
             </div> */}
-        </main>
+        </main >
     );
 };
 

@@ -105,6 +105,21 @@ export const DynamicForm: React.FC<Props> = ({
                         </>
                     )}
 
+                    {field.type === "DATE" && (
+                        <>
+                            <label className="form-label">
+                                {field.label}{" "}
+                                {field.required && <span className="text-danger">*</span>}
+                            </label>
+                            <input
+                                type="date"
+                                className="form-control"
+                                disabled={preview}
+                                onChange={(e) => handleChange(field.id, e.target.value)}
+                            />
+                        </>
+                    )}
+
                     {field.type === "NUMBER" && (
                         <NumberInput
                             value={formData[field.id] || ""}

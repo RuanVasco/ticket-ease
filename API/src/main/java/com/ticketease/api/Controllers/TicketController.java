@@ -1,25 +1,19 @@
 package com.ticketease.api.Controllers;
 
-import com.ticketease.api.DTO.FormDTO.FormFieldFileAnswerDTO;
 import com.ticketease.api.DTO.TicketDTO.TicketRequestDTO;
 import com.ticketease.api.DTO.TicketDTO.TicketResponseDTO;
 import com.ticketease.api.Entities.*;
-import com.ticketease.api.Enums.FieldTypeEnum;
 import com.ticketease.api.Enums.StatusEnum;
-import com.ticketease.api.Repositories.DepartmentRepository;
 import com.ticketease.api.Repositories.FormRepository;
 import com.ticketease.api.Services.AttachmentService;
 import com.ticketease.api.Services.DepartmentService;
-import com.ticketease.api.Services.FormService;
 import com.ticketease.api.Services.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import org.springframework.data.domain.Pageable;
