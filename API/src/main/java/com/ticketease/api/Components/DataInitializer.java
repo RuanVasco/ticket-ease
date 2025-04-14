@@ -110,6 +110,11 @@ public class DataInitializer implements CommandLineRunner {
             permissionManageTicket.setDescription("Permite gerenciar chamados");
             allPermissions.add(permissionManageTicket);
 
+            Permission permissionValidateTicket = new Permission();
+            permissionValidateTicket.setName("VALIDATE_TICKET");
+            permissionValidateTicket.setDescription("Permite aceitar tickets que precisam de validação");
+            allPermissions.add(permissionValidateTicket);
+
             Permission permissionManageTicketCategory = new Permission();
             permissionManageTicketCategory.setName("MANAGE_TICKET_CATEGORY");
             permissionManageTicketCategory.setDescription("Permite gerenciar categorias de tickets");

@@ -3,12 +3,13 @@ import { FormField } from "../types/FormField";
 import { Form } from "../types/Form";
 import { TicketCategory } from "../types/TicketCategory";
 import axiosInstance from "./AxiosConfig";
-import { FaArrowRotateRight, FaFloppyDisk, FaPlus } from "react-icons/fa6";
+import { FaArrowRotateRight, FaFloppyDisk, FaMinus, FaPencil, FaPlus } from "react-icons/fa6";
 import { fetchCategories } from "../services/TicketCategoryService";
 import { toast } from "react-toastify";
 import { User } from "../types/User";
 import OptionEditor from "./Fields/OptionEditor";
 import Select from "react-select";
+import { Modal } from "bootstrap";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -22,18 +23,61 @@ interface FormBuilderProps {
 const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, form, setForm }) => {
     const [fieldTypes, setFieldTypes] = useState<string[]>([]);
     const [categories, setCategories] = useState<TicketCategory[]>([]);
+    const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+    const [editIndex, setEditIndex] = useState<number | null>(null);
+    const [validators, setValidators] = useState<User[]>([]);
+    const [selectedValidators, setSelectedValidators] = useState<User[]>([]);
+    const [validationMode, setValidationMode] = useState<"AND" | "OR">("AND");
+    const [newField, setNewField] = useState<FormField>({
+        id: "",
+        label: "",
+        type: fieldTypes[0] || "TEXT",
+        required: false,
+        placeholder: "",
+        options: [],
+    });
 
     useEffect(() => {
         loadFieldTypes();
+        loadCategories();
+
     }, []);
 
     useEffect(() => {
-        const loadCategories = async () => {
-            const categories = await fetchCategories();
-            setCategories(categories);
-        };
-        loadCategories();
-    }, []);
+        if (form.ticketCategory.id) {
+            loadValidators(Number(form.ticketCategory.id));
+        }
+    }, [form.ticketCategory]);
+
+    useEffect(() => {
+        if (screenType === "create") {
+            setForm({
+                id: "",
+                title: "",
+                ticketCategory: {} as TicketCategory,
+                validators: [],
+                description: "",
+                creator: {} as User,
+                fields: [],
+            });
+        }
+    }, [screenType]);
+
+    const loadValidators = async (categoryId: number) => {
+        try {
+            const res = await axiosInstance.get(`${API_BASE_URL}/ticket-category/${categoryId}/validators`);
+            if (res.status === 200) {
+                setValidators(res.data);
+            }
+        } catch (error) {
+            console.error("Error fetching field types:", error);
+        }
+    };
+
+    const loadCategories = async () => {
+        const categories = await fetchCategories();
+        setCategories(categories);
+    };
 
     const loadFieldTypes = async () => {
         try {
@@ -46,22 +90,6 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
         }
     };
 
-    const addField = () => {
-        const newField: FormField = {
-            id: "",
-            label: "",
-            type: fieldTypes[0] || "TEXT",
-            required: false,
-            placeholder: "",
-            options: [],
-        };
-
-        setForm((prev) => ({
-            ...prev,
-            fields: [...prev.fields, newField],
-        }));
-    };
-
     const updateField = (index: number, updated: Partial<FormField>) => {
         const newFields = [...form.fields];
         newFields[index] = { ...newFields[index], ...updated };
@@ -71,6 +99,15 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
     const removeField = (index: number) => {
         const newFields = form.fields.filter((_, i) => i !== index);
         setForm({ ...form, fields: newFields });
+    };
+
+    const updateNewField = (updated: Partial<FormField>) => {
+        setNewField(prev => ({ ...prev, ...updated }));
+    };
+
+    const handleNewFieldAllowedTypesChange = (selected: any) => {
+        const selectedOptions = Array.isArray(selected) ? selected : selected ? [selected] : [];
+        updateNewField({ options: selectedOptions });
     };
 
     const handleSubmit = async () => {
@@ -106,6 +143,7 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
                     id: "",
                     title: "",
                     ticketCategory: {} as TicketCategory,
+                    validators: [],
                     description: "",
                     creator: {} as User,
                     fields: [],
@@ -119,14 +157,163 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
         }
     };
 
-    const handleAllowedTypesChange = (selected: any, index: number) => {
-        const selectedOptions = Array.isArray(selected) ? selected : selected ? [selected] : [];
+    const handleAddField = (e: React.FormEvent) => {
+        e.preventDefault();
 
-        updateField(index, { options: selectedOptions });
+        if (modalMode === "edit" && editIndex !== null) {
+            const newFields = [...form.fields];
+            newFields[editIndex] = newField;
+            setForm({ ...form, fields: newFields });
+        } else {
+            setForm((prev) => ({
+                ...prev,
+                fields: [...prev.fields, newField],
+            }));
+        }
+
+        const modalElement = document.getElementById("modal-field");
+        if (modalElement) {
+            const modalInstance = Modal.getInstance(modalElement);
+            modalInstance?.hide();
+        }
+    };
+
+    const openModal = (mode: "create" | "edit", index?: number) => {
+        setModalMode(mode);
+
+        if (mode === "create") {
+            setNewField({
+                id: "",
+                label: "",
+                type: fieldTypes[0] || "TEXT",
+                required: false,
+                placeholder: "",
+                options: [],
+            });
+            setEditIndex(null);
+        } else if (mode === "edit" && typeof index === "number") {
+            setNewField({ ...form.fields[index] });
+            setEditIndex(index);
+        }
+
+        const modalElement = document.getElementById("modal-field");
+        if (modalElement) {
+            const modalInstance = new Modal(modalElement);
+            modalInstance.show();
+        }
     };
 
     return (
         <div className="p-3 border rounded shadow-sm bg-light">
+            <div className="modal fade" id="modal-field" tabIndex={-1} aria-hidden="true">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h1 className="modal-title fs-5">
+                                {modalMode === "create" ? "Adicionar novo campo" : "Editar campo"}
+                            </h1>
+                            <button
+                                type="button"
+                                className="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                            ></button>
+                        </div>
+                        <form onSubmit={handleAddField}>
+                            <div className="modal-body">
+                                <div className="mb-2">
+                                    <label className="form-label">Nome</label>
+                                    <input
+                                        className="form-control"
+                                        value={newField.label}
+                                        onChange={(e) => setNewField({ ...newField, label: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className="mb-2">
+                                    <label className="form-label">Tipo</label>
+                                    <select
+                                        className="form-select"
+                                        value={newField.type}
+                                        onChange={(e) => {
+                                            const newType = e.target.value;
+
+                                            setNewField({
+                                                ...newField,
+                                                type: newType,
+                                                options: [],
+                                            });
+                                        }}
+                                    >
+                                        {fieldTypes.map((type) => (
+                                            <option key={type} value={type}>{type}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                {(newField.type === "SELECT" ||
+                                    newField.type === "CHECKBOX" ||
+                                    newField.type === "RADIO") && (
+                                        <div className="mb-2">
+                                            <label className="form-label">Opções (separadas por vírgula)</label>
+                                            <OptionEditor
+                                                value={newField.options}
+                                                onChange={(options) => updateNewField({ options })}
+                                            />
+                                        </div>
+                                    )}
+
+                                {(newField.type === "FILE" || newField.type === "FILE_MULTIPLE") && (
+                                    <div className="mb-3">
+                                        <label className="form-label">Tipos de arquivos permitidos</label>
+                                        <Select
+                                            className="form-select"
+                                            isMulti={newField.type === "FILE_MULTIPLE"}
+                                            value={newField.options}
+                                            onChange={(selected) => handleNewFieldAllowedTypesChange(selected)}
+                                            options={[
+                                                { value: 'image/*', label: 'Imagens (jpg, png, gif)' },
+                                                { value: 'application/pdf', label: 'PDF (.pdf)' },
+                                                { value: 'application/msword', label: 'Word (.doc)' },
+                                                { value: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', label: 'Word (.docx)' },
+                                                { value: 'application/vnd.ms-excel', label: 'Excel (.xls)' },
+                                                { value: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', label: 'Excel (.xlsx)' },
+                                                { value: 'text/plain', label: 'Texto (.txt)' },
+                                            ]}
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="form-check mb-2">
+                                    <input
+                                        disabled={newField.type === "FILE" || newField.type === "FILE_MULTIPLE"}
+                                        type="checkbox"
+                                        className="form-check-input"
+                                        id={`required`}
+                                        checked={newField.required}
+                                        onChange={(e) => updateNewField({ required: e.target.checked })}
+                                    />
+                                    <label className="form-check-label" htmlFor={`required`}>
+                                        Obrigatório
+                                    </label>
+                                </div>
+
+                            </div>
+                            <div className="modal-footer">
+                                <button type="submit" className="btn btn-primary">
+                                    Adicionar
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    data-bs-dismiss="modal"
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
             <h3 className="fw-bold mb-3 text-center border-bottom pb-2">Criar Formulário</h3>
             <label htmlFor="form_title" className="form-label">
                 Título
@@ -178,94 +365,89 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
                     ))}
                 </select>
             </div>
-            <div>
-                {form.fields.map((field, index) => (
-                    <div key={index} className="border mt-3 rounded p-3">
-                        <div className="mb-2">
-                            <label htmlFor={`field_label_${index}`} className="form-label">
-                                Nome
-                            </label>
-                            <input
-                                name={`field_label_${index}`}
-                                className="form-control"
-                                value={field.label}
-                                required
-                                onChange={(e) => updateField(index, { label: e.target.value })}
-                            />
-                        </div>
-                        <div className="mb-2">
-                            <label className="form-label">Tipo</label>
-                            <select
-                                required
-                                className="form-select"
-                                value={field.type}
-                                onChange={(e) => updateField(index, { type: e.target.value })}
-                            >
-                                {fieldTypes.map((fieldType: string) => (
-                                    <option key={fieldType} value={fieldType}>
-                                        {fieldType}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+            <div className="mt-2">
+                <label className="form-label">Validadores</label>
+                <Select
+                    isMulti
+                    className="form-select"
+                    isDisabled={!form.ticketCategory.id}
+                    options={validators.map((v) => ({
+                        value: v.id,
+                        label: `${v.name} (${v.email})`,
+                    }))}
+                    value={validators
+                        .filter((v) => selectedValidators.find((s) => s.id === v.id))
+                        .map((v) => ({
+                            value: v.id,
+                            label: `${v.name} (${v.email})`,
+                        }))}
+                    onChange={(options) => {
+                        const selected = options.map((opt) =>
+                            validators.find((v) => v.id === opt.value)!
+                        );
+                        setSelectedValidators(selected);
+                    }}
+                />
+            </div>
 
-                        {(field.type === "SELECT" ||
-                            field.type === "CHECKBOX" ||
-                            field.type === "RADIO") && (
-                                <div className="mb-2">
-                                    <label className="form-label">Opções (separadas por vírgula)</label>
-                                    <OptionEditor
-                                        value={field.options}
-                                        onChange={(options) => updateField(index, { options })}
-                                    />
-                                </div>
-                            )}
-
-                        {(field.type === "FILE" || field.type === "FILE_MULTIPLE") && (
-                            <div className="mb-3">
-                                <label className="form-label">Tipos de arquivos permitidos</label>
-                                <Select
-                                    className="form-select"
-                                    isMulti
-                                    value={field.options}
-                                    onChange={(selected) => handleAllowedTypesChange(selected, index)}
-                                    options={[
-                                        { value: 'image/*', label: 'Imagens (jpg, png, gif)' },
-                                        { value: 'application/pdf', label: 'PDF (.pdf)' },
-                                        { value: 'application/msword', label: 'Word (.doc)' },
-                                        { value: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', label: 'Word (.docx)' },
-                                        { value: 'application/vnd.ms-excel', label: 'Excel (.xls)' },
-                                        { value: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', label: 'Excel (.xlsx)' },
-                                        { value: 'text/plain', label: 'Texto (.txt)' },
-                                    ]}
-                                />
+            <div className="mt-2">
+                <label className="form-label">Modo de Validação</label>
+                <select
+                    className="form-select"
+                    value={validationMode}
+                    onChange={(e) => setValidationMode(e.target.value as "AND" | "OR")}
+                    disabled={selectedValidators.length === 0}
+                >
+                    <option value="AND">Todos devem validar (E)</option>
+                    <option value="OR">Qualquer um pode validar (OU)</option>
+                </select>
+            </div>
+            <div className="mt-2">
+                <span>Campos</span>
+                <ul className="list-group mt-2">
+                    {form.fields.map((field, index) => (
+                        <li key={index} className="list-group-item">
+                            <div>
+                                {field.label} - {field.type}
+                                <button
+                                    type="button"
+                                    className="btn btn-sm ms-4 me-2 btn-secondary"
+                                    onClick={() => openModal("edit", index)}
+                                >
+                                    <FaPencil />
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-danger btn-sm"
+                                    onClick={() => removeField(index)}
+                                >
+                                    <FaMinus />
+                                </button>
                             </div>
-                        )}
-
-                        <div className="form-check mb-2">
-                            <input
-                                disabled={field.type === "FILE" || field.type === "FILE_MULTIPLE"}
-                                type="checkbox"
-                                className="form-check-input"
-                                id={`required_${index}`}
-                                checked={field.required}
-                                onChange={(e) => updateField(index, { required: e.target.checked })}
-                            />
-                            <label className="form-check-label" htmlFor={`required_${index}`}>
-                                Obrigatório
-                            </label>
-                        </div>
-
-                        <button
-                            type="button"
-                            className="btn btn-danger mt-2"
-                            onClick={() => removeField(index)}
-                        >
-                            Remover
-                        </button>
-                    </div>
-                ))}
-                <button className="btn btn-secondary mt-2" onClick={addField}>
+                            {field.options && field.options?.length > 0 && (
+                                <ul>
+                                    {field.options.map((option, idx) => (
+                                        <li key={idx}>{option.label}</li>
+                                    ))}
+                                </ul>
+                            )}
+                            <div className="form-check">
+                                <input
+                                    disabled
+                                    type="checkbox"
+                                    className="form-check-input"
+                                    id={`required_${index}`}
+                                    checked={field.required}
+                                    onChange={(e) => updateField(index, { required: e.target.checked })}
+                                />
+                                <label className="form-check-label" htmlFor={`required_${index}`}>
+                                    Obrigatório
+                                </label>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+                <button className="btn btn-secondary mt-2" onClick={() => openModal("create")}>
                     <FaPlus /> Adicionar Campo
                 </button>
             </div>

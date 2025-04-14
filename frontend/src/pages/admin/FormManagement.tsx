@@ -34,6 +34,7 @@ const FormManagement: React.FC = () => {
         id: "",
         title: "",
         ticketCategory: {} as TicketCategory,
+        validators: [],
         description: "",
         creator: {} as User,
         fields: [],
@@ -91,6 +92,7 @@ const FormManagement: React.FC = () => {
                     id: "",
                     title: "",
                     ticketCategory: {} as TicketCategory,
+                    validators: [],
                     description: "",
                     creator: {} as User,
                     fields: [],
@@ -165,7 +167,7 @@ const FormManagement: React.FC = () => {
                             setForm={setForm}
                         />
                     </div>
-                    <div className="pe-4 col-5">
+                    <div className="pe-4 col-5" style={{ height: "80vh", overflowY: "auto" }}>
                         <FormPreview form={form} />
                     </div>
                 </div>

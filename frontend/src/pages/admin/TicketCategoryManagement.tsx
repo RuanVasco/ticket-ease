@@ -41,7 +41,7 @@ const TicketCategoryManagement: React.FC = () => {
     const fetchDepartments = async () => {
         try {
             const res = await axiosInstance.get(
-                `${API_BASE_URL}/tickets-category/departments/allowed`
+                `${API_BASE_URL}/ticket-category/departments/allowed`
             );
             if (res.status === 200) {
                 setDepartments(res.data);
@@ -54,7 +54,7 @@ const TicketCategoryManagement: React.FC = () => {
     const fetchData = async () => {
         try {
             const res = await axiosInstance.get(
-                `${API_BASE_URL}/tickets-category/pageable?page=${currentPage}&size=${pageSize}`
+                `${API_BASE_URL}/ticket-category/pageable?page=${currentPage}&size=${pageSize}`
             );
             if (res.status === 200) {
                 setData(res.data.content);
@@ -91,7 +91,7 @@ const TicketCategoryManagement: React.FC = () => {
         if (mode !== "add") {
             try {
                 const res = await axiosInstance.get(
-                    `${API_BASE_URL}/tickets-category/${idCategory}`
+                    `${API_BASE_URL}/ticket-category/${idCategory}`
                 );
                 if (res.status === 200) {
                     const { father, department, ...category } = res.data;
@@ -142,17 +142,17 @@ const TicketCategoryManagement: React.FC = () => {
             switch (submitType) {
                 case "delete":
                     res = await axiosInstance.delete(
-                        `${API_BASE_URL}/tickets-category/${currentCategory.id}`
+                        `${API_BASE_URL}/ticket-category/${currentCategory.id}`
                     );
                     message = "Categoria removida com sucesso!"
                     break;
                 case "add":
-                    res = await axiosInstance.post(`${API_BASE_URL}/tickets-category`, payload);
+                    res = await axiosInstance.post(`${API_BASE_URL}/ticket-category`, payload);
                     message = "Categoria criada com sucesso!"
                     break;
                 case "update":
                     res = await axiosInstance.put(
-                        `${API_BASE_URL}/tickets-category/${currentCategory.id}`,
+                        `${API_BASE_URL}/ticket-category/${currentCategory.id}`,
                         payload
                     );
                     message = "Categoria atualizada com sucesso!"
@@ -211,7 +211,7 @@ const TicketCategoryManagement: React.FC = () => {
             <div className="container">
                 <ActionBar
                     modalTargetId="modal"
-                    delEntityEndPoint={`${API_BASE_URL}/tickets-category`}
+                    delEntityEndPoint={`${API_BASE_URL}/ticket-category`}
                     onCreate={() => handleModalOpen("Criar", "add")}
                     onFilterChange={handleFilterChange}
                     filterText={filterText}

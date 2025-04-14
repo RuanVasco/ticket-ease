@@ -25,8 +25,8 @@ const CreateTicket: React.FC = () => {
     const fetchCategories = async (fatherId: string | null = null) => {
         try {
             const url = fatherId
-                ? `${API_BASE_URL}/tickets-category/with-form?fatherId=${fatherId}`
-                : `${API_BASE_URL}/tickets-category/with-form`;
+                ? `${API_BASE_URL}/ticket-category/with-form?fatherId=${fatherId}`
+                : `${API_BASE_URL}/ticket-category/with-form`;
 
             const res = await axiosInstance.get(url);
             if (res.status === 200) {
@@ -40,7 +40,7 @@ const CreateTicket: React.FC = () => {
     const fetchForms = async (categoryId: string) => {
         try {
             const res = await axiosInstance.get(
-                `${API_BASE_URL}/tickets-category/forms/${categoryId}`
+                `${API_BASE_URL}/ticket-category/forms/${categoryId}`
             );
             if (res.status === 200) {
                 setForms(res.data);

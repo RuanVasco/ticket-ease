@@ -3,6 +3,7 @@ package com.ticketease.api.Entities;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.ticketease.api.Enums.StatusEnum;
 import com.ticketease.api.Enums.UrgencyEnum;
+import com.ticketease.api.Enums.ValidationModeEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,6 +39,20 @@ public class Ticket {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> observers = new HashSet<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "validation_mode", nullable = false)
+    @Setter
+    private ValidationModeEnum validationMode = ValidationModeEnum.OR;
+
+    @ManyToMany
+    @Setter
+    @JoinTable(
+            name = "ticket_validators",
+            joinColumns = @JoinColumn(name = "ticket_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> validators = new HashSet<>();
 
     @Setter
     private StatusEnum status;
@@ -82,6 +97,14 @@ public class Ticket {
 
     public Department getDepartment() {
         return this.form.getDepartment();
+    }
+
+    public boolean isValidatedBy(User user) {
+        if (validationMode == ValidationModeEnum.OR) {
+            return validators.contains(user);
+        }
+
+        return false;
     }
 
 }

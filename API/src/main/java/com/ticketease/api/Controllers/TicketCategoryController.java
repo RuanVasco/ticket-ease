@@ -24,7 +24,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("tickets-category")
+@RequestMapping("ticket-category")
 @RequiredArgsConstructor
 public class TicketCategoryController {
 
@@ -96,6 +96,30 @@ public class TicketCategoryController {
         }
 
         return ResponseEntity.ok(ticketCategory);
+    }
+
+    @GetMapping("/{categoryId}/validators")
+    public ResponseEntity<?> getValidators(@PathVariable Long categoryId) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Optional<TicketCategory> optionalTicketCategory = ticketCategoryRepository.findById(categoryId);
+
+        if (optionalTicketCategory.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        TicketCategory ticketCategory = optionalTicketCategory.get();
+        Department categoryDepartment = ticketCategory.getDepartment();
+
+        if (!user.hasPermission("MANAGE_FORM", categoryDepartment)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Você não tem permissão.");
+        }
+
+        List<User> validators = categoryDepartment.getUsers().stream()
+                .filter(u -> u.hasPermission("VALIDATE_TICKET", categoryDepartment))
+                .toList();
+
+        return ResponseEntity.ok(validators);
     }
 
     @GetMapping("/departments/allowed")

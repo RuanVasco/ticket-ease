@@ -9,6 +9,7 @@ import lombok.Setter;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @Entity
@@ -54,5 +55,11 @@ public class Department {
 	@Override
 	public int hashCode() {
 		return Objects.hash(id);
+	}
+
+	public Set<User> getUsers() {
+		return roleBindings.stream()
+				.map(UserRoleDepartment::getUser)
+				.collect(Collectors.toSet());
 	}
 }
