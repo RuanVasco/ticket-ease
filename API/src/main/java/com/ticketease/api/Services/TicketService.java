@@ -45,9 +45,14 @@ public class TicketService {
         Ticket ticket = new Ticket();
         ticket.setUser(user);
         ticket.setForm(form);
-        ticket.setStatus(StatusEnum.NOVO);
         ticket.setCreatedAt(new Date());
         ticket.setUpdatedAt(new Date());
+
+        if (form.getApprovers().isEmpty()) {
+            ticket.setStatus(StatusEnum.NEW);
+        } else {
+            ticket.setStatus(StatusEnum.PENDING_APPROVAL);
+        }
 
         TicketPropertiesDTO properties = ticketRequestDTO.properties();
 
@@ -83,6 +88,10 @@ public class TicketService {
         ticket.setResponses(responses);
 
         return ticketRepository.save(ticket);
+    }
+
+    public List<Ticket> findPendingTicketsForApprover(User approver) {
+        return ticketRepository.findPendingTicketsByApprover(approver.getId(), StatusEnum.PENDING_APPROVAL);
     }
 
     public Set<User> getRelatedUsers(Ticket ticket) {

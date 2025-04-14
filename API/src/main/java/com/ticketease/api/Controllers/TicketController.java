@@ -19,10 +19,8 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.data.domain.Pageable;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 @RestController
 @RequestMapping("ticket")
@@ -31,8 +29,22 @@ public class TicketController {
 
     private final TicketService ticketService;
     private final DepartmentService departmentService;
-    private final FormRepository formRepository;
-    private final AttachmentService attachmentService;
+
+    @GetMapping
+    public ResponseEntity<List<TicketResponseDTO>> getByStatus(
+            @RequestParam(required = false) StatusEnum status
+    ) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        List<Ticket> tickets = new ArrayList<>();
+        if (status == StatusEnum.PENDING_APPROVAL) {
+            tickets = ticketService.findPendingTicketsForApprover(user);
+        }
+
+        List<TicketResponseDTO> dto = tickets.stream().map(TicketResponseDTO::from).toList();
+
+        return ResponseEntity.ok(dto);
+    }
 
     @GetMapping("/my-tickets")
     public ResponseEntity<Page<TicketResponseDTO>> getUserTickets(

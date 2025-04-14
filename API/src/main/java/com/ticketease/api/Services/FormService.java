@@ -29,14 +29,11 @@ public class FormService {
 
     @Transactional
     public Form createForm(Form form) {
-        Form savedForm = formRepository.save(form);
-
         for (FormField field : form.getFields()) {
-            field.setForm(savedForm);
-            fieldRepository.save(field);
+            field.setForm(form);
         }
 
-        return savedForm;
+        return formRepository.save(form);
     }
 
     public void deleteForm(Long id) {

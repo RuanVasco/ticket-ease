@@ -1,10 +1,21 @@
 package com.ticketease.api.Enums;
 
 public enum StatusEnum {
-    NOVO,
-    EM_ANDAMENTO,
-    PENDENTE,
-    RESOLVIDO,
-    FECHADO,
-    CANCELADO
+    PENDING_APPROVAL("Aguardando Aprovação"),
+    NEW("Novo"),
+    IN_PROGRESS("Em Andamento"),
+    PENDING("Pendente"),
+    RESOLVED("Resolvido"),
+    CLOSED("Fechado"),
+    CANCELED("Cancelado");
+
+    private final String label;
+
+    StatusEnum(String label) {
+        this.label = label;
+    }
+
+    public String getLabel() {
+        return label;
+    }
 }

@@ -12,6 +12,7 @@ import { TicketCategory } from "../../types/TicketCategory";
 import { User } from "../../types/User";
 import { toast } from "react-toastify";
 import { closeModal } from "../../components/Util/CloseModal";
+import { ApprovalModeEnum } from "../../enums/ApprovalModeEnum";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -34,7 +35,8 @@ const FormManagement: React.FC = () => {
         id: "",
         title: "",
         ticketCategory: {} as TicketCategory,
-        validators: [],
+        approvers: [],
+        approvalMode: ApprovalModeEnum.AND,
         description: "",
         creator: {} as User,
         fields: [],
@@ -92,7 +94,8 @@ const FormManagement: React.FC = () => {
                     id: "",
                     title: "",
                     ticketCategory: {} as TicketCategory,
-                    validators: [],
+                    approvers: [],
+                    approvalMode: ApprovalModeEnum.AND,
                     description: "",
                     creator: {} as User,
                     fields: [],

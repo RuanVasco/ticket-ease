@@ -9,7 +9,7 @@ import Pagination from "./Pagination";
 import "../assets/styles/table.css";
 import { Department } from "../types/Department";
 import { Ticket } from "../types/Ticket";
-import { StatusEnum } from "../enums/StatusEnum";
+import { StatusEnum, StatusLabels } from "../enums/StatusEnum";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -22,7 +22,7 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
     const [currentPage, setCurrentPage] = useState<number>(0);
     const [totalPages, setTotalPages] = useState<number>(1);
     const [pageSize, setPageSize] = useState<number>(10);
-    const [status, setStatus] = useState<StatusEnum | null>(StatusEnum.NOVO);
+    const [status, setStatus] = useState<StatusEnum | null>(StatusEnum.NEW);
     const [noResultsMessage, setNoResultsMessage] = useState<string>("");
     const [departments, setDepartments] = useState<Department[]>([]);
     const [department, setDepartment] = useState<Department>();
@@ -159,12 +159,11 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                             id="statusSelect"
                         >
                             <option value="">Todos</option>
-                            <option value={StatusEnum.NOVO}>Novos</option>
-                            <option value={StatusEnum.EM_ANDAMENTO}>Em Andamento</option>
-                            <option value={StatusEnum.PENDENTE}>Pendentes</option>
-                            <option value={StatusEnum.RESOLVIDO}>Resolvidos</option>
-                            <option value={StatusEnum.FECHADO}>Fechados</option>
-                            <option value={StatusEnum.CANCELADO}>Cancelados</option>
+                            {Object.values(StatusEnum).map((statusKey) => (
+                                <option key={statusKey} value={statusKey}>
+                                    {StatusLabels[statusKey]}
+                                </option>
+                            ))}
                         </select>
                     </div>
                     {viewMode === "edit" && departments.length > 1 && (

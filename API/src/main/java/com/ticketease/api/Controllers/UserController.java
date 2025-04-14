@@ -124,10 +124,10 @@ public class UserController {
 
         User user = optionalUser.get();
 
-        user.getRoleBindings().clear();
-
         userRoleDepartmentRepository.deleteByUser(user);
         userRoleDepartmentRepository.flush();
+
+        user.getRoleBindings().clear();
 
         if (userUpdateDTO.cargo() != null && userUpdateDTO.cargo().getId() != null) {
             cargoRepository.findById(userUpdateDTO.cargo().getId()).ifPresent(user::setCargo);
@@ -156,8 +156,6 @@ public class UserController {
 
             if (departmentId != null) {
                 departmentRepository.findById(departmentId).ifPresent(binding::setDepartment);
-            } else {
-                binding.setDepartment(null);
             }
 
             userRoleDepartmentRepository.save(binding);
