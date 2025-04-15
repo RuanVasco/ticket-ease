@@ -98,7 +98,7 @@ public class TicketCategoryController {
         return ResponseEntity.ok(ticketCategory);
     }
 
-    @GetMapping("/{categoryId}/validators")
+    @GetMapping("/{categoryId}/approvers")
     public ResponseEntity<?> getValidators(@PathVariable Long categoryId) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -116,7 +116,7 @@ public class TicketCategoryController {
         }
 
         List<User> validators = categoryDepartment.getUsers().stream()
-                .filter(u -> u.hasPermission("VALIDATE_TICKET", categoryDepartment))
+                .filter(u -> u.hasPermission("APPROVE_TICKET", categoryDepartment))
                 .toList();
 
         return ResponseEntity.ok(validators);

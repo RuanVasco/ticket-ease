@@ -29,6 +29,16 @@
 	--secondary-color-hover: #060d14;
 }
 
+.btn-primary {
+	background-color: #584bea;
+	border: 1px solid #4f40fa;
+}
+
+.btn-primary:hover {
+	background-color: #4f40fa;
+	border: 1px solid #4f40fa;
+}
+
 body {
 	background-color: var(--secondary-color);
 	color: var(--primary-color);

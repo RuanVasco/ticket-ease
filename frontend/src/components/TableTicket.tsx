@@ -9,257 +9,278 @@ import Pagination from "./Pagination";
 import "../assets/styles/table.css";
 import { Department } from "../types/Department";
 import { Ticket } from "../types/Ticket";
-import { StatusEnum } from "../enums/StatusEnum";
+import { StatusEnum, StatusLabels } from "../enums/StatusEnum";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 interface TableTicketProps {
-    viewMode?: "readonly" | "edit";
+	viewMode?: "readonly" | "edit";
 }
 
 const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
-    const [data, setData] = useState<Ticket[]>([]);
-    const [currentPage, setCurrentPage] = useState<number>(0);
-    const [totalPages, setTotalPages] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(10);
-    const [status, setStatus] = useState<StatusEnum | null>(StatusEnum.NOVO);
-    const [noResultsMessage, setNoResultsMessage] = useState<string>("");
-    const [departments, setDepartments] = useState<Department[]>([]);
-    const [department, setDepartment] = useState<Department>();
-    const [searchQuery, setSearchQuery] = useState<string>("");
+	const [data, setData] = useState<Ticket[]>([]);
+	const [currentPage, setCurrentPage] = useState<number>(0);
+	const [totalPages, setTotalPages] = useState<number>(1);
+	const [pageSize, setPageSize] = useState<number>(10);
+	const [status, setStatus] = useState<StatusEnum | null>(StatusEnum.NEW);
+	const [noResultsMessage, setNoResultsMessage] = useState<string>("");
+	const [departments, setDepartments] = useState<Department[]>([]);
+	const [department, setDepartment] = useState<Department>();
+	const [searchQuery, setSearchQuery] = useState<string>("");
 
-    const columns: string[] = [
-        "ID",
-        "Assunto",
-        "Categoria",
-        "Status",
-        "Urgência",
-        "Data de Criação",
-        "Última Atualização",
-    ];
+	const columns: string[] = [
+		"ID",
+		"Assunto",
+		"Categoria",
+		"Status",
+		"Urgência",
+		"Data de Criação",
+		"Última Atualização",
+	];
 
-    if (viewMode === "edit") {
-        columns.push("Usuário");
-    }
+	if (viewMode === "edit") {
+		columns.push("Usuário");
+	}
 
-    const fetchUserDepartments = async () => {
-        try {
-            const res = await axiosInstance.get(`${API_BASE_URL}/departments/manager`);
-            if (res.status === 200 && res.data) {
-                setDepartments(res.data);
-            }
-        } catch (error) {
-            console.error("Erro ao buscar departamentos:", error);
-        }
-    };
+	const fetchUserDepartments = async () => {
+		try {
+			const res = await axiosInstance.get(`${API_BASE_URL}/departments/manager`);
+			if (res.status === 200 && res.data) {
+				setDepartments(res.data);
+			}
+		} catch (error) {
+			console.error("Erro ao buscar departamentos:", error);
+		}
+	};
 
-    const fetchData = async () => {
-        try {
-            let url = "";
+	const fetchData = async () => {
+		try {
+			let url = "";
 
-            if (searchQuery.length >= 3) {
-                url =
-                    viewMode === "edit"
-                        ? `${API_BASE_URL}/tickets/search/manager`
-                        : `${API_BASE_URL}/tickets/search/user`;
-            } else {
-                if (viewMode === "edit") {
-                    if (!department) return;
-                    url = `${API_BASE_URL}/ticket/by-department/${department.id}`;
-                } else {
-                    url = `${API_BASE_URL}/ticket/my-tickets`;
-                }
-            }
+			if (searchQuery.length >= 3) {
+				url =
+					viewMode === "edit"
+						? `${API_BASE_URL}/tickets/search/manager`
+						: `${API_BASE_URL}/tickets/search/user`;
+			} else {
+				if (viewMode === "edit") {
+					if (!department) return;
+					url = `${API_BASE_URL}/ticket/by-department/${department.id}`;
+				} else {
+					url = `${API_BASE_URL}/ticket/my-tickets`;
+				}
+			}
 
-            const params: any = {
-                page: currentPage,
-                size: pageSize,
-                status,
-            };
+			const params: any = {
+				page: currentPage,
+				size: pageSize,
+				status,
+			};
 
-            if (searchQuery.length >= 3) {
-                params.query = searchQuery;
-            }
+			if (searchQuery.length >= 3) {
+				params.query = searchQuery;
+			}
 
-            const res = await axiosInstance.get(url, { params });
+			const res = await axiosInstance.get(url, { params });
 
-            if (res.status === 200 && res.data?.content?.length > 0) {
-                setData(res.data.content);
-                setTotalPages(res.data.totalPages);
-                setNoResultsMessage("");
-            } else {
-                setData([]);
-                setTotalPages(1);
-                setNoResultsMessage("Nenhum ticket encontrado.");
-            }
-        } catch (error) {
-            console.error("Erro ao buscar dados:", error);
-            setData([]);
-            setNoResultsMessage("Erro ao buscar tickets.");
-        }
-    };
+			if (res.status === 200 && res.data?.content?.length > 0) {
+				setData(res.data.content);
+				setTotalPages(res.data.totalPages);
+				setNoResultsMessage("");
+			} else {
+				setData([]);
+				setTotalPages(1);
+				setNoResultsMessage("Nenhum ticket encontrado.");
+			}
+		} catch (error) {
+			console.error("Erro ao buscar dados:", error);
+			setData([]);
+			setNoResultsMessage("Erro ao buscar tickets.");
+		}
+	};
 
-    useEffect(() => {
-        if (viewMode === "edit") {
-            fetchUserDepartments();
-        }
-    }, [viewMode]);
+	useEffect(() => {
+		if (viewMode === "edit") {
+			fetchUserDepartments();
+		}
+	}, [viewMode]);
 
-    useEffect(() => {
-        if (departments.length > 0 && !department) {
-            setDepartment(departments[0]);
-        }
-    }, [departments]);
+	useEffect(() => {
+		if (departments.length > 0 && !department) {
+			setDepartment(departments[0]);
+		}
+	}, [departments]);
 
-    useEffect(() => {
-        if (viewMode === "edit" && !department) return;
-        fetchData();
-    }, [currentPage, pageSize, status, department, searchQuery]);
+	useEffect(() => {
+		if (viewMode === "edit" && !department) return;
+		fetchData();
+	}, [currentPage, pageSize, status, department, searchQuery]);
 
-    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const query = e.target.value;
-        setSearchQuery(query);
-        setCurrentPage(0);
-    };
+	const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const query = e.target.value;
+		setSearchQuery(query);
+		setCurrentPage(0);
+	};
 
-    const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const value = e.target.value;
-        if (value === "") {
-            setStatus(null);
-        } else {
-            setStatus(value as StatusEnum);
-        }
-        setCurrentPage(0);
-    };
+	const handleStatusChange = (status: string | null) => {
+		if (status === "") {
+			setStatus(null);
+		} else {
+			setStatus(status as StatusEnum);
+		}
+		setCurrentPage(0);
+	};
 
-    const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selected = departments.find((dep) => Number(dep.id) === Number(e.target.value));
-        setDepartment(selected);
-        setCurrentPage(0);
-    };
+	const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+		const selected = departments.find((dep) => Number(dep.id) === Number(e.target.value));
+		setDepartment(selected);
+		setCurrentPage(0);
+	};
 
-    const handlePageChange = (page: number) => setCurrentPage(page);
+	const handlePageChange = (page: number) => setCurrentPage(page);
 
-    const handlePageSizeChange = (size: number) => {
-        setPageSize(size);
-        setCurrentPage(0);
-    };
+	const handlePageSizeChange = (size: number) => {
+		setPageSize(size);
+		setCurrentPage(0);
+	};
 
-    return (
-        <div className="container">
-            <div className="row align-items-center my-3">
-                <div className="col d-flex align-items-end">
-                    <ItemsPerPage onPageSizeChange={handlePageSizeChange} pageSize={pageSize} />
-                    <div className="ms-3">
-                        <label htmlFor="statusSelect">Status: </label>
-                        <select
-                            value={status || ""}
-                            onChange={handleStatusChange}
-                            className="form-select"
-                            id="statusSelect"
-                        >
-                            <option value="">Todos</option>
-                            <option value={StatusEnum.NOVO}>Novos</option>
-                            <option value={StatusEnum.EM_ANDAMENTO}>Em Andamento</option>
-                            <option value={StatusEnum.PENDENTE}>Pendentes</option>
-                            <option value={StatusEnum.RESOLVIDO}>Resolvidos</option>
-                            <option value={StatusEnum.FECHADO}>Fechados</option>
-                            <option value={StatusEnum.CANCELADO}>Cancelados</option>
-                        </select>
-                    </div>
-                    {viewMode === "edit" && departments.length > 1 && (
-                        <div className="ms-3">
-                            <label htmlFor="departmentSelect">Departamento: </label>
-                            <select
-                                value={department?.id || ""}
-                                onChange={handleDepartmentChange}
-                                className="form-select"
-                                id="departmentSelect"
-                            >
-                                {departments.map((dep) => (
-                                    <option key={dep.id} value={dep.id ?? ""}>
-                                        {dep.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    )}
-                </div>
-                <div className="col-2">
-                    <input
-                        type="text"
-                        placeholder="Pesquisar"
-                        className="input-text"
-                        onChange={handleSearch}
-                    />
-                </div>
-            </div>
-            <table className="w-100 table table-custom table-hover">
-                <thead>
-                    <tr>
-                        {columns.map((column, index) => (
-                            <th key={index}>{column}</th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.length === 0 && noResultsMessage ? (
-                        <tr>
-                            <td colSpan={columns.length} className="text-center">
-                                {noResultsMessage}
-                            </td>
-                        </tr>
-                    ) : (
-                        data.map((item, index) => (
-                            <tr key={index}>
-                                <td>
-                                    <Link
-                                        to={`/ticket/${item.id}`}
-                                        className="fw-semibold text-decoration-underline"
-                                    >
-                                        {item.id}
-                                    </Link>
-                                </td>
-                                <td>
-                                    <Link
-                                        to={`/ticket/${item.id}`}
-                                        className="fw-semibold text-decoration-underline"
-                                    >
-                                        {item.form.title}
-                                    </Link>
-                                </td>
-                                <td>
-                                    {item.form.ticketCategory.name}
-                                </td>
-                                <td>
-                                    {item.properties.status}
-                                </td>
-                                <td>
-                                    {item.properties.urgency}
-                                </td>
-                                <td>
-                                    {DateFormatter(item.properties.createdAt || "")}
-                                </td>
-                                <td>
-                                    {DateFormatter(item.properties.updatedAt || "")}
-                                </td>
-                                {viewMode === "edit" && (
-                                    <td>
-                                        {item.properties.user?.name || ""}
-                                    </td>
-                                )}
-                            </tr>
-                        ))
-                    )}
-                </tbody>
-            </table>
-            <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-            />
-        </div>
-    );
+	return (
+		<div className="container">
+			<div
+				className="d-flex justify-content-start align-items-center gap-3 px-3 py-2"
+				style={{ overflowX: "auto", whiteSpace: "nowrap" }}
+			>
+				<div
+					className={`text-center rounded ${status === null ? "fw-bold border-2" : ""}`}
+					style={{
+						height: "8vh",
+						minWidth: "100px",
+						padding: "10px",
+						border: "1px solid black",
+						backgroundColor: status === null ? "#ffc107" : "#f8d7da",
+						cursor: "pointer",
+					}}
+					onClick={() => handleStatusChange(null)}
+				>
+					Todos
+				</div>
+
+				{Object.values(StatusEnum).map((statusKey) => (
+					<div
+						key={statusKey}
+						className={`text-center rounded ${status === statusKey ? "fw-bold border-2" : ""}`}
+						style={{
+							height: "8vh",
+							minWidth: "100px",
+							padding: "10px",
+							border: "1px solid black",
+							backgroundColor: status === statusKey ? "#ffc107" : "#f8d7da",
+							cursor: "pointer",
+						}}
+						onClick={() => handleStatusChange(statusKey)}
+					>
+						{StatusLabels[statusKey]}
+					</div>
+				))}
+			</div>
+			<div className="row align-items-center my-3">
+				<div className="col d-flex align-items-end">
+					<ItemsPerPage onPageSizeChange={handlePageSizeChange} pageSize={pageSize} />
+					<div className="ms-3">
+						<label htmlFor="statusSelect">Status: </label>
+						<select
+							value={status || ""}
+							onChange={(e) => handleStatusChange(e.target.value)}
+							className="form-select"
+							id="statusSelect"
+						>
+							<option value="">Todos</option>
+							{Object.values(StatusEnum).map((statusKey) => (
+								<option key={statusKey} value={statusKey}>
+									{StatusLabels[statusKey]}
+								</option>
+							))}
+						</select>
+					</div>
+					{viewMode === "edit" && departments.length > 1 && (
+						<div className="ms-3">
+							<label htmlFor="departmentSelect">Departamento: </label>
+							<select
+								value={department?.id || ""}
+								onChange={handleDepartmentChange}
+								className="form-select"
+								id="departmentSelect"
+							>
+								{departments.map((dep) => (
+									<option key={dep.id} value={dep.id ?? ""}>
+										{dep.name}
+									</option>
+								))}
+							</select>
+						</div>
+					)}
+				</div>
+				<div className="col-2">
+					<input
+						type="text"
+						placeholder="Pesquisar"
+						className="input-text"
+						onChange={handleSearch}
+					/>
+				</div>
+			</div>
+			<table className="w-100 table table-custom table-hover">
+				<thead>
+					<tr>
+						{columns.map((column, index) => (
+							<th key={index}>{column}</th>
+						))}
+					</tr>
+				</thead>
+				<tbody>
+					{data.length === 0 && noResultsMessage ? (
+						<tr>
+							<td colSpan={columns.length} className="text-center">
+								{noResultsMessage}
+							</td>
+						</tr>
+					) : (
+						data.map((item, index) => (
+							<tr key={index}>
+								<td>
+									<Link
+										to={`/ticket/${item.id}`}
+										className="fw-semibold text-decoration-underline"
+									>
+										{item.id}
+									</Link>
+								</td>
+								<td>
+									<Link
+										to={`/ticket/${item.id}`}
+										className="fw-semibold text-decoration-underline"
+									>
+										{item.form.title}
+									</Link>
+								</td>
+								<td>{item.form.ticketCategory.name}</td>
+								<td>{item.properties.status}</td>
+								<td>{item.properties.urgency}</td>
+								<td>{DateFormatter(item.properties.createdAt || "")}</td>
+								<td>{DateFormatter(item.properties.updatedAt || "")}</td>
+								{viewMode === "edit" && <td>{item.properties.user?.name || ""}</td>}
+							</tr>
+						))
+					)}
+				</tbody>
+			</table>
+			<Pagination
+				currentPage={currentPage}
+				totalPages={totalPages}
+				onPageChange={handlePageChange}
+			/>
+		</div>
+	);
 };
 
 export default TableTicket;

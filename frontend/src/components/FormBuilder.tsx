@@ -10,6 +10,7 @@ import { User } from "../types/User";
 import OptionEditor from "./Fields/OptionEditor";
 import Select from "react-select";
 import { Modal } from "bootstrap";
+import { ApprovalModeEnum } from "../enums/ApprovalModeEnum";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -25,9 +26,9 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
     const [categories, setCategories] = useState<TicketCategory[]>([]);
     const [modalMode, setModalMode] = useState<"create" | "edit">("create");
     const [editIndex, setEditIndex] = useState<number | null>(null);
-    const [validators, setValidators] = useState<User[]>([]);
-    const [selectedValidators, setSelectedValidators] = useState<User[]>([]);
-    const [validationMode, setValidationMode] = useState<"AND" | "OR">("AND");
+    const [approvers, setApprovers] = useState<User[]>([]);
+    const [selectedApprovers, setSelectedApprovers] = useState<User[]>([]);
+    const [approvalMode, setApprovalMode] = useState<"AND" | "OR">("AND");
     const [newField, setNewField] = useState<FormField>({
         id: "",
         label: "",
@@ -45,7 +46,7 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
 
     useEffect(() => {
         if (form.ticketCategory.id) {
-            loadValidators(Number(form.ticketCategory.id));
+            loadApprovers(Number(form.ticketCategory.id));
         }
     }, [form.ticketCategory]);
 
@@ -55,7 +56,8 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
                 id: "",
                 title: "",
                 ticketCategory: {} as TicketCategory,
-                validators: [],
+                approvers: [],
+                approvalMode: ApprovalModeEnum.AND,
                 description: "",
                 creator: {} as User,
                 fields: [],
@@ -63,11 +65,18 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
         }
     }, [screenType]);
 
-    const loadValidators = async (categoryId: number) => {
+    useEffect(() => {
+        if (screenType === "edit" && form.approvers?.length > 0) {
+            setSelectedApprovers(form.approvers);
+            setApprovalMode(form.approvalMode || "AND");
+        }
+    }, [screenType, form.approvers, form.approvalMode]);
+
+    const loadApprovers = async (categoryId: number) => {
         try {
-            const res = await axiosInstance.get(`${API_BASE_URL}/ticket-category/${categoryId}/validators`);
+            const res = await axiosInstance.get(`${API_BASE_URL}/ticket-category/${categoryId}/approvers`);
             if (res.status === 200) {
-                setValidators(res.data);
+                setApprovers(res.data);
             }
         } catch (error) {
             console.error("Error fetching field types:", error);
@@ -120,6 +129,8 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
             title: form.title,
             description: form.description,
             ticketCategoryId: form.ticketCategory.id,
+            approvers: selectedApprovers.map((v) => v.id),
+            approvalMode: approvalMode,
             fields: form.fields,
         };
         try {
@@ -143,7 +154,8 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
                     id: "",
                     title: "",
                     ticketCategory: {} as TicketCategory,
-                    validators: [],
+                    approvers: [],
+                    approvalMode: ApprovalModeEnum.AND,
                     description: "",
                     creator: {} as User,
                     fields: [],
@@ -371,21 +383,21 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
                     isMulti
                     className="form-select"
                     isDisabled={!form.ticketCategory.id}
-                    options={validators.map((v) => ({
+                    options={approvers.map((v) => ({
                         value: v.id,
                         label: `${v.name} (${v.email})`,
                     }))}
-                    value={validators
-                        .filter((v) => selectedValidators.find((s) => s.id === v.id))
+                    value={approvers
+                        .filter((v) => selectedApprovers.find((s) => s.id === v.id))
                         .map((v) => ({
                             value: v.id,
                             label: `${v.name} (${v.email})`,
                         }))}
                     onChange={(options) => {
                         const selected = options.map((opt) =>
-                            validators.find((v) => v.id === opt.value)!
+                            approvers.find((v) => v.id === opt.value)!
                         );
-                        setSelectedValidators(selected);
+                        setSelectedApprovers(selected);
                     }}
                 />
             </div>
@@ -394,9 +406,9 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
                 <label className="form-label">Modo de Validação</label>
                 <select
                     className="form-select"
-                    value={validationMode}
-                    onChange={(e) => setValidationMode(e.target.value as "AND" | "OR")}
-                    disabled={selectedValidators.length === 0}
+                    value={approvalMode}
+                    onChange={(e) => setApprovalMode(e.target.value as "AND" | "OR")}
+                    disabled={selectedApprovers.length === 0}
                 >
                     <option value="AND">Todos devem validar (E)</option>
                     <option value="OR">Qualquer um pode validar (OU)</option>

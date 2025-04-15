@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Set;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
@@ -34,4 +35,15 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
 
     Set<Ticket> findByStatus(StatusEnum status);
+
+    @Query("""
+        SELECT t FROM Ticket t
+        JOIN t.form.approvers approver
+        WHERE approver.id = :approverId
+        AND t.status = :status
+    """)
+    List<Ticket> findPendingTicketsByApprover(
+            @Param("approverId") Long approverId,
+            @Param("status") StatusEnum status
+    );
 }

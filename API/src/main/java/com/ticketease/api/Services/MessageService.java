@@ -59,12 +59,12 @@ public class MessageService {
     public Message addMessage(Ticket ticket, User user, MessageRequestDTO messageRequestDTO) throws IOException {
         StatusEnum ticketStatus = ticket.getStatus();
 
-        if (ticketStatus.equals(StatusEnum.NOVO) && (user != ticket.getUser() && ticket.canManage(user))) {
-            ticket.setStatus(StatusEnum.EM_ANDAMENTO);
+        if (ticketStatus.equals(StatusEnum.NEW) && (user != ticket.getUser() && ticket.canManage(user))) {
+            ticket.setStatus(StatusEnum.IN_PROGRESS);
         }
 
         if (Boolean.TRUE.equals(messageRequestDTO.getCloseTicket()) && ticket.canManage(user)) {
-            ticket.setStatus(StatusEnum.RESOLVIDO);
+            ticket.setStatus(StatusEnum.RESOLVED);
         }
 
         Message message = new Message();

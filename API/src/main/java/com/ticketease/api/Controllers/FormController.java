@@ -2,9 +2,11 @@ package com.ticketease.api.Controllers;
 
 import com.ticketease.api.DTO.FormDTO.FormDTO;
 import com.ticketease.api.DTO.FormDTO.FormFieldDTO;
+import com.ticketease.api.DTO.FormDTO.FormResponseDTO;
 import com.ticketease.api.DTO.FormDTO.OptionDTO;
 import com.ticketease.api.Entities.*;
 import com.ticketease.api.Enums.FieldTypeEnum;
+import com.ticketease.api.Repositories.FormFieldRepository;
 import com.ticketease.api.Repositories.FormRepository;
 import com.ticketease.api.Repositories.TicketCategoryRepository;
 import com.ticketease.api.Repositories.UserRepository;
@@ -19,10 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -34,6 +33,7 @@ public class FormController {
     private final UserRepository userRepository;
     private final TicketCategoryRepository ticketCategoryRepository;
     private final FormRepository formRepository;
+    private final FormFieldRepository formFieldRepository;
 
     @GetMapping
     public ResponseEntity<List<Form>> getAllForms() {
@@ -77,7 +77,7 @@ public class FormController {
         Form form = formService.getFormById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Form not found"));
 
-        return ResponseEntity.ok(form);
+        return ResponseEntity.ok(FormResponseDTO.from(form));
     }
 
     @PostMapping
@@ -113,7 +113,21 @@ public class FormController {
             fields.add(field);
         }
 
-        Form form = new Form(ticketCategory, formDTO.getTitle(), formDTO.getDescription(), user, fields);
+        Set<User> validators = new HashSet<>();
+        for (Long userId : formDTO.getApprovers()) {
+            userRepository.findById(userId).ifPresent(validators::add);
+        }
+
+        Form form = new Form(
+                ticketCategory,
+                formDTO.getTitle(),
+                formDTO.getDescription(),
+                validators,
+                formDTO.getApprovalMode(),
+                user,
+                fields
+        );
+
         Form savedForm = formService.createForm(form);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(savedForm);
@@ -133,30 +147,56 @@ public class FormController {
         TicketCategory ticketCategory = ticketCategoryRepository.findById(formDTO.getTicketCategoryId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket category not found"));
 
-        existingForm.getFields().clear();
         existingForm.setTitle(formDTO.getTitle());
         existingForm.setDescription(formDTO.getDescription());
         existingForm.setTicketCategory(ticketCategory);
 
+        Set<User> approvers = new HashSet<>();
+        for (Long userId : formDTO.getApprovers()) {
+            userRepository.findById(userId).ifPresent(approvers::add);
+        }
+
+        existingForm.setApprovers(approvers);
+        existingForm.setApprovalMode(formDTO.getApprovalMode());
+
+        List<FormField> existingFields = existingForm.getFields();
+        Map<Long, FormField> existingFieldMap = existingFields.stream()
+                .filter(f -> f.getId() != null)
+                .collect(Collectors.toMap(FormField::getId, f -> f));
+
+        Set<Long> incomingIds = formDTO.getFields().stream()
+                .map(FormFieldDTO::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        List<FormField> toRemove = existingFields.stream()
+                .filter(f -> f.getId() != null && !incomingIds.contains(f.getId()))
+                .toList();
+
+        existingFields.removeAll(toRemove);
+
         for (FormFieldDTO dto : formDTO.getFields()) {
-            FieldTypeEnum fieldTypeEnum = FieldTypeEnum.valueOf(dto.getType().toUpperCase());
-            FormField field = new FormField();
-            field.setLabel(dto.getLabel());
-            field.setType(fieldTypeEnum);
-            if (fieldTypeEnum != FieldTypeEnum.FILE && fieldTypeEnum != FieldTypeEnum.FILE_MULTIPLE) {
-                field.setRequired(dto.isRequired());
+            FormField field;
+            if (dto.getId() != null && existingFieldMap.containsKey(dto.getId())) {
+                field = existingFieldMap.get(dto.getId());
+            } else {
+                field = new FormField();
+                field.setForm(existingForm);
+                existingFields.add(field);
             }
+
+            field.setLabel(dto.getLabel());
+            field.setType(FieldTypeEnum.valueOf(dto.getType().toUpperCase()));
             field.setPlaceholder(dto.getPlaceholder());
+            field.setRequired(dto.isRequired());
 
             if (dto.getOptions() != null) {
-                List<Option> options = dto.getOptions().stream()
-                        .map(OptionDTO::toEntity)
-                        .toList();
-                field.setOptions(options);
+                field.setOptions(new ArrayList<>(
+                        dto.getOptions().stream()
+                                .map(OptionDTO::toEntity)
+                                .toList()
+                ));
             }
-
-            field.setForm(existingForm);
-            existingForm.getFields().add(field);
         }
 
         Form updatedForm = formService.save(existingForm);

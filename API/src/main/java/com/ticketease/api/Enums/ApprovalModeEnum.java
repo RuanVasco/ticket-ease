@@ -1,6 +1,6 @@
 package com.ticketease.api.Enums;
 
-public enum ValidationModeEnum {
+public enum ApprovalModeEnum {
     AND,
     OR
 }
