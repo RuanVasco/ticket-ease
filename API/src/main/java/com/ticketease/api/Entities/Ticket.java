@@ -70,6 +70,15 @@ public class Ticket {
     @JsonManagedReference
     private List<TicketResponse> responses;
 
+    @Setter
+    @ManyToOne
+    @JoinColumn(name = "approved_by_id")
+    private User approvedBy;
+
+    @Setter
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date approvalDate;
+
     public boolean canManage(User user) {
         Department department = this.getDepartment();
 

@@ -24,6 +24,7 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final FormRepository formRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public Optional<Ticket> findById(Long ticketId) {
         return ticketRepository.findById(ticketId);
@@ -87,11 +88,20 @@ public class TicketService {
 
         ticket.setResponses(responses);
 
-        return ticketRepository.save(ticket);
+        Ticket savedTicket = ticketRepository.save(ticket);
+
+        Set<User> relatedUsers = getRelatedUsers(savedTicket);
+        String notificationContent = "Mensagem recebida no ticket " +  savedTicket.getId();
+        for (User targetUser : relatedUsers) {
+            if (user.equals(targetUser)) continue;
+            notificationService.createNotification(targetUser, ticket.getId(), "Message", notificationContent);
+        }
+
+        return savedTicket;
     }
 
-    public List<Ticket> findPendingTicketsForApprover(User approver) {
-        return ticketRepository.findPendingTicketsByApprover(approver.getId(), StatusEnum.PENDING_APPROVAL);
+    public Page<Ticket> findPendingTicketsForApprover(User approver, Pageable pageable) {
+        return ticketRepository.findPendingTicketsByApprover(approver.getId(), StatusEnum.PENDING_APPROVAL, pageable);
     }
 
     public Set<User> getRelatedUsers(Ticket ticket) {
@@ -151,5 +161,26 @@ public class TicketService {
 
 
         return new PageImpl<>(pageContent, pageable, filteredList.size());
+    }
+
+    public void approveOrReject(Ticket ticket, boolean approved, User approver) {
+        if (!ticket.getStatus().equals(StatusEnum.PENDING_APPROVAL)) {
+            throw new IllegalStateException("O ticket não está pendente de aprovação.");
+        }
+
+        ticket.setStatus(approved ? StatusEnum.NEW : StatusEnum.CANCELED);
+        ticket.setApprovalDate(new Date());
+        ticket.setApprovedBy(approver);
+        ticket.setUpdatedAt(new Date());
+
+        ticketRepository.save(ticket);
+
+        Set<User> relatedUsers = getRelatedUsers(ticket);
+        String notificationContent = "Ticket " + ticket.getId() + " " + (approved ? "aprovado" : "negado");
+
+        for (User targetUser : relatedUsers) {
+            if (approver.equals(targetUser)) continue;
+            notificationService.createNotification(targetUser, ticket.getId(), "Message", notificationContent);
+        }
     }
 }

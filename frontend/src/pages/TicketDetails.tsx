@@ -17,8 +17,12 @@ import { StatusEnum } from "../enums/StatusEnum";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
-const TicketDetails: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
+interface TicketDetailsProps {
+    ticketId?: string;
+}
+
+const TicketDetails: React.FC<TicketDetailsProps> = ({ ticketId }) => {
+    const { id: routeId } = useParams<{ id: string }>();
     const { ticketMessages, sendMessage } = useWebSocket();
     const [allMessages, setAllMessages] = useState<Message[]>([]);
     const userData = getUserData();
@@ -40,6 +44,8 @@ const TicketDetails: React.FC = () => {
         label: string;
         fileNames: string[];
     }[]>([]);
+
+    const id = ticketId || routeId;
 
     const getFirstName = (fullName: string) => fullName.split(" ")[0];
     const { hasPermission } = usePermissions();
@@ -248,44 +254,45 @@ const TicketDetails: React.FC = () => {
                             ) : null}
                             <div ref={chatEndRef} />
                         </div>
-                        {ticket.properties.status !== "Fechado" && (
-                            <form className="mt-3 input-group" onSubmit={handleSubmit}>
-                                <input
-                                    type="text"
-                                    className="input-text form-control"
-                                    name="text"
-                                    value={message.text}
-                                    onChange={handleInputChange}
-                                    placeholder="Digite sua mensagem..."
-                                />
-                                <button type="submit" className="btn_send_message">
-                                    Enviar
-                                    <BsSend className="ms-2" />
-                                </button>
-                                {isManager && (
-                                    <div className="dropup">
-                                        <button
-                                            type="button"
-                                            className="btn_send_message_dropdown_togle dropdown-toggle dropdown-toggle-split"
-                                            data-bs-toggle="dropdown"
-                                            aria-expanded="false"
-                                        ></button>
-                                        <ul className="dropdown-menu dropdown_options_message dropdown-menu-end ">
-                                            <li>
-                                                <button
-                                                    className="dropdown-item"
-                                                    type="submit"
-                                                    name="close"
-                                                >
-                                                    Enviar e finalizar chamado
-                                                    <BsSendCheck className="ms-2" />
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                )}
-                            </form>
-                        )}
+                        {ticket.properties.status !== undefined &&
+                            ![StatusEnum.CLOSED, StatusEnum.CANCELED].includes(ticket.properties.status) && (
+                                <form className="mt-3 input-group" onSubmit={handleSubmit}>
+                                    <input
+                                        type="text"
+                                        className="input-text form-control"
+                                        name="text"
+                                        value={message.text}
+                                        onChange={handleInputChange}
+                                        placeholder="Digite sua mensagem..."
+                                    />
+                                    <button type="submit" className="btn_send_message">
+                                        Enviar
+                                        <BsSend className="ms-2" />
+                                    </button>
+                                    {isManager && (
+                                        <div className="dropup">
+                                            <button
+                                                type="button"
+                                                className="btn_send_message_dropdown_togle dropdown-toggle dropdown-toggle-split"
+                                                data-bs-toggle="dropdown"
+                                                aria-expanded="false"
+                                            ></button>
+                                            <ul className="dropdown-menu dropdown_options_message dropdown-menu-end ">
+                                                <li>
+                                                    <button
+                                                        className="dropdown-item"
+                                                        type="submit"
+                                                        name="close"
+                                                    >
+                                                        Enviar e finalizar chamado
+                                                        <BsSendCheck className="ms-2" />
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    )}
+                                </form>
+                            )}
                     </div>
                 </div>
                 <div className="col-4">

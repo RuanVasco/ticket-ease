@@ -31,19 +31,19 @@ public class TicketController {
     private final DepartmentService departmentService;
 
     @GetMapping
-    public ResponseEntity<List<TicketResponseDTO>> getByStatus(
-            @RequestParam(required = false) StatusEnum status
+    public ResponseEntity<Page<TicketResponseDTO>> getByStatus(
+            @RequestParam(required = false) StatusEnum status,
+            Pageable pageable
     ) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        List<Ticket> tickets = new ArrayList<>();
+        Page<Ticket> tickets = Page.empty();
         if (status == StatusEnum.PENDING_APPROVAL) {
-            tickets = ticketService.findPendingTicketsForApprover(user);
+            tickets = ticketService.findPendingTicketsForApprover(user, pageable);
         }
 
-        List<TicketResponseDTO> dto = tickets.stream().map(TicketResponseDTO::from).toList();
-
-        return ResponseEntity.ok(dto);
+        Page<TicketResponseDTO> dtoPage = tickets.map(TicketResponseDTO::from);
+        return ResponseEntity.ok(dtoPage);
     }
 
     @GetMapping("/my-tickets")
@@ -114,5 +114,36 @@ public class TicketController {
 
         URI location = URI.create("/ticket/" + savedTicket.getId());
         return ResponseEntity.created(location).body(savedTicket.getId());
+    }
+
+    @PostMapping("/{ticketId}/approval")
+    public ResponseEntity<?> approveTicket(
+            @PathVariable Long ticketId,
+            @RequestParam boolean approved
+    ) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Ticket ticket = ticketService.findById(ticketId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
+
+        boolean isApprover = ticket.getForm().getApprovers().contains(user);
+        boolean hasPermission = user.hasPermission("APPROVE_TICKET", ticket.getDepartment());
+
+        if (!isApprover || !hasPermission) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body("Você não tem permissão para aprovar ou rejeitar este ticket.");
+        }
+
+        if (!ticket.getStatus().equals(StatusEnum.PENDING_APPROVAL)) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("Ticket não está pendente de aprovação.");
+        }
+
+        ticketService.approveOrReject(ticket, approved, user);
+
+        String message = approved ? "Ticket aprovado com sucesso." : "Ticket rejeitado com sucesso.";
+
+        return ResponseEntity.ok(message);
     }
 }

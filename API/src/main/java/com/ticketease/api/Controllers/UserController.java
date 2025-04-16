@@ -156,6 +156,8 @@ public class UserController {
 
             if (departmentId != null) {
                 departmentRepository.findById(departmentId).ifPresent(binding::setDepartment);
+            } else {
+                binding.setDepartment(null);
             }
 
             userRoleDepartmentRepository.save(binding);

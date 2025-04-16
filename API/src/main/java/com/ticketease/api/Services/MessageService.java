@@ -59,6 +59,10 @@ public class MessageService {
     public Message addMessage(Ticket ticket, User user, MessageRequestDTO messageRequestDTO) throws IOException {
         StatusEnum ticketStatus = ticket.getStatus();
 
+        if (StatusEnum.RESOLVED.equals(ticket.getStatus())) {
+            ticket.setStatus(StatusEnum.NEW);
+        }
+
         if (ticketStatus.equals(StatusEnum.NEW) && (user != ticket.getUser() && ticket.canManage(user))) {
             ticket.setStatus(StatusEnum.IN_PROGRESS);
         }

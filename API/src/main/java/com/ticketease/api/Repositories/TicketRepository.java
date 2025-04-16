@@ -42,8 +42,9 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
         WHERE approver.id = :approverId
         AND t.status = :status
     """)
-    List<Ticket> findPendingTicketsByApprover(
+    Page<Ticket> findPendingTicketsByApprover(
             @Param("approverId") Long approverId,
-            @Param("status") StatusEnum status
+            @Param("status") StatusEnum status,
+            Pageable pageable
     );
 }

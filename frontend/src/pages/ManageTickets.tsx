@@ -38,7 +38,7 @@ const ManageTickets: React.FC = () => {
                 </ul>
             </nav>
 
-            <div className="col">
+            <div className="col py-4 px-5">
                 {viewMode === "list" && <TableTicket viewMode="edit" />}
                 {viewMode === "validate" && <TicketApproval />}
                 {viewMode === "dashboard" && <p>📊 Painel de estatísticas em construção</p>}

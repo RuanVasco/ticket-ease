@@ -6,6 +6,7 @@ import com.ticketease.api.DTO.User.UserResponseDTO;
 import com.ticketease.api.Entities.Message;
 import com.ticketease.api.Entities.Ticket;
 import com.ticketease.api.Entities.User;
+import com.ticketease.api.Enums.StatusEnum;
 import com.ticketease.api.Services.MessageService;
 import com.ticketease.api.Services.NotificationService;
 import com.ticketease.api.Services.TicketService;
@@ -61,12 +62,19 @@ public class MessageController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
 
         if (!ticket.getUser().equals(user) && !ticket.canManage(user)) {
-            System.out.println("Acesso negado. Usuário não tem permissão.");
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado. Você não tem permissão.");
         }
 
-        if ("Fechado".equals(ticket.getStatus())) {
+        if (StatusEnum.CLOSED.equals(ticket.getStatus())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Este ticket está fechado.");
+        }
+
+        if (
+                StatusEnum.PENDING_APPROVAL.equals(ticket.getStatus()) &&
+                        !ticket.getForm().getApprovers().contains(user) &&
+                        !ticket.getUser().equals(user)
+        ) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Este ticket está aguardando aprovação.");
         }
 
         Message message = messageService.addMessage(ticket, user, messageRequestDTO);
