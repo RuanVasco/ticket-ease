@@ -1,0 +1,41 @@
+@use "../variables";
+
+.header {
+	background-color: variables.$color-primary;
+	&,
+	* {
+		user-select: none;
+		-webkit-user-drag: none;
+	}
+
+	& * {
+		color: variables.$color-white;
+	}
+}
+
+.header_brand {
+	height: 35px;
+}
+
+.header_link {
+	text-decoration: none;
+	padding: 7px 12px;
+	border-radius: 8px;
+
+	&_active {
+		background-color: variables.$color-secondary;
+		padding: 7px 12px;
+		border-radius: 8px;
+	}
+
+	&:hover {
+		background-color: variables.$color-tertiary;
+	}
+}
+
+.header_divider {
+	width: 1px;
+	height: 24px;
+	background-color: variables.$color-white;
+	opacity: 0.5;
+}

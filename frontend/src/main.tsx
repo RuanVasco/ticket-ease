@@ -5,7 +5,8 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App.tsx";
 import { AuthProvider } from "./context/AuthContext";
 import { WebSocketProvider } from "./context/WebSocketContext";
-import "./assets/styles/global.css";
+// import "./assets/styles/global.css";
+import './assets/styles/main.scss';
 import { ThemeProvider } from "./context/ThemeContext";
 import { PermissionsProvider } from "./context/PermissionsContext.tsx";
 
