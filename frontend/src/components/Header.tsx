@@ -119,31 +119,31 @@ const Header: React.FC = () => {
                         </Link>
                     )}
                 </div>
-                <div className="col-2 d-flex justify-content-end gap-3">
+                <div className="col-2 d-flex justify-content-end align-items-center gap-2">
                     <div>
                         <button
-                            className="btn btn-settings"
+                            className="header_action_btn"
                             data-bs-toggle="modal"
                             data-bs-target="#configModal"
                         >
                             <FaUser />
                         </button>
                     </div>
-                    <div className="header-divider" />
-                    <div className="notification-wrapper">
+                    <hr className="header_divider" />
+                    <div className="notification_wrapper">
                         <button
-                            className="btn btn-settings position-relative"
+                            className="header_action_btn position-relative"
                             onClick={() => setDropdownVisible((prev) => !prev)}
                             ref={bellButtonRef}
                         >
                             <FaBell />
                             {unreadNotifications > 0 && (
-                                <span className="notification-badge">{unreadNotifications}</span>
+                                <span className="notification_badge">{unreadNotifications}</span>
                             )}
                         </button>
                         {dropdownVisible && (
-                            <div className="notification-dropdown" ref={dropdownRef}>
-                                <div className="dropdown-header">
+                            <div className="notification_dropdown" ref={dropdownRef}>
+                                <div className="dropdown_header">
                                     <span>
                                         <FaBell /> {unreadNotifications} novas notificações
                                     </span>
@@ -157,10 +157,10 @@ const Header: React.FC = () => {
                                 <ul>
                                     {notifications.map((n, i) => (
                                         <li key={i} className={`${!n.read ? "unread" : ""}`}>
-                                            <div className="notification-content">
+                                            <div className="notification_content">
                                                 <Link
                                                     to={`/ticket/${n.typeId}`}
-                                                    className="notification-message"
+                                                    className="notification_message"
                                                     onClick={() => markAsRead(Number(n.id))}
                                                 >
                                                     {n.message}

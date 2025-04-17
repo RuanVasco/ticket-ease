@@ -2,11 +2,11 @@
 
 body {
 	font-family: variables.$font-family-base;
+	font-size: variables.$font-size-base;
 	background-color: variables.$color-white;
 	color: variables.$color-black;
 	margin: 0;
 	padding: 0;
-	box-sizing: border-box;
 }
 
 * {
@@ -15,4 +15,13 @@ body {
 	-moz-user-drag: none;
 	-o-user-drag: none;
 	-ms-user-drag: none;
+}
+
+.modal-content {
+	background-color: variables.$color-white;
+	color: variables.$color-black;
+
+	* {
+		color: variables.$color-black !important;
+	}
 }
