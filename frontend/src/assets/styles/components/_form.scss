@@ -1,0 +1,37 @@
+@use "../variables";
+
+.search_wrapper {
+	position: relative;
+	display: inline-block;
+	width: 100%;
+	max-width: 70%;
+}
+
+.search_bar {
+	width: 100%;
+	background-color: variables.$color-primary;
+	border: none;
+	color: variables.$color-white;
+	border-radius: 8px;
+	padding: 0.4rem 2.5rem 0.4rem 1rem;
+	font-size: variables.$font-size-base;
+	outline: none;
+	transition: all 0.2s ease-in-out;
+
+	&::placeholder {
+		color: variables.$color-white;
+	}
+
+	&:focus {
+		background-color: variables.$color-tertiary;
+	}
+}
+
+.search_icon {
+	position: absolute;
+	top: 50%;
+	right: 0.8rem;
+	transform: translateY(-50%);
+	color: variables.$color-white;
+	pointer-events: none;
+}

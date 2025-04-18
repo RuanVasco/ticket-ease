@@ -1,0 +1,70 @@
+@use "../variables";
+
+.btn_yellow {
+	background-color: variables.$color-yellow;
+	border: none;
+	padding: 5px 10px;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background-color 0.2s;
+
+	&:hover {
+		background-color: variables.$color-dark-yellow;
+	}
+}
+
+.btn_common {
+	background-color: variables.$color-primary;
+	border: none;
+	padding: 5px 10px;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background-color 0.2s;
+
+	&:hover {
+		background-color: variables.$color-secondary;
+	}
+}
+
+.btn_primary {
+	background-color: variables.$color-primary;
+	border: none;
+	padding: 5px 10px;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background-color 0.2s;
+
+	&:hover {
+		background-color: variables.$color-tertiary;
+	}
+}
+
+.btn_none {
+	background: transparent;
+	border: none;
+	padding: 5px 10px;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: color 0.2s;
+
+	&:hover {
+		background-color: variables.$color-tertiary;
+	}
+}
+
+.header_action_btn {
+	background: none;
+	border: none;
+	color: variables.$color-white;
+	border-radius: 8px;
+	padding: 5px 10px;
+	transition: background-color 0.2s;
+
+	& svg {
+		font-size: variables.$font-size-xl;
+	}
+
+	&:hover {
+		background-color: variables.$color-tertiary;
+	}
+}

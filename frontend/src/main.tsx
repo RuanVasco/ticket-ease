@@ -7,7 +7,6 @@ import { AuthProvider } from "./context/AuthContext";
 import { WebSocketProvider } from "./context/WebSocketContext";
 // import "./assets/styles/global.css";
 import './assets/styles/main.scss';
-import { ThemeProvider } from "./context/ThemeContext";
 import { PermissionsProvider } from "./context/PermissionsContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
@@ -16,9 +15,7 @@ createRoot(document.getElementById("root")!).render(
             <AuthProvider>
                 <WebSocketProvider>
                     <PermissionsProvider>
-                        <ThemeProvider>
-                            <App />
-                        </ThemeProvider>
+                        <App />
                     </PermissionsProvider>
                 </WebSocketProvider>
             </AuthProvider>

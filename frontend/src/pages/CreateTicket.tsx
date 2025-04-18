@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
-import { FaAngleRight, FaAngleLeft, FaFolderOpen, FaClipboardList } from "react-icons/fa6";
+import { FaAngleRight, FaAngleLeft, FaFolderOpen, FaClipboardList, FaClockRotateLeft } from "react-icons/fa6";
 
+import "../assets/styles/pages/_createticket.scss";
 import axiosInstance from "../components/AxiosConfig";
-import "../assets/styles/create_ticket.css";
 import { TicketCategory } from "../types/TicketCategory";
 import { Form } from "../types/Form";
 import { DynamicForm } from "../components/DynamicForm";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { defaultProperties, TicketProperties } from "../types/TicketProperties";
+import { FaSearch } from "react-icons/fa";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -61,6 +62,7 @@ const CreateTicket: React.FC = () => {
         setCategoryPath([...categoryPath, category]);
         fetchCategories(category.id);
         fetchForms(category.id);
+        setCurrentForm({} as Form);
     };
 
     const handleFormClick = (form: Form) => {
@@ -145,78 +147,102 @@ const CreateTicket: React.FC = () => {
         } else {
             setForms([]);
         }
+
+        setCurrentForm({} as Form);
     };
 
     return (
-        <main>
-            <div className="container-xxl">
-                <div className="row mt-3">
-                    <div className="col-3">
-                        <div>
-                            <div className="nav_forms_cat_head">
-                                {categoryPath.length > 0 ? (
-                                    <button onClick={handleBack} className="nav_forms_cat_btn_back">
-                                        <FaAngleLeft />
-                                        <span className="ms-2">
-                                            {categoryPath[categoryPath.length - 1]?.name}
-                                        </span>
-                                    </button>
-                                ) : (
-                                    <span>Selecione um categoria</span>
-                                )}
-                            </div>
-
-                            <ul className="mt-2 nav_forms_cat_list">
-                                {forms.map((item) => (
-                                    <li
-                                        key={item.id}
-                                        className={`nav_forms_cat_item${currentForm.id === item.id ? " item_selected" : ""}`}
-                                    >
-                                        <div>
-                                            <a
-                                                onClick={() => handleFormClick(item)}
-                                                className="d-flex align-items-center tree_item"
-                                                role="button"
-                                                style={{ cursor: "pointer" }}
-                                            >
-                                                <FaClipboardList />
-                                                <span className="ms-2">{item.title}</span>
-                                            </a>
-                                        </div>
-                                    </li>
-                                ))}
-                                {categories.map((item) => (
-                                    <li key={item.id} className="nav_forms_cat_item">
-                                        <div>
-                                            <a
-                                                onClick={() => handleCategoryClick(item)}
-                                                className="d-flex align-items-center tree_item"
-                                                role="button"
-                                                style={{ cursor: "pointer" }}
-                                            >
-                                                <FaFolderOpen />
-                                                <span className="ms-2">{item.name}</span>
-                                                <FaAngleRight className="ms-auto" />
-                                            </a>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-                    <div className="col border-start ps-4 form_box">
-                        {currentForm.fields && currentForm.fields.length != 0 && (
-                            <DynamicForm
-                                form={currentForm}
-                                formData={formData}
-                                setFormData={setFormData}
-                                preview={false}
-                                handleSubmit={handleSubmit}
-                                properties={properties}
-                                setProperties={setProperties}
-                            />
+        <main className="container-fluid">
+            <div className="row">
+                <div className="categories_box col-3 pt-3 px-4">
+                    <div className="categories_head d-flex align-items-center">
+                        {categoryPath.length > 0 ? (
+                            <button onClick={handleBack} className="btn_none">
+                                <FaAngleLeft />
+                                <span className="ms-3">
+                                    {categoryPath[categoryPath.length - 1]?.name}
+                                </span>
+                            </button>
+                        ) : (
+                            <span>Selecione um categoria abaixo</span>
                         )}
                     </div>
+
+                    <ul className="mt-2">
+                        {forms.map((item) => (
+                            <li
+                                key={item.id}
+                                className={`categories_item${currentForm.id === item.id ? " categories_item_selected" : ""}`}
+                            >
+                                <div>
+                                    <a
+                                        onClick={() => handleFormClick(item)}
+                                        className="d-flex align-items-center"
+                                        role="button"
+                                        style={{ cursor: "pointer" }}
+                                    >
+                                        <FaClipboardList />
+                                        <span className="ms-3">{item.title}</span>
+                                    </a>
+                                </div>
+                            </li>
+                        ))}
+                        {categories.map((item) => (
+                            <li key={item.id} className="categories_item">
+                                <div>
+                                    <a
+                                        onClick={() => handleCategoryClick(item)}
+                                        className="d-flex align-items-center"
+                                        role="button"
+                                        style={{ cursor: "pointer" }}
+                                    >
+                                        <FaFolderOpen />
+                                        <span className="ms-3">{item.name}</span>
+                                        <FaAngleRight className="ms-auto" />
+                                    </a>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+                <div className="col">
+                    {currentForm.fields && currentForm.fields.length != 0 ? (
+                        <DynamicForm
+                            form={currentForm}
+                            formData={formData}
+                            setFormData={setFormData}
+                            preview={false}
+                            handleSubmit={handleSubmit}
+                            properties={properties}
+                            setProperties={setProperties}
+                        />
+                    ) : (
+                        <div className="d-flex flex-column justify-content-center align-items-center pt-4">
+                            <div className="search_wrapper">
+                                <input type="text" className="search_bar" placeholder="Pesquisar por ajuda" />
+                                <FaSearch className="search_icon" />
+                            </div>
+                            <div className="forms_shortcut">
+                                <div className="shortcut_title m-4">
+                                    <FaClockRotateLeft />
+                                    Recentes
+                                </div>
+                                <div className="shortcut_grid">
+                                    <div className="shortcut_item">
+                                        <span>formulario 1</span>
+                                        <p>afasifapifhasiphfpsiafhasihfhasfasfasfasfasfasfasfh</p>
+                                    </div>
+                                    <div className="shortcut_item">formulario 2</div>
+                                    <div className="shortcut_item">formulario 3</div>
+                                    <div className="shortcut_item">formulario 4</div>
+                                    <div className="shortcut_item">formulario 5</div>
+                                    <div className="shortcut_item">formulario 6</div>
+                                    <div className="shortcut_item">formulario 7</div>
+                                    <div className="shortcut_item">formulario 8</div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </main>

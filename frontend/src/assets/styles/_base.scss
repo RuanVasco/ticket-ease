@@ -1,5 +1,4 @@
 @use "./variables";
-
 body {
 	font-family: variables.$font-family-base;
 	font-size: variables.$font-size-base;
@@ -15,13 +14,4 @@ body {
 	-moz-user-drag: none;
 	-o-user-drag: none;
 	-ms-user-drag: none;
-}
-
-.modal-content {
-	background-color: variables.$color-white;
-	color: variables.$color-black;
-
-	* {
-		color: variables.$color-black !important;
-	}
 }

@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { FaBell, FaEye, FaEyeSlash, FaPlus, FaUser } from "react-icons/fa6";
 import { Link, useLocation } from "react-router-dom";
 
-import "../assets/styles/header.css";
 import logo from "../assets/logo_claro.png";
 import { useAuth } from "../context/AuthContext";
 import { usePermissions } from "../context/PermissionsContext";
@@ -10,7 +9,6 @@ import { useWebSocket } from "../context/WebSocketContext";
 import { User } from "../types/User";
 
 import GetUserData from "./GetUserData";
-import ThemeSelector from "./ThemeSwitcher";
 import { FaSlidersH, FaTasks } from "react-icons/fa";
 
 const Header: React.FC = () => {
@@ -83,7 +81,8 @@ const Header: React.FC = () => {
                 <div className="col-2">
                     <Logo />
                 </div>
-                <div className="col d-flex justify-content-center gap-3 align-items-center">
+                <div className="col menu-scroll d-flex justify-content-center gap-3 align-items-center">
+
                     {canOpenTicket && (
                         <Link to="/" className={`d-flex align-items-center ${getActiveClass("/")}`} draggable={false}>
                             <FaPlus />
@@ -190,42 +189,30 @@ const Header: React.FC = () => {
                 </div>
             </div>
 
-            <div className="modal fade" id="configModal" tabIndex={-1}>
-                <div className="modal-dialog">
+            <div className="modal fade" id="configModal" tabIndex={-1} aria-labelledby="configModalLabel" aria-hidden="true">
+                <div className="modal-dialog modal-sm">
                     <div className="modal-content">
                         <div className="modal-header">
-                            <h5 className="modal-title">Configurações</h5>
-                            <div className="ms-auto">
-                                <ThemeSelector />
-                            </div>
+                            <h5 className="modal-title" id="configModalLabel">Preferências</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                         </div>
+
                         <div className="modal-body">
                             {user && (
-                                <div className="row">
-                                    <div className="col">
+                                <div className="d-flex align-items-center justify-content-between gap-3">
+                                    <div className="mb-2 d-flex flex-column">
                                         <span className="fw-semibold">{user.name}</span>
-                                        <button
-                                            type="button"
-                                            className="btn btn-warning btn-sm ms-3"
-                                            onClick={handleLogout}
-                                        >
-                                            Sair
-                                        </button>
-                                        <br />
-                                        {user.email}
-                                        <br />
+                                        <span className="d-block">{user.email}</span>
                                     </div>
+                                    <button
+                                        type="button"
+                                        className="btn_yellow"
+                                        onClick={handleLogout}
+                                    >
+                                        Logout
+                                    </button>
                                 </div>
                             )}
-                        </div>
-                        <div className="modal-footer">
-                            <button
-                                type="button"
-                                className="btn btn-secondary"
-                                data-bs-dismiss="modal"
-                            >
-                                Fechar
-                            </button>
                         </div>
                     </div>
                 </div>

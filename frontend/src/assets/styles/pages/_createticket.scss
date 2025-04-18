@@ -1,0 +1,106 @@
+@use "../variables";
+
+.categories_box {
+	background-color: variables.$color-secondary;
+	min-height: 93vh;
+	overflow-y: auto;
+
+	& * {
+		color: variables.$color-white;
+		text-decoration: none;
+	}
+
+	& span {
+		user-select: none;
+	}
+
+	& ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+}
+
+.categories_head {
+	height: 5vh;
+	& * {
+		font-size: variables.$font-size-lg;
+	}
+}
+
+.categories_item {
+	font-size: variables.$font-size-lg;
+	border-radius: 8px;
+	padding: 5px 10px;
+
+	&:hover {
+		background-color: variables.$color-tertiary;
+	}
+}
+
+.categories_item_selected {
+	background-color: variables.$color-tertiary;
+	&:hover {
+		background-color: variables.$color-tertiary;
+	}
+}
+
+.forms_shortcut {
+	width: 100%;
+}
+
+.shortcut_title {
+	font-size: variables.$font-size-xl;
+	color: variables.$color-primary;
+	display: flex;
+	justify-content: start;
+	align-items: center;
+	gap: 8px;
+}
+
+.shortcut_grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, max-content));
+	justify-content: center;
+	gap: 1rem;
+}
+
+.shortcut_item {
+	background-color: #394ca4;
+	color: #fff;
+	border-radius: 12px;
+	padding: 1rem;
+	height: auto;
+	width: 250px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	cursor: pointer;
+	transition:
+		background-color 0.2s ease,
+		transform 0.15s ease;
+	gap: 0.5rem;
+
+	&:hover {
+		background-color: #5569c3;
+		transform: translateY(-2px);
+	}
+
+	p {
+		font-size: 0.875rem;
+		opacity: 0.85;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		line-height: 1.2;
+		max-height: calc(1.2em * 3);
+		word-break: break-word;
+		margin: 0;
+		width: 100%;
+	}
+}
