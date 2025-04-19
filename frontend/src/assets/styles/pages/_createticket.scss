@@ -58,20 +58,13 @@
 	gap: 8px;
 }
 
-.shortcut_grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(200px, max-content));
-	justify-content: center;
-	gap: 1rem;
-}
-
 .shortcut_item {
 	background-color: #394ca4;
 	color: #fff;
 	border-radius: 12px;
-	padding: 1rem;
+	padding: 8px 10px;
 	height: auto;
-	width: 250px;
+	width: 200px;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
