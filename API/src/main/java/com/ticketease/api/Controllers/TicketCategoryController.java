@@ -261,4 +261,10 @@ public class TicketCategoryController {
         }
     }
 
+    @GetMapping("/path/{categoryId}")
+    public ResponseEntity<List<TicketCategoryDTO>> getCategoryPath(@PathVariable Long categoryId) {
+        List<TicketCategoryDTO> path = ticketCategoryService.getCategoryPath(categoryId);
+        return ResponseEntity.ok(path);
+    }
+
 }

@@ -1,0 +1,50 @@
+@use "../variables";
+
+.shortcut_title {
+	font-size: variables.$font-size-xl;
+	color: variables.$color-primary;
+	display: flex;
+	justify-content: start;
+	align-items: center;
+	gap: 8px;
+}
+
+.shortcut_item {
+	background-color: #394ca4;
+	color: #fff;
+	border-radius: 12px;
+	padding: 8px 10px;
+	height: auto;
+	width: 200px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	cursor: pointer;
+	transition:
+		background-color 0.2s ease,
+		transform 0.15s ease;
+	gap: 0.5rem;
+
+	&:hover {
+		background-color: #5569c3;
+		transform: translateY(-2px);
+	}
+
+	p {
+		font-size: 0.875rem;
+		opacity: 0.85;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		line-height: 1.2;
+		max-height: calc(1.2em * 3);
+		word-break: break-word;
+		margin: 0;
+		width: 100%;
+	}
+}

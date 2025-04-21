@@ -7,6 +7,7 @@ import com.ticketease.api.Entities.TicketCategory;
 import com.ticketease.api.Repositories.DepartmentRepository;
 import com.ticketease.api.Repositories.FormRepository;
 import com.ticketease.api.Repositories.TicketCategoryRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -110,5 +111,18 @@ public class TicketCategoryService {
         }
 
         ticketCategoryRepository.delete(ticketCategory);
+    }
+
+    public List<TicketCategoryDTO> getCategoryPath(Long categoryId) {
+        List<TicketCategoryDTO> path = new ArrayList<>();
+        TicketCategory current = ticketCategoryRepository.findById(categoryId)
+                .orElseThrow(() -> new EntityNotFoundException("Categoria não encontrada"));
+
+        while (current != null) {
+            path.addFirst(new TicketCategoryDTO(current));
+            current = current.getFather();
+        }
+
+        return path;
     }
 }

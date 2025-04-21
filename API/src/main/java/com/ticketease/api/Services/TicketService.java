@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +24,7 @@ public class TicketService {
     private final FormRepository formRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final UserLinkFormsService userLinkFormsService;
 
     public Optional<Ticket> findById(Long ticketId) {
         return ticketRepository.findById(ticketId);
@@ -96,6 +96,8 @@ public class TicketService {
             if (user.equals(targetUser)) continue;
             notificationService.createNotification(targetUser, ticket.getId(), "Message", notificationContent);
         }
+
+        userLinkFormsService.registerRecentForm(user, form);
 
         return savedTicket;
     }

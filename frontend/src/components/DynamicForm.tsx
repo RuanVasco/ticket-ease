@@ -68,9 +68,23 @@ export const DynamicForm: React.FC<Props> = ({
         setProperties((prev) => ({ ...prev, [name]: value }));
     };
 
+    const setFavorite = async () => {
+        try {
+            const res = await axiosInstance.post(`${API_BASE_URL}/users/me/favorite/${form.id}`);
+            if (res.status === 200) {
+                toast.success("Formulário favoritado com sucesso");
+            }
+        } catch (error) {
+            toast.error("Erro ao favoritar o formulário");
+        }
+    }
+
     return (
         <form onSubmit={preview ? (e) => e.preventDefault() : handleSubmit}>
-            <h4 className="fw-bold mb-2">{form.title}</h4>
+            <div className="d-flex align-items-center justify-content-between">
+                <h4 className="fw-bold mb-2 d-inline">{form.title}</h4>
+                <span onClick={() => setFavorite()}>Favoritar</span>
+            </div>
             <p className="text-muted">{form.description}</p>
 
             {form.fields.map((field, index) => (
