@@ -11,21 +11,30 @@
 
 .shortcut_item {
 	background-color: #394ca4;
-	color: #fff;
+	color: variables.$color-white;
 	border-radius: 12px;
-	padding: 8px 10px;
-	height: auto;
-	width: 200px;
+	padding: 10px;
+	height: 100px;
+	// width: 210px;
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
 	align-items: center;
+	justify-content: center;
 	text-align: center;
 	cursor: pointer;
 	transition:
 		background-color 0.2s ease,
 		transform 0.15s ease;
-	gap: 0.5rem;
+	gap: 0.8rem;
+
+	.item_title {
+		font-size: 1.1rem;
+	}
+
+	.text-muted {
+		color: inherit !important;
+		opacity: 0.8;
+	}
 
 	&:hover {
 		background-color: #5569c3;
@@ -36,8 +45,8 @@
 		font-size: 0.875rem;
 		opacity: 0.85;
 		display: -webkit-box;
-		-webkit-line-clamp: 3;
-		line-clamp: 3;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 		text-overflow: ellipsis;

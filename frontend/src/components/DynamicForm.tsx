@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import axiosInstance from "./AxiosConfig";
 import SelectDepartment from "./Fields/SelectDepartment";
 import AttachmentUploadInput from "./Fields/AttachmentUploadInput";
+import { FaRegStar, FaStar } from "react-icons/fa6";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -21,6 +22,7 @@ interface Props {
     preview?: boolean;
     properties: TicketProperties;
     setProperties: React.Dispatch<React.SetStateAction<TicketProperties>>;
+    favorite?: boolean;
 }
 
 interface OptionType {
@@ -36,6 +38,7 @@ export const DynamicForm: React.FC<Props> = ({
     setFormData,
     properties,
     setProperties,
+    favorite = false
 }) => {
     const [options, setOptions] = useState<OptionType[]>([]);
     const [selectedOptions, setSelectedOptions] = useState<MultiValue<OptionType>>([]);
@@ -69,6 +72,9 @@ export const DynamicForm: React.FC<Props> = ({
     };
 
     const setFavorite = async () => {
+        if (preview === true) {
+            return
+        }
         try {
             const res = await axiosInstance.post(`${API_BASE_URL}/users/me/favorite/${form.id}`);
             if (res.status === 200) {
@@ -83,7 +89,13 @@ export const DynamicForm: React.FC<Props> = ({
         <form onSubmit={preview ? (e) => e.preventDefault() : handleSubmit}>
             <div className="d-flex align-items-center justify-content-between">
                 <h4 className="fw-bold mb-2 d-inline">{form.title}</h4>
-                <span onClick={() => setFavorite()}>Favoritar</span>
+                <span onClick={() => setFavorite()}>
+                    {favorite ? (
+                        <FaStar />
+                    ) : (
+                        <FaRegStar />
+                    )}
+                </span>
             </div>
             <p className="text-muted">{form.description}</p>
 

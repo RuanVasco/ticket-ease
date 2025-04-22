@@ -4,9 +4,10 @@ import { Form } from "../types/Form";
 
 type FormsShortCutsProps = {
     icon: FC;
-    title: string
+    title: string;
     forms: {
         form: Form;
+        favorite: boolean;
         accessedAt: string;
     }[];
     onFormClick: (form: Form) => void;
@@ -15,30 +16,22 @@ type FormsShortCutsProps = {
 
 const FormsShortCuts = ({ icon: Icon, title, forms, onFormClick }: FormsShortCutsProps) => {
     return (
-        <div className="forms_shortcut">
+        <div>
             <div className="shortcut_title mb-2">
                 <Icon />
                 {title}
             </div>
-            <div className="row justify-content-between g-4">
+            <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 gx-4 gy-4">
                 {forms.map((shortcut) => (
-                    <div key={shortcut.form.id} className="shortcut_item col-auto" onClick={() => onFormClick(shortcut.form)}>
-                        <span>{shortcut.form.title}</span>
-                        <span>{shortcut.form.ticketCategory.name}</span>
-                        <p>
-                            {shortcut.form.description}
-                        </p>
+                    <div key={shortcut.form.id} className="col">
+                        <article className="shortcut_item" onClick={() => onFormClick(shortcut.form)}>
+                            {shortcut.form.title}
+                            <p>
+                                {shortcut.form.description}
+                            </p>
+                        </article>
                     </div>
                 ))}
-
-
-                {/*<div className="shortcut_item col-auto">
-                     <span>formulario 1</span>
-                    <p>
-                        Descrição longa de teste para verificar quebra de linha
-                        e alinhamento dos itens com wrap.
-                    </p>
-                </div>*/}
             </div>
         </div>
     )

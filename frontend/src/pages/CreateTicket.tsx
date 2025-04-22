@@ -5,7 +5,7 @@ import {
     FaFolderOpen,
     FaClipboardList,
     FaClockRotateLeft,
-    FaRegHeart,
+    FaRegStar,
 } from "react-icons/fa6";
 
 import "../assets/styles/pages/_createticket.scss";
@@ -23,6 +23,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 interface FormPreview {
     form: Form;
+    favorite: boolean;
     accessedAt: string;
 }
 
@@ -32,6 +33,7 @@ const CreateTicket: React.FC = () => {
     const [formData, setFormData] = useState<Record<string, any>>({});
     const [categoryPath, setCategoryPath] = useState<TicketCategory[]>([]);
     const [currentForm, setCurrentForm] = useState<Form>({} as Form);
+    const [currentFormFavorite, setCurrentFormFavorite] = useState<boolean>(false);
     const [properties, setProperties] = useState<TicketProperties>(defaultProperties);
     const [recentForms, setRecentForms] = useState<FormPreview[]>([]);
     const [favoriteForms, setFavoriteForms] = useState<FormPreview[]>([]);
@@ -93,6 +95,16 @@ const CreateTicket: React.FC = () => {
         fetchRecentForms();
         fetchFavoriteForms();
     }, []);
+
+    useEffect(() => {
+        fetchFavoriteForms();
+    }, [currentForm]);
+
+    useEffect(() => {
+        setCurrentFormFavorite(
+            favoriteForms.some(f => f.form.id === currentForm?.id)
+        );
+    }, [favoriteForms, currentForm]);
 
     const handleCategoryClick = (category: TicketCategory) => {
         setCategories([]);
@@ -281,10 +293,11 @@ const CreateTicket: React.FC = () => {
                             handleSubmit={handleSubmit}
                             properties={properties}
                             setProperties={setProperties}
+                            favorite={currentFormFavorite}
                         />
                     ) : (
                         <div className="d-flex flex-column justify-content-center align-items-center p-4">
-                            <div className="search_wrapper">
+                            <div className="search_wrapper my-3">
                                 <input
                                     type="text"
                                     className="search_bar"
@@ -292,10 +305,10 @@ const CreateTicket: React.FC = () => {
                                 />
                                 <FaSearch className="search_icon" />
                             </div>
-                            <div className="w-100 mt-4 d-flex justify-content-center flex-column gap-4">
+                            <div className="w-80 d-flex justify-content-center flex-column gap-5">
                                 {favoriteForms.length > 0 && (
                                     <FormsShortCuts
-                                        icon={FaRegHeart}
+                                        icon={FaRegStar}
                                         title={"Favoritos"}
                                         forms={favoriteForms}
                                         onFormClick={handleShortcutClick}
