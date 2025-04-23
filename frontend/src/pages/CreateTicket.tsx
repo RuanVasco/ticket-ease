@@ -291,7 +291,7 @@ const CreateTicket: React.FC = () => {
                             </div>
                         ) : (
                             <div className="d-flex flex-column justify-content-center align-items-center p-4">
-                                <div className="search_wrapper my-3">
+                                <div className="search_wrapper my-3 w-75">
                                     <input
                                         type="text"
                                         className="search_bar"

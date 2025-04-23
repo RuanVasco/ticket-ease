@@ -1,3 +1,5 @@
+import "../assets/styles/components/_form.scss";
+
 interface ItemsPerPageProps {
     pageSize: number;
     onPageSizeChange: (size: number) => void;
@@ -6,12 +8,12 @@ interface ItemsPerPageProps {
 const ItemsPerPage: React.FC<ItemsPerPageProps> = ({ pageSize, onPageSizeChange }) => {
     return (
         <div>
-            <label htmlFor="page-size" className="label-page-selector">
-                Itens por página:{" "}
+            <label htmlFor="page-size" className="label_form">
+                Itens por página{" "}
             </label>
             <select
                 id="page-size"
-                className="form-select"
+                className="select_bar_outlined"
                 value={pageSize}
                 onChange={(e) => onPageSizeChange(parseInt(e.target.value, 10))}
             >

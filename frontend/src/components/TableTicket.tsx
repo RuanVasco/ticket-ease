@@ -6,10 +6,11 @@ import DateFormatter from "./Util/DateFormatter";
 import ItemsPerPage from "./ItemsPerPage";
 import Pagination from "./Pagination";
 
-import "../assets/styles/table.css";
+import "../assets/styles/components/_form.scss";
 import { Department } from "../types/Department";
 import { Ticket } from "../types/Ticket";
 import { StatusEnum, StatusLabels } from "../enums/StatusEnum";
+import { FaSearch } from "react-icons/fa";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -146,54 +147,15 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
 
     return (
         <div>
-            <div
-                className="d-flex justify-content-center align-items-center gap-3 px-3 py-2"
-                style={{ overflowX: "auto", whiteSpace: "nowrap" }}
-            >
-                <div
-                    className={`text-center rounded ${status === null ? "fw-bold border-2" : ""}`}
-                    style={{
-                        height: "8vh",
-                        minWidth: "100px",
-                        padding: "10px",
-                        border: "1px solid black",
-                        backgroundColor: status === null ? "#ffc107" : "#f8d7da",
-                        cursor: "pointer",
-                    }}
-                    onClick={() => handleStatusChange(null)}
-                >
-                    Todos
-                </div>
-
-                {Object.values(StatusEnum)
-                    .filter((statusKey) => statusKey !== StatusEnum.PENDING_APPROVAL)
-                    .map((statusKey) => (
-                        <div
-                            key={statusKey}
-                            className={`text-center rounded ${status === statusKey ? "fw-bold border-2" : ""}`}
-                            style={{
-                                height: "8vh",
-                                minWidth: "100px",
-                                padding: "10px",
-                                border: "1px solid black",
-                                backgroundColor: status === statusKey ? "#ffc107" : "#f8d7da",
-                                cursor: "pointer",
-                            }}
-                            onClick={() => handleStatusChange(statusKey)}
-                        >
-                            {StatusLabels[statusKey]}
-                        </div>
-                    ))}
-            </div>
             <div className="row align-items-center my-3">
                 <div className="col d-flex align-items-end">
                     <ItemsPerPage onPageSizeChange={handlePageSizeChange} pageSize={pageSize} />
                     <div className="ms-3">
-                        <label htmlFor="statusSelect">Status: </label>
+                        <label htmlFor="statusSelect" className="label_form">Status</label>
                         <select
                             value={status || ""}
                             onChange={(e) => handleStatusChange(e.target.value)}
-                            className="form-select"
+                            className="select_bar_outlined"
                             id="statusSelect"
                         >
                             <option value="">Todos</option>
@@ -206,11 +168,11 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                     </div>
                     {viewMode === "edit" && departments.length > 1 && (
                         <div className="ms-3">
-                            <label htmlFor="departmentSelect">Departamento: </label>
+                            <label htmlFor="departmentSelect" className="label_form">Departamento</label>
                             <select
                                 value={department?.id || ""}
                                 onChange={handleDepartmentChange}
-                                className="form-select"
+                                className="select_bar_outlined"
                                 id="departmentSelect"
                             >
                                 {departments.map((dep) => (
@@ -222,13 +184,16 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                         </div>
                     )}
                 </div>
-                <div className="col-2">
-                    <input
-                        type="text"
-                        placeholder="Pesquisar"
-                        className="input-text"
-                        onChange={handleSearch}
-                    />
+                <div className="col-5">
+                    <div className="search_wrapper">
+                        <input
+                            type="text"
+                            className="search_bar_outlined"
+                            placeholder="Pesquisar"
+                            onChange={handleSearch}
+                        />
+                        <FaSearch className="search_icon_outlined" />
+                    </div>
                 </div>
             </div>
             <table className="w-100 table table-custom table-hover">

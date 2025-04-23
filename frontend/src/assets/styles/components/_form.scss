@@ -4,7 +4,6 @@
 	position: relative;
 	display: inline-block;
 	width: 100%;
-	max-width: 70%;
 }
 
 .search_bar {
@@ -28,6 +27,36 @@
 	}
 }
 
+.search_bar_outlined {
+	width: 100%;
+	height: 45px;
+	background-color: variables.$color-white;
+	border: 2px solid variables.$color-secondary;
+	color: variables.$color-primary;
+	border-radius: 8px;
+	padding: 0.4rem 2.5rem 0.4rem 1rem;
+	font-size: variables.$font-size-base;
+	outline: none;
+	transition: all 0.2s ease-in-out;
+
+	&::placeholder {
+		color: variables.$color-secondary;
+	}
+
+	&:focus {
+		background-color: variables.$color-light-gray;
+	}
+}
+
+.search_icon_outlined {
+	position: absolute;
+	top: 50%;
+	right: 0.8rem;
+	transform: translateY(-50%);
+	color: variables.$color-secondary;
+	pointer-events: none;
+}
+
 .search_icon {
 	position: absolute;
 	top: 50%;
@@ -35,4 +64,33 @@
 	transform: translateY(-50%);
 	color: variables.$color-white;
 	pointer-events: none;
+}
+
+.select_bar_outlined {
+	width: 100%;
+	height: 45px;
+	background-color: variables.$color-white;
+	border: 2px solid variables.$color-secondary;
+	color: variables.$color-secondary;
+	border-radius: 8px;
+	padding: 0.4rem 1rem;
+	font-weight: 600;
+	outline: none;
+	transition: all 0.2s ease-in-out;
+
+	&::placeholder {
+		color: variables.$color-secondary;
+	}
+
+	&:hover {
+		cursor: pointer;
+	}
+}
+
+.select_bar_outlined option {
+	color: variables.$color-secondary;
+}
+
+.label_form {
+	color: variables.$color-secondary;
 }
