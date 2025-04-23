@@ -1,0 +1,12 @@
+@use "../variables";
+
+.form_header {
+	svg {
+		font-size: variables.$font-size-xxl;
+		color: variables.$color-primary;
+	}
+
+	svg:hover {
+		cursor: pointer;
+	}
+}

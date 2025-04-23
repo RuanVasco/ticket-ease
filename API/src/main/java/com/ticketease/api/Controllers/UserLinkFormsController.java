@@ -50,4 +50,15 @@ public class UserLinkFormsController {
         userLinkFormsService.favoriteForm(user, form);
         return ResponseEntity.ok("Favoritado com sucesso");
     }
+
+    @DeleteMapping("/favorite/{formId}")
+    public ResponseEntity<?> unfavorite(@PathVariable Long formId) {
+        User user = getAuthenticatedUser();
+
+        Form form = formRepository.findById(formId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Formulário não encontrado"));
+
+        userLinkFormsService.unfavoriteForm(user, form);
+        return ResponseEntity.ok("Desfavoritado com sucesso");
+    }
 }

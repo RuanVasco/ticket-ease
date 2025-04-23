@@ -60,6 +60,7 @@ public class UserLinkFormsService {
                 .toList();
     }
 
+    @Transactional
     public void favoriteForm(User user, Form form) {
         UserLinkFormsId id = new UserLinkFormsId(user.getId(), form.getId());
 
@@ -70,6 +71,15 @@ public class UserLinkFormsService {
             favorite.setUser(user);
             favorite.setForm(form);
             userFavoriteFormsRepository.save(favorite);
+        }
+    }
+
+    @Transactional
+    public void unfavoriteForm(User user, Form form) {
+        UserLinkFormsId id = new UserLinkFormsId(user.getId(), form.getId());
+
+        if (userFavoriteFormsRepository.existsById(id)) {
+            userFavoriteFormsRepository.deleteById(id);
         }
     }
 }

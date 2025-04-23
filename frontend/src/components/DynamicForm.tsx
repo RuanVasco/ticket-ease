@@ -11,6 +11,8 @@ import axiosInstance from "./AxiosConfig";
 import SelectDepartment from "./Fields/SelectDepartment";
 import AttachmentUploadInput from "./Fields/AttachmentUploadInput";
 import { FaRegStar, FaStar } from "react-icons/fa6";
+import "../assets/styles/components/_dynamicform.scss";
+import { useToggleFavorite } from "./UseToggleFavorite";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -22,7 +24,8 @@ interface Props {
     preview?: boolean;
     properties: TicketProperties;
     setProperties: React.Dispatch<React.SetStateAction<TicketProperties>>;
-    favorite?: boolean;
+    fav?: boolean;
+    onFavoriteChange?: () => void;
 }
 
 interface OptionType {
@@ -38,10 +41,16 @@ export const DynamicForm: React.FC<Props> = ({
     setFormData,
     properties,
     setProperties,
-    favorite = false
+    fav = false,
+    onFavoriteChange
 }) => {
     const [options, setOptions] = useState<OptionType[]>([]);
     const [selectedOptions, setSelectedOptions] = useState<MultiValue<OptionType>>([]);
+    const {
+        favorite,
+        toggleFavorite,
+        loading,
+    } = useToggleFavorite(Number(form.id), fav, preview, onFavoriteChange);
 
     const fetchUsers = async () => {
         try {
@@ -71,31 +80,20 @@ export const DynamicForm: React.FC<Props> = ({
         setProperties((prev) => ({ ...prev, [name]: value }));
     };
 
-    const setFavorite = async () => {
-        if (preview === true) {
-            return
-        }
-        try {
-            const res = await axiosInstance.post(`${API_BASE_URL}/users/me/favorite/${form.id}`);
-            if (res.status === 200) {
-                toast.success("Formulário favoritado com sucesso");
-            }
-        } catch (error) {
-            toast.error("Erro ao favoritar o formulário");
-        }
-    }
-
     return (
         <form onSubmit={preview ? (e) => e.preventDefault() : handleSubmit}>
-            <div className="d-flex align-items-center justify-content-between">
-                <h4 className="fw-bold mb-2 d-inline">{form.title}</h4>
-                <span onClick={() => setFavorite()}>
-                    {favorite ? (
-                        <FaStar />
-                    ) : (
-                        <FaRegStar />
-                    )}
-                </span>
+            <div className="d-flex align-items-center form_header">
+                <h4 className="fw-bold mb-0 me-2">{form.title}</h4>
+
+                <button
+                    type="button"
+                    className="btn p-0 bg-transparent border-0 align-middle"
+                    onClick={toggleFavorite}
+                    disabled={loading}
+                    aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
+                >
+                    {favorite ? <FaStar /> : <FaRegStar />}
+                </button>
             </div>
             <p className="text-muted">{form.description}</p>
 

@@ -51,16 +51,10 @@ const CreateTicket: React.FC = () => {
         }
     }
 
-    const fetchFavoriteForms = async () => {
-        try {
-            const res = await axiosInstance.get(`${API_BASE_URL}/users/me/favorite-forms`);
-            if (res.status === 200) {
-                setFavoriteForms(res.data);
-            }
-        } catch (error) {
-            console.error("Erro ao buscar formulários favoritos:", error);
-        }
-    }
+    const refreshFavorites = async () => {
+        const { data } = await axiosInstance.get("/users/me/favorite-forms");
+        setFavoriteForms(data);
+    };
 
     const fetchCategories = async (fatherId: string | null = null) => {
         try {
@@ -93,16 +87,12 @@ const CreateTicket: React.FC = () => {
     useEffect(() => {
         fetchCategories(null);
         fetchRecentForms();
-        fetchFavoriteForms();
+        refreshFavorites();
     }, []);
 
     useEffect(() => {
-        fetchFavoriteForms();
-    }, [currentForm]);
-
-    useEffect(() => {
         setCurrentFormFavorite(
-            favoriteForms.some(f => f.form.id === currentForm?.id)
+            favoriteForms.some((f) => f.form.id === currentForm?.id)
         );
     }, [favoriteForms, currentForm]);
 
@@ -284,48 +274,53 @@ const CreateTicket: React.FC = () => {
                     </ul>
                 </div>
                 <div className="col">
-                    {currentForm.fields && currentForm.fields.length != 0 ? (
-                        <DynamicForm
-                            form={currentForm}
-                            formData={formData}
-                            setFormData={setFormData}
-                            preview={false}
-                            handleSubmit={handleSubmit}
-                            properties={properties}
-                            setProperties={setProperties}
-                            favorite={currentFormFavorite}
-                        />
-                    ) : (
-                        <div className="d-flex flex-column justify-content-center align-items-center p-4">
-                            <div className="search_wrapper my-3">
-                                <input
-                                    type="text"
-                                    className="search_bar"
-                                    placeholder="Pesquisar por ajuda"
+                    <div className="w-80">
+                        {currentForm.fields && currentForm.fields.length != 0 ? (
+                            <div className="p-3">
+                                <DynamicForm
+                                    form={currentForm}
+                                    formData={formData}
+                                    setFormData={setFormData}
+                                    preview={false}
+                                    handleSubmit={handleSubmit}
+                                    properties={properties}
+                                    setProperties={setProperties}
+                                    fav={currentFormFavorite}
+                                    onFavoriteChange={refreshFavorites}
                                 />
-                                <FaSearch className="search_icon" />
                             </div>
-                            <div className="w-80 d-flex justify-content-center flex-column gap-5">
-                                {favoriteForms.length > 0 && (
-                                    <FormsShortCuts
-                                        icon={FaRegStar}
-                                        title={"Favoritos"}
-                                        forms={favoriteForms}
-                                        onFormClick={handleShortcutClick}
+                        ) : (
+                            <div className="d-flex flex-column justify-content-center align-items-center p-4">
+                                <div className="search_wrapper my-3">
+                                    <input
+                                        type="text"
+                                        className="search_bar"
+                                        placeholder="Pesquisar por ajuda"
                                     />
-                                )}
+                                    <FaSearch className="search_icon" />
+                                </div>
+                                <div className="d-flex justify-content-center flex-column gap-5">
+                                    {favoriteForms.length > 0 && (
+                                        <FormsShortCuts
+                                            icon={FaRegStar}
+                                            title={"Favoritos"}
+                                            forms={favoriteForms}
+                                            onFormClick={handleShortcutClick}
+                                        />
+                                    )}
 
-                                {recentForms.length > 0 && (
-                                    <FormsShortCuts
-                                        icon={FaClockRotateLeft}
-                                        title={"Recentes"}
-                                        forms={recentForms}
-                                        onFormClick={handleShortcutClick}
-                                    />
-                                )}
+                                    {recentForms.length > 0 && (
+                                        <FormsShortCuts
+                                            icon={FaClockRotateLeft}
+                                            title={"Recentes"}
+                                            forms={recentForms}
+                                            onFormClick={handleShortcutClick}
+                                        />
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
         </main>
