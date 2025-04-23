@@ -299,7 +299,7 @@ const CreateTicket: React.FC = () => {
                                     />
                                     <FaSearch className="search_icon" />
                                 </div>
-                                <div className="d-flex justify-content-center flex-column gap-5">
+                                <div className="w-100 d-flex justify-content-center flex-column gap-5">
                                     {favoriteForms.length > 0 && (
                                         <FormsShortCuts
                                             icon={FaRegStar}
