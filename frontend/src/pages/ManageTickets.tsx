@@ -2,43 +2,44 @@ import { FaChartPie, FaList, FaListCheck } from "react-icons/fa6";
 import TableTicket from "../components/TableTicket";
 import React, { useState } from "react";
 import TicketApproval from "../components/ManageTicket/TicketApproval";
+import "../assets/styles/pages/_manageticket.scss";
 
 const ManageTickets: React.FC = () => {
     const [viewMode, setViewMode] = useState("list");
 
     return (
-        <main className="row" style={{ minHeight: "100vh" }}>
-            <nav className="col-2 header-style border-top">
-                <ul className="p-3 nav flex-column">
+        <main className="row container-fluid">
+            <nav className="col-2 sidebar">
+                <ul className="p-3 nav flex-column gap-2">
                     <li className="nav-item" onClick={() => setViewMode("list")}>
-                        <span
-                            className={`nav-link text-white fw-semibold d-flex align-items-center ${viewMode === "list" ? "active bg-white bg-opacity-25 rounded" : ""}`}
+                        <button
+                            className={`nav-link fw-semibold d-flex align-items-center ${viewMode === "list" ? "active" : ""}`}
                             style={{ cursor: "pointer" }}
                         >
                             <FaList className="me-2" /> Listar
-                        </span>
+                        </button>
                     </li>
                     <li className="nav-item" onClick={() => setViewMode("validate")}>
-                        <span
-                            className={`nav-link text-white fw-semibold d-flex align-items-center ${viewMode === "validate" ? "active bg-white bg-opacity-25 rounded" : ""}`}
+                        <button
+                            className={`nav-link fw-semibold d-flex align-items-center ${viewMode === "validate" ? "active" : ""}`}
                             style={{ cursor: "pointer" }}
                         >
                             <FaListCheck className="me-2" /> Aprovar
-                        </span>
+                        </button>
                     </li>
 
                     <li className="nav-item" onClick={() => setViewMode("dashboard")}>
-                        <span
-                            className={`nav-link text-white fw-semibold d-flex align-items-center ${viewMode === "dashboard" ? "active bg-white bg-opacity-25 rounded" : ""}`}
+                        <button
+                            className={`nav-link fw-semibold d-flex align-items-center ${viewMode === "dashboard" ? "active" : ""}`}
                             style={{ cursor: "pointer" }}
                         >
                             <FaChartPie className="me-2" /> Dashboard
-                        </span>
+                        </button>
                     </li>
                 </ul>
             </nav>
 
-            <div className="col py-4 px-5">
+            <div className="col p-3">
                 {viewMode === "list" && <TableTicket viewMode="edit" />}
                 {viewMode === "validate" && <TicketApproval />}
                 {viewMode === "dashboard" && <p>📊 Painel de estatísticas em construção</p>}

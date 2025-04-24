@@ -291,7 +291,7 @@ const CreateTicket: React.FC = () => {
                             </div>
                         ) : (
                             <div className="d-flex flex-column justify-content-center align-items-center p-4">
-                                <div className="search_wrapper my-3 w-75">
+                                <div className="search_wrapper mt-3 w-75">
                                     <input
                                         type="text"
                                         className="search_bar"
@@ -299,7 +299,7 @@ const CreateTicket: React.FC = () => {
                                     />
                                     <FaSearch className="search_icon" />
                                 </div>
-                                <div className="w-100 d-flex justify-content-center flex-column gap-5">
+                                <div className="mt-3 w-100 d-flex justify-content-center flex-column gap-5">
                                     {favoriteForms.length > 0 && (
                                         <FormsShortCuts
                                             icon={FaRegStar}

@@ -1,4 +1,3 @@
 package com.ticketease.api.DTO;
 
-public record CargoDTO(String name) {
-}
+public record CargoDTO(String name) {}

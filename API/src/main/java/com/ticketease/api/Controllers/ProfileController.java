@@ -4,6 +4,7 @@ import com.ticketease.api.DTO.RoleDTO;
 import com.ticketease.api.Entities.Role;
 import com.ticketease.api.Repositories.RoleRepository;
 import jakarta.transaction.Transactional;
+import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,89 +12,87 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
-
 @RestController
 @RequestMapping("profiles")
 public class ProfileController {
 
-    @Autowired
-    private RoleRepository roleRepository;
+  @Autowired private RoleRepository roleRepository;
 
-    @GetMapping("/")
-    public ResponseEntity<?> getAll() {
-        return ResponseEntity.ok(roleRepository.findAll());
+  @GetMapping("/")
+  public ResponseEntity<?> getAll() {
+    return ResponseEntity.ok(roleRepository.findAll());
+  }
+
+  @GetMapping("/pageable")
+  public ResponseEntity<Page<Role>> getAllPageable(Pageable pageable) {
+    Page<Role> roles = roleRepository.findAll(pageable);
+
+    return ResponseEntity.ok(roles);
+  }
+
+  @GetMapping("/{profileId}")
+  public ResponseEntity<?> getProfile(@PathVariable Long profileId) {
+    Optional<Role> optionalRole = roleRepository.findById(profileId);
+
+    if (optionalRole.isEmpty()) {
+      return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/pageable")
-    public ResponseEntity<Page<Role>> getAllPageable(Pageable pageable) {
-        Page<Role> roles = roleRepository.findAll(pageable);
+    Role profile = optionalRole.get();
+    return ResponseEntity.ok(profile);
+  }
 
-        return ResponseEntity.ok(roles);
+  @DeleteMapping("/{profileId}")
+  public ResponseEntity<?> deleteProfile(@PathVariable Long profileId) {
+    Optional<Role> optionalRole = roleRepository.findById(profileId);
+
+    if (optionalRole.isEmpty()) {
+      return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/{profileId}")
-    public ResponseEntity<?> getProfile(@PathVariable Long profileId) {
-        Optional<Role> optionalRole = roleRepository.findById(profileId);
+    Role profile = optionalRole.get();
+    roleRepository.deleteById(profile.getId());
+    return ResponseEntity.ok().build();
+  }
 
-        if (optionalRole.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+  @PutMapping("/{profileId}")
+  @Transactional
+  public ResponseEntity<?> updateProfile(
+      @PathVariable Long profileId, @RequestBody RoleDTO roleDTO) {
+    Optional<Role> optionalRole = roleRepository.findById(profileId);
 
-        Role profile = optionalRole.get();
-        return ResponseEntity.ok(profile);
+    if (optionalRole.isEmpty()) {
+      return ResponseEntity.notFound().build();
     }
 
-    @DeleteMapping("/{profileId}")
-    public ResponseEntity<?> deleteProfile(@PathVariable Long profileId) {
-        Optional<Role> optionalRole = roleRepository.findById(profileId);
+    Role existingProfile = optionalRole.get();
 
-        if (optionalRole.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+    String roleName = roleDTO.name().toUpperCase();
+    roleName = roleName.startsWith("ROLE_") ? roleName : "ROLE_" + roleName;
 
-        Role profile = optionalRole.get();
-        roleRepository.deleteById(profile.getId());
-        return ResponseEntity.ok().build();
+    existingProfile.setName(roleName);
+    existingProfile.setPermissions(roleDTO.permissions());
+
+    roleRepository.save(existingProfile);
+    return ResponseEntity.ok(existingProfile);
+  }
+
+  @PostMapping
+  @Transactional
+  public ResponseEntity<Role> createProfile(@RequestBody RoleDTO roleDTO) {
+    if (roleDTO.name() == null || roleDTO.permissions() == null) {
+      return ResponseEntity.badRequest().build();
     }
 
-    @PutMapping("/{profileId}")
-    @Transactional
-    public ResponseEntity<?> updateProfile(@PathVariable Long profileId, @RequestBody RoleDTO roleDTO) {
-        Optional<Role> optionalRole = roleRepository.findById(profileId);
+    String roleName = roleDTO.name().toUpperCase();
+    roleName = roleName.startsWith("ROLE_") ? roleName : "ROLE_" + roleName;
 
-        if (optionalRole.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+    Role role = new Role();
+    role.setName(roleName);
+    role.setPermissions(roleDTO.permissions());
 
-        Role existingProfile = optionalRole.get();
+    Role savedProfile = roleRepository.save(role);
 
-        String roleName = roleDTO.name().toUpperCase();
-        roleName = roleName.startsWith("ROLE_") ? roleName : "ROLE_" + roleName;
-
-        existingProfile.setName(roleName);
-        existingProfile.setPermissions(roleDTO.permissions());
-
-        roleRepository.save(existingProfile);
-        return ResponseEntity.ok(existingProfile);
-    }
-
-    @PostMapping
-    @Transactional
-    public ResponseEntity<Role> createProfile(@RequestBody RoleDTO roleDTO) {
-        if (roleDTO.name() == null || roleDTO.permissions() == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        String roleName = roleDTO.name().toUpperCase();
-        roleName = roleName.startsWith("ROLE_") ? roleName : "ROLE_" + roleName;
-
-        Role role = new Role();
-        role.setName(roleName);
-        role.setPermissions(roleDTO.permissions());
-
-        Role savedProfile = roleRepository.save(role);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedProfile);
-    }
+    return ResponseEntity.status(HttpStatus.CREATED).body(savedProfile);
+  }
 }

@@ -167,7 +167,7 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
 
     return (
         <div>
-            <div className="d-flex align-items-center justify-content-between my-3 floating-box">
+            <div className="d-flex align-items-center justify-content-between mt-3 mb-4 floating-box">
                 <div className="d-flex align-items-center justify-content-start gap-2">
                     <div>
                         <ItemsPerPage onPageSizeChange={handlePageSizeChange} pageSize={pageSize} />

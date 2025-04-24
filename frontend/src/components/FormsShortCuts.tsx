@@ -16,7 +16,7 @@ type FormsShortCutsProps = {
 
 const FormsShortCuts = ({ icon: Icon, title, forms, onFormClick }: FormsShortCutsProps) => {
     return (
-        <div>
+        <div className="floating-box">
             <div className="shortcut_title mb-2">
                 <Icon />
                 {title}

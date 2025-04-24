@@ -9,16 +9,15 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Option {
-    private String label;
+  private String label;
 
-    @Column(name = "option_value")
-    private String value;
+  @Column(name = "option_value")
+  private String value;
 
-    public Option(String label, String value) {
-        this.setLabel(label);
-        this.setValue(value);
-    }
+  public Option(String label, String value) {
+    this.setLabel(label);
+    this.setValue(value);
+  }
 
-    public Option() {
-    }
+  public Option() {}
 }

@@ -7,19 +7,18 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name="cargos")
+@Table(name = "cargos")
 public class Cargo {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(unique = true, nullable = false)
-    private String name;
+  @Column(unique = true, nullable = false)
+  private String name;
 
-    public Cargo(String name) {
-        this.name = name;
-    }
+  public Cargo(String name) {
+    this.name = name;
+  }
 
-    public Cargo() {
-    }
+  public Cargo() {}
 }

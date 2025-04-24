@@ -5,6 +5,7 @@
 	overflow-x: auto;
 	-webkit-overflow-scrolling: touch;
 	border-radius: 8px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .custom_table {
@@ -16,7 +17,7 @@
 	font-size: v.$font-size-base;
 
 	thead {
-		background: v.$color-tertiary;
+		background: v.$color-primary;
 		color: v.$color-white;
 
 		th {
@@ -104,6 +105,6 @@ th.sortable {
 }
 
 .custom_table tbody tr:focus-within {
-	outline: 2px solid v.$color-dark-yellow;
+	outline: 2px solid v.$color-secondary;
 	outline-offset: -2px;
 }

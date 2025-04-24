@@ -9,23 +9,21 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name="units")
+@Table(name = "units")
 @Getter
 public class Unit {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	@Setter
-    private String name;
+  @Setter private String name;
 
-	@Setter
-    private String address;
-	
-	public Unit() {}
-	
-	public Unit(String name, String address) {
-		this.name = name;
-		this.address = address;
-    }
+  @Setter private String address;
+
+  public Unit() {}
+
+  public Unit(String name, String address) {
+    this.name = name;
+    this.address = address;
+  }
 }
