@@ -3,7 +3,7 @@ import PendingTicketsTable from "./PendingTicketsTable";
 import { toast } from "react-toastify";
 import axiosInstance from "../AxiosConfig";
 import { Ticket } from "../../types/Ticket";
-import ItemsPerPage from "../ItemsPerPage";
+import ItemsPerPage from "../Common/ItemsPerPage";
 import Pagination from "../Pagination";
 import { Modal } from "bootstrap";
 import TicketDetails from "../../pages/TicketDetails";

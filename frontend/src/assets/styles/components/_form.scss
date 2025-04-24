@@ -74,13 +74,8 @@
 	color: variables.$color-secondary;
 	border-radius: 8px;
 	padding: 0.4rem 1rem;
-	font-weight: 600;
 	outline: none;
 	transition: all 0.2s ease-in-out;
-
-	&::placeholder {
-		color: variables.$color-secondary;
-	}
 
 	&:hover {
 		cursor: pointer;

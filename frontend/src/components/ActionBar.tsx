@@ -3,7 +3,7 @@ import axios from "axios";
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { FaPlus, FaMinus } from "react-icons/fa6";
 
-import ItemsPerPage from "./ItemsPerPage";
+import ItemsPerPage from "./Common/ItemsPerPage";
 
 interface ActionBarProps {
     modalTargetId?: string;

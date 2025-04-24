@@ -10,16 +10,13 @@ interface SelectInputProps {
 const SelectInput: React.FC<SelectInputProps> = ({ value, label, required = false, disabled = false, options, onChange }) => {
     return (
         <div>
-            <label className="form-label">
-                {label} {required && <span className="text-danger">*</span>}
-            </label>
             <select
-                className="form-select"
+                className={`select_bar_outlined`}
                 value={value}
                 disabled={disabled}
                 onChange={(e) => onChange(e.target.value)}
             >
-                <option value="">Selecione...</option>
+                <option value="">{label} {required ? " *" : ""}</option>
                 {options.map((opt) => (
                     <option key={opt.value} value={opt.value}>
                         {opt.label}

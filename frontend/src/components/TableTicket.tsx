@@ -3,14 +3,17 @@ import { Link } from "react-router-dom";
 
 import axiosInstance from "./AxiosConfig";
 import DateFormatter from "./Util/DateFormatter";
-import ItemsPerPage from "./ItemsPerPage";
+import ItemsPerPage from "./Common/ItemsPerPage";
 import Pagination from "./Pagination";
 
 import "../assets/styles/components/_form.scss";
+import "../assets/styles/components/_table.scss";
 import { Department } from "../types/Department";
 import { Ticket } from "../types/Ticket";
 import { StatusEnum, StatusLabels } from "../enums/StatusEnum";
 import { FaSearch } from "react-icons/fa";
+import SelectStatus from "./Common/SelectStatus";
+import SelectDepartment from "./Fields/SelectDepartment";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -23,7 +26,7 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
     const [currentPage, setCurrentPage] = useState<number>(0);
     const [totalPages, setTotalPages] = useState<number>(1);
     const [pageSize, setPageSize] = useState<number>(10);
-    const [status, setStatus] = useState<StatusEnum | null>(StatusEnum.NEW);
+    const [status, setStatus] = useState<StatusEnum | null>(null);
     const [noResultsMessage, setNoResultsMessage] = useState<string>("");
     const [departments, setDepartments] = useState<Department[]>([]);
     const [department, setDepartment] = useState<Department>();
@@ -132,12 +135,6 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
         setCurrentPage(0);
     };
 
-    const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selected = departments.find((dep) => Number(dep.id) === Number(e.target.value));
-        setDepartment(selected);
-        setCurrentPage(0);
-    };
-
     const handlePageChange = (page: number) => setCurrentPage(page);
 
     const handlePageSizeChange = (size: number) => {
@@ -147,44 +144,33 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
 
     return (
         <div>
-            <div className="row align-items-center my-3">
-                <div className="col d-flex align-items-end">
-                    <ItemsPerPage onPageSizeChange={handlePageSizeChange} pageSize={pageSize} />
-                    <div className="ms-3">
-                        <label htmlFor="statusSelect" className="label_form">Status</label>
-                        <select
-                            value={status || ""}
-                            onChange={(e) => handleStatusChange(e.target.value)}
+            <div className="d-flex align-items-center justify-content-between my-3 floating-box">
+                <div className="d-flex align-items-center justify-content-start gap-2">
+                    <div>
+                        <ItemsPerPage onPageSizeChange={handlePageSizeChange} pageSize={pageSize} />
+                    </div>
+                    <div>
+                        <SelectStatus
+                            status={status}
+                            onStatusChange={handleStatusChange}
                             className="select_bar_outlined"
-                            id="statusSelect"
-                        >
-                            <option value="">Todos</option>
-                            {Object.values(StatusEnum).map((statusKey) => (
-                                <option key={statusKey} value={statusKey}>
-                                    {StatusLabels[statusKey]}
-                                </option>
-                            ))}
-                        </select>
+                        />
                     </div>
                     {viewMode === "edit" && departments.length > 1 && (
-                        <div className="ms-3">
-                            <label htmlFor="departmentSelect" className="label_form">Departamento</label>
-                            <select
+                        <div>
+                            <SelectDepartment
                                 value={department?.id || ""}
-                                onChange={handleDepartmentChange}
-                                className="select_bar_outlined"
-                                id="departmentSelect"
-                            >
-                                {departments.map((dep) => (
-                                    <option key={dep.id} value={dep.id ?? ""}>
-                                        {dep.name}
-                                    </option>
-                                ))}
-                            </select>
+                                onChange={(id) => {
+                                    const selected = departments.find((dep) => String(dep.id) === id);
+                                    setDepartment(selected);
+                                    setCurrentPage(0);
+                                }}
+                                scope="user"
+                            />
                         </div>
                     )}
                 </div>
-                <div className="col-5">
+                <div>
                     <div className="search_wrapper">
                         <input
                             type="text"
@@ -196,51 +182,53 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                     </div>
                 </div>
             </div>
-            <table className="w-100 table table-custom table-hover">
-                <thead>
-                    <tr>
-                        {columns.map((column, index) => (
-                            <th key={index}>{column}</th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.length === 0 && noResultsMessage ? (
+            <div className="table-responsive">
+                <table className="custom_table">
+                    <thead>
                         <tr>
-                            <td colSpan={columns.length} className="text-center">
-                                {noResultsMessage}
-                            </td>
+                            {columns.map((column, index) => (
+                                <th key={index}>{column}</th>
+                            ))}
                         </tr>
-                    ) : (
-                        data.map((item, index) => (
-                            <tr key={index}>
-                                <td>
-                                    <Link
-                                        to={`/ticket/${item.id}`}
-                                        className="fw-semibold text-decoration-underline"
-                                    >
-                                        {item.id}
-                                    </Link>
+                    </thead>
+                    <tbody>
+                        {data.length === 0 && noResultsMessage ? (
+                            <tr>
+                                <td colSpan={columns.length} className="text-center">
+                                    {noResultsMessage}
                                 </td>
-                                <td>
-                                    <Link
-                                        to={`/ticket/${item.id}`}
-                                        className="fw-semibold text-decoration-underline"
-                                    >
-                                        {item.form.title}
-                                    </Link>
-                                </td>
-                                <td>{item.form.ticketCategory.name}</td>
-                                <td>{item.properties.status ? StatusLabels[item.properties.status] : "Status desconhecido"}</td>
-                                <td>{item.properties.urgency}</td>
-                                <td>{DateFormatter(item.properties.createdAt || "")}</td>
-                                <td>{DateFormatter(item.properties.updatedAt || "")}</td>
-                                {viewMode === "edit" && <td>{item.properties.user?.name || ""}</td>}
                             </tr>
-                        ))
-                    )}
-                </tbody>
-            </table>
+                        ) : (
+                            data.map((item, index) => (
+                                <tr key={index}>
+                                    <td>
+                                        <Link
+                                            to={`/ticket/${item.id}`}
+                                            className="fw-semibold text-decoration-underline"
+                                        >
+                                            {item.id}
+                                        </Link>
+                                    </td>
+                                    <td>
+                                        <Link
+                                            to={`/ticket/${item.id}`}
+                                            className="fw-semibold text-decoration-underline"
+                                        >
+                                            {item.form.title}
+                                        </Link>
+                                    </td>
+                                    <td>{item.form.ticketCategory.name}</td>
+                                    <td>{item.properties.status ? StatusLabels[item.properties.status] : "Status desconhecido"}</td>
+                                    <td>{item.properties.urgency}</td>
+                                    <td>{DateFormatter(item.properties.createdAt || "")}</td>
+                                    <td>{DateFormatter(item.properties.updatedAt || "")}</td>
+                                    {viewMode === "edit" && <td>{item.properties.user?.name || ""}</td>}
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
             <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
