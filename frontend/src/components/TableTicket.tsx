@@ -40,7 +40,7 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
         { label: "Categoria", field: "form.ticketCategory.name" },
         { label: "Status", field: "status" },
         { label: "Urgência", field: "urgency" },
-        { label: "Data de Criação", field: "createdAt" },
+        { label: "Criação", field: "createdAt" },
         { label: "Última Atualização", field: "updatedAt" },
     ];
 
@@ -78,8 +78,13 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                         : `${API_BASE_URL}/tickets/search/user`;
             } else {
                 if (viewMode === "edit") {
-                    if (!department) return;
-                    url = `${API_BASE_URL}/ticket/by-department/${department.id}`;
+
+                    if (!department) {
+                        url = `${API_BASE_URL}/ticket/managed`;
+                    } else {
+                        url = `${API_BASE_URL}/ticket/by-department/${department.id}`;
+                    }
+
                 } else {
                     url = `${API_BASE_URL}/ticket/my-tickets`;
                 }
@@ -116,13 +121,6 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
     }, [viewMode]);
 
     useEffect(() => {
-        if (departments.length > 0 && !department) {
-            setDepartment(departments[0]);
-        }
-    }, [departments]);
-
-    useEffect(() => {
-        if (viewMode === "edit" && !department) return;
         fetchData();
     }, [currentPage, pageSize, status, department, searchQuery, sortField, sortDir]);
 

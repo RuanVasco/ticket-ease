@@ -141,6 +141,27 @@ public class TicketService {
         return filterAndPaginate(tickets, department, user, pageable);
     }
 
+    public void approveOrReject(Ticket ticket, boolean approved, User approver) {
+        if (!ticket.getStatus().equals(StatusEnum.PENDING_APPROVAL)) {
+            throw new IllegalStateException("O ticket não está pendente de aprovação.");
+        }
+
+        ticket.setStatus(approved ? StatusEnum.NEW : StatusEnum.CANCELED);
+        ticket.setApprovalDate(new Date());
+        ticket.setApprovedBy(approver);
+        ticket.setUpdatedAt(new Date());
+
+        ticketRepository.save(ticket);
+
+        Set<User> relatedUsers = getRelatedUsers(ticket);
+        String notificationContent = "Ticket " + ticket.getId() + " " + (approved ? "aprovado" : "negado");
+
+        for (User targetUser : relatedUsers) {
+            if (approver.equals(targetUser)) continue;
+            notificationService.createNotification(targetUser, ticket.getId(), "Message", notificationContent);
+        }
+    }
+
     private Page<Ticket> filterAndPaginate(
             Collection<Ticket> tickets,
             Department department,
@@ -163,26 +184,5 @@ public class TicketService {
 
 
         return new PageImpl<>(pageContent, pageable, filteredList.size());
-    }
-
-    public void approveOrReject(Ticket ticket, boolean approved, User approver) {
-        if (!ticket.getStatus().equals(StatusEnum.PENDING_APPROVAL)) {
-            throw new IllegalStateException("O ticket não está pendente de aprovação.");
-        }
-
-        ticket.setStatus(approved ? StatusEnum.NEW : StatusEnum.CANCELED);
-        ticket.setApprovalDate(new Date());
-        ticket.setApprovedBy(approver);
-        ticket.setUpdatedAt(new Date());
-
-        ticketRepository.save(ticket);
-
-        Set<User> relatedUsers = getRelatedUsers(ticket);
-        String notificationContent = "Ticket " + ticket.getId() + " " + (approved ? "aprovado" : "negado");
-
-        for (User targetUser : relatedUsers) {
-            if (approver.equals(targetUser)) continue;
-            notificationService.createNotification(targetUser, ticket.getId(), "Message", notificationContent);
-        }
     }
 }

@@ -1,5 +1,6 @@
 package com.ticketease.api.Repositories;
 
+import com.ticketease.api.Entities.Department;
 import com.ticketease.api.Entities.Ticket;
 import com.ticketease.api.Enums.StatusEnum;
 import org.springframework.data.domain.Page;

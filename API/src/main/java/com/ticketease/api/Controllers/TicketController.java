@@ -10,6 +10,7 @@ import com.ticketease.api.Services.DepartmentService;
 import com.ticketease.api.Services.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +22,8 @@ import org.springframework.data.domain.Pageable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("ticket")
@@ -88,6 +91,46 @@ public class TicketController {
         Page<TicketResponseDTO> ticketsDTOPage = ticketsPage.map(TicketResponseDTO::from);
 
         return ResponseEntity.ok(ticketsDTOPage);
+    }
+
+    @GetMapping("/managed")
+    public ResponseEntity<Page<TicketResponseDTO>> getManagedTickets(
+            @RequestParam(value = "status", required = false) StatusEnum status,
+            Pageable pageable
+    ) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Set<Department> departments = user.getRoleBindings().stream()
+                .map(UserRoleDepartment::getDepartment)
+                .filter(dep -> user.hasPermission("MANAGE_TICKET", dep))
+                .collect(Collectors.toSet());
+
+        if (departments.isEmpty()) {
+            return ResponseEntity.ok(Page.empty(pageable));
+        }
+
+        List<Ticket> allTickets = ticketService.getTicketsByRelatedUser(user);
+
+        List<Ticket> filtered = allTickets.stream()
+                .filter(ticket -> {
+                    Department ticketDep = ticket
+                            .getDepartment();
+                    return departments.contains(ticketDep)
+                            && (status == null || ticket.getStatus() == status);
+                })
+                .toList();
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), filtered.size());
+        List<Ticket> pageContent = (start >= filtered.size()) ? List.of() : filtered.subList(start, end);
+
+        Page<TicketResponseDTO> resultPage = new PageImpl<>(
+                pageContent.stream().map(TicketResponseDTO::from).toList(),
+                pageable,
+                filtered.size()
+        );
+
+        return ResponseEntity.ok(resultPage);
     }
 
     @GetMapping("/{ticketId}")
