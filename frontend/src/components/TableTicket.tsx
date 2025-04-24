@@ -31,19 +31,24 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
     const [departments, setDepartments] = useState<Department[]>([]);
     const [department, setDepartment] = useState<Department>();
     const [searchQuery, setSearchQuery] = useState<string>("");
+    const [sortField, setSortField] = useState<string>("id");
+    const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
-    const columns: string[] = [
-        "ID",
-        "Assunto",
-        "Categoria",
-        "Status",
-        "Urgência",
-        "Data de Criação",
-        "Última Atualização",
+    const columnDefs = [
+        { label: "ID", field: "id" },
+        { label: "Assunto", field: "form.title" },
+        { label: "Categoria", field: "form.ticketCategory.name" },
+        { label: "Status", field: "status" },
+        { label: "Urgência", field: "urgency" },
+        { label: "Data de Criação", field: "createdAt" },
+        { label: "Última Atualização", field: "updatedAt" },
     ];
 
     if (viewMode === "edit") {
-        columns.push("Usuário");
+        columnDefs.push({
+            label: "Usuário",
+            field: "user.name",
+        });
     }
 
     const fetchUserDepartments = async () => {
@@ -60,6 +65,11 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
     const fetchData = async () => {
         try {
             let url = "";
+            const params: any = {
+                page: currentPage,
+                size: pageSize,
+                status,
+            };
 
             if (searchQuery.length >= 3) {
                 url =
@@ -73,13 +83,9 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                 } else {
                     url = `${API_BASE_URL}/ticket/my-tickets`;
                 }
-            }
 
-            const params: any = {
-                page: currentPage,
-                size: pageSize,
-                status,
-            };
+                params.sort = `${sortField},${sortDir}`;
+            }
 
             if (searchQuery.length >= 3) {
                 params.query = searchQuery;
@@ -118,7 +124,7 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
     useEffect(() => {
         if (viewMode === "edit" && !department) return;
         fetchData();
-    }, [currentPage, pageSize, status, department, searchQuery]);
+    }, [currentPage, pageSize, status, department, searchQuery, sortField, sortDir]);
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value;
@@ -140,6 +146,25 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
     const handlePageSizeChange = (size: number) => {
         setPageSize(size);
         setCurrentPage(0);
+    };
+
+    const renderHeader = (c: { label: string; field: string }) => {
+        const active = sortField === c.field;
+        const dirIcon = active && sortDir === "asc" ? "▲" : "▼";
+
+        return (
+            <th
+                key={c.field}
+                onClick={() => {
+                    if (active) setSortDir(sortDir === "asc" ? "desc" : "asc");
+                    else setSortField(c.field);
+                    setCurrentPage(0);
+                }}
+                style={{ cursor: "pointer" }}
+            >
+                {c.label} {active && dirIcon}
+            </th>
+        );
     };
 
     return (
@@ -185,18 +210,14 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
             <div className="table-responsive">
                 <table className="custom_table">
                     <thead>
-                        <tr>
-                            {columns.map((column, index) => (
-                                <th key={index}>{column}</th>
-                            ))}
-                        </tr>
+                        <tr>{columnDefs.map(renderHeader)}</tr>
                     </thead>
                     <tbody>
                         {data.length === 0 && noResultsMessage ? (
                             <tr>
-                                <td colSpan={columns.length} className="text-center">
+                                <th colSpan={columnDefs.length} className="text-center">
                                     {noResultsMessage}
-                                </td>
+                                </th>
                             </tr>
                         ) : (
                             data.map((item, index) => (
