@@ -9,19 +9,19 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MessageRequestDTO {
-  String text;
-  Boolean closeTicket;
-  Ticket ticket;
-  Date sentAt;
+	String text;
+	Boolean closeTicket;
+	Ticket ticket;
+	Date sentAt;
 
-  public MessageRequestDTO(String text, Boolean closeTicket) {
-    this.text = text;
-    this.closeTicket = closeTicket;
-  }
+	public MessageRequestDTO(String text, Boolean closeTicket) {
+		this.text = text;
+		this.closeTicket = closeTicket;
+	}
 
-  public MessageRequestDTO(Message message) {
-    this.text = message.getText();
-    this.ticket = message.getTicket();
-    this.sentAt = message.getSentAt();
-  }
+	public MessageRequestDTO(Message message) {
+		this.text = message.getText();
+		this.ticket = message.getTicket();
+		this.sentAt = message.getSentAt();
+	}
 }

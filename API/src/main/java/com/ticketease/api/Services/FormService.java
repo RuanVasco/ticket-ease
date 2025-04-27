@@ -14,35 +14,35 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class FormService {
 
-  private final FormRepository formRepository;
-  private final FormFieldRepository fieldRepository;
+	private final FormRepository formRepository;
+	private final FormFieldRepository fieldRepository;
 
-  public List<Form> getAllForms() {
-    return formRepository.findAll();
-  }
+	public List<Form> getAllForms() {
+		return formRepository.findAll();
+	}
 
-  public Optional<Form> getFormById(Long id) {
-    return formRepository.findById(id);
-  }
+	public Optional<Form> getFormById(Long id) {
+		return formRepository.findById(id);
+	}
 
-  @Transactional
-  public Form createForm(Form form) {
-    for (FormField field : form.getFields()) {
-      field.setForm(form);
-    }
+	@Transactional
+	public Form createForm(Form form) {
+		for (FormField field : form.getFields()) {
+			field.setForm(form);
+		}
 
-    return formRepository.save(form);
-  }
+		return formRepository.save(form);
+	}
 
-  public void deleteForm(Long id) {
-    formRepository.deleteById(id);
-  }
+	public void deleteForm(Long id) {
+		formRepository.deleteById(id);
+	}
 
-  public Form save(Form existingForm) {
-    return formRepository.save(existingForm);
-  }
+	public Form save(Form existingForm) {
+		return formRepository.save(existingForm);
+	}
 
-  public List<Form> findByTicketCategory(Long categoryId) {
-    return formRepository.findByTicketCategoryId(categoryId);
-  }
+	public List<Form> findByTicketCategory(Long categoryId) {
+		return formRepository.findByTicketCategoryId(categoryId);
+	}
 }

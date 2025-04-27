@@ -1,3 +1,4 @@
 package com.ticketease.api.DTO.FormDTO;
 
-public record FormFieldAnswerRequestDTO(Long fieldId, String value) {}
+public record FormFieldAnswerRequestDTO(Long fieldId, String value) {
+}

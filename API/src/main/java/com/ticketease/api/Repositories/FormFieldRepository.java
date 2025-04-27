@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FormFieldRepository extends JpaRepository<FormField, Long> {
-  List<FormField> findByForm(Form form);
+	List<FormField> findByForm(Form form);
 }

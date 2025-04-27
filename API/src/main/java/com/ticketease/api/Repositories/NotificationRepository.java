@@ -7,7 +7,7 @@ import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-  Set<Notification> findByUserOrderByCreatedAtDesc(User user);
+	Set<Notification> findByUserOrderByCreatedAtDesc(User user);
 
-  List<Notification> findByUserAndReadFalse(User user);
+	List<Notification> findByUserAndReadFalse(User user);
 }

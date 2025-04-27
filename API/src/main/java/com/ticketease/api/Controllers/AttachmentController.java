@@ -27,70 +27,58 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class AttachmentController {
 
-  private final TicketService ticketService;
-  private final AttachmentService attachmentService;
+	private final TicketService ticketService;
+	private final AttachmentService attachmentService;
 
-  @GetMapping("{attachmentName:.+}")
-  public ResponseEntity<?> getAttachment(
-      @PathVariable Long ticketId, @PathVariable String attachmentName) {
-    Ticket ticket =
-        ticketService
-            .findById(ticketId)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
+	@GetMapping("{attachmentName:.+}")
+	public ResponseEntity<?> getAttachment(@PathVariable Long ticketId, @PathVariable String attachmentName) {
+		Ticket ticket = ticketService.findById(ticketId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
 
-    Resource attachment = attachmentService.getAttachmentsByTicket(ticket, attachmentName);
+		Resource attachment = attachmentService.getAttachmentsByTicket(ticket, attachmentName);
 
-    String contentType = "application/octet-stream";
-    try {
-      contentType = Files.probeContentType(Paths.get(attachment.getFile().getAbsolutePath()));
-    } catch (IOException ignored) {
-    }
+		String contentType = "application/octet-stream";
+		try {
+			contentType = Files.probeContentType(Paths.get(attachment.getFile().getAbsolutePath()));
+		} catch (IOException ignored) {
+		}
 
-    return ResponseEntity.ok()
-        .contentType(MediaType.parseMediaType(contentType))
-        .header(
-            HttpHeaders.CONTENT_DISPOSITION,
-            "inline; filename=\"" + attachment.getFilename() + "\"")
-        .body(attachment);
-  }
+		return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
+				.header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + attachment.getFilename() + "\"")
+				.body(attachment);
+	}
 
-  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<?> uploadAttachments(
-      @PathVariable Long ticketId, MultipartHttpServletRequest request) {
-    User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<?> uploadAttachments(@PathVariable Long ticketId, MultipartHttpServletRequest request) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-    Ticket ticket =
-        ticketService
-            .findById(ticketId)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
+		Ticket ticket = ticketService.findById(ticketId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
 
-    if (!ticket.getUser().equals(user) && !ticket.canManage(user)) {
-      return new ResponseEntity<>(
-          "Acesso negado. Você não tem permissão para acessar esse ticket.", HttpStatus.FORBIDDEN);
-    }
+		if (!ticket.getUser().equals(user) && !ticket.canManage(user)) {
+			return new ResponseEntity<>("Acesso negado. Você não tem permissão para acessar esse ticket.",
+					HttpStatus.FORBIDDEN);
+		}
 
-    Map<String, String[]> params = request.getParameterMap();
+		Map<String, String[]> params = request.getParameterMap();
 
-    params.forEach(
-        (key, value) -> {
-          if (key.matches("fileAnswers\\[\\d+\\]\\.fieldId")) {
-            int index = Integer.parseInt(key.replaceAll("\\D", ""));
-            Long fieldId = Long.valueOf(value[0]);
+		params.forEach((key, value) -> {
+			if (key.matches("fileAnswers\\[\\d+\\]\\.fieldId")) {
+				int index = Integer.parseInt(key.replaceAll("\\D", ""));
+				Long fieldId = Long.valueOf(value[0]);
 
-            List<MultipartFile> files = request.getFiles("fileAnswers[" + index + "].files");
+				List<MultipartFile> files = request.getFiles("fileAnswers[" + index + "].files");
 
-            if (!files.isEmpty()) {
-              FormFieldFileAnswerDTO dto = new FormFieldFileAnswerDTO();
-              dto.setFieldId(fieldId);
-              dto.setFiles(files);
+				if (!files.isEmpty()) {
+					FormFieldFileAnswerDTO dto = new FormFieldFileAnswerDTO();
+					dto.setFieldId(fieldId);
+					dto.setFiles(files);
 
-              attachmentService.saveAttachments(dto, ticket);
-            }
-          }
-        });
+					attachmentService.saveAttachments(dto, ticket);
+				}
+			}
+		});
 
-    return ResponseEntity.ok().build();
-  }
+		return ResponseEntity.ok().build();
+	}
 }

@@ -6,12 +6,6 @@ import com.ticketease.api.Enums.UrgencyEnum;
 import java.util.Date;
 import java.util.List;
 
-public record TicketPropertiesResponseDTO(
-    List<UserResponseDTO> observers,
-    UrgencyEnum urgency,
-    Boolean receiveEmail,
-    StatusEnum status,
-    Date createdAt,
-    Date updatedAt,
-    Date closedAt,
-    UserResponseDTO user) {}
+public record TicketPropertiesResponseDTO(List<UserResponseDTO> observers, UrgencyEnum urgency, Boolean receiveEmail,
+		StatusEnum status, Date createdAt, Date updatedAt, Date closedAt, UserResponseDTO user) {
+}

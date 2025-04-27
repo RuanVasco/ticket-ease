@@ -9,29 +9,30 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Notification {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-  private String message;
-  private boolean read = false;
+	private String message;
+	private boolean read = false;
 
-  @ManyToOne
-  @JoinColumn(name = "user_id", nullable = false)
-  private User user;
+	@ManyToOne
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
 
-  private Long referenceId;
-  private String type;
+	private Long referenceId;
+	private String type;
 
-  private LocalDateTime createdAt = LocalDateTime.now();
+	private LocalDateTime createdAt = LocalDateTime.now();
 
-  public Notification() {}
+	public Notification() {
+	}
 
-  public Notification(User user, String message, Long referenceId, String type) {
-    this.user = user;
-    this.message = message;
-    this.referenceId = referenceId;
-    this.type = type;
-    this.read = false;
-  }
+	public Notification(User user, String message, Long referenceId, String type) {
+		this.user = user;
+		this.message = message;
+		this.referenceId = referenceId;
+		this.type = type;
+		this.read = false;
+	}
 }

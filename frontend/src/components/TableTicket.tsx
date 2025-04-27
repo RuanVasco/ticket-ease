@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 
 import axiosInstance from "./AxiosConfig";
 import DateFormatter from "./Util/DateFormatter";
@@ -19,14 +18,15 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 interface TableTicketProps {
     viewMode?: "readonly" | "edit";
+    onTicketSelect: (ticketId: Number) => void;
 }
 
-const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
+const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly", onTicketSelect }) => {
     const [data, setData] = useState<Ticket[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(0);
     const [totalPages, setTotalPages] = useState<number>(1);
     const [pageSize, setPageSize] = useState<number>(10);
-    const [status, setStatus] = useState<StatusEnum | null>(null);
+    const [status, setStatus] = useState<StatusEnum | null>(StatusEnum.NEW);
     const [noResultsMessage, setNoResultsMessage] = useState<string>("");
     const [departments, setDepartments] = useState<Department[]>([]);
     const [department, setDepartment] = useState<Department>();
@@ -213,7 +213,7 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                     <tbody>
                         {data.length === 0 && noResultsMessage ? (
                             <tr>
-                                <th colSpan={columnDefs.length} className="text-center">
+                                <th colSpan={columnDefs.length} className="text-center table-hint">
                                     {noResultsMessage}
                                 </th>
                             </tr>
@@ -221,20 +221,22 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
                             data.map((item, index) => (
                                 <tr key={index}>
                                     <td>
-                                        <Link
-                                            to={`/ticket/${item.id}`}
+                                        <span
+                                            onClick={() => onTicketSelect(item.id)}
                                             className="fw-semibold text-decoration-underline"
+                                            style={{ cursor: "pointer" }}
                                         >
                                             {item.id}
-                                        </Link>
+                                        </span>
                                     </td>
                                     <td>
-                                        <Link
-                                            to={`/ticket/${item.id}`}
-                                            className="fw-semibold text-decoration-underline"
+                                        <span
+                                            onClick={() => onTicketSelect(item.id)}
+                                            className="fw-semibold text-decoration-underline cursor-pointer"
+                                            style={{ cursor: "pointer" }}
                                         >
                                             {item.form.title}
-                                        </Link>
+                                        </span>
                                     </td>
                                     <td>{item.form.ticketCategory.name}</td>
                                     <td>{item.properties.status ? StatusLabels[item.properties.status] : "Status desconhecido"}</td>

@@ -18,68 +18,62 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserLinkFormsService {
 
-  private final UserRecentFormsRepository userRecentFormsRepository;
-  private final UserFavoriteFormsRepository userFavoriteFormsRepository;
+	private final UserRecentFormsRepository userRecentFormsRepository;
+	private final UserFavoriteFormsRepository userFavoriteFormsRepository;
 
-  @Transactional
-  public void registerRecentForm(User user, Form form) {
-    UserLinkFormsId compositeId = new UserLinkFormsId(user.getId(), form.getId());
+	@Transactional
+	public void registerRecentForm(User user, Form form) {
+		UserLinkFormsId compositeId = new UserLinkFormsId(user.getId(), form.getId());
 
-    UserRecentForms entry =
-        userRecentFormsRepository
-            .findById(compositeId)
-            .orElseGet(
-                () -> {
-                  UserRecentForms newEntry = new UserRecentForms();
-                  newEntry.setId(compositeId);
-                  newEntry.setUser(user);
-                  newEntry.setForm(form);
-                  return newEntry;
-                });
+		UserRecentForms entry = userRecentFormsRepository.findById(compositeId).orElseGet(() -> {
+			UserRecentForms newEntry = new UserRecentForms();
+			newEntry.setId(compositeId);
+			newEntry.setUser(user);
+			newEntry.setForm(form);
+			return newEntry;
+		});
 
-    entry.setAccessedAt(LocalDateTime.now());
-    userRecentFormsRepository.save(entry);
+		entry.setAccessedAt(LocalDateTime.now());
+		userRecentFormsRepository.save(entry);
 
-    List<UserRecentForms> allRecents =
-        userRecentFormsRepository.findByUserOrderByAccessedAtDesc(user);
-    if (allRecents.size() > 10) {
-      userRecentFormsRepository.deleteAll(allRecents.subList(10, allRecents.size()));
-    }
-  }
+		List<UserRecentForms> allRecents = userRecentFormsRepository.findByUserOrderByAccessedAtDesc(user);
+		if (allRecents.size() > 10) {
+			userRecentFormsRepository.deleteAll(allRecents.subList(10, allRecents.size()));
+		}
+	}
 
-  public List<UserFormLinkDTO> findTop10RecentByUserOrderByAccessedAtDesc(User user) {
-    List<UserRecentForms> userRecentForms =
-        userRecentFormsRepository.findTop10ByUserOrderByAccessedAtDesc(user);
+	public List<UserFormLinkDTO> findTop10RecentByUserOrderByAccessedAtDesc(User user) {
+		List<UserRecentForms> userRecentForms = userRecentFormsRepository.findTop10ByUserOrderByAccessedAtDesc(user);
 
-    return userRecentForms.stream().map(UserFormLinkDTO::fromUserRecentForms).toList();
-  }
+		return userRecentForms.stream().map(UserFormLinkDTO::fromUserRecentForms).toList();
+	}
 
-  public List<UserFormLinkDTO> findFavoriteByUser(User user) {
-    List<UserFavoriteForms> userFavoriteForms = userFavoriteFormsRepository.findByUser(user);
+	public List<UserFormLinkDTO> findFavoriteByUser(User user) {
+		List<UserFavoriteForms> userFavoriteForms = userFavoriteFormsRepository.findByUser(user);
 
-    return userFavoriteForms.stream().map(UserFormLinkDTO::fromUserFavoriteForms).toList();
-  }
+		return userFavoriteForms.stream().map(UserFormLinkDTO::fromUserFavoriteForms).toList();
+	}
 
-  @Transactional
-  public void favoriteForm(User user, Form form) {
-    UserLinkFormsId id = new UserLinkFormsId(user.getId(), form.getId());
+	@Transactional
+	public void favoriteForm(User user, Form form) {
+		UserLinkFormsId id = new UserLinkFormsId(user.getId(), form.getId());
 
-    boolean exists = userFavoriteFormsRepository.existsById(id);
-    if (!exists) {
-      UserFavoriteForms favorite = new UserFavoriteForms();
-      favorite.setId(id);
-      favorite.setUser(user);
-      favorite.setForm(form);
-      userFavoriteFormsRepository.save(favorite);
-    }
-  }
+		boolean exists = userFavoriteFormsRepository.existsById(id);
+		if (!exists) {
+			UserFavoriteForms favorite = new UserFavoriteForms();
+			favorite.setId(id);
+			favorite.setUser(user);
+			favorite.setForm(form);
+			userFavoriteFormsRepository.save(favorite);
+		}
+	}
 
-  @Transactional
-  public void unfavoriteForm(User user, Form form) {
-    UserLinkFormsId id = new UserLinkFormsId(user.getId(), form.getId());
+	@Transactional
+	public void unfavoriteForm(User user, Form form) {
+		UserLinkFormsId id = new UserLinkFormsId(user.getId(), form.getId());
 
-    if (userFavoriteFormsRepository.existsById(id)) {
-      userFavoriteFormsRepository.deleteById(id);
-    }
-  }
+		if (userFavoriteFormsRepository.existsById(id)) {
+			userFavoriteFormsRepository.deleteById(id);
+		}
+	}
 }

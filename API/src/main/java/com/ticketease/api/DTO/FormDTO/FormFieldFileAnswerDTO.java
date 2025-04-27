@@ -8,6 +8,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 public class FormFieldFileAnswerDTO {
-  private Long fieldId;
-  private List<MultipartFile> files;
+	private Long fieldId;
+	private List<MultipartFile> files;
 }

@@ -89,3 +89,23 @@
 .label_form {
 	color: variables.$color-secondary;
 }
+
+.input_text {
+	background-color: variables.$color-white;
+	border: 1px solid variables.$color-primary;
+	color: variables.$color-primary;
+	border-radius: 8px 0 0 8px;
+	padding: 0 1rem;
+	height: 40px;
+	font-size: variables.$font-size-base;
+	outline: none;
+	transition: all 0.2s ease-in-out;
+
+	&::placeholder {
+		color: variables.$color-primary;
+	}
+
+	&:focus {
+		background-color: variables.$color-light-gray;
+	}
+}

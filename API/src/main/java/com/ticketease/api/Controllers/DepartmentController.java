@@ -17,102 +17,109 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("departments")
 public class DepartmentController {
 
-  @Autowired DepartmentRepository departmentRepository;
+	@Autowired
+	DepartmentRepository departmentRepository;
 
-  @GetMapping("/")
-  public ResponseEntity<?> getAll() {
-    return ResponseEntity.ok(departmentRepository.findAll());
-  }
+	@GetMapping("/")
+	public ResponseEntity<?> getAll() {
+		return ResponseEntity.ok(departmentRepository.findAll());
+	}
 
-  @GetMapping("/pageable")
-  public ResponseEntity<Page<Department>> getAllPageable(Pageable pageable) {
-    Page<Department> department = departmentRepository.findAll(pageable);
-    return ResponseEntity.ok(department);
-  }
+	@GetMapping("/pageable")
+	public ResponseEntity<Page<Department>> getAllPageable(Pageable pageable) {
+		Page<Department> department = departmentRepository.findAll(pageable);
+		return ResponseEntity.ok(department);
+	}
 
-  @GetMapping("/{departmentID}")
-  public ResponseEntity<?> getDepartment(@PathVariable Long departmentID) {
-    Optional<Department> optionalDepartment = departmentRepository.findById(departmentID);
+	@GetMapping("/{departmentID}")
+	public ResponseEntity<?> getDepartment(@PathVariable Long departmentID) {
+		Optional<Department> optionalDepartment = departmentRepository.findById(departmentID);
 
-    if (optionalDepartment.isEmpty()) {
-      return ResponseEntity.notFound().build();
-    }
+		if (optionalDepartment.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
 
-    Department department = optionalDepartment.get();
-    return ResponseEntity.ok(department);
-  }
+		Department department = optionalDepartment.get();
+		return ResponseEntity.ok(department);
+	}
 
-  @GetMapping("/manager")
-  public ResponseEntity<?> getDepartmentsByManager() {
-    User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	@GetMapping("/manager")
+	public ResponseEntity<?> getDepartmentsByManager() {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-    List<Department> departmentList = departmentRepository.findAll();
+		List<Department> departmentList = departmentRepository.findAll();
 
-    List<Department> filtered =
-        departmentList.stream()
-            .filter(
-                department ->
-                    user.hasPermission("MANAGE_TICKET", department)
-                        || user.hasPermission("MANAGE_TICKET", null))
-            .toList();
+		List<Department> filtered = departmentList.stream()
+				.filter(department -> user.hasPermission("MANAGE_TICKET", department)
+						|| user.hasPermission("MANAGE_TICKET", null))
+				.toList();
 
-    return ResponseEntity.ok(filtered);
-  }
+		return ResponseEntity.ok(filtered);
+	}
 
-  @GetMapping("/receiveRequests")
-  public ResponseEntity<?> findByReceivesRequests(
-      @RequestParam(name = "receiveRequests") boolean receiveRequests) {
-    User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	@GetMapping("/approver")
+	public ResponseEntity<?> getDepartmentsByApprover() {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-    List<Department> departmentList = departmentRepository.findByReceivesRequests(receiveRequests);
+		List<Department> departmentList = departmentRepository.findAll();
 
-    List<Department> filteredDepartments =
-        departmentList.stream()
-            .filter(
-                department ->
-                    department != null && user.hasPermission("MANAGE_TICKET_CATEGORY", department))
-            .toList();
+		List<Department> filtered = departmentList.stream()
+				.filter(department -> user.hasPermission("APPROVE_TICKET", department)
+						|| user.hasPermission("APPROVE_TICKET", null))
+				.toList();
 
-    return ResponseEntity.ok(filteredDepartments);
-  }
+		return ResponseEntity.ok(filtered);
+	}
 
-  @PostMapping("/")
-  public ResponseEntity<?> createDepartment(@RequestBody DepartmentDTO departmentDTO) {
-    Department department =
-        new Department(
-            departmentDTO.name(), departmentDTO.receivesRequests(), departmentDTO.unit());
+	@GetMapping("/receiveRequests")
+	public ResponseEntity<?> findByReceivesRequests(@RequestParam(name = "receiveRequests") boolean receiveRequests) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-    departmentRepository.save(department);
+		List<Department> departmentList = departmentRepository.findByReceivesRequests(receiveRequests);
 
-    return ResponseEntity.ok().build();
-  }
+		List<Department> filteredDepartments = departmentList.stream()
+				.filter(department -> department != null && user.hasPermission("MANAGE_TICKET_CATEGORY", department))
+				.toList();
 
-  @DeleteMapping("/{departmentID}")
-  public ResponseEntity<?> deleteDepartment(@PathVariable Long departmentID) {
-    Optional<Department> optionalDepartment = departmentRepository.findById(departmentID);
+		return ResponseEntity.ok(filteredDepartments);
+	}
 
-    if (optionalDepartment.isEmpty()) {
-      return ResponseEntity.notFound().build();
-    }
-    departmentRepository.deleteById(departmentID);
-    return ResponseEntity.ok().build();
-  }
+	@PostMapping("/")
+	public ResponseEntity<?> createDepartment(@RequestBody DepartmentDTO departmentDTO) {
+		Department department = new Department(departmentDTO.name(), departmentDTO.receivesRequests(),
+				departmentDTO.unit());
 
-  @PutMapping("/{departmentID}")
-  public ResponseEntity<?> updateDepartment(
-      @PathVariable Long departmentID, @RequestBody DepartmentDTO departmentDTO) {
-    Optional<Department> optionalDepartment = departmentRepository.findById(departmentID);
+		departmentRepository.save(department);
 
-    if (optionalDepartment.isEmpty()) {
-      return ResponseEntity.notFound().build();
-    }
+		return ResponseEntity.ok().build();
+	}
 
-    Department department = optionalDepartment.get();
-    department.setName(departmentDTO.name());
-    department.setReceivesRequests(departmentDTO.receivesRequests());
-    department.setUnit(departmentDTO.unit());
-    departmentRepository.save(department);
+	@DeleteMapping("/{departmentID}")
+	public ResponseEntity<?> deleteDepartment(@PathVariable Long departmentID) {
+		Optional<Department> optionalDepartment = departmentRepository.findById(departmentID);
 
-    return ResponseEntity.ok().build();
-  }
+		if (optionalDepartment.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+		departmentRepository.deleteById(departmentID);
+		return ResponseEntity.ok().build();
+	}
+
+	@PutMapping("/{departmentID}")
+	public ResponseEntity<?> updateDepartment(@PathVariable Long departmentID,
+			@RequestBody DepartmentDTO departmentDTO) {
+		Optional<Department> optionalDepartment = departmentRepository.findById(departmentID);
+
+		if (optionalDepartment.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+
+		Department department = optionalDepartment.get();
+		department.setName(departmentDTO.name());
+		department.setReceivesRequests(departmentDTO.receivesRequests());
+		department.setUnit(departmentDTO.unit());
+		departmentRepository.save(department);
+
+		return ResponseEntity.ok().build();
+	}
 }

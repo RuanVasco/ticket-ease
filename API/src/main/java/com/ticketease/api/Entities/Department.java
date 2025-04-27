@@ -14,47 +14,52 @@ import lombok.Setter;
 @Entity
 @Table(name = "departments")
 public class Department {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-  @Setter private String name;
+	@Setter
+	private String name;
 
-  @Setter private boolean receivesRequests;
+	@Setter
+	private boolean receivesRequests;
 
-  @ManyToOne
-  @JoinColumn(name = "unit_id")
-  @Setter
-  private Unit unit;
+	@ManyToOne
+	@JoinColumn(name = "unit_id")
+	@Setter
+	private Unit unit;
 
-  @Getter
-  @OneToMany(mappedBy = "department", fetch = FetchType.EAGER)
-  @JsonManagedReference
-  @JsonIgnore
-  private Set<UserRoleDepartment> roleBindings = new HashSet<>();
+	@Getter
+	@OneToMany(mappedBy = "department", fetch = FetchType.EAGER)
+	@JsonManagedReference
+	@JsonIgnore
+	private Set<UserRoleDepartment> roleBindings = new HashSet<>();
 
-  public Department() {}
+	public Department() {
+	}
 
-  public Department(String name, boolean receivesRequests, Unit unit) {
-    this.name = name;
-    this.receivesRequests = receivesRequests;
-    this.unit = unit;
-  }
+	public Department(String name, boolean receivesRequests, Unit unit) {
+		this.name = name;
+		this.receivesRequests = receivesRequests;
+		this.unit = unit;
+	}
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    Department that = (Department) o;
-    return Objects.equals(id, that.id);
-  }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		Department that = (Department) o;
+		return Objects.equals(id, that.id);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(id);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
 
-  public Set<User> getUsers() {
-    return roleBindings.stream().map(UserRoleDepartment::getUser).collect(Collectors.toSet());
-  }
+	public Set<User> getUsers() {
+		return roleBindings.stream().map(UserRoleDepartment::getUser).collect(Collectors.toSet());
+	}
 }

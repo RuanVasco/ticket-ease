@@ -19,64 +19,63 @@ import org.springframework.stereotype.Service;
 @Service
 public class MessageService {
 
-  @Autowired MessageRepository messageRepository;
+	@Autowired
+	MessageRepository messageRepository;
 
-  private final TicketService ticketService;
-  private final SimpMessagingTemplate simpMessagingTemplate;
+	private final TicketService ticketService;
+	private final SimpMessagingTemplate simpMessagingTemplate;
 
-  public MessageService(TicketService ticketService, SimpMessagingTemplate simpMessagingTemplate) {
-    this.ticketService = ticketService;
-    this.simpMessagingTemplate = simpMessagingTemplate;
-  }
+	public MessageService(TicketService ticketService, SimpMessagingTemplate simpMessagingTemplate) {
+		this.ticketService = ticketService;
+		this.simpMessagingTemplate = simpMessagingTemplate;
+	}
 
-  public List<Message> getByTicketId(Long ticketId) {
-    return messageRepository.findByTicketId(ticketId);
-  }
+	public List<Message> getByTicketId(Long ticketId) {
+		return messageRepository.findByTicketId(ticketId);
+	}
 
-  public void sendTicketsId(User user) {
-    List<Ticket> tickets = ticketService.getTicketsByRelatedUser(user);
-    List<Long> ticketsId = new ArrayList<>();
+	public void sendTicketsId(User user) {
+		List<Ticket> tickets = ticketService.getTicketsByRelatedUser(user);
+		List<Long> ticketsId = new ArrayList<>();
 
-    for (Ticket ticket : tickets) {
-      if (!ticket.getUser().equals(user) && !ticket.canManage(user)) {
-        continue;
-      }
+		for (Ticket ticket : tickets) {
+			if (!ticket.getUser().equals(user) && !ticket.canManage(user)) {
+				continue;
+			}
 
-      ticketsId.add(ticket.getId());
-    }
+			ticketsId.add(ticket.getId());
+		}
 
-    simpMessagingTemplate.convertAndSendToUser(user.getUsername(), "/queue/tickets", ticketsId);
-  }
+		simpMessagingTemplate.convertAndSendToUser(user.getUsername(), "/queue/tickets", ticketsId);
+	}
 
-  public Message addMessage(Ticket ticket, User user, MessageRequestDTO messageRequestDTO)
-      throws IOException {
-    StatusEnum ticketStatus = ticket.getStatus();
+	public Message addMessage(Ticket ticket, User user, MessageRequestDTO messageRequestDTO) throws IOException {
+		StatusEnum ticketStatus = ticket.getStatus();
 
-    if (StatusEnum.RESOLVED.equals(ticket.getStatus())) {
-      ticket.setStatus(StatusEnum.NEW);
-    }
+		if (StatusEnum.RESOLVED.equals(ticket.getStatus())) {
+			ticket.setStatus(StatusEnum.NEW);
+		}
 
-    if (ticketStatus.equals(StatusEnum.NEW)
-        && (user != ticket.getUser() && ticket.canManage(user))) {
-      ticket.setStatus(StatusEnum.IN_PROGRESS);
-    }
+		if (ticketStatus.equals(StatusEnum.NEW) && (user != ticket.getUser() && ticket.canManage(user))) {
+			ticket.setStatus(StatusEnum.IN_PROGRESS);
+		}
 
-    if (Boolean.TRUE.equals(messageRequestDTO.getCloseTicket()) && ticket.canManage(user)) {
-      ticket.setStatus(StatusEnum.RESOLVED);
-    }
+		if (Boolean.TRUE.equals(messageRequestDTO.getCloseTicket()) && ticket.canManage(user)) {
+			ticket.setStatus(StatusEnum.RESOLVED);
+		}
 
-    Message message = new Message();
-    message.setText(messageRequestDTO.getText());
-    message.setUser(user);
-    message.setTicket(ticket);
-    message.setSentAt(new Date());
+		Message message = new Message();
+		message.setText(messageRequestDTO.getText());
+		message.setUser(user);
+		message.setTicket(ticket);
+		message.setSentAt(new Date());
 
-    messageRepository.save(message);
+		messageRepository.save(message);
 
-    return message;
-  }
+		return message;
+	}
 
-  public Page<Message> getByTicketId(Long ticketID, Pageable pageable) {
-    return messageRepository.findByTicketId(ticketID, pageable);
-  }
+	public Page<Message> getByTicketId(Long ticketID, Pageable pageable) {
+		return messageRepository.findByTicketId(ticketID, pageable);
+	}
 }

@@ -8,10 +8,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FormDTO {
-  private String title;
-  private String description;
-  private Long ticketCategoryId;
-  private List<Long> approvers;
-  private ApprovalModeEnum approvalMode;
-  private List<FormFieldDTO> fields;
+	private String title;
+	private String description;
+	private Long ticketCategoryId;
+	private List<Long> approvers;
+	private ApprovalModeEnum approvalMode;
+	private List<FormFieldDTO> fields;
 }

@@ -9,14 +9,14 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 public class TicketEaseApi {
 
-  public static void main(String[] args) {
-    SpringApplication.run(TicketEaseApi.class, args);
-  }
+	public static void main(String[] args) {
+		SpringApplication.run(TicketEaseApi.class, args);
+	}
 
-  @Bean
-  CommandLineRunner init(FileStorageService storageService) {
-    return (args) -> {
-      storageService.init();
-    };
-  }
+	@Bean
+	CommandLineRunner init(FileStorageService storageService) {
+		return (args) -> {
+			storageService.init();
+		};
+	}
 }

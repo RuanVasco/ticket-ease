@@ -10,8 +10,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FormRepository extends JpaRepository<Form, Long> {
-  List<Form> findByCreator(User creator);
+	List<Form> findByCreator(User creator);
 
-  @Query("SELECT f FROM Form f WHERE f.ticketCategory.id = :category_id")
-  List<Form> findByTicketCategoryId(@Param("category_id") Long categoryId);
+	@Query("SELECT f FROM Form f WHERE f.ticketCategory.id = :category_id")
+	List<Form> findByTicketCategoryId(@Param("category_id") Long categoryId);
 }

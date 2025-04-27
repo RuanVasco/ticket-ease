@@ -10,9 +10,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRecentFormsRepository extends JpaRepository<UserRecentForms, UserLinkFormsId> {
 
-  Optional<UserRecentForms> findByUserAndForm(User user, Form form);
+	Optional<UserRecentForms> findByUserAndForm(User user, Form form);
 
-  List<UserRecentForms> findByUserOrderByAccessedAtDesc(User user);
+	List<UserRecentForms> findByUserOrderByAccessedAtDesc(User user);
 
-  List<UserRecentForms> findTop10ByUserOrderByAccessedAtDesc(User user);
+	List<UserRecentForms> findTop10ByUserOrderByAccessedAtDesc(User user);
 }

@@ -6,7 +6,13 @@ import { Ticket } from "../../types/Ticket";
 import ItemsPerPage from "../Common/ItemsPerPage";
 import Pagination from "../Pagination";
 import { Modal } from "bootstrap";
-import TicketDetails from "../../pages/TicketDetails";
+import TicketDetails from "../../pages/TicketDetails_bkp";
+import SelectDepartment from "../Fields/SelectDepartment";
+import { Department } from "../../types/Department";
+import "../../assets/styles/components/_ticketapproval.scss";
+import { FaCheck } from "react-icons/fa6";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 const TicketApproval = () => {
     const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -15,10 +21,24 @@ const TicketApproval = () => {
     const [pageSize, setPageSize] = useState<number>(10);
     const [totalItems, setTotalItems] = useState<number>(0);
     const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+    const [departments, setDepartments] = useState<Department[]>([]);
+    const [department, setDepartment] = useState<Department>();
 
     useEffect(() => {
         fetchPendingTickets();
+        fetchUserDepartments();
     }, []);
+
+    const fetchUserDepartments = async () => {
+        try {
+            const res = await axiosInstance.get(`${API_BASE_URL}/departments/approver`);
+            if (res.status === 200 && res.data) {
+                setDepartments(res.data);
+            }
+        } catch (error) {
+            console.error("Erro ao buscar departamentos:", error);
+        }
+    };
 
     const fetchPendingTickets = async () => {
         try {
@@ -67,32 +87,56 @@ const TicketApproval = () => {
     };
 
     return (
-        <div>
-            <div className="d-flex align-items-center justify-content-between mb-4">
-                <h3 className="fw-semibold">Tickets Pendentes de Aprovação <span className="badge bg-secondary">{totalItems}</span></h3>
-                <ItemsPerPage onPageSizeChange={handlePageSizeChange} pageSize={pageSize} />
-            </div>
-
+        <div className="container-fluid">
             {totalItems <= 0 ? (
-                <div className="alert alert-success text-center fs-5 shadow-sm">
-                    Tudo certo por aqui!
+                <div className="floating-box pending-tickets-title fw-bold d-flex align-items-center justify-content-center mt-3">
+                    Sem tickets pendentes
+                    <FaCheck />
                 </div>
             ) : (
-                <PendingTicketsTable
-                    tickets={tickets}
-                    onApprove={(id) => handleApproval(id, true)}
-                    onReject={(id) => handleApproval(id, false)}
-                    onView={(id) => openTicketDetails(id)}
-                />
-            )}
+                <>
+                    <div className="d-flex align-items-center justify-content-between mt-3 mb-4 floating-box">
+                        <div className="d-flex align-items-center">
+                            <span className="pending-tickets-title fw-bold">
+                                Tickets Pendentes
+                                <span className="pending-tickets-amount">{totalItems}</span>
+                            </span>
+                        </div>
+                        <div className="d-flex align-items-center justify-content-start gap-2">
+                            <div>
+                                <ItemsPerPage onPageSizeChange={handlePageSizeChange} pageSize={pageSize} />
+                            </div>
+                            <div>
+                                <SelectDepartment
+                                    value={department?.id || ""}
+                                    onChange={(id) => {
+                                        const selected = departments.find((dep) => String(dep.id) === id);
+                                        setDepartment(selected);
+                                        setCurrentPage(0);
+                                    }}
+                                    scope="user"
+                                />
+                            </div>
+                        </div>
 
-            <div className="d-flex justify-content-center mt-4">
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={handlePageChange}
-                />
-            </div>
+                    </div>
+
+                    <PendingTicketsTable
+                        tickets={tickets}
+                        onApprove={(id) => handleApproval(id, true)}
+                        onReject={(id) => handleApproval(id, false)}
+                        onView={(id) => openTicketDetails(id)}
+                    />
+
+                    <div className="d-flex justify-content-center mt-4">
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={handlePageChange}
+                        />
+                    </div>
+                </>
+            )}
 
             <div className="modal fade" id="modal" tabIndex={-1} aria-hidden="true">
                 <div className="modal-dialog modal-xl">
@@ -113,6 +157,7 @@ const TicketApproval = () => {
                     </div>
                 </div>
             </div>
+
         </div>
     );
 };

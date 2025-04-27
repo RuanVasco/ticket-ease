@@ -48,6 +48,9 @@
 		td {
 			padding: 0.65rem 1rem;
 			line-height: 1.4;
+			overflow-wrap: break-word;
+			word-break: break-word;
+			white-space: normal;
 		}
 	}
 
@@ -104,7 +107,9 @@ th.sortable {
 	}
 }
 
-.custom_table tbody tr:focus-within {
-	outline: 2px solid v.$color-secondary;
-	outline-offset: -2px;
+.table-hint {
+	color: v.$color-primary;
+	font-weight: 600;
+	font-size: v.$font-size-lg;
+	padding: 20px 0;
 }

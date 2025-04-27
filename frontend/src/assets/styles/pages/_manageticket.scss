@@ -2,7 +2,7 @@
 
 .sidebar {
 	background-color: var.$color-secondary;
-	height: 93vh;
+	min-height: 93vh;
 
 	button {
 		color: var.$color-white;

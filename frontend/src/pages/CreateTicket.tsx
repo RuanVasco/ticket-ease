@@ -32,7 +32,7 @@ const CreateTicket: React.FC = () => {
     const [forms, setForms] = useState<Form[]>([]);
     const [formData, setFormData] = useState<Record<string, any>>({});
     const [categoryPath, setCategoryPath] = useState<TicketCategory[]>([]);
-    const [currentForm, setCurrentForm] = useState<Form>({} as Form);
+    const [currentForm, setCurrentForm] = useState<Form | null>(null);
     const [currentFormFavorite, setCurrentFormFavorite] = useState<boolean>(false);
     const [properties, setProperties] = useState<TicketProperties>(defaultProperties);
     const [recentForms, setRecentForms] = useState<FormPreview[]>([]);
@@ -103,7 +103,7 @@ const CreateTicket: React.FC = () => {
         setCategoryPath([...categoryPath, category]);
         fetchCategories(category.id);
         fetchForms(category.id);
-        setCurrentForm({} as Form);
+        setCurrentForm(null);
     };
 
     const handleFormClick = (form: Form) => {
@@ -113,10 +113,15 @@ const CreateTicket: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (!currentForm) {
+            toast.error("Selecione um formulário");
+            return;
+        }
+
         const files: { fieldId: number; files: any[] }[] = [];
 
         const ticketData = {
-            formId: currentForm.id,
+            formId: currentForm?.id,
             responses: [] as { fieldId: number; value: any }[],
             properties: {
                 observersId: properties.observers,
@@ -146,7 +151,7 @@ const CreateTicket: React.FC = () => {
                 files.length > 0 && handleSubmitFiles(res.data, files);
 
                 toast.success("Ticket criado");
-                navigate(`/ticket/${res.data}`);
+                navigate(`/tickets/${res.data}`);
             }
         } catch (error) {
             toast.error("Erro ao criar ticket");
@@ -195,14 +200,14 @@ const CreateTicket: React.FC = () => {
             setForms([]);
         }
 
-        setCurrentForm({} as Form);
+        setCurrentForm(null);
     };
 
     const handleShortcutClick = async (form: Form) => {
         try {
             setCategories([]);
             setForms([]);
-            setCurrentForm({} as Form);
+            setCurrentForm(null);
 
             const pathRes = await axiosInstance.get(`${API_BASE_URL}/ticket-category/path/${form.ticketCategory.id}`);
             if (pathRes.status === 200) {
@@ -240,7 +245,7 @@ const CreateTicket: React.FC = () => {
                         {forms.map((item) => (
                             <li
                                 key={item.id}
-                                className={`categories_item${currentForm.id === item.id ? " categories_item_selected" : ""}`}
+                                className={`categories_item${currentForm?.id === item.id ? " categories_item_selected" : ""}`}
                             >
                                 <div>
                                     <a
@@ -275,7 +280,7 @@ const CreateTicket: React.FC = () => {
                 </div>
                 <div className="col">
                     <div className="w-80">
-                        {currentForm.fields && currentForm.fields.length != 0 ? (
+                        {currentForm != null ? (
                             <div className="p-3">
                                 <DynamicForm
                                     form={currentForm}
@@ -291,7 +296,7 @@ const CreateTicket: React.FC = () => {
                             </div>
                         ) : (
                             <div className="d-flex flex-column justify-content-center align-items-center p-4">
-                                <div className="search_wrapper mt-3 w-75">
+                                <div className="search_wrapper my-2 mb-3 w-75">
                                     <input
                                         type="text"
                                         className="search_bar"

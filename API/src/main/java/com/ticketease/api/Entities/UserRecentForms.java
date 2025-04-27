@@ -11,18 +11,19 @@ import lombok.Setter;
 @Setter
 public class UserRecentForms {
 
-  @EmbeddedId private UserLinkFormsId id = new UserLinkFormsId();
+	@EmbeddedId
+	private UserLinkFormsId id = new UserLinkFormsId();
 
-  @MapsId("userId")
-  @ManyToOne(optional = false)
-  @JoinColumn(name = "user_id")
-  private User user;
+	@MapsId("userId")
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "user_id")
+	private User user;
 
-  @MapsId("formId")
-  @ManyToOne(optional = false)
-  @JoinColumn(name = "form_id")
-  private Form form;
+	@MapsId("formId")
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "form_id")
+	private Form form;
 
-  @Column(nullable = false)
-  private LocalDateTime accessedAt;
+	@Column(nullable = false)
+	private LocalDateTime accessedAt;
 }

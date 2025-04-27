@@ -18,42 +18,40 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
 
-  @Autowired TokenService tokenService;
+	@Autowired
+	TokenService tokenService;
 
-  @Autowired UserRepository userRepository;
+	@Autowired
+	UserRepository userRepository;
 
-  @Override
-  protected void doFilterInternal(
-      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-      throws ServletException, IOException {
-    if (request.getRequestURI().startsWith("/ws")) {
-      filterChain.doFilter(request, response);
-      return;
-    }
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
+		if (request.getRequestURI().startsWith("/ws")) {
+			filterChain.doFilter(request, response);
+			return;
+		}
 
-    String token = this.recoverToken(request);
-    if (token != null) {
-      String login = tokenService.validateToken(token);
-      User user =
-          userRepository
-              .findByEmail(login)
-              .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+		String token = this.recoverToken(request);
+		if (token != null) {
+			String login = tokenService.validateToken(token);
+			User user = userRepository.findByEmail(login)
+					.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-      var authentication =
-          new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-      SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
+			var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+		}
 
-    filterChain.doFilter(request, response);
-  }
+		filterChain.doFilter(request, response);
+	}
 
-  private String recoverToken(HttpServletRequest request) {
-    String authHeader = request.getHeader("Authorization");
+	private String recoverToken(HttpServletRequest request) {
+		String authHeader = request.getHeader("Authorization");
 
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-      return null;
-    }
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+			return null;
+		}
 
-    return authHeader.substring(7);
-  }
+		return authHeader.substring(7);
+	}
 }

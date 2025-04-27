@@ -175,9 +175,9 @@
 				</executions>
 				<configuration>
 					<java>
-						<googleJavaFormat>
-							<version>1.17.0</version>
-						</googleJavaFormat>
+						<eclipse>
+							<file>${basedir}/eclipse-java-formatter.xml</file>
+						</eclipse>
 					</java>
 				</configuration>
 			</plugin>

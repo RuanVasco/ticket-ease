@@ -168,7 +168,6 @@ export const DynamicForm: React.FC<Props> = ({
                     {field.type === "DEPARTMENT_SELECT" && (
                         <SelectDepartment
                             value={formData[field.id] || ""}
-                            label={field.label}
                             required={field.required}
                             disabled={false}
                             onChange={(value) => handleChange(field.id, value)}
@@ -178,7 +177,6 @@ export const DynamicForm: React.FC<Props> = ({
                     {field.type === "USER_DEPARTMENT_SELECT" && (
                         <SelectDepartment
                             value={formData[field.id] || ""}
-                            label={field.label}
                             required={field.required}
                             disabled={false}
                             onChange={(value) => handleChange(field.id, value)}

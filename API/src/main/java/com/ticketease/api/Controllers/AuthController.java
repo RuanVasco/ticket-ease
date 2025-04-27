@@ -31,100 +31,96 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("auth")
 public class AuthController {
 
-  @Autowired private AuthenticationManager authenticationManager;
+	@Autowired
+	private AuthenticationManager authenticationManager;
 
-  @Autowired private UserRepository userRepository;
+	@Autowired
+	private UserRepository userRepository;
 
-  @Autowired private RoleRepository roleRepository;
+	@Autowired
+	private RoleRepository roleRepository;
 
-  @Autowired private CargoRepository cargoRepository;
+	@Autowired
+	private CargoRepository cargoRepository;
 
-  @Autowired private DepartmentRepository departmentRepository;
+	@Autowired
+	private DepartmentRepository departmentRepository;
 
-  @Autowired private PasswordEncoder passwordEncoder;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
-  @Autowired private TokenService tokenService;
+	@Autowired
+	private TokenService tokenService;
 
-  @PostMapping("/login")
-  public ResponseEntity<?> login(@RequestBody @Valid LoginDTO data) {
-    try {
-      var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
-      Authentication auth = authenticationManager.authenticate(usernamePassword);
+	@PostMapping("/login")
+	public ResponseEntity<?> login(@RequestBody @Valid LoginDTO data) {
+		try {
+			var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
+			Authentication auth = authenticationManager.authenticate(usernamePassword);
 
-      User user = (User) auth.getPrincipal();
+			User user = (User) auth.getPrincipal();
 
-      var token = tokenService.generateAccessToken(user);
-      var refreshToken = tokenService.generateRefreshToken(user);
+			var token = tokenService.generateAccessToken(user);
+			var refreshToken = tokenService.generateRefreshToken(user);
 
-      return ResponseEntity.ok(new LoginResponseDTO(token, refreshToken));
+			return ResponseEntity.ok(new LoginResponseDTO(token, refreshToken));
 
-    } catch (BadCredentialsException e) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais incorretas");
-    } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao autenticar");
-    }
-  }
+		} catch (BadCredentialsException e) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais incorretas");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao autenticar");
+		}
+	}
 
-  @PostMapping("/refresh")
-  public ResponseEntity<?> refresh(@RequestBody Map<String, String> request) {
-    var refreshToken = request.get("refreshToken");
+	@PostMapping("/refresh")
+	public ResponseEntity<?> refresh(@RequestBody Map<String, String> request) {
+		var refreshToken = request.get("refreshToken");
 
-    if (refreshToken == null || tokenService.validateToken(refreshToken) == "") {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid refresh token");
-    }
+		if (refreshToken == null || tokenService.validateToken(refreshToken) == "") {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid refresh token");
+		}
 
-    var email = tokenService.validateToken(refreshToken);
-    User user =
-        userRepository
-            .findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+		var email = tokenService.validateToken(refreshToken);
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-    if (user == null) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not found");
-    }
+		if (user == null) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not found");
+		}
 
-    var newToken = tokenService.generateAccessToken(user);
+		var newToken = tokenService.generateAccessToken(user);
 
-    return ResponseEntity.ok(new LoginResponseDTO(newToken, refreshToken));
-  }
+		return ResponseEntity.ok(new LoginResponseDTO(newToken, refreshToken));
+	}
 
-  @PostMapping("/validate")
-  public ResponseEntity<?> validate(@RequestBody @Valid ValidateDTO token) {
-    if (!Objects.equals(tokenService.validateToken(token.token()), "")) {
-      return ResponseEntity.ok().build();
-    } else {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("invalid token");
-    }
-  }
+	@PostMapping("/validate")
+	public ResponseEntity<?> validate(@RequestBody @Valid ValidateDTO token) {
+		if (!Objects.equals(tokenService.validateToken(token.token()), "")) {
+			return ResponseEntity.ok().build();
+		} else {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("invalid token");
+		}
+	}
 
-  @GetMapping("/permissions")
-  public ResponseEntity<List<PermissionDTO>> getPermissions() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	@GetMapping("/permissions")
+	public ResponseEntity<List<PermissionDTO>> getPermissions() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    if (authentication == null || !(authentication.getPrincipal() instanceof User user)) {
-      return ResponseEntity.status(403).build();
-    }
+		if (authentication == null || !(authentication.getPrincipal() instanceof User user)) {
+			return ResponseEntity.status(403).build();
+		}
 
-    List<PermissionDTO> permissionDTOs =
-        user.getRoleBindings().stream()
-            .flatMap(
-                binding -> {
-                  Role role = binding.getRole();
-                  Department dept = binding.getDepartment();
+		List<PermissionDTO> permissionDTOs = user.getRoleBindings().stream().flatMap(binding -> {
+			Role role = binding.getRole();
+			Department dept = binding.getDepartment();
 
-                  if (role.getPermissions() == null) return Stream.empty();
+			if (role.getPermissions() == null)
+				return Stream.empty();
 
-                  return role.getPermissions().stream()
-                      .map(
-                          permission ->
-                              new PermissionDTO(
-                                  permission.getName(),
-                                  dept != null ? dept.getName() : null,
-                                  dept != null ? dept.getId() : null));
-                })
-            .distinct()
-            .toList();
+			return role.getPermissions().stream().map(permission -> new PermissionDTO(permission.getName(),
+					dept != null ? dept.getName() : null, dept != null ? dept.getId() : null));
+		}).distinct().toList();
 
-    return ResponseEntity.ok(permissionDTOs);
-  }
+		return ResponseEntity.ok(permissionDTOs);
+	}
 }

@@ -1,0 +1,25 @@
+@use "../variables" as var;
+
+.pending-tickets-title {
+	font-size: var.$font-size-xxl;
+	color: var.$color-primary;
+
+	.pending-tickets-amount {
+		margin-left: 1rem;
+		border: 2px solid var.$color-secondary;
+		border-radius: 8px;
+		padding: 0.09rem 0.8rem;
+	}
+
+	& svg {
+		margin-left: 1rem;
+		color: var.$color-white;
+		border-radius: 8px;
+		padding: 0.3rem;
+		background-color: var.$color-success;
+		width: 2rem;
+		height: 2rem;
+		display: inline-block;
+		font-size: 1.5rem;
+	}
+}

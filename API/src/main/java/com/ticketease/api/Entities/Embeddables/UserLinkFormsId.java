@@ -13,21 +13,23 @@ import lombok.*;
 @AllArgsConstructor
 public class UserLinkFormsId implements Serializable {
 
-  @Column(name = "user_id")
-  private Long userId;
+	@Column(name = "user_id")
+	private Long userId;
 
-  @Column(name = "form_id")
-  private Long formId;
+	@Column(name = "form_id")
+	private Long formId;
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof UserLinkFormsId that)) return false;
-    return Objects.equals(userId, that.userId) && Objects.equals(formId, that.formId);
-  }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof UserLinkFormsId that))
+			return false;
+		return Objects.equals(userId, that.userId) && Objects.equals(formId, that.formId);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(userId, formId);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(userId, formId);
+	}
 }

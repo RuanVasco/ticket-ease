@@ -9,14 +9,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-  Optional<User> findByEmail(String email);
+	Optional<User> findByEmail(String email);
 
-  Boolean existsByEmail(String email);
+	Boolean existsByEmail(String email);
 
-  void deleteById(Long id);
+	void deleteById(Long id);
 
-  @Query("SELECT DISTINCT u FROM User u JOIN u.roleBindings b")
-  List<User> findAllUsersWithRoles();
+	@Query("SELECT DISTINCT u FROM User u JOIN u.roleBindings b")
+	List<User> findAllUsersWithRoles();
 
-  Page<User> findAll(Pageable pageable);
+	Page<User> findAll(Pageable pageable);
 }

@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRoleDepartmentRepository extends JpaRepository<UserRoleDepartment, Long> {
-  List<UserRoleDepartment> findByUser(User user);
+	List<UserRoleDepartment> findByUser(User user);
 
-  void deleteByUser(User user);
+	void deleteByUser(User user);
 }

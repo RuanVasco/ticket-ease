@@ -11,22 +11,24 @@ import lombok.Setter;
 @Setter
 @Entity
 public class FormField {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-  private String label;
+	private String label;
 
-  @Enumerated(EnumType.STRING)
-  private FieldTypeEnum type;
+	@Enumerated(EnumType.STRING)
+	private FieldTypeEnum type;
 
-  private boolean required;
+	private boolean required;
 
-  private String placeholder;
+	private String placeholder;
 
-  @ElementCollection
-  @CollectionTable(name = "form_field_option", joinColumns = @JoinColumn(name = "form_field_id"))
-  private List<Option> options;
+	@ElementCollection
+	@CollectionTable(name = "form_field_option", joinColumns = @JoinColumn(name = "form_field_id"))
+	private List<Option> options;
 
-  @ManyToOne @JsonBackReference private Form form;
+	@ManyToOne
+	@JsonBackReference
+	private Form form;
 }

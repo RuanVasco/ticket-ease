@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class DepartmentService {
-  private final DepartmentRepository departmentRepository;
+	private final DepartmentRepository departmentRepository;
 
-  public Optional<Department> findById(Long departmentId) {
-    return departmentRepository.findById(departmentId);
-  }
+	public Optional<Department> findById(Long departmentId) {
+		return departmentRepository.findById(departmentId);
+	}
 }

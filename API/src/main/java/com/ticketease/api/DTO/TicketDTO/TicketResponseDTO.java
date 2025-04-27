@@ -6,35 +6,20 @@ import com.ticketease.api.Entities.Form;
 import com.ticketease.api.Entities.Ticket;
 import java.util.List;
 
-public record TicketResponseDTO(
-    Long id,
-    TicketPropertiesResponseDTO properties,
-    Form form,
-    List<FormFieldAnswerResponseDTO> responses) {
-  public static TicketResponseDTO from(Ticket ticket) {
-    Form form = ticket.getForm();
+public record TicketResponseDTO(Long id, TicketPropertiesResponseDTO properties, Form form,
+		List<FormFieldAnswerResponseDTO> responses) {
+	public static TicketResponseDTO from(Ticket ticket) {
+		Form form = ticket.getForm();
 
-    List<UserResponseDTO> observers =
-        ticket.getObservers().stream().map(UserResponseDTO::from).toList();
+		List<UserResponseDTO> observers = ticket.getObservers().stream().map(UserResponseDTO::from).toList();
 
-    TicketPropertiesResponseDTO ticketProperties =
-        new TicketPropertiesResponseDTO(
-            observers,
-            ticket.getUrgency(),
-            ticket.getReceiveEmail(),
-            ticket.getStatus(),
-            ticket.getCreatedAt(),
-            ticket.getUpdatedAt(),
-            ticket.getClosedAt(),
-            UserResponseDTO.from(ticket.getUser()));
+		TicketPropertiesResponseDTO ticketProperties = new TicketPropertiesResponseDTO(observers, ticket.getUrgency(),
+				ticket.getReceiveEmail(), ticket.getStatus(), ticket.getCreatedAt(), ticket.getUpdatedAt(),
+				ticket.getClosedAt(), UserResponseDTO.from(ticket.getUser()));
 
-    List<FormFieldAnswerResponseDTO> fieldAnswers =
-        ticket.getResponses().stream()
-            .map(
-                response ->
-                    new FormFieldAnswerResponseDTO(response.getField(), response.getValue()))
-            .toList();
+		List<FormFieldAnswerResponseDTO> fieldAnswers = ticket.getResponses().stream()
+				.map(response -> new FormFieldAnswerResponseDTO(response.getField(), response.getValue())).toList();
 
-    return new TicketResponseDTO(ticket.getId(), ticketProperties, form, fieldAnswers);
-  }
+		return new TicketResponseDTO(ticket.getId(), ticketProperties, form, fieldAnswers);
+	}
 }

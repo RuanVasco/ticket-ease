@@ -11,36 +11,33 @@ import org.springframework.data.repository.query.Param;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
-  @Query(
-      """
-        SELECT t
-        FROM Ticket t
-        LEFT JOIN t.observers obs
-        WHERE t.user.id = :userId
-           OR obs.id = :userId
-        """)
-  Page<Ticket> findByOwnerOrObserver(@Param("userId") Long userId, Pageable pageable);
+	@Query("""
+			SELECT t
+			FROM Ticket t
+			LEFT JOIN t.observers obs
+			WHERE t.user.id = :userId
+			   OR obs.id = :userId
+			""")
+	Page<Ticket> findByOwnerOrObserver(@Param("userId") Long userId, Pageable pageable);
 
-  @Query(
-      """
-        SELECT t
-        FROM Ticket t
-        LEFT JOIN t.observers obs
-        WHERE (t.user.id = :userId OR obs.id = :userId)
-          AND t.status = :status
-    """)
-  Page<Ticket> findByOwnerOrObserverAndStatus(
-      @Param("userId") Long userId, @Param("status") StatusEnum status, Pageable pageable);
+	@Query("""
+			    SELECT t
+			    FROM Ticket t
+			    LEFT JOIN t.observers obs
+			    WHERE (t.user.id = :userId OR obs.id = :userId)
+			      AND t.status = :status
+			""")
+	Page<Ticket> findByOwnerOrObserverAndStatus(@Param("userId") Long userId, @Param("status") StatusEnum status,
+			Pageable pageable);
 
-  Set<Ticket> findByStatus(StatusEnum status);
+	Set<Ticket> findByStatus(StatusEnum status);
 
-  @Query(
-      """
-        SELECT t FROM Ticket t
-        JOIN t.form.approvers approver
-        WHERE approver.id = :approverId
-        AND t.status = :status
-    """)
-  Page<Ticket> findPendingTicketsByApprover(
-      @Param("approverId") Long approverId, @Param("status") StatusEnum status, Pageable pageable);
+	@Query("""
+			    SELECT t FROM Ticket t
+			    JOIN t.form.approvers approver
+			    WHERE approver.id = :approverId
+			    AND t.status = :status
+			""")
+	Page<Ticket> findPendingTicketsByApprover(@Param("approverId") Long approverId, @Param("status") StatusEnum status,
+			Pageable pageable);
 }

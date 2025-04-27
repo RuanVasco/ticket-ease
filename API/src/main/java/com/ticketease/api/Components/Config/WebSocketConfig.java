@@ -20,54 +20,47 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-  private final WebSocketAuthChannelInterceptor webSocketAuthChannelInterceptor;
+	private final WebSocketAuthChannelInterceptor webSocketAuthChannelInterceptor;
 
-  public WebSocketConfig(WebSocketAuthChannelInterceptor webSocketAuthChannelInterceptor) {
-    this.webSocketAuthChannelInterceptor = webSocketAuthChannelInterceptor;
-  }
+	public WebSocketConfig(WebSocketAuthChannelInterceptor webSocketAuthChannelInterceptor) {
+		this.webSocketAuthChannelInterceptor = webSocketAuthChannelInterceptor;
+	}
 
-  @Override
-  public void registerStompEndpoints(StompEndpointRegistry registry) {
-    registry
-        .addEndpoint("/ws")
-        .setAllowedOrigins(
-            "http://localhost:5173", "http://localhost:4173", "http://192.0.1.68:4173");
-  }
+	@Override
+	public void registerStompEndpoints(StompEndpointRegistry registry) {
+		registry.addEndpoint("/ws").setAllowedOrigins("http://localhost:5173", "http://localhost:4173",
+				"http://192.0.1.68:4173");
+	}
 
-  @Override
-  public void configureMessageBroker(MessageBrokerRegistry registry) {
-    registry.enableSimpleBroker("/topic", "/queue");
-    registry.setApplicationDestinationPrefixes("/app");
-  }
+	@Override
+	public void configureMessageBroker(MessageBrokerRegistry registry) {
+		registry.enableSimpleBroker("/topic", "/queue");
+		registry.setApplicationDestinationPrefixes("/app");
+	}
 
-  @Override
-  public void configureClientInboundChannel(ChannelRegistration registration) {
-    registration.interceptors(webSocketAuthChannelInterceptor);
-  }
+	@Override
+	public void configureClientInboundChannel(ChannelRegistration registration) {
+		registration.interceptors(webSocketAuthChannelInterceptor);
+	}
 
-  @Bean
-  AuthorizationManager<Message<?>> webSocketMessageAuthorizationManager() {
-    return MessageMatcherDelegatingAuthorizationManager.builder()
-        .simpTypeMatchers(
-            SimpMessageType.CONNECT, SimpMessageType.DISCONNECT, SimpMessageType.OTHER)
-        .permitAll()
-        .simpDestMatchers("/topic/**", "/queue/**", "/app/**")
-        .permitAll()
-        .anyMessage()
-        .authenticated()
-        .build();
-  }
+	@Bean
+	AuthorizationManager<Message<?>> webSocketMessageAuthorizationManager() {
+		return MessageMatcherDelegatingAuthorizationManager.builder()
+				.simpTypeMatchers(SimpMessageType.CONNECT, SimpMessageType.DISCONNECT, SimpMessageType.OTHER)
+				.permitAll().simpDestMatchers("/topic/**", "/queue/**", "/app/**").permitAll().anyMessage()
+				.authenticated().build();
+	}
 
-  @Bean
-  public ChannelInterceptor csrfChannelInterceptor() {
-    return new ChannelInterceptor() {
-      @Override
-      public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        if (SimpMessageType.CONNECT.equals(StompHeaderAccessor.wrap(message).getMessageType())) {
-          return message;
-        }
-        return message;
-      }
-    };
-  }
+	@Bean
+	public ChannelInterceptor csrfChannelInterceptor() {
+		return new ChannelInterceptor() {
+			@Override
+			public Message<?> preSend(Message<?> message, MessageChannel channel) {
+				if (SimpMessageType.CONNECT.equals(StompHeaderAccessor.wrap(message).getMessageType())) {
+					return message;
+				}
+				return message;
+			}
+		};
+	}
 }

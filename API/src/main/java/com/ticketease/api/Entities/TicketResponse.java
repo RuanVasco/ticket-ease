@@ -11,21 +11,22 @@ import lombok.Setter;
 @Getter
 @Setter
 public class TicketResponse {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-  @ManyToOne private FormField field;
+	@ManyToOne
+	private FormField field;
 
-  @Column(name = "field_value")
-  private String value;
+	@Column(name = "field_value")
+	private String value;
 
-  @ManyToOne
-  @JoinColumn(name = "ticket_id")
-  @JsonBackReference
-  private Ticket ticket;
+	@ManyToOne
+	@JoinColumn(name = "ticket_id")
+	@JsonBackReference
+	private Ticket ticket;
 
-  @OneToMany(mappedBy = "ticketResponse", cascade = CascadeType.ALL, orphanRemoval = true)
-  @JsonManagedReference
-  private List<Attachment> attachments;
+	@OneToMany(mappedBy = "ticketResponse", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference
+	private List<Attachment> attachments;
 }

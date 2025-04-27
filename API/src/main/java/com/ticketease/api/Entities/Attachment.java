@@ -11,17 +11,17 @@ import lombok.Setter;
 @Setter
 public class Attachment {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "ticket_response_id")
-  @JsonBackReference
-  private TicketResponse ticketResponse;
+	@ManyToOne
+	@JoinColumn(name = "ticket_response_id")
+	@JsonBackReference
+	private TicketResponse ticketResponse;
 
-  private String fileName;
-  private String fileType;
-  private String filePath;
-  private Date uploadedAt;
+	private String fileName;
+	private String fileType;
+	private String filePath;
+	private Date uploadedAt;
 }

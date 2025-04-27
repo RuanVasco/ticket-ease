@@ -18,55 +18,46 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class UserLinkFormsController {
 
-  private final UserLinkFormsService userLinkFormsService;
-  private final FormRepository formRepository;
+	private final UserLinkFormsService userLinkFormsService;
+	private final FormRepository formRepository;
 
-  private User getAuthenticatedUser() {
-    return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-  }
+	private User getAuthenticatedUser() {
+		return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	}
 
-  @GetMapping("/recent-forms")
-  public ResponseEntity<List<UserFormLinkDTO>> getRecentForms() {
-    User user = getAuthenticatedUser();
-    List<UserFormLinkDTO> recentForms =
-        userLinkFormsService.findTop10RecentByUserOrderByAccessedAtDesc(user);
-    return ResponseEntity.ok(recentForms);
-  }
+	@GetMapping("/recent-forms")
+	public ResponseEntity<List<UserFormLinkDTO>> getRecentForms() {
+		User user = getAuthenticatedUser();
+		List<UserFormLinkDTO> recentForms = userLinkFormsService.findTop10RecentByUserOrderByAccessedAtDesc(user);
+		return ResponseEntity.ok(recentForms);
+	}
 
-  @GetMapping("/favorite-forms")
-  public ResponseEntity<List<UserFormLinkDTO>> getFavoriteForms() {
-    User user = getAuthenticatedUser();
-    List<UserFormLinkDTO> favoriteForms = userLinkFormsService.findFavoriteByUser(user);
-    return ResponseEntity.ok(favoriteForms);
-  }
+	@GetMapping("/favorite-forms")
+	public ResponseEntity<List<UserFormLinkDTO>> getFavoriteForms() {
+		User user = getAuthenticatedUser();
+		List<UserFormLinkDTO> favoriteForms = userLinkFormsService.findFavoriteByUser(user);
+		return ResponseEntity.ok(favoriteForms);
+	}
 
-  @PostMapping("/favorite/{formId}")
-  public ResponseEntity<?> favorite(@PathVariable Long formId) {
-    User user = getAuthenticatedUser();
+	@PostMapping("/favorite/{formId}")
+	public ResponseEntity<?> favorite(@PathVariable Long formId) {
+		User user = getAuthenticatedUser();
 
-    Form form =
-        formRepository
-            .findById(formId)
-            .orElseThrow(
-                () ->
-                    new ResponseStatusException(HttpStatus.NOT_FOUND, "Formulário não encontrado"));
+		Form form = formRepository.findById(formId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Formulário não encontrado"));
 
-    userLinkFormsService.favoriteForm(user, form);
-    return ResponseEntity.ok("Favoritado com sucesso");
-  }
+		userLinkFormsService.favoriteForm(user, form);
+		return ResponseEntity.ok("Favoritado com sucesso");
+	}
 
-  @DeleteMapping("/favorite/{formId}")
-  public ResponseEntity<?> unfavorite(@PathVariable Long formId) {
-    User user = getAuthenticatedUser();
+	@DeleteMapping("/favorite/{formId}")
+	public ResponseEntity<?> unfavorite(@PathVariable Long formId) {
+		User user = getAuthenticatedUser();
 
-    Form form =
-        formRepository
-            .findById(formId)
-            .orElseThrow(
-                () ->
-                    new ResponseStatusException(HttpStatus.NOT_FOUND, "Formulário não encontrado"));
+		Form form = formRepository.findById(formId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Formulário não encontrado"));
 
-    userLinkFormsService.unfavoriteForm(user, form);
-    return ResponseEntity.ok("Desfavoritado com sucesso");
-  }
+		userLinkFormsService.unfavoriteForm(user, form);
+		return ResponseEntity.ok("Desfavoritado com sucesso");
+	}
 }

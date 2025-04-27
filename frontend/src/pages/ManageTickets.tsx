@@ -3,9 +3,11 @@ import TableTicket from "../components/TableTicket";
 import React, { useState } from "react";
 import TicketApproval from "../components/ManageTicket/TicketApproval";
 import "../assets/styles/pages/_manageticket.scss";
+import TicketDetail from "../components/TicketDetails";
 
 const ManageTickets: React.FC = () => {
     const [viewMode, setViewMode] = useState("list");
+    const [selectedTicketId, setSelectedTicket] = useState<Number | null>(null);
 
     return (
         <main className="row container-fluid">
@@ -40,11 +42,20 @@ const ManageTickets: React.FC = () => {
             </nav>
 
             <div className="col p-3">
-                {viewMode === "list" && <TableTicket viewMode="edit" />}
+                {viewMode === "list" && (
+                    selectedTicketId ? (
+                        <TicketDetail
+                            selectedTicketId={selectedTicketId}
+                            setSelectedTicket={setSelectedTicket}
+                        />
+                    ) : (
+                        <TableTicket viewMode="edit" onTicketSelect={setSelectedTicket} />
+                    )
+                )}
                 {viewMode === "validate" && <TicketApproval />}
                 {viewMode === "dashboard" && <p>📊 Painel de estatísticas em construção</p>}
             </div>
-        </main>
+        </main >
     );
 };
 

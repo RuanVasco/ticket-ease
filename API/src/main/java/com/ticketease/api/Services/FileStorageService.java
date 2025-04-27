@@ -11,31 +11,31 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class FileStorageService {
 
-  private final Path rootLocation = Paths.get("uploads");
+	private final Path rootLocation = Paths.get("uploads");
 
-  public void init() {
-    try {
-      Files.createDirectories(rootLocation);
-    } catch (IOException e) {
-      throw new RuntimeException("Could not initialize storage", e);
-    }
-  }
+	public void init() {
+		try {
+			Files.createDirectories(rootLocation);
+		} catch (IOException e) {
+			throw new RuntimeException("Could not initialize storage", e);
+		}
+	}
 
-  public void save(MultipartFile file) {
-    try {
-      Files.copy(file.getInputStream(), this.rootLocation.resolve(file.getOriginalFilename()));
-    } catch (Exception e) {
-      throw new RuntimeException("Could not store the file. Error: " + e.getMessage());
-    }
-  }
+	public void save(MultipartFile file) {
+		try {
+			Files.copy(file.getInputStream(), this.rootLocation.resolve(file.getOriginalFilename()));
+		} catch (Exception e) {
+			throw new RuntimeException("Could not store the file. Error: " + e.getMessage());
+		}
+	}
 
-  public String store(MultipartFile file) {
-    try {
-      String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-      Files.copy(file.getInputStream(), this.rootLocation.resolve(filename));
-      return filename;
-    } catch (Exception e) {
-      throw new RuntimeException("Failed to store file " + file.getOriginalFilename(), e);
-    }
-  }
+	public String store(MultipartFile file) {
+		try {
+			String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+			Files.copy(file.getInputStream(), this.rootLocation.resolve(filename));
+			return filename;
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to store file " + file.getOriginalFilename(), e);
+		}
+	}
 }
