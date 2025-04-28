@@ -151,7 +151,7 @@ const CreateTicket: React.FC = () => {
                 files.length > 0 && handleSubmitFiles(res.data, files);
 
                 toast.success("Ticket criado");
-                navigate(`/tickets/${res.data}`);
+                navigate(`/tickets`);
             }
         } catch (error) {
             toast.error("Erro ao criar ticket");

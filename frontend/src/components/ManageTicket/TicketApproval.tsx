@@ -6,11 +6,12 @@ import { Ticket } from "../../types/Ticket";
 import ItemsPerPage from "../Common/ItemsPerPage";
 import Pagination from "../Pagination";
 import { Modal } from "bootstrap";
-import TicketDetails from "../../pages/TicketDetails_bkp";
 import SelectDepartment from "../Fields/SelectDepartment";
 import { Department } from "../../types/Department";
 import "../../assets/styles/components/_ticketapproval.scss";
 import { FaCheck } from "react-icons/fa6";
+import { closeModal } from "../../components/Util/CloseModal";
+import TicketDetail from "../TicketDetails";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -20,7 +21,7 @@ const TicketApproval = () => {
     const [totalPages, setTotalPages] = useState<number>(1);
     const [pageSize, setPageSize] = useState<number>(10);
     const [totalItems, setTotalItems] = useState<number>(0);
-    const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+    const [selectedTicketId, setSelectedTicketId] = useState<Number | null>(null);
     const [departments, setDepartments] = useState<Department[]>([]);
     const [department, setDepartment] = useState<Department>();
 
@@ -84,6 +85,11 @@ const TicketApproval = () => {
     const handlePageSizeChange = (size: number) => {
         setPageSize(size);
         setCurrentPage(0);
+    };
+
+    const clearSelectedTicket = () => {
+        closeModal("modal");
+        setSelectedTicketId(null);
     };
 
     return (
@@ -152,12 +158,16 @@ const TicketApproval = () => {
                             ></button>
                         </div>
                         <div className="modal-body">
-                            {selectedTicketId && <TicketDetails ticketId={selectedTicketId.toString()} />}
+                            {selectedTicketId && (
+                                <TicketDetail
+                                    selectedTicketId={selectedTicketId}
+                                    setSelectedTicket={clearSelectedTicket}
+                                />
+                            )}
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
     );
 };

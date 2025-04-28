@@ -191,7 +191,7 @@ const Header: React.FC = () => {
 
             <div className="modal fade" id="configModal" tabIndex={-1} aria-labelledby="configModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-sm">
-                    <div className="modal-content">
+                    <div className="modal-content modal_user_settings">
                         <div className="modal-header">
                             <h5 className="modal-title" id="configModalLabel">Preferências</h5>
                             <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
