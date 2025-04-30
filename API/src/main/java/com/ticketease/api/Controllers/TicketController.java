@@ -67,11 +67,15 @@ public class TicketController {
 		Department department = departmentService.findById(departmentId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Setor não encontrado"));
 
+		if (!user.hasPermission("MANAGE_TICKET", department)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para este setor.");
+		}
+
 		Page<Ticket> ticketsPage;
 		if (status != null) {
-			ticketsPage = ticketService.findByDepartmentAndStatus(department, user, status, pageable);
+			ticketsPage = ticketService.findByDepartmentAndStatus(department, status, pageable);
 		} else {
-			ticketsPage = ticketService.findByDepartment(department, user, pageable);
+			ticketsPage = ticketService.findByDepartment(department, pageable);
 		}
 
 		Page<TicketResponseDTO> ticketsDTOPage = ticketsPage.map(TicketResponseDTO::from);
@@ -93,17 +97,24 @@ public class TicketController {
 
 		List<Ticket> allTickets = ticketService.getTicketsByRelatedUser(user);
 
-		List<Ticket> filtered = allTickets.stream().filter(ticket -> {
-			Department ticketDep = ticket.getDepartment();
-			return departments.contains(ticketDep) && (status == null || ticket.getStatus() == status);
-		}).toList();
+		List<Ticket> filtered = allTickets.stream()
+			.filter(ticket -> {
+				Department ticketDep = ticket.getDepartment();
+				return departments.contains(ticketDep) && (status == null || ticket.getStatus() == status);
+			})
+			.toList();
+
+		List<Ticket> sorted = ticketService.sortInMemory(filtered, pageable.getSort());
 
 		int start = (int) pageable.getOffset();
-		int end = Math.min(start + pageable.getPageSize(), filtered.size());
-		List<Ticket> pageContent = (start >= filtered.size()) ? List.of() : filtered.subList(start, end);
+		int end = Math.min(start + pageable.getPageSize(), sorted.size());
+		List<Ticket> pageContent = (start >= sorted.size()) ? List.of() : sorted.subList(start, end);
 
-		Page<TicketResponseDTO> resultPage = new PageImpl<>(pageContent.stream().map(TicketResponseDTO::from).toList(),
-				pageable, filtered.size());
+		Page<TicketResponseDTO> resultPage = new PageImpl<>(
+			pageContent.stream().map(TicketResponseDTO::from).toList(),
+			pageable,
+			sorted.size()
+		);
 
 		return ResponseEntity.ok(resultPage);
 	}

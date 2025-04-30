@@ -8,10 +8,13 @@ import com.ticketease.api.Repositories.FormRepository;
 import com.ticketease.api.Repositories.TicketRepository;
 import com.ticketease.api.Repositories.UserRepository;
 import java.util.*;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -126,15 +129,14 @@ public class TicketService {
 		return ticketRepository.findByOwnerOrObserverAndStatus(user.getId(), status, pageable);
 	}
 
-	public Page<Ticket> findByDepartmentAndStatus(Department department, User user, StatusEnum status,
-			Pageable pageable) {
-		Collection<Ticket> tickets = ticketRepository.findByStatus(status);
-		return filterAndPaginate(tickets, department, user, pageable);
+	public Page<Ticket> findByDepartmentAndStatus(Department department, StatusEnum status, Pageable pageable) {
+		return ticketRepository.findByForm_DepartmentAndStatus(department, status, pageable);
 	}
 
-	public Page<Ticket> findByDepartment(Department department, User user, Pageable pageable) {
-		Collection<Ticket> tickets = ticketRepository.findAll();
-		return filterAndPaginate(tickets, department, user, pageable);
+	public Page<Ticket> findByDepartment(Department department, Pageable pageable) {
+//		Collection<Ticket> tickets = ticketRepository.findAll();
+//		return filterAndPaginate(tickets, department, user, pageable);
+		return ticketRepository.findByForm_Department(department, pageable);
 	}
 
 	public void approveOrReject(Ticket ticket, boolean approved, User approver) {
@@ -170,5 +172,34 @@ public class TicketService {
 		List<Ticket> pageContent = (start >= filteredList.size()) ? List.of() : filteredList.subList(start, end);
 
 		return new PageImpl<>(pageContent, pageable, filteredList.size());
+	}
+
+	public List<Ticket> sortInMemory(List<Ticket> tickets, Sort sort) {
+		if (sort.isUnsorted()) return tickets;
+
+		Comparator<Ticket> comparator = null;
+
+		for (Sort.Order order : sort) {
+			Comparator<Ticket> fieldComparator = switch (order.getProperty()) {
+				case "id" -> Comparator.comparing(Ticket::getId);
+				case "status" -> Comparator.comparing(Ticket::getStatus);
+				case "urgency" -> Comparator.comparing(Ticket::getUrgency);
+				case "createdAt" -> Comparator.comparing(Ticket::getCreatedAt, Comparator.nullsLast(Date::compareTo));
+				case "updatedAt" -> Comparator.comparing(Ticket::getUpdatedAt, Comparator.nullsLast(Date::compareTo));
+				case "user.name" -> Comparator.comparing(t -> t.getUser().getName(), Comparator.nullsLast(String::compareToIgnoreCase));
+				case "form.title" -> Comparator.comparing(t -> t.getForm().getTitle(), Comparator.nullsLast(String::compareToIgnoreCase));
+				case "form.ticketCategory.name" -> Comparator.comparing(t -> t.getForm().getTicketCategory().getName(), Comparator.nullsLast(String::compareToIgnoreCase));
+				default -> null;
+			};
+
+			if (fieldComparator != null) {
+				if (order.isDescending()) {
+					fieldComparator = fieldComparator.reversed();
+				}
+				comparator = comparator == null ? fieldComparator : comparator.thenComparing(fieldComparator);
+			}
+		}
+
+		return comparator != null ? tickets.stream().sorted(comparator).toList() : tickets;
 	}
 }

@@ -1,5 +1,6 @@
 package com.ticketease.api.Repositories;
 
+import com.ticketease.api.Entities.Department;
 import com.ticketease.api.Entities.Ticket;
 import com.ticketease.api.Enums.StatusEnum;
 import java.util.Set;
@@ -40,4 +41,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 			""")
 	Page<Ticket> findPendingTicketsByApprover(@Param("approverId") Long approverId, @Param("status") StatusEnum status,
 			Pageable pageable);
+
+	Page<Ticket> findByForm_Department(Department department, Pageable pageable);
+	Page<Ticket> findByForm_DepartmentAndStatus(Department department, StatusEnum status, Pageable pageable);
 }

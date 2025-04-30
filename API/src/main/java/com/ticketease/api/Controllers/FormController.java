@@ -112,7 +112,7 @@ public class FormController {
 		}
 
 		Form form = new Form(ticketCategory, formDTO.getTitle(), formDTO.getDescription(), validators,
-				formDTO.getApprovalMode(), user, fields);
+				formDTO.getApprovalMode(), user, fields, ticketCategory.getDepartment());
 
 		Form savedForm = formService.createForm(form);
 
@@ -137,6 +137,7 @@ public class FormController {
 		existingForm.setTitle(formDTO.getTitle());
 		existingForm.setDescription(formDTO.getDescription());
 		existingForm.setTicketCategory(ticketCategory);
+		existingForm.setDepartment(ticketCategory.getDepartment());
 
 		Set<User> approvers = new HashSet<>();
 		for (Long userId : formDTO.getApprovers()) {

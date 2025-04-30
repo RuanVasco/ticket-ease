@@ -49,8 +49,12 @@ public class Form {
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<FormField> fields = new ArrayList<>();
 
+	@ManyToOne
+	@JoinColumn(name = "department_id")
+	private Department department;
+
 	public Form(TicketCategory ticketCategory, String title, String description, Set<User> approvers,
-			ApprovalModeEnum approvalMode, User user, List<FormField> fields) {
+			ApprovalModeEnum approvalMode, User user, List<FormField> fields, Department department) {
 		this.ticketCategory = ticketCategory;
 		this.title = title;
 		this.description = description;
@@ -58,6 +62,7 @@ public class Form {
 		this.approvalMode = approvalMode;
 		this.creator = user;
 		this.fields = fields;
+		this.department = department;
 	};
 
 	public Form() {
