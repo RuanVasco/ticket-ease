@@ -1,9 +1,6 @@
 package com.ticketease.api.Controllers;
 
-import com.ticketease.api.DTO.FormDTO.FormDTO;
-import com.ticketease.api.DTO.FormDTO.FormFieldDTO;
-import com.ticketease.api.DTO.FormDTO.FormResponseDTO;
-import com.ticketease.api.DTO.FormDTO.OptionDTO;
+import com.ticketease.api.DTO.FormDTO.*;
 import com.ticketease.api.Entities.*;
 import com.ticketease.api.Enums.FieldTypeEnum;
 import com.ticketease.api.Repositories.FormFieldRepository;
@@ -35,7 +32,17 @@ public class FormController {
 	private final FormFieldRepository formFieldRepository;
 
 	@GetMapping
-	public ResponseEntity<List<Form>> getAllForms() {
+	public ResponseEntity<?> getAllForms(
+		@RequestParam(required = false) String search
+	) {
+		if (search != null) {
+			List<UserFormLinkDTO> formLinkDTOS = formService.findByValue(search)
+				.stream()
+				.map(UserFormLinkDTO::fromEntity)
+				.collect(Collectors.toList());
+
+			return ResponseEntity.ok(formLinkDTOS);
+		}
 		return ResponseEntity.ok(formService.getAllForms());
 	}
 

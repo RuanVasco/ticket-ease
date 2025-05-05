@@ -45,4 +45,8 @@ public class FormService {
 	public List<Form> findByTicketCategory(Long categoryId) {
 		return formRepository.findByTicketCategoryId(categoryId);
 	}
+
+	public List<Form> findByValue(String value) {
+		return formRepository.findByValue(value);
+	}
 }

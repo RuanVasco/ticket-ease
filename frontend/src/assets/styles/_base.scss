@@ -3,9 +3,10 @@ body {
 	font-family: variables.$font-family-base;
 	font-size: variables.$font-size-base;
 	background-color: variables.$color-light-gray;
-	color: variables.$color-black;
+	color: variables.$color-primary;
 	margin: 0;
 	padding: 0;
+	overflow-x: hidden;
 }
 
 * {
@@ -14,4 +15,8 @@ body {
 	-moz-user-drag: none;
 	-o-user-drag: none;
 	-ms-user-drag: none;
+}
+
+a {
+	text-decoration: none;
 }

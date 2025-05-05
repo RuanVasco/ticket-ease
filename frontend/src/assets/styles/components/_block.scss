@@ -1,0 +1,18 @@
+@use "../variables" as var;
+
+.block_ {
+	width: 19vw;
+	background-color: var.$color-primary;
+	border-radius: 8px;
+	padding: 10px;
+	margin: 5px;
+	color: var.$color-white;
+}
+
+.block_:hover {
+	background-color: var.$color-tertiary;
+}
+
+.icon_block {
+	font-size: 2.3rem;
+}

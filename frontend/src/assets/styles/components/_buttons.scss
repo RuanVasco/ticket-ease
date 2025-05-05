@@ -16,6 +16,7 @@
 
 .btn_common {
 	background-color: variables.$color-primary;
+	color: variables.$color-white;
 	border: none;
 	padding: 5px 10px;
 	border-radius: 8px;
@@ -23,6 +24,10 @@
 	transition: background-color 0.2s;
 
 	&:hover {
+		background-color: variables.$color-secondary;
+	}
+
+	&:active {
 		background-color: variables.$color-secondary;
 	}
 }
@@ -73,6 +78,7 @@
 
 .btn_success {
 	background-color: variables.$color-success;
+	color: variables.$color-white;
 	border: none;
 	padding: 5px 10px;
 	border-radius: 8px;

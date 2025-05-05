@@ -98,37 +98,38 @@ const HomeAdmin: React.FC = () => {
 	return (
 		<main>
 			<div className="container-xxl mt-4">
-				<div className="d-block pt-4">
+				<div className="floating-box">
 					<h5 className="border-bottom fw-semibold pb-1 ps-3">Cadastros</h5>
+					<div className="d-flex align-items-start flex-wrap">
+						{blocksCadastro.map((block, index) =>
+							permissions[block.link] ? (
+								<Block
+									key={index}
+									text={block.text}
+									icon={block.icon}
+									link={block.link}
+									description={block.description}
+								/>
+							) : null
+						)}
+					</div>
 				</div>
-				<div className="d-flex align-items-start flex-wrap">
-					{blocksCadastro.map((block, index) =>
-						permissions[block.link] ? (
-							<Block
-								key={index}
-								text={block.text}
-								icon={block.icon}
-								link={block.link}
-								description={block.description}
-							/>
-						) : null
-					)}
-				</div>
-				<div className="d-block pt-4">
+
+				<div className="floating-box">
 					<h5 className="border-bottom fw-semibold pb-1 ps-3">Formulários</h5>
-				</div>
-				<div className="d-flex align-items-start flex-wrap">
-					{blocksForms.map((block, index) =>
-						permissions[block.link] ? (
-							<Block
-								key={index}
-								text={block.text}
-								icon={block.icon}
-								link={block.link}
-								description={block.description}
-							/>
-						) : null
-					)}
+					<div className="d-flex align-items-start flex-wrap">
+						{blocksForms.map((block, index) =>
+							permissions[block.link] ? (
+								<Block
+									key={index}
+									text={block.text}
+									icon={block.icon}
+									link={block.link}
+									description={block.description}
+								/>
+							) : null
+						)}
+					</div>
 				</div>
 			</div>
 		</main>
