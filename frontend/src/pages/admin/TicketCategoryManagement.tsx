@@ -6,13 +6,15 @@ import Pagination from "../../components/Pagination";
 import Table from "../../components/Table";
 import { Department } from "../../types/Department";
 import { TicketCategory } from "../../types/TicketCategory";
+import { fetchCategories } from "../../services/TicketCategoryService";
+import { closeModal } from "../../components/Util/CloseModal";
+import { toast } from "react-toastify";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 const columns = [
     { value: "name", label: "Nome" },
     { value: "path", label: "Diretório" },
-    { value: "receiveTickets", label: "Recebe Chamado" },
     { value: "father.name", label: "Categoria Pai" },
     { value: "department.name", label: "Setor" },
 ];
@@ -32,7 +34,6 @@ const TicketCategoryManagement: React.FC = () => {
     const [currentCategory, setCurrentCategory] = useState({
         id: "",
         name: "",
-        receiveTickets: false,
         department: { id: "", name: "" },
         father: { id: "", name: "" },
     });
@@ -40,7 +41,7 @@ const TicketCategoryManagement: React.FC = () => {
     const fetchDepartments = async () => {
         try {
             const res = await axiosInstance.get(
-                `${API_BASE_URL}/tickets-category/departments/allowed`
+                `${API_BASE_URL}/ticket-category/departments/allowed`
             );
             if (res.status === 200) {
                 setDepartments(res.data);
@@ -50,22 +51,10 @@ const TicketCategoryManagement: React.FC = () => {
         }
     };
 
-    const fetchCategories = async () => {
-        try {
-            const res = await axiosInstance.get(`${API_BASE_URL}/tickets-category/fathers`);
-            if (res.status === 200) {
-                const newData = res.data.map((c: any) => TicketCategory.fromJSON(c));
-                setCategories(newData);
-            }
-        } catch (error) {
-            console.error("Error fetching categories:", error);
-        }
-    };
-
     const fetchData = async () => {
         try {
             const res = await axiosInstance.get(
-                `${API_BASE_URL}/tickets-category/pageable?page=${currentPage}&size=${pageSize}`
+                `${API_BASE_URL}/ticket-category/pageable?page=${currentPage}&size=${pageSize}`
             );
             if (res.status === 200) {
                 setData(res.data.content);
@@ -80,18 +69,29 @@ const TicketCategoryManagement: React.FC = () => {
 
     useEffect(() => {
         fetchData();
+        fetchDepartments();
+        loadCategories();
     }, [currentPage, pageSize]);
 
+    const loadCategories = async () => {
+        const categories = await fetchCategories();
+        setCategories(categories);
+    };
+
     const handleModalOpen = async (action: string, mode: string, idCategory?: string) => {
-        fetchDepartments();
-        fetchCategories();
         setModalTitle(`${action} Categoria de Formulário`);
         setModeModal(mode);
+
+        if (idCategory) {
+            setCategories(prev =>
+                prev.filter(category => category.id !== idCategory)
+            );
+        }
 
         if (mode !== "add") {
             try {
                 const res = await axiosInstance.get(
-                    `${API_BASE_URL}/tickets-category/${idCategory}`
+                    `${API_BASE_URL}/ticket-category/${idCategory}`
                 );
                 if (res.status === 200) {
                     const { father, department, ...category } = res.data;
@@ -99,7 +99,6 @@ const TicketCategoryManagement: React.FC = () => {
                     setCurrentCategory({
                         id: category.id,
                         name: category.name,
-                        receiveTickets: category.receiveTickets,
                         father: father || { id: "", name: "" },
                         department: department || { id: "", name: "" },
                     });
@@ -113,7 +112,6 @@ const TicketCategoryManagement: React.FC = () => {
             setCurrentCategory({
                 id: "",
                 name: "",
-                receiveTickets: false,
                 department: { id: "", name: "" },
                 father: { id: "", name: "" },
             });
@@ -135,26 +133,29 @@ const TicketCategoryManagement: React.FC = () => {
         try {
             const payload = {
                 name: currentCategory.name,
-                receiveTickets: currentCategory.receiveTickets,
                 departmentId: rootCategory ? currentCategory.department.id : null,
                 fatherId: !rootCategory ? currentCategory.father.id : null,
             };
 
             let res;
+            let message;
             switch (submitType) {
                 case "delete":
                     res = await axiosInstance.delete(
-                        `${API_BASE_URL}/tickets-category/${currentCategory.id}`
+                        `${API_BASE_URL}/ticket-category/${currentCategory.id}`
                     );
+                    message = "Categoria removida com sucesso!"
                     break;
                 case "add":
-                    res = await axiosInstance.post(`${API_BASE_URL}/tickets-category`, payload);
+                    res = await axiosInstance.post(`${API_BASE_URL}/ticket-category`, payload);
+                    message = "Categoria criada com sucesso!"
                     break;
                 case "update":
                     res = await axiosInstance.put(
-                        `${API_BASE_URL}/tickets-category/${currentCategory.id}`,
+                        `${API_BASE_URL}/ticket-category/${currentCategory.id}`,
                         payload
                     );
+                    message = "Categoria atualizada com sucesso!"
                     break;
                 default:
                     console.error("Invalid submit type");
@@ -165,18 +166,21 @@ const TicketCategoryManagement: React.FC = () => {
                 setCurrentCategory({
                     id: "",
                     name: "",
-                    receiveTickets: false,
                     department: { id: "", name: "" },
                     father: { id: "", name: "" },
                 });
 
                 setCurrentPage(0);
-                window.location.reload();
-            } else {
-                console.error("Error submitting data:", res.status);
+                fetchData();
+                loadCategories();
+                fetchDepartments();
+                closeModal("modal");
+                toast.success(message);
             }
         } catch (error) {
-            console.error("Error submitting data:", error);
+            closeModal("modal");
+            toast.error(String(error));
+            console.error(error)
         }
     };
 
@@ -194,11 +198,6 @@ const TicketCategoryManagement: React.FC = () => {
                 ...prev,
                 father: { ...prev.father, id: value },
             }));
-        } else if (name === "receiveTickets") {
-            setCurrentCategory((prev) => ({
-                ...prev,
-                receiveTickets: value === "true",
-            }));
         } else {
             setCurrentCategory((prev) => ({
                 ...prev,
@@ -212,7 +211,7 @@ const TicketCategoryManagement: React.FC = () => {
             <div className="container">
                 <ActionBar
                     modalTargetId="modal"
-                    delEntityEndPoint={`${API_BASE_URL}/tickets-category`}
+                    delEntityEndPoint={`${API_BASE_URL}/ticket-category`}
                     onCreate={() => handleModalOpen("Criar", "add")}
                     onFilterChange={handleFilterChange}
                     filterText={filterText}
@@ -268,25 +267,6 @@ const TicketCategoryManagement: React.FC = () => {
                                                 required
                                             />
                                         </div>
-
-                                        <div className="mt-2">
-                                            <label htmlFor="receiveTickets" className="form-label">
-                                                Recebe Chamado
-                                            </label>
-                                            <select
-                                                className="form-select"
-                                                name="receiveTickets"
-                                                id="receiveTickets"
-                                                value={currentCategory.receiveTickets.toString()}
-                                                onChange={handleInputChange}
-                                                disabled={modeModal === "readonly"}
-                                                required
-                                            >
-                                                <option value="false">Não</option>
-                                                <option value="true">Sim</option>
-                                            </select>
-                                        </div>
-
                                         <div className="mt-2">
                                             <label htmlFor="rootCategory" className="form-label">
                                                 Categoria Raiz
@@ -376,9 +356,8 @@ const TicketCategoryManagement: React.FC = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className={`btn btn-${
-                                        modeModal === "delete" ? "danger" : "primary"
-                                    }`}
+                                    className={`btn btn-${modeModal === "delete" ? "danger" : "primary"
+                                        }`}
                                     onClick={() => setSubmitType(modeModal)}
                                 >
                                     {modeModal === "delete" ? "Excluir" : "Salvar"}

@@ -1,6 +1,8 @@
 target/
 .idea
-uploads/
+uploads/*
+db/*
+logs/*
 
 # Created by https://www.gitignore.io/api/eclipse
 
@@ -58,10 +60,10 @@ local.properties
 .worksheet
 
 ### Eclipse Patch ###
-# Eclipse Core      
+# Eclipse Core
 .project
 
-# JDT-specific (Eclipse Java Development Tools)     
+# JDT-specific (Eclipse Java Development Tools)
 .classpath
 
 # End of https://www.gitignore.io/api/eclipse

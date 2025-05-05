@@ -1,0 +1,115 @@
+@use "../variables" as v;
+
+.table-responsive {
+	width: 100%;
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+	border-radius: 8px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.custom_table {
+	width: 100%;
+	border-collapse: collapse;
+	background: v.$color-white;
+	color: v.$color-secondary;
+	font-family: v.$font-family-base;
+	font-size: v.$font-size-base;
+
+	thead {
+		background: v.$color-primary;
+		color: v.$color-white;
+
+		th {
+			padding: 0.75rem 1rem;
+			font-weight: 600;
+			text-align: left;
+			white-space: nowrap;
+			position: sticky;
+			top: 0;
+			z-index: 2;
+			cursor: pointer;
+		}
+	}
+
+	tbody {
+		tr {
+			border-bottom: 1px solid v.$color-light-gray;
+
+			&:nth-child(odd) {
+				background: v.$color-light-gray;
+			}
+			&:hover {
+				background: v.$color-light-gray;
+				color: v.$color-secondary;
+			}
+		}
+
+		td {
+			padding: 0.65rem 1rem;
+			line-height: 1.4;
+			overflow-wrap: break-word;
+			word-break: break-word;
+			white-space: normal;
+		}
+	}
+
+	tfoot {
+		background: v.$color-secondary;
+		color: v.$color-white;
+
+		td {
+			padding: 0.7rem 1rem;
+			font-weight: 600;
+		}
+	}
+
+	.text-center {
+		text-align: center;
+	}
+	.text-right {
+		text-align: right;
+	}
+
+	a,
+	button {
+		color: v.$color-white;
+		text-decoration: none;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+}
+
+th.sortable {
+	cursor: pointer;
+	position: relative;
+
+	&::after {
+		content: "";
+		position: absolute;
+		right: 0.5rem;
+		border: 6px solid transparent;
+		border-top-color: v.$color-white;
+		top: 50%;
+		transform: translateY(-50%) rotate(180deg);
+		opacity: 0.45;
+	}
+
+	&.asc::after {
+		transform: translateY(-50%) rotate(0deg);
+		opacity: 1;
+	}
+	&.desc::after {
+		transform: translateY(-50%) rotate(180deg);
+		opacity: 1;
+	}
+}
+
+.table-hint {
+	color: v.$color-primary;
+	font-weight: 600;
+	font-size: v.$font-size-lg;
+	padding: 20px 0;
+}

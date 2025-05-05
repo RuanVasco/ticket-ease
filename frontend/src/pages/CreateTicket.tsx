@@ -1,332 +1,376 @@
-import { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import { FaAngleRight, FaAngleLeft, FaFolderOpen, FaClipboardList, FaPlus } from "react-icons/fa6";
-import { useNavigate } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
+import { useState, useEffect } from "react";
+import {
+	FaAngleRight,
+	FaAngleLeft,
+	FaFolderOpen,
+	FaClipboardList,
+	FaClockRotateLeft,
+	FaRegStar,
+} from "react-icons/fa6";
 
-import AttachmentsForm from "../components/AttachmentsForm";
+import "../assets/styles/pages/_createticket.scss";
 import axiosInstance from "../components/AxiosConfig";
-import "../assets/styles/create_ticket.css";
+import { TicketCategory } from "../types/TicketCategory";
+import { Form } from "../types/Form";
+import { DynamicForm } from "../components/DynamicForm";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { defaultProperties, TicketProperties } from "../types/TicketProperties";
+import { FaSearch } from "react-icons/fa";
+import FormsShortCuts from "../components/FormsShortCuts";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
-interface Category {
-    id: string;
-    name: string;
-    path: string;
-    father?: { id: string };
-    department?: { id: string; name: string };
-    receiveTickets?: boolean;
-    children: Category[];
-}
-
-interface Ticket {
-    ticketCategory_id: string;
-    name: string;
-    description: string;
-    observation?: string;
-    urgency: string;
-    receiveEmail: boolean;
+interface FormPreview {
+	form: Form;
+	favorite: boolean;
+	accessedAt: string;
 }
 
 const CreateTicket: React.FC = () => {
-    const navigate = useNavigate();
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
-    const [categoryPath, setCategoryPath] = useState<Category[]>([]);
-    const [category, setCategory] = useState<Category | null>(null);
-    const [ticket, setTicket] = useState<Ticket>({
-        ticketCategory_id: "",
-        name: "",
-        description: "",
-        observation: "",
-        urgency: "Média",
-        receiveEmail: false,
-    });
-    const [attachments, setAttachments] = useState<File[]>([]);
+	const [categories, setCategories] = useState<TicketCategory[]>([]);
+	const [forms, setForms] = useState<Form[]>([]);
+	const [formData, setFormData] = useState<Record<string, any>>({});
+	const [categoryPath, setCategoryPath] = useState<TicketCategory[]>([]);
+	const [currentForm, setCurrentForm] = useState<Form | null>(null);
+	const [currentFormFavorite, setCurrentFormFavorite] = useState<boolean>(false);
+	const [properties, setProperties] = useState<TicketProperties>(defaultProperties);
+	const [recentForms, setRecentForms] = useState<FormPreview[]>([]);
+	const [favoriteForms, setFavoriteForms] = useState<FormPreview[]>([]);
+	const [searchValue, setSearchValue] = useState<string | null>(null);
+	const [searchResponse, setSearchResponse] = useState<FormPreview[]>([]);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const res = await axiosInstance.get(`${API_BASE_URL}/tickets-category/`);
-                if (res.status === 200) {
-                    setCategories(res.data);
-                } else {
-                    console.error("Erro ao buscar categorias:", res.status);
-                }
-            } catch (error) {
-                console.error("Erro ao buscar categorias:", error);
-            }
-        };
+	const navigate = useNavigate();
 
-        fetchData();
-    }, []);
+	const fetchRecentForms = async () => {
+		try {
+			const res = await axiosInstance.get(`${API_BASE_URL}/users/me/recent-forms`);
+			if (res.status === 200) {
+				setRecentForms(res.data);
+			}
+		} catch (error) {
+			console.error("Erro ao buscar formulários recentes:", error);
+		}
+	};
 
-    useEffect(() => {
-        if (categories.length > 0) {
-            const data = organizeData();
-            setCurrentCategory(data);
-        }
-    }, [categories]);
+	const refreshFavorites = async () => {
+		const { data } = await axiosInstance.get("/users/me/favorite-forms");
+		setFavoriteForms(data);
+	};
 
-    const organizeData = (): Category => {
-        const categoryMap = new Map<string, Category>();
-        const departmentMap = new Map<string, Category>();
-        const root: Category = { id: "root", name: "Categorias", path: "", children: [] };
+	const fetchCategories = async (fatherId: string | null = null) => {
+		try {
+			const url = fatherId
+				? `${API_BASE_URL}/ticket-category/with-form?fatherId=${fatherId}`
+				: `${API_BASE_URL}/ticket-category/with-form`;
 
-        categories.forEach((category) => {
-            categoryMap.set(category.id, { ...category, children: [] });
-            if (category.department) {
-                const departmentId = category.department.id;
-                if (!departmentMap.has(departmentId)) {
-                    departmentMap.set(departmentId, {
-                        ...category.department,
-                        path: "",
-                        children: [],
-                    });
-                }
-            }
-        });
+			const res = await axiosInstance.get(url);
+			if (res.status === 200) {
+				setCategories(res.data);
+			}
+		} catch (error) {
+			console.error("Erro ao buscar categorias:", error);
+		}
+	};
 
-        categories.forEach((category) => {
-            if (category.father) {
-                const parentCategory = categoryMap.get(category.father.id);
-                if (parentCategory) {
-                    parentCategory.children.push(categoryMap.get(category.id)!);
-                }
-            } else {
-                if (category.department) {
-                    const department = departmentMap.get(category.department.id);
-                    if (department) {
-                        department.children.push(categoryMap.get(category.id)!);
-                    }
-                }
-            }
-        });
+	const fetchForms = async (categoryId: string) => {
+		try {
+			const res = await axiosInstance.get(
+				`${API_BASE_URL}/ticket-category/forms/${categoryId}`
+			);
+			if (res.status === 200) {
+				setForms(res.data);
+			}
+		} catch (error) {
+			console.error("Erro ao buscar formulários:", error);
+		}
+	};
 
-        departmentMap.forEach((department) => {
-            root.children.push(department);
-        });
+	useEffect(() => {
+		fetchCategories(null);
+		fetchRecentForms();
+		refreshFavorites();
+	}, []);
 
-        return root;
-    };
+	useEffect(() => {
+		setCurrentFormFavorite(favoriteForms.some((f) => f.form.id === currentForm?.id));
+	}, [favoriteForms, currentForm]);
 
-    const handleCategoryClick = (cat: Category) => {
-        if (cat.receiveTickets) {
-            setCategory(cat);
-        }
+	useEffect(() => {
+		const sendSearch = async () => {
+			if (searchValue && searchValue.length > 2) {
+				try {
+					const res = await axiosInstance.get("/forms", {
+						params: {
+							search: searchValue,
+						},
+					});
 
-        if (cat.children.length > 0) {
-            setCurrentCategory(cat);
-            setCategoryPath([...categoryPath, cat]);
-        }
-    };
+					if (res.status === 200 || res.status === 201) {
+						setSearchResponse(res.data);
+					}
+				} catch (error) {
+					toast.error("Erro a fazer a pesquisa.");
+				}
 
-    const handleBack = () => {
-        const newPath = [...categoryPath];
-        newPath.pop();
-        setCurrentCategory(newPath.length > 0 ? newPath[newPath.length - 1] : organizeData());
-        setCategoryPath(newPath);
-    };
+				console.log(searchResponse);
+			} else {
+				setSearchResponse([]);
+			}
+		};
 
-    const renderTreeNavigation = (data: Category) => {
-        return (
-            <div>
-                <div className="nav_forms_cat_head">
-                    {categoryPath.length > 0 ? (
-                        <button onClick={handleBack} className="nav_forms_cat_btn_back">
-                            <FaAngleLeft />
-                            <span className="ms-2">
-                                {categoryPath[categoryPath.length - 1]?.name}
-                            </span>
-                        </button>
-                    ) : (
-                        <span>Departamentos</span>
-                    )}
-                </div>
+		sendSearch();
+	}, [searchValue]);
 
-                <ul className="mt-2 nav_forms_cat_list">
-                    {data.children.map((item) => (
-                        <li
-                            key={uuidv4()}
-                            className={`nav_forms_cat_item${category === item ? " item_selected" : ""}`}
-                        >
-                            <div>
-                                <a
-                                    onClick={() => handleCategoryClick(item)}
-                                    className="d-flex align-items-center"
-                                    role="button"
-                                    style={{ cursor: "pointer" }}
-                                >
-                                    {item.receiveTickets ? <FaClipboardList /> : <FaFolderOpen />}
-                                    <span className="ms-2">{item.name}</span>
-                                    {item.children.length > 0 && (
-                                        <FaAngleRight className="ms-auto" />
-                                    )}
-                                </a>
-                                {currentCategory === item && (
-                                    <div>{renderTreeNavigation(item)}</div>
-                                )}
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        );
-    };
+	const handleCategoryClick = (category: TicketCategory) => {
+		setCategories([]);
+		setForms([]);
 
-    const handleInputChange = (
-        event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-    ) => {
-        const target = event.target as HTMLInputElement;
-        const { name, value, type } = target;
-        const checked = target.checked;
+		setCategoryPath([...categoryPath, category]);
+		fetchCategories(category.id);
+		fetchForms(category.id);
+		setCurrentForm(null);
+	};
 
-        setTicket({
-            ...ticket,
-            [name]: type === "checkbox" ? checked : value,
-        });
-    };
+	const handleFormClick = (form: Form) => {
+		setCurrentForm(form);
+	};
 
-    const handleFilesChange = (files: File[]) => {
-        setAttachments(files);
-    };
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
 
-    const handleSubmitForm = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+		if (!currentForm) {
+			toast.error("Selecione um formulário");
+			return;
+		}
 
-        if (!category) {
-            console.error("Formulário não carregado.");
-            return;
-        }
+		const files: { fieldId: number; files: any[] }[] = [];
 
-        const formData = new FormData();
+		const ticketData = {
+			formId: currentForm?.id,
+			responses: [] as { fieldId: number; value: any }[],
+			properties: {
+				observersId: properties.observers,
+				urgency: properties.urgency,
+				receiveEmail: properties.receiveEmail,
+			},
+		};
 
-        const ticketDTO = {
-            ticketCategory_id: category.id,
-            name: ticket.name,
-            description: ticket.description,
-            observation: ticket.observation || "",
-            urgency: ticket.urgency,
-            receiveEmail: ticket.receiveEmail,
-        };
+		Object.entries(formData).forEach(([fieldId, value]) => {
+			if (!(value instanceof File) && !(Array.isArray(value) && value[0] instanceof File)) {
+				ticketData.responses.push({
+					fieldId: Number(fieldId),
+					value,
+				});
+			} else {
+				files.push({
+					fieldId: Number(fieldId),
+					files: Array.isArray(value) ? value : [value],
+				});
+			}
+		});
 
-        formData.append(
-            "ticketInputDTO",
-            new Blob([JSON.stringify(ticketDTO)], { type: "application/json" })
-        );
+		try {
+			const res = await axiosInstance.post(`${API_BASE_URL}/ticket`, ticketData);
 
-        attachments.forEach((file) => formData.append("files", file));
+			if (res.status === 200 || res.status === 201) {
+				files.length > 0 && handleSubmitFiles(res.data, files);
 
-        try {
-            const res = await axiosInstance.post(`${API_BASE_URL}/tickets/`, formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
+				toast.success("Ticket criado");
+				navigate(`/tickets`);
+			}
+		} catch (error) {
+			toast.error("Erro ao criar ticket");
+			console.error(error);
+		}
+	};
 
-            if (res.status === 200 || res.status === 201) {
-                navigate(`/tickets/${res.data}`);
-            } else {
-                console.error("Erro:", res.status);
-            }
-        } catch (error) {
-            console.error("Erro ao enviar formulário:", error);
-        }
-    };
+	const handleSubmitFiles = async (
+		ticketId: number,
+		files: { fieldId: number; files: File[] }[]
+	) => {
+		const formData = new FormData();
 
-    return (
-        <main>
-            <div className="container">
-                <div className="row mt-3">
-                    <div className="col-3">
-                        {currentCategory ? renderTreeNavigation(currentCategory) : null}
-                    </div>
-                    <div className="col border-start ps-4 form_box">
-                        {category ? (
-                            <form onSubmit={handleSubmitForm}>
-                                <div className="mb-3">
-                                    <label htmlFor="name" className="form-label">
-                                        Assunto *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="name"
-                                        name="name"
-                                        value={ticket.name}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </div>
-                                <div className="mb-3">
-                                    <label htmlFor="description" className="form-label">
-                                        Descrição *
-                                    </label>
-                                    <textarea
-                                        className="form-control"
-                                        id="description"
-                                        name="description"
-                                        rows={3}
-                                        value={ticket.description}
-                                        onChange={handleInputChange}
-                                        required
-                                    ></textarea>
-                                </div>
-                                <div className="mb-3">
-                                    <label htmlFor="observation" className="form-label">
-                                        Observações
-                                    </label>
-                                    <textarea
-                                        className="form-control"
-                                        id="observation"
-                                        name="observation"
-                                        rows={3}
-                                        value={ticket.observation}
-                                        onChange={handleInputChange}
-                                    ></textarea>
-                                </div>
-                                <div className="mb-3">
-                                    <label htmlFor="urgency" className="form-label">
-                                        Urgência *
-                                    </label>
-                                    <select
-                                        className="form-select"
-                                        id="urgency"
-                                        name="urgency"
-                                        value={ticket.urgency}
-                                        onChange={handleInputChange}
-                                        required
-                                    >
-                                        <option value="Baixa">Baixa</option>
-                                        <option value="Média">Média</option>
-                                        <option value="Alta">Alta</option>
-                                    </select>
-                                </div>
-                                <div className="mb-3 form-check">
-                                    <input
-                                        type="checkbox"
-                                        className="form-check-input"
-                                        id="receiveEmail"
-                                        name="receiveEmail"
-                                        checked={ticket.receiveEmail}
-                                        onChange={handleInputChange}
-                                    />
-                                    <label className="form-check-label" htmlFor="receiveEmail">
-                                        Receber E-mail
-                                    </label>
-                                </div>
-                                <label className="form-label">Anexos</label>
-                                <AttachmentsForm onFilesChange={handleFilesChange} />
-                                <button type="submit" className="btn btn-send mt-3 d-block mx-auto">
-                                    <FaPlus /> Enviar
-                                </button>
-                            </form>
-                        ) : (
-                            <div>Selecione um formulário</div>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </main>
-    );
+		files.forEach((entry, index) => {
+			formData.append(`fileAnswers[${index}].fieldId`, entry.fieldId.toString());
+			entry.files.forEach((file: File) => {
+				formData.append(`fileAnswers[${index}].files`, file);
+			});
+		});
+
+		try {
+			const res = await axiosInstance.post(
+				`${API_BASE_URL}/ticket/${ticketId}/attachments`,
+				formData
+			);
+
+			if (res.status === 200 || res.status === 201) {
+				toast.success("Arquivos enviados!");
+			}
+		} catch (error) {
+			toast.error("Erro ao enviar arquivos");
+			console.error(error);
+		}
+	};
+
+	const handleBack = () => {
+		const newPath = [...categoryPath];
+		newPath.pop();
+		const previous = newPath.length > 0 ? newPath[newPath.length - 1] : null;
+
+		setCategoryPath(newPath);
+		fetchCategories(previous?.id ?? null);
+		if (previous?.id) {
+			fetchForms(previous.id);
+		} else {
+			setForms([]);
+		}
+
+		setCurrentForm(null);
+	};
+
+	const handleShortcutClick = async (form: Form) => {
+		try {
+			setCategories([]);
+			setForms([]);
+			setCurrentForm(null);
+
+			const pathRes = await axiosInstance.get(
+				`${API_BASE_URL}/ticket-category/path/${form.ticketCategory.id}`
+			);
+			if (pathRes.status === 200) {
+				const path: TicketCategory[] = pathRes.data;
+				setCategoryPath(path);
+
+				await fetchCategories(form.ticketCategory.id);
+				await fetchForms(form.ticketCategory.id);
+
+				setCurrentForm(form);
+			}
+		} catch (error) {
+			console.error("Erro ao processar atalho:", error);
+		}
+	};
+
+	return (
+		<main className="container-fluid">
+			<div className="row">
+				<div className="categories_box col-3 pt-3 px-4">
+					<div className="categories_head d-flex align-items-center">
+						{categoryPath.length > 0 ? (
+							<button onClick={handleBack} className="btn_none">
+								<FaAngleLeft />
+								<span className="ms-3">
+									{categoryPath[categoryPath.length - 1]?.name}
+								</span>
+							</button>
+						) : (
+							<span>Selecione um categoria abaixo</span>
+						)}
+					</div>
+
+					<ul className="mt-2">
+						{forms.map((item) => (
+							<li
+								key={item.id}
+								className={`categories_item${currentForm?.id === item.id ? " categories_item_selected" : ""}`}
+							>
+								<div>
+									<a
+										onClick={() => handleFormClick(item)}
+										className="d-flex align-items-center"
+										role="button"
+										style={{ cursor: "pointer" }}
+									>
+										<FaClipboardList />
+										<span className="ms-3">{item.title}</span>
+									</a>
+								</div>
+							</li>
+						))}
+						{categories.map((item) => (
+							<li key={item.id} className="categories_item">
+								<div>
+									<a
+										onClick={() => handleCategoryClick(item)}
+										className="d-flex align-items-center"
+										role="button"
+										style={{ cursor: "pointer" }}
+									>
+										<FaFolderOpen />
+										<span className="ms-3">{item.name}</span>
+										<FaAngleRight className="ms-auto" />
+									</a>
+								</div>
+							</li>
+						))}
+					</ul>
+				</div>
+				<div className="col">
+					<div className="w-80">
+						{currentForm != null ? (
+							<div className="p-3">
+								<DynamicForm
+									form={currentForm}
+									formData={formData}
+									setFormData={setFormData}
+									preview={false}
+									handleSubmit={handleSubmit}
+									properties={properties}
+									setProperties={setProperties}
+									fav={currentFormFavorite}
+									onFavoriteChange={refreshFavorites}
+								/>
+							</div>
+						) : (
+							<div className="d-flex flex-column justify-content-center align-items-center p-4">
+								<div className="search_wrapper my-2 mb-3 w-75">
+									<input
+										type="text"
+										className="search_bar"
+										placeholder="Pesquisar por ajuda"
+										value={searchValue || ""}
+										onChange={(e) => setSearchValue(e.target.value)}
+									/>
+									<FaSearch className="search_icon" />
+								</div>
+								<div className="mt-3 w-100 d-flex justify-content-center flex-column gap-5">
+									{searchResponse.length > 0 ? (
+										<FormsShortCuts
+											icon={FaSearch}
+											title={"Resultados da pesquisa"}
+											forms={searchResponse}
+											onFormClick={handleShortcutClick}
+										/>
+									) : (
+										<>
+											{favoriteForms.length > 0 && (
+												<FormsShortCuts
+													icon={FaRegStar}
+													title={"Favoritos"}
+													forms={favoriteForms}
+													onFormClick={handleShortcutClick}
+												/>
+											)}
+
+											{recentForms.length > 0 && (
+												<FormsShortCuts
+													icon={FaClockRotateLeft}
+													title={"Recentes"}
+													forms={recentForms}
+													onFormClick={handleShortcutClick}
+												/>
+											)}
+										</>
+									)}
+								</div>
+							</div>
+						)}
+					</div>
+				</div>
+			</div>
+		</main>
+	);
 };
 
 export default CreateTicket;

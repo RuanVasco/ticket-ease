@@ -1,117 +1,90 @@
 package com.ticketease.api.Entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.ticketease.api.Enums.StatusEnum;
+import com.ticketease.api.Enums.UrgencyEnum;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Date;
-import java.util.Set;
-
 @Getter
 @Entity
-@Table(name="ticket")
+@Table(name = "ticket")
 public class Ticket {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Setter
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    User user;
+	@Setter
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	User user;
 
-    @ManyToMany
-    @JoinTable(
-            name = "ticket_observers",
-            joinColumns = @JoinColumn(name = "ticket_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<User> observers = new HashSet<>();
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	@Setter
+	private UrgencyEnum urgency;
 
-    @Setter
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    @NotNull(message = "Name cannot be null")
-    TicketCategory ticketCategory;
+	@ManyToMany
+	@Setter
+	@JoinTable(name = "ticket_observers", joinColumns = @JoinColumn(name = "ticket_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+	private Set<User> observers = new HashSet<>();
 
-    @Setter
-    @NotNull(message = "Name cannot be null")
-    @Column(nullable = false)
-    private String name;
+	@Setter
+	private StatusEnum status;
 
-    @Setter
-    @NotNull(message = "Name cannot be null")
-    @Column(nullable = false)
-    private String description;
+	@Setter
+	private Boolean receiveEmail;
 
-    @Setter
-    @Column(nullable = true)
-    private String observation;
+	@Setter
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "createdAt")
+	private Date createdAt;
 
-    @Setter
-    @ElementCollection
-    @CollectionTable(name = "ticket_files", joinColumns = @JoinColumn(name = "ticket_id"))
-    @Column(name = "file_path")
-    private List<String> filePaths;
+	@Setter
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "updatedAt", nullable = true)
+	private Date updatedAt;
 
-    @Setter
-    private String status;
+	@Setter
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "closedAt", nullable = true)
+	private Date closedAt;
 
-    @Setter
-    private String urgency;
+	@Setter
+	@ManyToOne
+	@JoinColumn(name = "form_id")
+	private Form form;
 
-    @Setter
-    private Boolean receiveEmail;
+	@Setter
+	@OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference
+	private List<TicketResponse> responses;
 
-    @Setter
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "createdAt")
-    private Date createdAt;
+	@Setter
+	@ManyToOne
+	@JoinColumn(name = "approved_by_id")
+	private User approvedBy;
 
-    @Setter
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updatedAt", nullable = true)
-    private Date updatedAt;
+	@Setter
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date approvalDate;
 
-    @Setter
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "closedAt", nullable = true)
-    private Date closedAt;
+	public boolean canManage(User user) {
+		Department department = this.getDepartment();
 
-    public boolean canManage(User user) {
-        Department department = this.getDepartment();
+		if (department == null) {
+			return false;
+		}
 
-        if (department == null) {
-            return false;
-        }
+		return user.hasPermission("MANAGE_TICKET", department) || user.hasPermission("MANAGE_TICKET", null);
+	}
 
-        return user.hasPermission("MANAGE_TICKET", department) || user.hasPermission("MANAGE_TICKET", null);
-    }
-
-    public Set<User> getRelatedUsers() {
-        Set<User> relatedUsers = new HashSet<>();
-
-        Department department = this.getDepartment();
-
-        for (UserRoleDepartment binding : department.getRoleBindings()) {
-            User user = binding.getUser();
-            if (user.hasPermission("MANAGE_TICKET", department)) {
-                relatedUsers.add(user);
-            }
-        }
-
-        relatedUsers.addAll(this.getObservers());
-        relatedUsers.add(this.user);
-
-        return relatedUsers;
-    }
-
-
-    public Department getDepartment() {
-        return this.getTicketCategory().getDepartment();
-    }
-
+	public Department getDepartment() {
+		return this.form.getDepartment();
+	}
 }

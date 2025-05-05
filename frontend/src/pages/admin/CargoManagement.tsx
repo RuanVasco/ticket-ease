@@ -6,6 +6,8 @@ import Pagination from "../../components/Pagination";
 import Table from "../../components/Table";
 import { usePermissions } from "../../context/PermissionsContext";
 import { Cargo } from "../../types/Cargo";
+import { toast } from "react-toastify";
+import { closeModal } from "../../components/Util/CloseModal";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -110,16 +112,20 @@ const CargoManagement: React.FC = () => {
 
         try {
             let res;
+            let message;
 
             if (submitType === "delete") {
                 res = await axiosInstance.delete(`${API_BASE_URL}/cargos/${currentCargo.id}`);
+                message = "Cargo removido com sucesso!";
             } else if (submitType === "add") {
                 res = await axiosInstance.post(`${API_BASE_URL}/cargos/`, currentCargo);
+                message = "Cargo criado com sucesso!";
             } else if (submitType === "update") {
                 res = await axiosInstance.put(
                     `${API_BASE_URL}/cargos/${currentCargo.id}`,
                     currentCargo
                 );
+                message = "Cargo atualizado com sucesso!";
             } else {
                 console.error("Invalid submit type");
                 return;
@@ -131,11 +137,18 @@ const CargoManagement: React.FC = () => {
                     name: "",
                 });
 
-                window.location.reload();
+                setCurrentPage(0);
+                fetchData();
+                closeModal("modal");
+                toast.success(message);
             } else {
                 console.error("Error", res.status);
             }
         } catch (error) {
+            setCurrentPage(0);
+            fetchData();
+            closeModal("modal");
+            toast.error(String(error));
             console.error(error);
         }
     };

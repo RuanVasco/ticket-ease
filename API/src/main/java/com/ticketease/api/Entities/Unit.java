@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name="units")
+@Table(name = "units")
 @Getter
 public class Unit {
 	@Id
@@ -17,15 +17,16 @@ public class Unit {
 	private Long id;
 
 	@Setter
-    private String name;
+	private String name;
 
 	@Setter
-    private String address;
-	
-	public Unit() {}
-	
+	private String address;
+
+	public Unit() {
+	}
+
 	public Unit(String name, String address) {
 		this.name = name;
 		this.address = address;
-    }
+	}
 }

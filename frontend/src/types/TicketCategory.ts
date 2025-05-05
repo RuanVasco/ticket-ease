@@ -3,7 +3,6 @@ import { Department } from "./Department";
 export class TicketCategory {
     id: string;
     name: string;
-    receiveTickets: boolean;
     department: Department;
     father: TicketCategory | null;
     path?: string;
@@ -12,14 +11,12 @@ export class TicketCategory {
     constructor(
         id: string,
         name: string,
-        receiveTickets: boolean,
         department: Department,
         father: TicketCategory | null = null,
         children?: TicketCategory[]
     ) {
         this.id = id;
         this.name = name;
-        this.receiveTickets = receiveTickets;
         this.department = department;
         this.father = father;
         this.path = this.buildPath();
@@ -38,40 +35,20 @@ export class TicketCategory {
     }
 
     buildPath(): string {
-        let path = "";
-        let current: TicketCategory | null = this.father;
-        let temp: Department | null = null;
+        const parts: string[] = [];
+        let current: TicketCategory | null = this;
 
-        if (current) {
-            temp = current.getDepartment();
-
-            while (current) {
-                path = `${current.name}${path ? " > " + path : ""}`;
-                temp = current.getDepartment();
-                current = current.father ?? null;
-            }
-
-            if (temp) {
-                path = `${temp.name} > ${path}`;
-            }
-        } else {
-            path = this.department.name;
+        while (current) {
+            parts.unshift(current.name);
+            current = current.father ?? null;
         }
 
-        path += ` > ${this.name}`;
-
-        return path;
+        return parts.join(" > ");
     }
 
     static fromJSON(data: any): TicketCategory {
         const father = data.father ? TicketCategory.fromJSON(data.father) : null;
-        const category = new TicketCategory(
-            data.id,
-            data.name,
-            data.receiveTickets,
-            data.department,
-            father
-        );
+        const category = new TicketCategory(data.id, data.name, data.department, father);
 
         if (data.children) {
             category.children = data.children.map((child: any) => TicketCategory.fromJSON(child));

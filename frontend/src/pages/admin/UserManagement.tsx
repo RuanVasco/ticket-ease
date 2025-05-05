@@ -4,13 +4,15 @@ import { FaPlus, FaTrash, FaUserMinus, FaUserPlus } from "react-icons/fa6";
 import ActionBar from "../../components/ActionBar";
 import axiosInstance from "../../components/AxiosConfig";
 import Pagination from "../../components/Pagination";
-import PhoneInput from "../../components/PhoneInput";
+import PhoneInput from "../../components/Fields/PhoneInput";
 import Table from "../../components/Table";
 import { usePermissions } from "../../context/PermissionsContext";
 import { Cargo } from "../../types/Cargo";
 import { Department } from "../../types/Department";
 import { Profile } from "../../types/Profile";
 import { User } from "../../types/User";
+import { toast } from "react-toastify";
+import { closeModal } from "../../components/Util/CloseModal";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -59,21 +61,21 @@ const UserManagement: React.FC = () => {
         setCanDelete(hasPermission("DELETE_USER"));
     }, [hasPermission]);
 
-    useEffect(() => {
-        const fetchUsersData = async () => {
-            try {
-                const res = await axiosInstance.get(
-                    `${API_BASE_URL}/users/pageable?page=${currentPage}&size=${pageSize}`
-                );
-                if (res.status === 200) {
-                    setData(res.data.content);
-                    setTotalPages(res.data.totalPages);
-                }
-            } catch (error) {
-                console.error(error);
+    const fetchUsersData = async () => {
+        try {
+            const res = await axiosInstance.get(
+                `${API_BASE_URL}/users/pageable?page=${currentPage}&size=${pageSize}`
+            );
+            if (res.status === 200) {
+                setData(res.data.content);
+                setTotalPages(res.data.totalPages);
             }
-        };
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
+    useEffect(() => {
         const fetchOptions = async (
             endpoint: string,
             setState: React.Dispatch<React.SetStateAction<any[]>>
@@ -171,6 +173,7 @@ const UserManagement: React.FC = () => {
         e.preventDefault();
         try {
             let res;
+            let message;
 
             const userToSend = {
                 name: currentUser.name,
@@ -178,26 +181,27 @@ const UserManagement: React.FC = () => {
                 email: currentUser.email,
                 password: currentUser.password,
                 cargo: currentUser.cargo,
-                roleDepartments: currentUser.profileDepartments
-                    .filter((a) => a.department && a.role)
-                    .map((a) => ({
-                        department: { id: a.department.id },
-                        role: { id: a.role.id },
-                    })),
+                roleDepartments: currentUser.profileDepartments.map((a) => ({
+                    department: a.department ? { id: a.department.id } : null,
+                    role: { id: a.role.id },
+                })),
             };
 
             switch (submitType) {
                 case "add":
                     res = await axiosInstance.post(`${API_BASE_URL}/users/register`, userToSend);
+                    message = "Usuário criado com sucesso!";
                     break;
                 case "update":
                     res = await axiosInstance.put(
                         `${API_BASE_URL}/users/${currentUser.id}`,
                         userToSend
                     );
+                    message = "Usuário atualizado com sucesso!";
                     break;
                 case "delete":
                     res = await axiosInstance.delete(`${API_BASE_URL}/users/${currentUser.id}`);
+                    message = "Usuário excluído com sucesso!";
                     break;
                 default:
                     return;
@@ -214,10 +218,14 @@ const UserManagement: React.FC = () => {
                     password: "",
                 });
 
-                window.location.reload();
+                toast.success(message);
+                fetchUsersData();
             }
         } catch (error) {
+            toast.error("Erro ao processar a requisição");
             console.error(error);
+        } finally {
+            closeModal("modal");
         }
     };
 

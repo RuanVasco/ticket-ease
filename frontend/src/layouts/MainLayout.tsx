@@ -12,8 +12,7 @@ const MainLayout = () => {
 
     useEffect(() => {
         if (notifications.length === 0) return;
-
-        const latest = notifications[notifications.length - 1];
+        const latest = notifications[0];
         if (!latest.read) {
             toast.info(latest.message);
         }

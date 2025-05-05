@@ -1,0 +1,47 @@
+@use "../variables";
+
+.categories_box {
+	background-color: variables.$color-secondary;
+	min-height: 93vh;
+	overflow-y: auto;
+
+	& * {
+		color: variables.$color-white;
+		text-decoration: none;
+	}
+
+	& span {
+		user-select: none;
+	}
+
+	& ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+}
+
+.categories_head {
+	height: 5vh;
+	& * {
+		font-size: variables.$font-size-lg;
+	}
+}
+
+.categories_item {
+	font-size: variables.$font-size-lg;
+	border-radius: 8px;
+	padding: 5px 10px;
+	margin-top: 5px;
+
+	&:hover {
+		background-color: variables.$color-tertiary;
+	}
+}
+
+.categories_item_selected {
+	background-color: variables.$color-tertiary;
+	&:hover {
+		background-color: variables.$color-tertiary;
+	}
+}

@@ -1,0 +1,22 @@
+@use "./variables";
+body {
+	font-family: variables.$font-family-base;
+	font-size: variables.$font-size-base;
+	background-color: variables.$color-light-gray;
+	color: variables.$color-primary;
+	margin: 0;
+	padding: 0;
+	overflow-x: hidden;
+}
+
+* {
+	-webkit-user-drag: none;
+	-khtml-user-drag: none;
+	-moz-user-drag: none;
+	-o-user-drag: none;
+	-ms-user-drag: none;
+}
+
+a {
+	text-decoration: none;
+}

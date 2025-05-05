@@ -22,7 +22,6 @@
 	</properties>
 
 	<dependencies>
-		<!-- Spring Boot -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -47,8 +46,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
-
-		<!-- Segurança e JWT -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-core</artifactId>
@@ -74,12 +76,17 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.12.6</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>nimbus-jose-jwt</artifactId>
 			<version>10.0.2</version>
 		</dependency>
 
-		<!-- Lombok -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -87,7 +94,6 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- Banco de Dados -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
@@ -99,7 +105,6 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- Flyway para migração de banco -->
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
@@ -109,7 +114,6 @@
 			<artifactId>flyway-database-postgresql</artifactId>
 		</dependency>
 
-		<!-- Jakarta Servlet API (compatível com Spring Boot 3.x) -->
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
@@ -117,45 +121,23 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- Documentação da API com Springdoc OpenAPI -->
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>2.2.0</version>
 		</dependency>
 
-		<!-- Upload de Arquivos -->
-		<dependency>
-			<groupId>commons-fileupload</groupId>
-			<artifactId>commons-fileupload</artifactId>
-			<version>1.5</version>
-		</dependency>
-
-		<!-- Google Java Format -->
-		<dependency>
-			<groupId>com.google.googlejavaformat</groupId>
-			<artifactId>google-java-format</artifactId>
-			<version>1.25.2</version>
-		</dependency>
-
-		<!-- Testes -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<version>3.4.4</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
 
 	<build>
 		<finalName>TicketEaseAPI</finalName>
 		<plugins>
-			<!-- Plugin do Spring Boot -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -176,6 +158,27 @@
 							<version>1.18.30</version>
 						</path>
 					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>com.diffplug.spotless</groupId>
+				<artifactId>spotless-maven-plugin</artifactId>
+				<version>2.44.3</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+							<goal>apply</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<java>
+						<eclipse>
+							<file>${basedir}/eclipse-java-formatter.xml</file>
+						</eclipse>
+					</java>
 				</configuration>
 			</plugin>
 		</plugins>

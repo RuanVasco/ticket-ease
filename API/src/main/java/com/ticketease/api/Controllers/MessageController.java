@@ -1,20 +1,22 @@
 package com.ticketease.api.Controllers;
 
-import com.ticketease.api.DTO.MessageDTO;
+import com.ticketease.api.DTO.MessageDTO.MessageRequestDTO;
+import com.ticketease.api.DTO.MessageDTO.MessageResponseDTO;
+import com.ticketease.api.DTO.User.UserResponseDTO;
 import com.ticketease.api.Entities.Message;
-import com.ticketease.api.Entities.Notification;
 import com.ticketease.api.Entities.Ticket;
 import com.ticketease.api.Entities.User;
-import com.ticketease.api.Repositories.MessageRepository;
-import com.ticketease.api.Repositories.NotificationRepository;
-import com.ticketease.api.Repositories.TicketRepository;
-import com.ticketease.api.Repositories.UserRepository;
+import com.ticketease.api.Enums.StatusEnum;
 import com.ticketease.api.Services.MessageService;
 import com.ticketease.api.Services.NotificationService;
 import com.ticketease.api.Services.TicketService;
+import java.io.IOException;
+import java.security.Principal;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,84 +29,86 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import org.springframework.data.domain.Pageable;
-import java.io.IOException;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 @RestController
 @RequestMapping("messages")
 public class MessageController {
 
-    @Autowired
-    UserRepository userRepository;
+	@Autowired
+	MessageService messageService;
 
-    @Autowired
-    TicketRepository ticketRepository;
+	private final TicketService ticketService;
+	private final NotificationService notificationService;
+	private final SimpMessagingTemplate simpMessagingTemplate;
 
-    @Autowired
-    MessageService messageService;
+	public MessageController(TicketService ticketService, SimpMessagingTemplate simpMessagingTemplate,
+			NotificationService notificationService) {
+		this.ticketService = ticketService;
+		this.simpMessagingTemplate = simpMessagingTemplate;
+		this.notificationService = notificationService;
+	}
 
-    @Autowired
-    MessageRepository messageRepository;
+	@MessageMapping("/user/tickets")
+	public void receiveTickets(Principal principal) {
+		User user = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
 
-    private final TicketService ticketService;
-    private final NotificationService notificationService;
-    private final SimpMessagingTemplate simpMessagingTemplate;
+		messageService.sendTicketsId(user);
+	}
 
-    public MessageController(TicketService ticketService, SimpMessagingTemplate simpMessagingTemplate, NotificationService notificationService, NotificationRepository notificationRepository) {
-        this.ticketService = ticketService;
-        this.simpMessagingTemplate = simpMessagingTemplate;
-        this.notificationService = notificationService;
-    }
+	@Transactional
+	@MessageMapping("/ticket/{ticketId}")
+	public void sendMessage(@DestinationVariable Long ticketId, @Payload MessageRequestDTO messageRequestDTO,
+			Principal principal) throws IOException {
+		User user = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
+		Ticket ticket = ticketService.findById(ticketId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
 
-    @MessageMapping("/user/tickets")
-    public void receiveTickets(Principal principal) {
-        User user = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
+		if (!ticket.getUser().equals(user) && !ticket.canManage(user)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado. Você não tem permissão.");
+		}
 
-        messageService.sendTicketsId(user);
-    }
+		if (
+			StatusEnum.CLOSED.equals(ticket.getStatus()) ||
+			StatusEnum.CANCELED.equals(ticket.getStatus())
+		) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Este ticket está fechado.");
+		}
 
-    @Transactional
-    @MessageMapping("/ticket/{ticketId}")
-    public void sendMessage(@DestinationVariable Long ticketId, @Payload MessageDTO messageDTO, Principal principal) throws IOException {
-        User user = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
-        Ticket ticket = ticketService.findById(ticketId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
+		if (StatusEnum.PENDING_APPROVAL.equals(ticket.getStatus()) && !ticket.getForm().getApprovers().contains(user)
+				&& !ticket.getUser().equals(user)) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Este ticket está aguardando aprovação.");
+		}
 
-        if (!ticket.getUser().equals(user) && !ticket.canManage(user)) {
-            System.out.println("Acesso negado. Usuário não tem permissão.");
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado. Você não tem permissão.");
-        }
+		Message message = messageService.addMessage(ticket, user, messageRequestDTO);
 
-        if ("Fechado".equals(ticket.getStatus())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Este ticket está fechado.");
-        }
+		simpMessagingTemplate.convertAndSend("/topic/ticket/" + ticketId, message);
 
-        Message message = messageService.addMessage(ticket, user, messageDTO);
+		Set<User> relatedUsers = ticketService.getRelatedUsers(ticket);
+		String notificationContent = "Mensagem recebida no ticket " + ticketId;
+		for (User targetUser : relatedUsers) {
+			if (user.equals(targetUser))
+				continue;
+			notificationService.createNotification(targetUser, ticket.getId(), "Message", notificationContent);
+		}
+	}
 
-        simpMessagingTemplate.convertAndSend("/topic/ticket/" + ticketId, message);
+	@GetMapping("/ticket/{ticketID}")
+	public ResponseEntity<Page<MessageResponseDTO>> getMessages(
+		@PathVariable Long ticketID,
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "10") int size
+	) {
+		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "sentAt"));
+		Page<Message> messages = messageService.getByTicketId(ticketID, pageable);
 
-        Set<User> relatedUsers = ticket.getRelatedUsers();
-        String notificationContent = "Mensagem recebida no ticket " +  ticketId;
-        for (User targetUser : relatedUsers) {
-            if (user.equals(targetUser)) continue;
-            notificationService.createNotification(targetUser, ticket.getId(), "Message", notificationContent);
-        }
-    }
+		Page<MessageResponseDTO> messageDTOs = messages.map(message ->
+			new MessageResponseDTO(
+				message.getId(),
+				message.getText(),
+				UserResponseDTO.from(message.getUser()),
+				message.getSentAt()
+			)
+		);
 
-    @GetMapping("/ticket/{ticketID}")
-    public ResponseEntity<Page<Message>> getMessages(
-            @PathVariable Long ticketID,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        //Verificar usuário;
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("sentAt"));
-        Page<Message> messages = messageService.getByTicketId(ticketID, pageable);
-
-        return ResponseEntity.ok(messages);
-    }
+		return ResponseEntity.ok(messageDTOs);
+	}
 }

@@ -1,205 +1,212 @@
 package com.ticketease.api.Controllers;
 
-import com.ticketease.api.DTO.UserRoleDepartmentDTO;
 import com.ticketease.api.DTO.User.CompleteUserDTO;
 import com.ticketease.api.DTO.User.UserDTO;
+import com.ticketease.api.DTO.UserRoleDepartmentDTO;
 import com.ticketease.api.Entities.*;
 import com.ticketease.api.Repositories.*;
 import com.ticketease.api.Services.CustomUserDetailsService;
 import jakarta.transaction.Transactional;
+import java.util.*;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 @RestController
 @RequestMapping("users")
 public class UserController {
 
-    @Autowired
-    private UserRepository userRepository;
+	@Autowired
+	private UserRepository userRepository;
 
-    @Autowired
-    private CustomUserDetailsService userService;
+	@Autowired
+	private CustomUserDetailsService userService;
 
-    @Autowired
-    private CargoRepository cargoRepository;
+	@Autowired
+	private CargoRepository cargoRepository;
 
-    @Autowired
-    private DepartmentRepository departmentRepository;
+	@Autowired
+	private DepartmentRepository departmentRepository;
 
-    @Autowired
-    private RoleRepository roleRepository;
+	@Autowired
+	private RoleRepository roleRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
-    private final UserRoleDepartmentRepository userRoleDepartmentRepository;
+	private final UserRoleDepartmentRepository userRoleDepartmentRepository;
 
-    public UserController(UserRoleDepartmentRepository userRoleDepartmentRepository) {
-        this.userRoleDepartmentRepository = userRoleDepartmentRepository;
-    }
+	public UserController(UserRoleDepartmentRepository userRoleDepartmentRepository) {
+		this.userRoleDepartmentRepository = userRoleDepartmentRepository;
+	}
 
-    @GetMapping("/")
-    public ResponseEntity<?> getAll() {
-        return ResponseEntity.ok(userRepository.findAll());
-    }
+	@GetMapping
+	public ResponseEntity<?> getAll() {
+		return ResponseEntity.ok(userRepository.findAll());
+	}
 
-    @GetMapping("/me/departments")
-    public ResponseEntity<?> getDepartments() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	@GetMapping("/me/departments")
+	public ResponseEntity<?> getDepartments() {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        Set<Department> departments = user.getRoleBindings().stream()
-                .map(UserRoleDepartment::getDepartment)
-                .collect(Collectors.toSet());
+		boolean allDepartmentsNull = user.getRoleBindings().stream()
+				.allMatch(binding -> binding.getDepartment() == null);
 
-        List<Department> sortedDepartments = departments.stream()
-                .sorted(Comparator.comparing(Department::getId))
-                .toList();
+		if (allDepartmentsNull) {
+			return ResponseEntity.noContent().build();
+		}
 
-        return ResponseEntity.ok(sortedDepartments);
-    }
+		Set<Department> departments = user.getRoleBindings().stream().map(UserRoleDepartment::getDepartment)
+				.filter(Objects::nonNull).collect(Collectors.toSet());
 
-    @GetMapping("/pageable")
-    public ResponseEntity<Page<User>> getAllPageable(Pageable pageable) {
-        Page<User> users = userRepository.findAll(pageable);
+		List<Department> sortedDepartments = departments.stream().sorted(Comparator.comparing(Department::getId))
+				.toList();
 
-        return ResponseEntity.ok(users);
-    }
+		return ResponseEntity.ok(sortedDepartments);
+	}
 
-    @GetMapping("/{userID}")
-    public CompleteUserDTO getUser(@PathVariable Long userID) {
-        return userService.getUser(userID);
-    }
+	@GetMapping("/pageable")
+	public ResponseEntity<Page<User>> getAllPageable(Pageable pageable) {
+		Page<User> users = userRepository.findAll(pageable);
 
-    @Transactional
-    @DeleteMapping("/{userID}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long userID) {
-        Optional<User> optionalUser = userRepository.findById(userID);
+		return ResponseEntity.ok(users);
+	}
 
-        if (optionalUser.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+	@GetMapping("/{userID}")
+	public CompleteUserDTO getUser(@PathVariable Long userID) {
+		return userService.getUser(userID);
+	}
 
-        User user = optionalUser.get();
+	@Transactional
+	@DeleteMapping("/{userID}")
+	public ResponseEntity<?> deleteUser(@PathVariable Long userID) {
+		Optional<User> optionalUser = userRepository.findById(userID);
 
-        user.getRoleBindings().clear();
-        userRepository.save(user);
+		if (optionalUser.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
 
-        userRoleDepartmentRepository.deleteByUser(user);
-        userRoleDepartmentRepository.flush();
+		User user = optionalUser.get();
 
-        userRepository.delete(user);
+		user.getRoleBindings().clear();
+		userRepository.save(user);
 
-        return ResponseEntity.ok().build();
-    }
+		userRoleDepartmentRepository.deleteByUser(user);
+		userRoleDepartmentRepository.flush();
 
-    @Transactional
-    @PutMapping("/{userID}")
-    public ResponseEntity<?> updateUser(@PathVariable Long userID, @RequestBody UserDTO userUpdateDTO) {
-        User sender = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!sender.hasPermission("EDIT_USER", null)) {
-            return new ResponseEntity<>("Acesso negado. Você não tem permissão para editar usuários.", HttpStatus.FORBIDDEN);
-        }
+		userRepository.delete(user);
 
-        Optional<User> optionalUser = userRepository.findById(userID);
-        if (optionalUser.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+		return ResponseEntity.ok().build();
+	}
 
-        User user = optionalUser.get();
+	@Transactional
+	@PutMapping("/{userID}")
+	public ResponseEntity<?> updateUser(@PathVariable Long userID, @RequestBody UserDTO userUpdateDTO) {
+		User sender = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		if (!sender.hasPermission("EDIT_USER", null)) {
+			return new ResponseEntity<>("Acesso negado. Você não tem permissão para editar usuários.",
+					HttpStatus.FORBIDDEN);
+		}
 
-        user.getRoleBindings().clear();
+		Optional<User> optionalUser = userRepository.findById(userID);
+		if (optionalUser.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
 
-        userRoleDepartmentRepository.deleteByUser(user);
-        userRoleDepartmentRepository.flush();
+		User user = optionalUser.get();
 
-        if (userUpdateDTO.cargo() != null && userUpdateDTO.cargo().getId() != null) {
-            cargoRepository.findById(userUpdateDTO.cargo().getId()).ifPresent(user::setCargo);
-        }
+		userRoleDepartmentRepository.deleteByUser(user);
+		userRoleDepartmentRepository.flush();
 
-        if (userUpdateDTO.password() != null && !userUpdateDTO.password().isBlank()) {
-            user.setPassword(userUpdateDTO.password(), passwordEncoder);
-        }
+		user.getRoleBindings().clear();
 
-        user.setName(userUpdateDTO.name());
-        user.setEmail(userUpdateDTO.email());
-        user.setPhone(userUpdateDTO.phone());
+		if (userUpdateDTO.cargo() != null && userUpdateDTO.cargo().getId() != null) {
+			cargoRepository.findById(userUpdateDTO.cargo().getId()).ifPresent(user::setCargo);
+		}
 
-        userRepository.save(user);
+		if (userUpdateDTO.password() != null && !userUpdateDTO.password().isBlank()) {
+			user.setPassword(userUpdateDTO.password(), passwordEncoder);
+		}
 
-        for (UserRoleDepartmentDTO pair : userUpdateDTO.roleDepartments()) {
-            Long roleId = pair.role().getId();
-            Long departmentId = pair.department() != null ? pair.department().getId() : null;
+		user.setName(userUpdateDTO.name());
+		user.setEmail(userUpdateDTO.email());
+		user.setPhone(userUpdateDTO.phone());
 
-            Optional<Role> optionalRole = roleRepository.findById(roleId);
-            if (optionalRole.isEmpty()) continue;
+		userRepository.save(user);
 
-            UserRoleDepartment binding = new UserRoleDepartment();
-            binding.setUser(user);
-            binding.setRole(optionalRole.get());
+		for (UserRoleDepartmentDTO pair : userUpdateDTO.roleDepartments()) {
+			Long roleId = pair.role().getId();
+			Long departmentId = pair.department() != null ? pair.department().getId() : null;
 
-            if (departmentId != null) {
-                departmentRepository.findById(departmentId).ifPresent(binding::setDepartment);
-            } else {
-                binding.setDepartment(null);
-            }
+			Optional<Role> optionalRole = roleRepository.findById(roleId);
+			if (optionalRole.isEmpty())
+				continue;
 
-            userRoleDepartmentRepository.save(binding);
-        }
+			UserRoleDepartment binding = new UserRoleDepartment();
+			binding.setUser(user);
+			binding.setRole(optionalRole.get());
 
-        return ResponseEntity.ok("User updated successfully");
-    }
+			if (departmentId != null) {
+				departmentRepository.findById(departmentId).ifPresent(binding::setDepartment);
+			} else {
+				binding.setDepartment(null);
+			}
 
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserDTO signUpDto) {
-        User sender = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!sender.hasPermission("CREATE_USER", null)){
-            return new ResponseEntity<>("Acesso negado. Você não tem permissão para criar usuários.", HttpStatus.FORBIDDEN);
-        }
+			userRoleDepartmentRepository.save(binding);
+		}
 
-        if (userRepository.existsByEmail(signUpDto.email())) {
-            return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
-        }
+		return ResponseEntity.ok("User updated successfully");
+	}
 
-        User user = new User();
-        user.setName(signUpDto.name());
-        user.setEmail(signUpDto.email());
-        user.setPhone(signUpDto.phone());
-        user.setPassword(signUpDto.password(), passwordEncoder);
+	@PostMapping("/register")
+	public ResponseEntity<?> registerUser(@RequestBody UserDTO signUpDto) {
+		User sender = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		if (!sender.hasPermission("CREATE_USER", null)) {
+			return new ResponseEntity<>("Acesso negado. Você não tem permissão para criar usuários.",
+					HttpStatus.FORBIDDEN);
+		}
 
-        if (signUpDto.cargo() != null && signUpDto.cargo().getId() != null) {
-            cargoRepository.findById(signUpDto.cargo().getId()).ifPresent(user::setCargo);
-        }
+		if (userRepository.existsByEmail(signUpDto.email())) {
+			return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
+		}
 
-        userRepository.save(user);
+		User user = new User();
+		user.setName(signUpDto.name());
+		user.setEmail(signUpDto.email());
+		user.setPhone(signUpDto.phone());
+		user.setPassword(signUpDto.password(), passwordEncoder);
 
-        for (UserRoleDepartmentDTO pair : signUpDto.roleDepartments()) {
-            Optional<Role> optionalRole = roleRepository.findById(pair.role().getId());
+		if (signUpDto.cargo() != null && signUpDto.cargo().getId() != null) {
+			cargoRepository.findById(signUpDto.cargo().getId()).ifPresent(user::setCargo);
+		}
 
-            if (optionalRole.isEmpty()) continue;
+		userRepository.save(user);
 
-            UserRoleDepartment binding = new UserRoleDepartment();
-            binding.setUser(user);
-            binding.setRole(optionalRole.get());
+		for (UserRoleDepartmentDTO pair : signUpDto.roleDepartments()) {
+			Optional<Role> optionalRole = roleRepository.findById(pair.role().getId());
 
-            if (pair.department() != null && pair.department().getId() != null) {
-                departmentRepository.findById(pair.department().getId()).ifPresent(binding::setDepartment);
-            } else {
-                binding.setDepartment(null);
-            }
+			if (optionalRole.isEmpty())
+				continue;
 
-            userRoleDepartmentRepository.save(binding);
-        }
+			UserRoleDepartment binding = new UserRoleDepartment();
+			binding.setUser(user);
+			binding.setRole(optionalRole.get());
 
-        return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
-    }
+			if (pair.department() != null && pair.department().getId() != null) {
+				departmentRepository.findById(pair.department().getId()).ifPresent(binding::setDepartment);
+			} else {
+				binding.setDepartment(null);
+			}
 
+			userRoleDepartmentRepository.save(binding);
+		}
+
+		return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
+	}
 }

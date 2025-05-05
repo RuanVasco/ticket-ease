@@ -8,6 +8,8 @@ export default function Login() {
     const navigate = useNavigate();
     const [emailUser, setEmail] = useState<string>("");
     const [passwordUser, setPassword] = useState<string>("");
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -22,11 +24,14 @@ export default function Login() {
                 localStorage.setItem("token", res.data.token);
                 localStorage.setItem("refreshToken", res.data.refreshToken);
                 navigate("/");
-            } else {
-                console.error("Erro ao enviar formulário:", res.status);
             }
-        } catch (error) {
-            console.error("Erro na autenticação:", error);
+        } catch (error: any) {
+            console.log(error)
+            if (axios.isAxiosError(error) && error.response) {
+                setErrorMessage(error.response.data);
+            } else {
+                setErrorMessage("Erro inesperado ao tentar fazer login.");
+            }
         }
     };
 
@@ -36,6 +41,11 @@ export default function Login() {
                 <div className="div_login">
                     <form onSubmit={handleSubmit} className="border p-4 rounded form_">
                         <div>
+                            {errorMessage && (
+                                <div className="alert alert-danger mt-3" role="alert">
+                                    {errorMessage}
+                                </div>
+                            )}
                             <label htmlFor="email" className="form-label">
                                 E-mail
                             </label>
@@ -45,6 +55,7 @@ export default function Login() {
                                 name="email"
                                 id="email"
                                 placeholder="nome@exemplo.com"
+                                autoComplete="off"
                                 value={emailUser}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
@@ -59,6 +70,7 @@ export default function Login() {
                                 className="form-control"
                                 name="password"
                                 id="password"
+                                autoComplete="off"
                                 value={passwordUser}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required

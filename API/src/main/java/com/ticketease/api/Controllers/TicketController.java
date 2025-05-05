@@ -1,177 +1,171 @@
 package com.ticketease.api.Controllers;
 
-import com.ticketease.api.DTO.InputDTO.TicketInputDTO;
-import com.ticketease.api.DTO.TicketDTO;
-import com.ticketease.api.DTO.AssemblerDTO.TicketDTOAssembler;
-import com.ticketease.api.Entities.Department;
-import com.ticketease.api.Entities.Ticket;
-import com.ticketease.api.Entities.User;
-import com.ticketease.api.Repositories.DepartmentRepository;
-import com.ticketease.api.Repositories.TicketRepository;
-import com.ticketease.api.Services.MessageService;
-import com.ticketease.api.Services.NotificationService;
+import com.ticketease.api.DTO.TicketDTO.TicketRequestDTO;
+import com.ticketease.api.DTO.TicketDTO.TicketResponseDTO;
+import com.ticketease.api.Entities.*;
+import com.ticketease.api.Enums.StatusEnum;
+import com.ticketease.api.Services.DepartmentService;
 import com.ticketease.api.Services.TicketService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
-import org.springframework.data.web.PagedResourcesAssembler;
+import java.net.URI;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.hateoas.PagedModel;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping("tickets")
+@RequestMapping("ticket")
+@RequiredArgsConstructor
 public class TicketController {
 
-    private final TicketService ticketService;
-    private final PagedResourcesAssembler<Ticket> pagedResourcesAssembler;
-    private final TicketDTOAssembler ticketDTOAssembler;
-    private final DepartmentRepository departmentRepository;
-    private final NotificationService notificationService;
-    private final MessageService messageService;
+	private final TicketService ticketService;
+	private final DepartmentService departmentService;
 
-    @Autowired
-    TicketRepository ticketRepository;
+	@GetMapping
+	public ResponseEntity<Page<TicketResponseDTO>> getByStatus(@RequestParam(required = false) StatusEnum status,
+			Pageable pageable) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-    public TicketController(TicketService ticketService,
-                            PagedResourcesAssembler<Ticket> pagedResourcesAssembler,
-                            TicketDTOAssembler ticketDTOAssembler,
-                            DepartmentRepository departmentRepository,
-                            NotificationService notificationService,
-                            MessageService messageService) {
-        this.ticketService = ticketService;
-        this.pagedResourcesAssembler = pagedResourcesAssembler;
-        this.ticketDTOAssembler = ticketDTOAssembler;
-        this.departmentRepository = departmentRepository;
-        this.notificationService = notificationService;
-        this.messageService = messageService;
-    }
+		Page<Ticket> tickets = Page.empty();
+		if (status == StatusEnum.PENDING_APPROVAL) {
+			tickets = ticketService.findPendingTicketsForApprover(user, pageable);
+		}
 
-    @PostMapping("/")
-    public ResponseEntity<?> openTicket(
-            @RequestPart(value = "files", required = false) List<MultipartFile> files,
-            @RequestPart TicketInputDTO ticketInputDTO
-    ) {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		Page<TicketResponseDTO> dtoPage = tickets.map(TicketResponseDTO::from);
+		return ResponseEntity.ok(dtoPage);
+	}
 
-        if (!(userDetails instanceof User user)) {
-            return ResponseEntity.notFound().build();
-        }
+	@GetMapping("/my-tickets")
+	public ResponseEntity<Page<TicketResponseDTO>> getUserTickets(
+			@RequestParam(value = "status", required = false) StatusEnum status, Pageable pageable) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        Ticket ticket = ticketService.openTicket(ticketInputDTO, files, user);
+		Page<Ticket> ticketsPage;
+		if (status != null) {
+			ticketsPage = ticketService.findByOwnerOrObserverAndStatus(user, status, pageable);
+		} else {
+			ticketsPage = ticketService.findByOwnerOrObserver(user, pageable);
+		}
 
-        messageService.sendTicketsId(user);
+		Page<TicketResponseDTO> ticketsDTOPage = ticketsPage.map(TicketResponseDTO::from);
 
-        Set<User> relatedUsers = ticket.getRelatedUsers();
-        String notificationContent = "Novo chamado de " + ticket.getUser().getName() + " para " + ticket.getDepartment().getName();
-        for (User targetUser : relatedUsers) {
-            if (user.equals(targetUser)) continue;
-            notificationService.createNotification(targetUser, ticket.getId(), "Ticket", notificationContent);
-        }
+		return ResponseEntity.ok(ticketsDTOPage);
+	}
 
-        return ResponseEntity.ok(ticket.getId());
-    }
+	@GetMapping("/by-department/{departmentId}")
+	public ResponseEntity<?> getDepartmentTickets(@PathVariable Long departmentId,
+			@RequestParam(value = "status", required = false) StatusEnum status, Pageable pageable) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-    @GetMapping("/department/{departmentId}")
-    public ResponseEntity<PagedModel<TicketDTO>> getAllPageable(
-            @PathVariable Long departmentId,
-            @RequestParam(value = "status", defaultValue = "Novo") String status,
-            Pageable pageable
-    ) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		Department department = departmentService.findById(departmentId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Setor não encontrado"));
 
-        Optional<Department> optionalDepartment = departmentRepository.findById(departmentId);
-        if (optionalDepartment.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
+		if (!user.hasPermission("MANAGE_TICKET", department)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para este setor.");
+		}
 
-        Department department = optionalDepartment.get();
+		Page<Ticket> ticketsPage;
+		if (status != null) {
+			ticketsPage = ticketService.findByDepartmentAndStatus(department, status, pageable);
+		} else {
+			ticketsPage = ticketService.findByDepartment(department, pageable);
+		}
 
-        if (!user.hasPermission("MANAGE_TICKET", department) && !user.hasPermission("MANAGE_TICKET", null)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+		Page<TicketResponseDTO> ticketsDTOPage = ticketsPage.map(TicketResponseDTO::from);
 
-        Page<Ticket> tickets = ticketService.getUserManageableTickets(pageable, status, department);
-        PagedModel<TicketDTO> pagedModel = pagedResourcesAssembler.toModel(tickets, ticketDTOAssembler);
+		return ResponseEntity.ok(ticketsDTOPage);
+	}
 
-        return ResponseEntity.ok(pagedModel);
-    }
+	@GetMapping("/managed")
+	public ResponseEntity<Page<TicketResponseDTO>> getManagedTickets(
+			@RequestParam(value = "status", required = false) StatusEnum status, Pageable pageable) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-    @GetMapping("/user")
-    public ResponseEntity<PagedModel<TicketDTO>> getAllUser(
-            @RequestParam(value = "page", defaultValue = "0") Integer page,
-            @RequestParam(value = "size", defaultValue = "10") Integer size,
-            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
-            @RequestParam(value = "sortDir", defaultValue = "DESC") String sortDir,
-            @RequestParam(value = "status", defaultValue = "ALL") String status
-    ) {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long userId = ((User) userDetails).getId();
+		Set<Department> departments = user.getRoleBindings().stream().map(UserRoleDepartment::getDepartment)
+				.filter(dep -> user.hasPermission("MANAGE_TICKET", dep)).collect(Collectors.toSet());
 
-        Sort.Direction direction = Sort.Direction.fromString(sortDir.toUpperCase());
+		if (departments.isEmpty()) {
+			return ResponseEntity.ok(Page.empty(pageable));
+		}
 
-        Pageable pageable = PageRequest.of(
-                page,
-                size,
-                Sort.by(direction, sortBy)
-        );
+		List<Ticket> allTickets = ticketService.getTicketsByRelatedUser(user);
 
-        Page<Ticket> tickets = ticketService.getTicketsByUserId(userId, status, pageable);
-        PagedModel<TicketDTO> pagedModel = pagedResourcesAssembler.toModel(tickets, ticketDTOAssembler);
+		List<Ticket> filtered = allTickets.stream()
+			.filter(ticket -> {
+				Department ticketDep = ticket.getDepartment();
+				return departments.contains(ticketDep) && (status == null || ticket.getStatus() == status);
+			})
+			.toList();
 
-        return ResponseEntity.ok(pagedModel);
-    }
+		List<Ticket> sorted = ticketService.sortInMemory(filtered, pageable.getSort());
 
-    @GetMapping("/{ticketID}")
-    public ResponseEntity<?> getTicketById(@PathVariable Long ticketID) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		int start = (int) pageable.getOffset();
+		int end = Math.min(start + pageable.getPageSize(), sorted.size());
+		List<Ticket> pageContent = (start >= sorted.size()) ? List.of() : sorted.subList(start, end);
 
-        Optional<Ticket> optionalTicket = ticketRepository.findById(ticketID);
+		Page<TicketResponseDTO> resultPage = new PageImpl<>(
+			pageContent.stream().map(TicketResponseDTO::from).toList(),
+			pageable,
+			sorted.size()
+		);
 
-        if (optionalTicket.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+		return ResponseEntity.ok(resultPage);
+	}
 
-        Ticket ticket = optionalTicket.get();
+	@GetMapping("/{ticketId}")
+	public ResponseEntity<?> getTicket(@PathVariable Long ticketId) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (!ticket.getUser().equals(user) && !ticket.canManage(user)) {
-            return new ResponseEntity<>("Acesso negado. Você não tem permissão.", HttpStatus.FORBIDDEN);
-        }
+		Ticket ticket = ticketService.findById(ticketId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
 
-        return ResponseEntity.ok(ticket);
-    }
+		if (!ticket.getUser().equals(user) && !ticket.canManage(user)) {
+			return new ResponseEntity<>("Acesso negado. Você não tem permissão para acessar esse ticket.",
+					HttpStatus.FORBIDDEN);
+		}
 
-    @GetMapping("/search/{mode}")
-    public ResponseEntity<PagedModel<TicketDTO>> searchTickets(
-            @PathVariable String mode,
-            @RequestParam(value = "query", required = false) String query,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
-            @RequestParam(value = "sortDir", defaultValue = "DESC") String sortDir,
-            @RequestParam(value = "status", defaultValue = "ALL") String status
-    ) {
-        Sort.Direction direction = Sort.Direction.fromString(sortDir.toUpperCase());
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+		return ResponseEntity.ok(TicketResponseDTO.from(ticket));
+	}
 
-        Page<Ticket> tickets;
+	@PostMapping
+	public ResponseEntity<?> createTicket(@RequestBody TicketRequestDTO ticketRequestDTO) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if ("user".equalsIgnoreCase(mode)) {
-            tickets = ticketService.searchUserTickets(query, status, pageable);
-        } else if ("manager".equalsIgnoreCase(mode)) {
-            tickets = ticketService.searchUserManageableTickets(query, status, pageable);
-        } else {
-            return ResponseEntity.badRequest().build();
-        }
+		Ticket savedTicket = ticketService.create(ticketRequestDTO, user);
 
-        PagedModel<TicketDTO> pagedModel = pagedResourcesAssembler.toModel(tickets, ticketDTOAssembler);
-        return ResponseEntity.ok(pagedModel);
-    }
+		URI location = URI.create("/ticket/" + savedTicket.getId());
+		return ResponseEntity.created(location).body(savedTicket.getId());
+	}
+
+	@PostMapping("/{ticketId}/approval")
+	public ResponseEntity<?> approveTicket(@PathVariable Long ticketId, @RequestParam boolean approved) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		Ticket ticket = ticketService.findById(ticketId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket não encontrado"));
+
+		boolean isApprover = ticket.getForm().getApprovers().contains(user);
+		boolean hasPermission = user.hasPermission("APPROVE_TICKET", ticket.getDepartment());
+
+		if (!isApprover || !hasPermission) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body("Você não tem permissão para aprovar ou rejeitar este ticket.");
+		}
+
+		if (!ticket.getStatus().equals(StatusEnum.PENDING_APPROVAL)) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ticket não está pendente de aprovação.");
+		}
+
+		ticketService.approveOrReject(ticket, approved, user);
+
+		String message = approved ? "Ticket aprovado com sucesso." : "Ticket rejeitado com sucesso.";
+
+		return ResponseEntity.ok(message);
+	}
 }

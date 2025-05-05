@@ -114,7 +114,6 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
 
                     client.subscribe("/user/queue/notifications", (message: IMessage) => {
                         const notification = JSON.parse(message.body);
-
                         setRawNotifications((prev) => [
                             ...prev,
                             new Notification(

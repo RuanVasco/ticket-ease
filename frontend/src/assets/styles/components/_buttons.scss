@@ -1,0 +1,185 @@
+@use "../variables";
+@use "sass:color";
+
+.btn_yellow {
+	background-color: variables.$color-yellow;
+	border: none;
+	padding: 5px 10px;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background-color 0.2s;
+
+	&:hover {
+		background-color: variables.$color-dark-yellow;
+	}
+}
+
+.btn_common {
+	background-color: variables.$color-primary;
+	color: variables.$color-white;
+	border: none;
+	padding: 5px 10px;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background-color 0.2s;
+
+	&:hover {
+		background-color: variables.$color-secondary;
+	}
+
+	&:active {
+		background-color: variables.$color-secondary;
+	}
+}
+
+.btn_primary {
+	background-color: variables.$color-primary;
+	color: variables.$color-white;
+	border: none;
+	padding: 0.5rem 1rem;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background-color 0.2s;
+
+	&:hover {
+		background-color: variables.$color-tertiary;
+	}
+}
+
+.btn_none {
+	background: transparent;
+	border: none;
+	padding: 5px 10px;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: color 0.2s;
+
+	&:hover {
+		background-color: variables.$color-tertiary;
+	}
+}
+
+.header_action_btn {
+	background: none;
+	border: none;
+	color: variables.$color-white;
+	border-radius: 8px;
+	padding: 5px 10px;
+	transition: background-color 0.2s;
+
+	& svg {
+		font-size: variables.$font-size-xl;
+	}
+
+	&:hover {
+		background-color: variables.$color-tertiary;
+	}
+}
+
+.btn_success {
+	background-color: variables.$color-success;
+	color: variables.$color-white;
+	border: none;
+	padding: 5px 10px;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background-color 0.2s;
+
+	* {
+		color: variables.$color-white;
+	}
+
+	&:hover {
+		background-color: color.adjust(variables.$color-success, $lightness: 10%);
+	}
+}
+
+.btn_error {
+	background-color: variables.$color-red;
+	color: variables.$color-white;
+	border: none;
+	padding: 5px 10px;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background-color 0.2s;
+
+	* {
+		color: variables.$color-white;
+	}
+
+	&:hover {
+		background-color: color.adjust(variables.$color-red, $lightness: 10%);
+	}
+}
+
+.btn_info {
+	background-color: variables.$color-tertiary;
+	border: none;
+	padding: 5px 10px;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background-color 0.2s;
+
+	* {
+		color: variables.$color-white;
+	}
+
+	&:hover {
+		background-color: color.adjust(variables.$color-tertiary, $lightness: 10%);
+	}
+}
+
+.btn_send {
+	background-color: variables.$color-white;
+	color: variables.$color-primary;
+	border-top: 1px solid variables.$color-primary;
+	border-bottom: 1px solid variables.$color-primary;
+	border-right: 0;
+	border-left: 0;
+	padding: 5px 10px;
+	height: 40px;
+	cursor: pointer;
+	transition: background-color 0.2s;
+
+	&:hover {
+		background-color: variables.$color-light-gray;
+	}
+}
+
+.btn_toggle {
+	background-color: variables.$color-white;
+	color: variables.$color-primary;
+	border: 1px solid variables.$color-primary;
+	padding: 5px 10px;
+	height: 40px;
+	border-radius: 0 8px 8px 0;
+	cursor: pointer;
+	transition: background-color 0.2s;
+
+	&.active {
+		background-color: variables.$color-light-gray;
+	}
+
+	&:hover {
+		background-color: variables.$color-light-gray;
+	}
+}
+
+.btn_send_reopen {
+	background-color: variables.$color-red;
+	color: variables.$color-white;
+	border: none;
+	padding: 5px 10px;
+	height: 40px;
+	border-radius: 0 8px 8px 0;
+	cursor: pointer;
+	transition: background-color 0.2s;
+
+	* {
+		color: variables.$color-white;
+	}
+
+	&:hover {
+		background-color: color.adjust(variables.$color-red, $lightness: 10%);
+	}
+}

@@ -1,130 +1,205 @@
 package com.ticketease.api.Services;
 
-import com.ticketease.api.DTO.InputDTO.TicketInputDTO;
-import com.ticketease.api.Entities.Department;
-import com.ticketease.api.Entities.Ticket;
-import com.ticketease.api.Entities.TicketCategory;
-import com.ticketease.api.Entities.User;
-import com.ticketease.api.Repositories.TicketCategoryRepository;
+import com.ticketease.api.DTO.TicketDTO.TicketPropertiesDTO;
+import com.ticketease.api.DTO.TicketDTO.TicketRequestDTO;
+import com.ticketease.api.Entities.*;
+import com.ticketease.api.Enums.StatusEnum;
+import com.ticketease.api.Repositories.FormRepository;
 import com.ticketease.api.Repositories.TicketRepository;
 import com.ticketease.api.Repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.util.*;
+import java.util.stream.Collectors;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
+@RequiredArgsConstructor
 public class TicketService {
+	private final TicketRepository ticketRepository;
+	private final FormRepository formRepository;
+	private final UserRepository userRepository;
+	private final NotificationService notificationService;
+	private final UserLinkFormsService userLinkFormsService;
 
-    @Autowired
-    TicketRepository ticketRepository;
+	public Optional<Ticket> findById(Long ticketId) {
+		return ticketRepository.findById(ticketId);
+	}
 
-    @Autowired
-    UserRepository userRepository;
+	public List<Ticket> getTicketsByRelatedUser(User user) {
+		List<Ticket> relatedTickets = ticketRepository.findAll();
 
-    @Autowired
-    TicketCategoryRepository ticketCategoryRepository;
+		return relatedTickets.stream().filter(ticket -> ticket.canManage(user) || ticket.getUser().equals(user))
+				.toList();
+	}
 
-    @Autowired
-    FileStorageService fileStorageService;
+	public Ticket create(TicketRequestDTO ticketRequestDTO, User user) {
+		Form form = formRepository.findById(ticketRequestDTO.formId())
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Formulário não encontrado"));
 
-    public Ticket openTicket(TicketInputDTO ticketInputDTO, List<MultipartFile> files, User user) {
-        Ticket ticket = new Ticket();
+		Ticket ticket = new Ticket();
+		ticket.setUser(user);
+		ticket.setForm(form);
+		ticket.setCreatedAt(new Date());
+		ticket.setUpdatedAt(new Date());
 
-        Optional<TicketCategory> optionalTicketCategory = ticketCategoryRepository.findById(ticketInputDTO.ticketCategory_id());
+		if (form.getApprovers().isEmpty()) {
+			ticket.setStatus(StatusEnum.NEW);
+		} else {
+			ticket.setStatus(StatusEnum.PENDING_APPROVAL);
+		}
 
-        if (optionalTicketCategory.isEmpty()) {
-            return null;
-        }
+		TicketPropertiesDTO properties = ticketRequestDTO.properties();
 
-        if (ticketInputDTO.name().isEmpty()) {
-            return null;
-        }
+		ticket.setUrgency(properties.urgency());
+		ticket.setReceiveEmail(Boolean.TRUE.equals(properties.receiveEmail()));
 
-        if (ticketInputDTO.description().isEmpty()) {
-            return null;
-        }
+		Set<User> observers = new HashSet<>();
+		for (Long userId : properties.observersId()) {
+			if (userId == null) {
+				continue;
+			}
+			Optional<User> optionalUser = userRepository.findById(userId);
+			optionalUser.ifPresent(observers::add);
+		}
+		ticket.setObservers(observers);
 
-        ticket.setUser(user);
-        ticket.setTicketCategory(optionalTicketCategory.get());
-        ticket.setName(ticketInputDTO.name());
-        ticket.setDescription(ticketInputDTO.description());
-        ticket.setStatus("Novo");
-        ticket.setUrgency(ticketInputDTO.urgency());
-        ticket.setReceiveEmail(ticketInputDTO.receiveEmail());
-        ticket.setCreatedAt(new Date());
-        ticket.setUpdatedAt(new Date());
+		List<TicketResponse> responses = ticketRequestDTO.responses().stream().map(fieldAnswer -> {
+			FormField field = form.getFields().stream().filter(f -> f.getId().equals(fieldAnswer.fieldId())).findFirst()
+					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+							"Campo não encontrado no formulário"));
 
-        if (ticketInputDTO.observation() != null) {
-            ticket.setObservation(ticketInputDTO.observation());
-        }
+			TicketResponse ticketResponse = new TicketResponse();
+			ticketResponse.setField(field);
+			ticketResponse.setValue(fieldAnswer.value());
+			ticketResponse.setTicket(ticket);
+			return ticketResponse;
+		}).toList();
 
-        List<String> filePaths = new ArrayList<>();
+		ticket.setResponses(responses);
 
-        if (files != null && !files.isEmpty()) {
-            for (MultipartFile file : files) {
-                String filePath = fileStorageService.store(file);
-                filePaths.add(filePath);
-            }
-        }
+		Ticket savedTicket = ticketRepository.save(ticket);
 
-        ticket.setFilePaths(filePaths);
+		Set<User> relatedUsers = getRelatedUsers(savedTicket);
+		String notificationContent = "Ticket criado " + savedTicket.getId();
+		for (User targetUser : relatedUsers) {
+			if (user.equals(targetUser))
+				continue;
+			notificationService.createNotification(targetUser, ticket.getId(), "Ticket", notificationContent);
+		}
 
-        return ticketRepository.save(ticket);
-    }
+		userLinkFormsService.registerRecentForm(user, form);
 
-    public Page<Ticket> getTicketsByUserId(Long userId, String status, Pageable pageable) {
-        return ticketRepository.findByUserIdAndStatus(userId, status, pageable);
-    }
+		return savedTicket;
+	}
 
-    public List<Ticket> getTicketsByRelatedUser(User user) {
-        List<Ticket> relatedTickets = ticketRepository.findAll();
+	public Page<Ticket> findPendingTicketsForApprover(User approver, Pageable pageable) {
+		return ticketRepository.findPendingTicketsByApprover(approver.getId(), StatusEnum.PENDING_APPROVAL, pageable);
+	}
 
-        return relatedTickets
-                .stream()
-                .filter(ticket -> ticket.canManage(user) || ticket.getUser().equals(user))
-                .toList();
-    }
+	public Set<User> getRelatedUsers(Ticket ticket) {
+		Set<User> relatedUsers = new HashSet<>();
 
-    @Transactional
-    public Page<Ticket> getUserManageableTickets(Pageable pageable, String status, Department department) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		Department department = ticket.getDepartment();
 
-        Page<Ticket> allTickets = ticketRepository.findByStatus(status, pageable);
+		List<User> users = userRepository.findAllUsersWithRoles();
+		for (User user : users) {
+			if (user.hasPermission("MANAGE_TICKET", department)) {
+				relatedUsers.add(user);
+			}
+		}
 
-        List<Ticket> filtered = allTickets
-                .stream()
-                .filter(t -> t.canManage(user) && t.getDepartment().equals(department))
-                .toList();
+		relatedUsers.addAll(ticket.getObservers());
+		relatedUsers.add(ticket.getUser());
 
-        return new PageImpl<>(filtered, pageable, filtered.size());
-    }
+		return relatedUsers;
+	}
 
-    @Transactional
-    public Page<Ticket> searchUserTickets(String query, String status, Pageable pageable) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	public Page<Ticket> findByOwnerOrObserver(User user, Pageable pageable) {
+		return ticketRepository.findByOwnerOrObserver(user.getId(), pageable);
+	}
 
-        return ticketRepository.findByUserAndStatus(user, status, query, pageable);
-    }
+	public Page<Ticket> findByOwnerOrObserverAndStatus(User user, StatusEnum status, Pageable pageable) {
+		return ticketRepository.findByOwnerOrObserverAndStatus(user.getId(), status, pageable);
+	}
 
-    @Transactional
-    public Page<Ticket> searchUserManageableTickets(String query, String status, Pageable pageable) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	public Page<Ticket> findByDepartmentAndStatus(Department department, StatusEnum status, Pageable pageable) {
+		return ticketRepository.findByForm_DepartmentAndStatus(department, status, pageable);
+	}
 
-        Page<Ticket> relatedTickets = ticketRepository.findByStatusAndQuery(status, query, pageable);
-        List<Ticket> filteredTickets = relatedTickets
-                .stream()
-                .filter((ticket -> ticket.canManage(user)))
-                .toList();
+	public Page<Ticket> findByDepartment(Department department, Pageable pageable) {
+//		Collection<Ticket> tickets = ticketRepository.findAll();
+//		return filterAndPaginate(tickets, department, user, pageable);
+		return ticketRepository.findByForm_Department(department, pageable);
+	}
 
-        return new PageImpl<>(filteredTickets, pageable, filteredTickets.size());
-    }
+	public void approveOrReject(Ticket ticket, boolean approved, User approver) {
+		if (!ticket.getStatus().equals(StatusEnum.PENDING_APPROVAL)) {
+			throw new IllegalStateException("O ticket não está pendente de aprovação.");
+		}
 
-    public Optional<Ticket> findById(Long ticketId) {
-        return ticketRepository.findById(ticketId);
-    }
+		ticket.setStatus(approved ? StatusEnum.NEW : StatusEnum.CANCELED);
+		ticket.setApprovalDate(new Date());
+		ticket.setApprovedBy(approver);
+		ticket.setUpdatedAt(new Date());
+
+		ticketRepository.save(ticket);
+		Set<User> relatedUsers = getRelatedUsers(ticket);
+		String notificationContent = "Ticket " + ticket.getId() + " " + (approved ? "aprovado" : "negado");
+
+		for (User targetUser : relatedUsers) {
+			if (approver.equals(targetUser))
+				continue;
+			notificationService.createNotification(targetUser, ticket.getId(), "Ticket", notificationContent);
+		}
+	}
+
+	private Page<Ticket> filterAndPaginate(Collection<Ticket> tickets, Department department, User user,
+			Pageable pageable) {
+
+		List<Ticket> filteredList = tickets.stream()
+				.filter(t -> t.canManage(user) && t.getDepartment().equals(department)).distinct().toList();
+
+		int start = (int) pageable.getOffset();
+		int end = Math.min(start + pageable.getPageSize(), filteredList.size());
+
+		List<Ticket> pageContent = (start >= filteredList.size()) ? List.of() : filteredList.subList(start, end);
+
+		return new PageImpl<>(pageContent, pageable, filteredList.size());
+	}
+
+	public List<Ticket> sortInMemory(List<Ticket> tickets, Sort sort) {
+		if (sort.isUnsorted()) return tickets;
+
+		Comparator<Ticket> comparator = null;
+
+		for (Sort.Order order : sort) {
+			Comparator<Ticket> fieldComparator = switch (order.getProperty()) {
+				case "id" -> Comparator.comparing(Ticket::getId);
+				case "status" -> Comparator.comparing(Ticket::getStatus);
+				case "urgency" -> Comparator.comparing(Ticket::getUrgency);
+				case "createdAt" -> Comparator.comparing(Ticket::getCreatedAt, Comparator.nullsLast(Date::compareTo));
+				case "updatedAt" -> Comparator.comparing(Ticket::getUpdatedAt, Comparator.nullsLast(Date::compareTo));
+				case "user.name" -> Comparator.comparing(t -> t.getUser().getName(), Comparator.nullsLast(String::compareToIgnoreCase));
+				case "form.title" -> Comparator.comparing(t -> t.getForm().getTitle(), Comparator.nullsLast(String::compareToIgnoreCase));
+				case "form.ticketCategory.name" -> Comparator.comparing(t -> t.getForm().getTicketCategory().getName(), Comparator.nullsLast(String::compareToIgnoreCase));
+				default -> null;
+			};
+
+			if (fieldComparator != null) {
+				if (order.isDescending()) {
+					fieldComparator = fieldComparator.reversed();
+				}
+				comparator = comparator == null ? fieldComparator : comparator.thenComparing(fieldComparator);
+			}
+		}
+
+		return comparator != null ? tickets.stream().sorted(comparator).toList() : tickets;
+	}
 }

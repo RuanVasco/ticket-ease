@@ -1,256 +1,268 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 
 import axiosInstance from "./AxiosConfig";
-import DateFormatter from "./DateFormatter";
-import ItemsPerPage from "./ItemsPerPage";
+import DateFormatter from "./Util/DateFormatter";
+import ItemsPerPage from "./Common/ItemsPerPage";
 import Pagination from "./Pagination";
 
-import "../assets/styles/table.css";
+import "../assets/styles/components/_form.scss";
+import "../assets/styles/components/_table.scss";
 import { Department } from "../types/Department";
+import { Ticket } from "../types/Ticket";
+import { StatusEnum, StatusLabels } from "../enums/StatusEnum";
+import { FaSearch } from "react-icons/fa";
+import SelectStatus from "./Common/SelectStatus";
+import SelectDepartment from "./Fields/SelectDepartment";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
-interface Ticket {
-    id: string;
-    name: string;
-    categoryPath: string;
-    status: string;
-    urgency: string;
-    createdAt: string;
-    updatedAt: string;
-    user?: { name: string };
-}
-
 interface TableTicketProps {
-    viewMode?: "readonly" | "edit";
+	viewMode?: "readonly" | "edit";
+	onTicketSelect: (ticketId: Number) => void;
 }
 
-const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly" }) => {
-    const [data, setData] = useState<Ticket[]>([]);
-    const [currentPage, setCurrentPage] = useState<number>(0);
-    const [totalPages, setTotalPages] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(10);
-    const [status, setStatus] = useState<string>("Novo");
-    const [noResultsMessage, setNoResultsMessage] = useState<string>("");
-    const [departments, setDepartments] = useState<Department[]>([]);
-    const [department, setDepartment] = useState<Department>();
-    const [searchQuery, setSearchQuery] = useState<string>("");
+const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly", onTicketSelect }) => {
+	const [data, setData] = useState<Ticket[]>([]);
+	const [currentPage, setCurrentPage] = useState<number>(0);
+	const [totalPages, setTotalPages] = useState<number>(1);
+	const [pageSize, setPageSize] = useState<number>(10);
+	const [status, setStatus] = useState<StatusEnum | null>(StatusEnum.NEW);
+	const [noResultsMessage, setNoResultsMessage] = useState<string>("");
+	const [departments, setDepartments] = useState<Department[]>([]);
+	const [department, setDepartment] = useState<Department>();
+	const [searchQuery, setSearchQuery] = useState<string>("");
+	const [sortField, setSortField] = useState<string>("id");
+	const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
-    const columns: { label: string; value: string }[] = [
-        { label: "ID", value: "id" },
-        { label: "Assunto", value: "name" },
-        { label: "Categoria", value: "categoryPath" },
-        { label: "Status", value: "status" },
-        { label: "Urgência", value: "urgency" },
-        { label: "Data de Criação", value: "createdAt" },
-        { label: "Última Atualização", value: "updatedAt" },
-    ];
+	const columnDefs = [
+		{ label: "ID", field: "id" },
+		{ label: "Assunto", field: "form.title" },
+		{ label: "Categoria", field: "form.ticketCategory.name" },
+		{ label: "Status", field: "status" },
+		{ label: "Urgência", field: "urgency" },
+		{ label: "Criação", field: "createdAt" },
+		{ label: "Última Atualização", field: "updatedAt" },
+	];
 
-    if (viewMode === "edit") {
-        columns.push({ label: "Usuário", value: "user.name" });
-    }
+	if (viewMode === "edit") {
+		columnDefs.push({
+			label: "Usuário",
+			field: "user.name",
+		});
+	}
 
-    const getNestedValue = (obj: any, path: string): any => {
-        return path.split(".").reduce((acc, part) => acc && acc[part], obj);
-    };
+	const fetchUserDepartments = async () => {
+		try {
+			const res = await axiosInstance.get(`${API_BASE_URL}/departments/manager`);
+			if (res.status === 200 && res.data) {
+				setDepartments(res.data);
+			}
+		} catch (error) {
+			console.error("Erro ao buscar departamentos:", error);
+		}
+	};
 
-    const fetchUserDepartments = async () => {
-        try {
-            const res = await axiosInstance.get(`${API_BASE_URL}/departments/manager`);
-            if (res.status === 200 && res.data) {
-                setDepartments(res.data);
-            }
-        } catch (error) {
-            console.error("Erro ao buscar departamentos:", error);
-        }
-    };
+	const fetchData = async () => {
+		try {
+			let url = "";
+			const params: any = {
+				page: currentPage,
+				size: pageSize,
+				status,
+			};
 
-    const fetchData = async () => {
-        try {
-            let url = "";
+			if (searchQuery.length >= 3) {
+				url =
+					viewMode === "edit"
+						? `${API_BASE_URL}/tickets/search/manager`
+						: `${API_BASE_URL}/tickets/search/user`;
+			} else {
+				if (viewMode === "edit") {
+					if (!department) {
+						url = `${API_BASE_URL}/ticket/managed`;
+					} else {
+						url = `${API_BASE_URL}/ticket/by-department/${department.id}`;
+					}
+				} else {
+					url = `${API_BASE_URL}/ticket/my-tickets`;
+				}
 
-            if (searchQuery.length >= 3) {
-                url =
-                    viewMode === "edit"
-                        ? `${API_BASE_URL}/tickets/search/manager`
-                        : `${API_BASE_URL}/tickets/search/user`;
-            } else {
-                if (viewMode === "edit") {
-                    if (!department) return;
-                    url = `${API_BASE_URL}/tickets/department/${department.id}`;
-                } else {
-                    url = `${API_BASE_URL}/tickets/user`;
-                }
-            }
+				params.sort = `${sortField},${sortDir}`;
+			}
 
-            const params: any = {
-                page: currentPage,
-                size: pageSize,
-                status,
-            };
+			if (searchQuery.length >= 3) {
+				params.query = searchQuery;
+			}
 
-            if (searchQuery.length >= 3) {
-                params.query = searchQuery;
-            }
+			const res = await axiosInstance.get(url, { params });
 
-            const res = await axiosInstance.get(url, { params });
+			if (res.status === 200 && res.data?.content?.length > 0) {
+				setData(res.data.content);
+				setTotalPages(res.data.totalPages);
+				setNoResultsMessage("");
+			} else {
+				setData([]);
+				setTotalPages(1);
+				setNoResultsMessage("Nenhum ticket encontrado.");
+			}
+		} catch (error) {
+			console.error("Erro ao buscar dados:", error);
+			setData([]);
+			setNoResultsMessage("Erro ao buscar tickets.");
+		}
+	};
 
-            if (res.status === 200 && res.data?._embedded?.ticketDTOList?.length > 0) {
-                setData(res.data._embedded.ticketDTOList);
-                setTotalPages(res.data.page.totalPages);
-                setNoResultsMessage("");
-            } else {
-                setData([]);
-                setTotalPages(1);
-                setNoResultsMessage("Nenhum ticket encontrado.");
-            }
-        } catch (error) {
-            console.error("Erro ao buscar dados:", error);
-            setData([]);
-            setNoResultsMessage("Erro ao buscar tickets.");
-        }
-    };
+	useEffect(() => {
+		if (viewMode === "edit") {
+			fetchUserDepartments();
+		}
+	}, [viewMode]);
 
-    useEffect(() => {
-        fetchUserDepartments();
-    }, []);
+	useEffect(() => {
+		fetchData();
+	}, [currentPage, pageSize, status, department, searchQuery, sortField, sortDir]);
 
-    useEffect(() => {
-        if (departments.length > 0 && !department) {
-            setDepartment(departments[0]);
-        }
-    }, [departments]);
+	const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const query = e.target.value;
+		setSearchQuery(query);
+		setCurrentPage(0);
+	};
 
-    useEffect(() => {
-        if (viewMode === "edit" && !department) return;
-        fetchData();
-    }, [currentPage, pageSize, status, department, searchQuery]);
+	const handleStatusChange = (status: string | null) => {
+		if (status === "") {
+			setStatus(null);
+		} else {
+			setStatus(status as StatusEnum);
+		}
+		setCurrentPage(0);
+	};
 
-    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const query = e.target.value;
-        setSearchQuery(query);
-        setCurrentPage(0);
-    };
+	const handlePageChange = (page: number) => setCurrentPage(page);
 
-    const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setStatus(e.target.value);
-        setCurrentPage(0);
-    };
+	const handlePageSizeChange = (size: number) => {
+		setPageSize(size);
+		setCurrentPage(0);
+	};
 
-    const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selected = departments.find((dep) => Number(dep.id) === Number(e.target.value));
-        setDepartment(selected);
-        setCurrentPage(0);
-    };
+	const renderHeader = (c: { label: string; field: string }) => {
+		const active = sortField === c.field;
+		const dirIcon = active && sortDir === "asc" ? "▲" : "▼";
 
-    const handlePageChange = (page: number) => setCurrentPage(page);
+		return (
+			<th
+				key={c.field}
+				onClick={() => {
+					if (active) setSortDir(sortDir === "asc" ? "desc" : "asc");
+					else setSortField(c.field);
+					setCurrentPage(0);
+				}}
+				style={{ cursor: "pointer" }}
+			>
+				{c.label} {active && dirIcon}
+			</th>
+		);
+	};
 
-    const handlePageSizeChange = (size: number) => {
-        setPageSize(size);
-        setCurrentPage(0);
-    };
-
-    return (
-        <div className="container">
-            <div className="row align-items-center my-3">
-                <div className="col d-flex align-items-end">
-                    <ItemsPerPage onPageSizeChange={handlePageSizeChange} pageSize={pageSize} />
-                    <div className="ms-3">
-                        <label htmlFor="statusSelect">Status: </label>
-                        <select
-                            value={status}
-                            onChange={handleStatusChange}
-                            className="form-select"
-                            id="statusSelect"
-                        >
-                            <option value="Novo">Novos</option>
-                            <option value="Em Andamento">Em Andamento</option>
-                            <option value="Fechado">Fechados</option>
-                            <option value="ALL">Todos</option>
-                        </select>
-                    </div>
-                    {viewMode === "edit" && departments.length > 1 && (
-                        <div className="ms-3">
-                            <label htmlFor="departmentSelect">Departamento: </label>
-                            <select
-                                value={department?.id || ""}
-                                onChange={handleDepartmentChange}
-                                className="form-select"
-                                id="departmentSelect"
-                            >
-                                {departments.map((dep) => (
-                                    <option key={dep.id} value={dep.id ?? ""}>
-                                        {dep.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    )}
-                </div>
-                <div className="col-2">
-                    <input
-                        type="text"
-                        placeholder="Pesquisar"
-                        className="input-text"
-                        onChange={handleSearch}
-                    />
-                </div>
-            </div>
-            <table className="w-100 table table-custom table-hover">
-                <thead>
-                    <tr>
-                        {columns.map((column, index) => (
-                            <th key={index}>{column.label}</th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.length === 0 && noResultsMessage ? (
-                        <tr>
-                            <td colSpan={columns.length} className="text-center">
-                                {noResultsMessage}
-                            </td>
-                        </tr>
-                    ) : (
-                        data.map((item, index) => (
-                            <tr key={index}>
-                                {columns.map((column, colIndex) => {
-                                    const value = getNestedValue(item, column.value);
-                                    const isDate =
-                                        column.value === "createdAt" ||
-                                        column.value === "updatedAt" ||
-                                        column.value === "closedAt";
-
-                                    return (
-                                        <td key={colIndex}>
-                                            {column.value === "name" ? (
-                                                <Link
-                                                    to={`/tickets/${item.id}`}
-                                                    className="fw-semibold text-decoration-underline"
-                                                >
-                                                    {value}
-                                                </Link>
-                                            ) : isDate ? (
-                                                DateFormatter(value || "")
-                                            ) : (
-                                                value || "N/A"
-                                            )}
-                                        </td>
-                                    );
-                                })}
-                            </tr>
-                        ))
-                    )}
-                </tbody>
-            </table>
-            <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-            />
-        </div>
-    );
+	return (
+		<div>
+			<div className="d-flex align-items-center justify-content-between mt-3 mb-4 floating-box">
+				<div className="d-flex align-items-center justify-content-start gap-2">
+					<div>
+						<ItemsPerPage onPageSizeChange={handlePageSizeChange} pageSize={pageSize} />
+					</div>
+					<div>
+						<SelectStatus
+							status={status}
+							onStatusChange={handleStatusChange}
+							className="select_bar_outlined"
+						/>
+					</div>
+					{viewMode === "edit" && departments.length > 1 && (
+						<div>
+							<SelectDepartment
+								value={department?.id || ""}
+								onChange={(id) => {
+									const selected = departments.find(
+										(dep) => String(dep.id) === id
+									);
+									setDepartment(selected);
+									setCurrentPage(0);
+								}}
+								scope="user"
+							/>
+						</div>
+					)}
+				</div>
+				<div>
+					<div className="search_wrapper">
+						<input
+							type="text"
+							className="search_bar_outlined"
+							placeholder="Pesquisar"
+							onChange={handleSearch}
+						/>
+						<FaSearch className="search_icon_outlined" />
+					</div>
+				</div>
+			</div>
+			<div className="table-responsive">
+				<table className="custom_table">
+					<thead>
+						<tr>{columnDefs.map(renderHeader)}</tr>
+					</thead>
+					<tbody>
+						{data.length === 0 && noResultsMessage ? (
+							<tr>
+								<th colSpan={columnDefs.length} className="text-center table-hint">
+									{noResultsMessage}
+								</th>
+							</tr>
+						) : (
+							data.map((item, index) => (
+								<tr key={index}>
+									<td>
+										<span
+											onClick={() => onTicketSelect(item.id)}
+											className="fw-semibold text-decoration-underline"
+											style={{ cursor: "pointer" }}
+										>
+											{item.id}
+										</span>
+									</td>
+									<td>
+										<span
+											onClick={() => onTicketSelect(item.id)}
+											className="fw-semibold text-decoration-underline cursor-pointer"
+											style={{ cursor: "pointer" }}
+										>
+											{item.form.title}
+										</span>
+									</td>
+									<td>{item.form.ticketCategory.name}</td>
+									<td>
+										{item.properties.status
+											? StatusLabels[item.properties.status]
+											: "Status desconhecido"}
+									</td>
+									<td>{item.properties.urgency}</td>
+									<td>{DateFormatter(item.properties.createdAt || "")}</td>
+									<td>{DateFormatter(item.properties.updatedAt || "")}</td>
+									{viewMode === "edit" && (
+										<td>{item.properties.user?.name || ""}</td>
+									)}
+								</tr>
+							))
+						)}
+					</tbody>
+				</table>
+			</div>
+			<Pagination
+				currentPage={currentPage}
+				totalPages={totalPages}
+				onPageChange={handlePageChange}
+			/>
+		</div>
+	);
 };
 
 export default TableTicket;
