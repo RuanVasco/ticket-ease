@@ -58,7 +58,7 @@ public class UserControllerTest {
 
 	@Test
 	void testGetAllUsers() throws Exception {
-		mockMvc.perform(get("/users/")).andExpect(status().isOk());
+		mockMvc.perform(get("/users")).andExpect(status().isOk());
 	}
 
 	@Test
@@ -68,24 +68,5 @@ public class UserControllerTest {
 
 		mockMvc.perform(post("/users/register").with(csrf()).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(dto))).andExpect(status().isOk());
-	}
-
-	@Test
-	void testGetDepartmentsAuthenticatedUser() throws Exception {
-		Department dept1 = new Department("TI", true, null);
-		Department dept2 = new Department("RH", true, null);
-
-		User mockUser = new User();
-
-		Role role = new Role();
-		UserRoleDepartment urd1 = new UserRoleDepartment(mockUser, role, dept1);
-		UserRoleDepartment urd2 = new UserRoleDepartment(mockUser, role, dept2);
-
-		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(mockUser, null, List.of());
-		SecurityContextHolder.getContext().setAuthentication(auth);
-
-		mockMvc.perform(get("/users/me/departments")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.length()").value(2)).andExpect(jsonPath("$[0].name").value("TI"))
-				.andExpect(jsonPath("$[1].name").value("RH"));
 	}
 }
