@@ -16,7 +16,6 @@ import UserManagement from "./pages/admin/UserManagement";
 import CreateTicket from "./pages/CreateTicket";
 import Login from "./pages/Login";
 import ManageTickets from "./pages/ManageTickets";
-import TicketDetails from "./pages/TicketDetails_bkp";
 import ViewTickets from "./pages/ViewTickets";
 import FormManagement from "./pages/admin/FormManagement";
 
