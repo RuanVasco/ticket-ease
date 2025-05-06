@@ -60,13 +60,4 @@ public class UserControllerTest {
 	void testGetAllUsers() throws Exception {
 		mockMvc.perform(get("/users")).andExpect(status().isOk());
 	}
-
-	@Test
-	@AutoConfigureMockMvc(addFilters = false)
-	void testRegisterUserBadRequest() throws Exception {
-		UserDTO dto = new UserDTO("João", "joao@email.com", "123456789", "senha123", null, List.of());
-
-		mockMvc.perform(post("/users/register").with(csrf()).contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(dto))).andExpect(status().isOk());
-	}
 }

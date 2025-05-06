@@ -183,3 +183,23 @@
 		background-color: color.adjust(variables.$color-red, $lightness: 10%);
 	}
 }
+
+.btn_login {
+	background-color: variables.$color-tertiary;
+	color: variables.$color-white;
+	font-size: variables.$font-size-lg;
+	border: none;
+	padding: 0.6rem 1rem;
+	height: 40px;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background-color 0.2s;
+
+	* {
+		color: variables.$color-white;
+	}
+
+	&:hover {
+		background-color: color.adjust(variables.$color-tertiary, $lightness: -5%);
+	}
+}
