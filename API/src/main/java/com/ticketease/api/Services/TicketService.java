@@ -8,7 +8,6 @@ import com.ticketease.api.Repositories.FormRepository;
 import com.ticketease.api.Repositories.TicketRepository;
 import com.ticketease.api.Repositories.UserRepository;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

@@ -7,6 +7,7 @@ import com.ticketease.api.Enums.StatusEnum;
 import com.ticketease.api.Services.DepartmentService;
 import com.ticketease.api.Services.TicketService;
 import java.net.URI;
+import java.util.Objects;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -88,21 +89,27 @@ public class TicketController {
 			@RequestParam(value = "status", required = false) StatusEnum status, Pageable pageable) {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-		Set<Department> departments = user.getRoleBindings().stream().map(UserRoleDepartment::getDepartment)
-				.filter(dep -> user.hasPermission("MANAGE_TICKET", dep)).collect(Collectors.toSet());
+		boolean hasGlobalPermission = user.hasPermission("MANAGE_TICKET", null);
 
-		if (departments.isEmpty()) {
-			return ResponseEntity.ok(Page.empty(pageable));
-		}
+        Set<Department> departments = user.getRoleBindings().stream()
+            .map(UserRoleDepartment::getDepartment)
+            .filter(Objects::nonNull)
+            .filter(dep -> user.hasPermission("MANAGE_TICKET", dep))
+            .collect(Collectors.toSet());
+
+        if (!hasGlobalPermission && departments.isEmpty()) {
+            return ResponseEntity.ok(Page.empty(pageable));
+        }
 
 		List<Ticket> allTickets = ticketService.getTicketsByRelatedUser(user);
 
 		List<Ticket> filtered = allTickets.stream()
-			.filter(ticket -> {
-				Department ticketDep = ticket.getDepartment();
-				return departments.contains(ticketDep) && (status == null || ticket.getStatus() == status);
-			})
-			.toList();
+            .filter(ticket -> {
+                Department ticketDep = ticket.getDepartment();
+                return (hasGlobalPermission || departments.contains(ticketDep))
+                    && (status == null || ticket.getStatus() == status);
+            })
+            .toList();
 
 		List<Ticket> sorted = ticketService.sortInMemory(filtered, pageable.getSort());
 

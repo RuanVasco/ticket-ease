@@ -49,9 +49,9 @@ public class Form {
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<FormField> fields = new ArrayList<>();
 
-	@ManyToOne
-	@JoinColumn(name = "department_id")
-	private Department department;
+	@ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
 
 	public Form(TicketCategory ticketCategory, String title, String description, Set<User> approvers,
 			ApprovalModeEnum approvalMode, User user, List<FormField> fields, Department department) {
@@ -67,8 +67,4 @@ public class Form {
 
 	public Form() {
 	};
-
-	public Department getDepartment() {
-		return this.ticketCategory.getDepartment();
-	}
 }
