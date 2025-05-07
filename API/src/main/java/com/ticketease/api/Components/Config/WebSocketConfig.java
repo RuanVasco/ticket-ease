@@ -1,6 +1,8 @@
 package com.ticketease.api.Components.Config;
 
 import com.ticketease.api.Components.WebSocketAuthChannelInterceptor;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
@@ -22,14 +24,17 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 	private final WebSocketAuthChannelInterceptor webSocketAuthChannelInterceptor;
 
+    @Value("${cors.allowed-origins:http://localhost:5173}")
+	private String corsOrigins;
+
 	public WebSocketConfig(WebSocketAuthChannelInterceptor webSocketAuthChannelInterceptor) {
 		this.webSocketAuthChannelInterceptor = webSocketAuthChannelInterceptor;
 	}
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
-		registry.addEndpoint("/ws").setAllowedOrigins("http://localhost:5173", "http://localhost:4173",
-				"http://192.0.1.68:4173");
+        String[] origins = corsOrigins.split(",");
+		registry.addEndpoint("/ws").setAllowedOrigins(origins);
 	}
 
 	@Override
