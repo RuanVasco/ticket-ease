@@ -37,7 +37,7 @@ const TableTicket: React.FC<TableTicketProps> = ({ viewMode = "readonly", onTick
     const columnDefs = [
         { label: "ID", field: "id" },
         { label: "Assunto", field: "form.title" },
-        { label: "Categoria", field: "form.ticketCategory.name" },
+        { label: "Categoria", field: "form.ticketCategory" },
         { label: "Status", field: "status" },
         { label: "Urgência", field: "urgency" },
         { label: "Criação", field: "createdAt" },

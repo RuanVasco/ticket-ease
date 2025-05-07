@@ -211,7 +211,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
             ticket.properties.status = StatusEnum.RESOLVED;
         }
 
-        if (ticket.properties.status === StatusEnum.NEW) {
+        if (ticket.properties.status === StatusEnum.NEW && isManager) {
             ticket.properties.status = StatusEnum.IN_PROGRESS;
         }
 
@@ -280,7 +280,6 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
                                 messages.map((msg) =>
                                     Number(msg.user.id) === Number(userData?.id) ? (
                                         <div key={msg.id} className="message-box sent">
-                                            {msg.id}
                                             <div className="message-bubble">
                                                 <div className="mb-2 message-header">
                                                     {getFirstName(msg.user.name)}
@@ -292,7 +291,6 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
                                         </div>
                                     ) : (
                                         <div key={msg.id} className="message-box received">
-                                            {msg.id}
                                             <div className="message-bubble">
                                                 <div className="mb-2 message-header">
                                                     {getFirstName(msg.user.name)}

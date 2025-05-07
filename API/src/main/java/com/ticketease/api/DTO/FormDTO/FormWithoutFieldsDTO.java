@@ -5,7 +5,7 @@ import com.ticketease.api.Entities.Form;
 
 public record FormWithoutFieldsDTO(
 	Long formId,
-	String category,
+	String ticketCategory,
 	String title,
 	String description,
 	UserResponseDTO user,
