@@ -70,8 +70,13 @@ public class FormController {
 			return user.hasPermission("MANAGE_FORM", dept) || user.hasPermission("MANAGE_FORM", null);
 		}).toList();
 
-		Page<Form> filteredPage = new PageImpl<>(filteredList, pageable, filteredList.size());
-		return ResponseEntity.ok(filteredPage);
+		List<FormDTO> dtoList = filteredList.stream()
+			.map(FormDTO::fromEntity)
+			.toList();
+
+		Page<FormDTO> dtoPage = new PageImpl<>(dtoList, pageable, dtoList.size());
+
+		return ResponseEntity.ok(dtoPage);
 	}
 
 	@GetMapping("/{id}")
@@ -96,17 +101,17 @@ public class FormController {
 
 		List<FormField> fields = new ArrayList<>();
 		for (FormFieldDTO dto : formDTO.getFields()) {
-			FieldTypeEnum fieldTypeEnum = FieldTypeEnum.valueOf(dto.getType().toUpperCase());
+			FieldTypeEnum fieldTypeEnum = FieldTypeEnum.valueOf(dto.type().toUpperCase());
 			FormField field = new FormField();
-			field.setLabel(dto.getLabel());
+			field.setLabel(dto.label());
 			field.setType(fieldTypeEnum);
 			if (fieldTypeEnum != FieldTypeEnum.FILE && fieldTypeEnum != FieldTypeEnum.FILE_MULTIPLE) {
-				field.setRequired(dto.isRequired());
+				field.setRequired(dto.required());
 			}
-			field.setPlaceholder(dto.getPlaceholder());
+			field.setPlaceholder(dto.placeholder());
 
-			if (dto.getOptions() != null) {
-				List<Option> options = dto.getOptions().stream().map(OptionDTO::toEntity).collect(Collectors.toList());
+			if (dto.options() != null) {
+				List<Option> options = dto.options().stream().map(OptionDTO::toEntity).collect(Collectors.toList());
 				field.setOptions(options);
 			}
 
@@ -158,7 +163,7 @@ public class FormController {
 		Map<Long, FormField> existingFieldMap = existingFields.stream().filter(f -> f.getId() != null)
 				.collect(Collectors.toMap(FormField::getId, f -> f));
 
-		Set<Long> incomingIds = formDTO.getFields().stream().map(FormFieldDTO::getId).filter(Objects::nonNull)
+		Set<Long> incomingIds = formDTO.getFields().stream().map(FormFieldDTO::id).filter(Objects::nonNull)
 				.collect(Collectors.toSet());
 
 		List<FormField> toRemove = existingFields.stream()
@@ -168,21 +173,21 @@ public class FormController {
 
 		for (FormFieldDTO dto : formDTO.getFields()) {
 			FormField field;
-			if (dto.getId() != null && existingFieldMap.containsKey(dto.getId())) {
-				field = existingFieldMap.get(dto.getId());
+			if (dto.id() != null && existingFieldMap.containsKey(dto.id())) {
+				field = existingFieldMap.get(dto.id());
 			} else {
 				field = new FormField();
 				field.setForm(existingForm);
 				existingFields.add(field);
 			}
 
-			field.setLabel(dto.getLabel());
-			field.setType(FieldTypeEnum.valueOf(dto.getType().toUpperCase()));
-			field.setPlaceholder(dto.getPlaceholder());
-			field.setRequired(dto.isRequired());
+			field.setLabel(dto.label());
+			field.setType(FieldTypeEnum.valueOf(dto.type().toUpperCase()));
+			field.setPlaceholder(dto.placeholder());
+			field.setRequired(dto.required());
 
-			if (dto.getOptions() != null) {
-				field.setOptions(new ArrayList<>(dto.getOptions().stream().map(OptionDTO::toEntity).toList()));
+			if (dto.options() != null) {
+				field.setOptions(new ArrayList<>(dto.options().stream().map(OptionDTO::toEntity).toList()));
 			}
 		}
 
