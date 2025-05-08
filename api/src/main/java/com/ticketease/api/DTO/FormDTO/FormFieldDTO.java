@@ -7,8 +7,6 @@ import com.ticketease.api.Enums.FieldTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
 public record FormFieldDTO(
 	Long id,
 	String label,
