@@ -1,9 +1,12 @@
 package com.ticketease.api.Entities;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -17,6 +20,7 @@ public class Notification {
 	private boolean read = false;
 
 	@ManyToOne
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
