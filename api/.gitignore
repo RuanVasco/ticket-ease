@@ -1,7 +1,6 @@
 target/
 .idea
 uploads/*
-db
 logs/*
 
 # Created by https://www.gitignore.io/api/eclipse
