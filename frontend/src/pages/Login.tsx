@@ -27,7 +27,7 @@ export default function Login() {
                 navigate("/");
             }
         } catch (error: any) {
-            console.log(error)
+            console.error(error)
             if (axios.isAxiosError(error) && error.response) {
                 setErrorMessage(error.response.data);
             } else {
