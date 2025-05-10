@@ -132,7 +132,10 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
                 onDisconnect: () => {
                     isConnected.current = false;
                     isConnecting.current = false;
+                    subscribedTickets.current.clear();
                     console.warn("WebSocket desconectado.");
+
+                    setTimeout(() => connectWebSocket(), 1000);
                 },
                 onStompError: (error) => {
                     isConnected.current = false;
