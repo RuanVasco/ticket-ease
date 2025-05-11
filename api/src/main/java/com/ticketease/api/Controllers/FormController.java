@@ -115,6 +115,10 @@ public class FormController {
 				field.setOptions(options);
 			}
 
+			if (dto.position() != null) {
+				field.setPosition(dto.position());
+			}
+
 			fields.add(field);
 		}
 
@@ -188,6 +192,10 @@ public class FormController {
 
 			if (dto.options() != null) {
 				field.setOptions(new ArrayList<>(dto.options().stream().map(OptionDTO::toEntity).toList()));
+			}
+
+			if (dto.position() != null) {
+				field.setPosition(dto.position());
 			}
 		}
 

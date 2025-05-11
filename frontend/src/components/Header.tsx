@@ -158,7 +158,7 @@ const Header: React.FC = () => {
                                         <li key={i} className={`${!n.read ? "unread" : ""}`}>
                                             <div className="notification_content">
                                                 <Link
-                                                    to={`/tickets/${n.typeId}`}
+                                                    to={`/tickets`}
                                                     className="notification_message"
                                                     onClick={() => markAsRead(Number(n.id))}
                                                 >

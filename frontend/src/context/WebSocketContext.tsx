@@ -86,8 +86,8 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
                 brokerURL: WS_URL,
                 connectHeaders: { Authorization: `Bearer ${token}` },
                 reconnectDelay: 5000,
-                heartbeatIncoming: 10000,
-                heartbeatOutgoing: 10000,
+                heartbeatIncoming: 4000,
+                heartbeatOutgoing: 4000,
                 onConnect: () => {
                     isConnected.current = true;
                     isConnecting.current = false;

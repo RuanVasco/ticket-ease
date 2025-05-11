@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import "../assets/styles/components/_login.scss";
+import logo from "../assets/logo_claro.png";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -10,7 +11,7 @@ export default function Login() {
     const [emailUser, setEmail] = useState<string>("");
     const [passwordUser, setPassword] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
+    const Logo = () => <img src={logo} className="header_brand" alt="Logo" draggable={false} />;
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -40,6 +41,9 @@ export default function Login() {
         <main>
             <div className="d-flex justify-content-center align-items-center div_main_content">
                 <form onSubmit={handleSubmit} className="border p-4 rounded">
+                    <div className="d-flex justify-content-center mb-4">
+                        <Logo />
+                    </div>
                     <div>
                         {errorMessage && (
                             <div className="alert alert-danger mt-3" role="alert">

@@ -13,7 +13,8 @@ public record FormFieldDTO(
 	String type,
 	boolean required,
 	String placeholder,
-	List<OptionDTO> options
+	List<OptionDTO> options,
+	Integer position
 ) {
 	public static FormFieldDTO fromEntity(FormField field) {
 		return new FormFieldDTO(
@@ -24,7 +25,8 @@ public record FormFieldDTO(
 			field.getPlaceholder(),
 			field.getOptions().stream()
 				.map(OptionDTO::from)
-				.toList()
+				.toList(),
+			field.getPosition()
 		);
 	}
 }

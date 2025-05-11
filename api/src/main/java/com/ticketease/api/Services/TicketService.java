@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -26,6 +27,7 @@ public class TicketService {
 	private final UserRepository userRepository;
 	private final NotificationService notificationService;
 	private final UserLinkFormsService userLinkFormsService;
+	private final SimpMessagingTemplate simpMessagingTemplate;
 
 	public Optional<Ticket> findById(Long ticketId) {
 		return ticketRepository.findById(ticketId);
@@ -88,11 +90,11 @@ public class TicketService {
 		Set<User> relatedUsers = getRelatedUsers(savedTicket);
 		String notificationContent = "Ticket criado " + savedTicket.getId();
 		for (User targetUser : relatedUsers) {
+			simpMessagingTemplate.convertAndSendToUser(targetUser.getUsername(), "/queue/tickets", List.of(savedTicket.getId()));
 			if (user.equals(targetUser))
 				continue;
 			notificationService.createNotification(targetUser, ticket.getId(), "Ticket", notificationContent);
 		}
-
 		userLinkFormsService.registerRecentForm(user, form);
 
 		return savedTicket;

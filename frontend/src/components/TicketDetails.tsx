@@ -155,6 +155,12 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
     }, [ticket?.responses]);
 
     useEffect(() => {
+        if (!loadingMessages) {
+            scrollToEnd();
+        }
+    }, [messages]);
+
+    useEffect(() => {
         if (!ticketMessages) return;
 
         const allIncomingMessages = Array.isArray(ticketMessages)
@@ -329,7 +335,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
                                             </button>
                                         ) : (
                                             <>
-                                                <button className="btn_send_message btn_send" onClick={() => handleSubmit(null)}>
+                                                <button className={!isManager ? "isntManager btn_send" : "btn_send"} onClick={() => handleSubmit(null)}>
                                                     Enviar
                                                     <BsSend className="ms-2" />
                                                 </button>
