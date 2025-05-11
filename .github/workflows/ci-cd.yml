@@ -20,7 +20,7 @@ jobs:
 
       - name: Deploy to Server
         run: |
-          ssh -o StrictHostKeyChecking=no -p 2222 ruan@186.232.151.7 "
+          ssh -o StrictHostKeyChecking=no -p 2365 ruan@186.232.151.7 "
             cd /home/ruan/Documents/TicketEase &&
             git pull &&
             docker compose down &&
