@@ -1,0 +1,28 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.ticketease_dev }}
+
+      - name: Deploy to Server
+        run: |
+          ssh -o StrictHostKeyChecking=no -p 2222 ruan@186.232.151.7 "
+            cd /home/ruan/Documents/TicketEase &&
+            git pull &&
+            docker compose down &&
+            docker compose up -d --build
+          "
