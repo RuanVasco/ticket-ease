@@ -24,17 +24,9 @@ public class FormDTO {
 		dto.setTicketCategoryId(form.getTicketCategory().getId());
 		dto.setApprovalMode(form.getApprovalMode());
 
-		dto.setApprovers(
-			form.getApprovers().stream()
-				.map(User::getId)
-				.toList()
-		);
+		dto.setApprovers(form.getApprovers().stream().map(User::getId).toList());
 
-		dto.setFields(
-			form.getFields().stream()
-				.map(FormFieldDTO::fromEntity)
-				.toList()
-		);
+		dto.setFields(form.getFields().stream().map(FormFieldDTO::fromEntity).toList());
 
 		return dto;
 	}

@@ -66,10 +66,7 @@ public class MessageController {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado. Você não tem permissão.");
 		}
 
-		if (
-			StatusEnum.CLOSED.equals(ticket.getStatus()) ||
-			StatusEnum.CANCELED.equals(ticket.getStatus())
-		) {
+		if (StatusEnum.CLOSED.equals(ticket.getStatus()) || StatusEnum.CANCELED.equals(ticket.getStatus())) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Este ticket está fechado.");
 		}
 
@@ -92,22 +89,13 @@ public class MessageController {
 	}
 
 	@GetMapping("/ticket/{ticketID}")
-	public ResponseEntity<Page<MessageResponseDTO>> getMessages(
-		@PathVariable Long ticketID,
-		@RequestParam(defaultValue = "0") int page,
-		@RequestParam(defaultValue = "10") int size
-	) {
+	public ResponseEntity<Page<MessageResponseDTO>> getMessages(@PathVariable Long ticketID,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
 		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "sentAt"));
 		Page<Message> messages = messageService.getByTicketId(ticketID, pageable);
 
-		Page<MessageResponseDTO> messageDTOs = messages.map(message ->
-			new MessageResponseDTO(
-				message.getId(),
-				message.getText(),
-				UserResponseDTO.from(message.getUser()),
-				message.getSentAt()
-			)
-		);
+		Page<MessageResponseDTO> messageDTOs = messages.map(message -> new MessageResponseDTO(message.getId(),
+				message.getText(), UserResponseDTO.from(message.getUser()), message.getSentAt()));
 
 		return ResponseEntity.ok(messageDTOs);
 	}

@@ -50,8 +50,8 @@ public class Form {
 	private List<FormField> fields = new ArrayList<>();
 
 	@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "department_id")
-    private Department department;
+	@JoinColumn(name = "department_id")
+	private Department department;
 
 	public Form(TicketCategory ticketCategory, String title, String description, Set<User> approvers,
 			ApprovalModeEnum approvalMode, User user, List<FormField> fields, Department department) {

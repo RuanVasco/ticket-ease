@@ -90,7 +90,8 @@ public class TicketService {
 		Set<User> relatedUsers = getRelatedUsers(savedTicket);
 		String notificationContent = "Ticket criado " + savedTicket.getId();
 		for (User targetUser : relatedUsers) {
-			simpMessagingTemplate.convertAndSendToUser(targetUser.getUsername(), "/queue/tickets", List.of(savedTicket.getId()));
+			simpMessagingTemplate.convertAndSendToUser(targetUser.getUsername(), "/queue/tickets",
+					List.of(savedTicket.getId()));
 			if (user.equals(targetUser))
 				continue;
 			notificationService.createNotification(targetUser, ticket.getId(), "Ticket", notificationContent);
@@ -135,8 +136,8 @@ public class TicketService {
 	}
 
 	public Page<Ticket> findByDepartment(Department department, Pageable pageable) {
-//		Collection<Ticket> tickets = ticketRepository.findAll();
-//		return filterAndPaginate(tickets, department, user, pageable);
+		// Collection<Ticket> tickets = ticketRepository.findAll();
+		// return filterAndPaginate(tickets, department, user, pageable);
 		return ticketRepository.findByForm_Department(department, pageable);
 	}
 
@@ -176,7 +177,8 @@ public class TicketService {
 	}
 
 	public List<Ticket> sortInMemory(List<Ticket> tickets, Sort sort) {
-		if (sort.isUnsorted()) return tickets;
+		if (sort.isUnsorted())
+			return tickets;
 
 		Comparator<Ticket> comparator = null;
 
@@ -187,9 +189,12 @@ public class TicketService {
 				case "urgency" -> Comparator.comparing(Ticket::getUrgency);
 				case "createdAt" -> Comparator.comparing(Ticket::getCreatedAt, Comparator.nullsLast(Date::compareTo));
 				case "updatedAt" -> Comparator.comparing(Ticket::getUpdatedAt, Comparator.nullsLast(Date::compareTo));
-				case "user.name" -> Comparator.comparing(t -> t.getUser().getName(), Comparator.nullsLast(String::compareToIgnoreCase));
-				case "form.title" -> Comparator.comparing(t -> t.getForm().getTitle(), Comparator.nullsLast(String::compareToIgnoreCase));
-				case "form.ticketCategory.name" -> Comparator.comparing(t -> t.getForm().getTicketCategory().getName(), Comparator.nullsLast(String::compareToIgnoreCase));
+				case "user.name" ->
+					Comparator.comparing(t -> t.getUser().getName(), Comparator.nullsLast(String::compareToIgnoreCase));
+				case "form.title" -> Comparator.comparing(t -> t.getForm().getTitle(),
+						Comparator.nullsLast(String::compareToIgnoreCase));
+				case "form.ticketCategory.name" -> Comparator.comparing(t -> t.getForm().getTicketCategory().getName(),
+						Comparator.nullsLast(String::compareToIgnoreCase));
 				default -> null;
 			};
 

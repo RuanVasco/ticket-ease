@@ -32,14 +32,10 @@ public class FormController {
 	private final FormFieldRepository formFieldRepository;
 
 	@GetMapping
-	public ResponseEntity<?> getAllForms(
-		@RequestParam(required = false) String search
-	) {
+	public ResponseEntity<?> getAllForms(@RequestParam(required = false) String search) {
 		if (search != null) {
-			List<UserFormLinkDTO> formLinkDTOS = formService.findByValue(search)
-				.stream()
-				.map(UserFormLinkDTO::fromEntity)
-				.collect(Collectors.toList());
+			List<UserFormLinkDTO> formLinkDTOS = formService.findByValue(search).stream()
+					.map(UserFormLinkDTO::fromEntity).collect(Collectors.toList());
 
 			return ResponseEntity.ok(formLinkDTOS);
 		}
@@ -70,11 +66,9 @@ public class FormController {
 			return user.hasPermission("MANAGE_FORM", dept) || user.hasPermission("MANAGE_FORM", null);
 		}).toList();
 
-		List<FormDTO> dtoList = filteredList.stream()
-			.map(FormDTO::fromEntity)
-			.toList();
+		List<FormResponseDTO> dtoList = filteredList.stream().map(FormResponseDTO::from).toList();
 
-		Page<FormDTO> dtoPage = new PageImpl<>(dtoList, pageable, dtoList.size());
+		Page<FormResponseDTO> dtoPage = new PageImpl<>(dtoList, pageable, dtoList.size());
 
 		return ResponseEntity.ok(dtoPage);
 	}
@@ -105,9 +99,11 @@ public class FormController {
 			FormField field = new FormField();
 			field.setLabel(dto.label());
 			field.setType(fieldTypeEnum);
+
 			if (fieldTypeEnum != FieldTypeEnum.FILE && fieldTypeEnum != FieldTypeEnum.FILE_MULTIPLE) {
 				field.setRequired(dto.required());
 			}
+
 			field.setPlaceholder(dto.placeholder());
 
 			if (dto.options() != null) {
@@ -164,6 +160,7 @@ public class FormController {
 		existingForm.setApprovalMode(formDTO.getApprovalMode());
 
 		List<FormField> existingFields = existingForm.getFields();
+
 		Map<Long, FormField> existingFieldMap = existingFields.stream().filter(f -> f.getId() != null)
 				.collect(Collectors.toMap(FormField::getId, f -> f));
 

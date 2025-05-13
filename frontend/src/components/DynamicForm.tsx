@@ -52,6 +52,8 @@ export const DynamicForm: React.FC<Props> = ({
         loading,
     } = useToggleFavorite(Number(form.id), fav, preview, onFavoriteChange);
 
+    const [useForm, setUseForm] = useState<Form | null>(null);
+
     const fetchUsers = async () => {
         try {
             const res = await axiosInstance.get(`${API_BASE_URL}/users`);
@@ -62,6 +64,27 @@ export const DynamicForm: React.FC<Props> = ({
             toast.error("Erro ao buscar usuários");
         }
     };
+
+    useEffect(() => {
+        setUseForm(form);
+    }, [form]);
+
+    const sortFields = (): void => {
+        if (!useForm) return;
+        const sortedFields = [...useForm.fields].sort((f1, f2) => f1.position - f2.position);
+
+        const isSorted = useForm.fields.every((field, idx) => field === sortedFields[idx]);
+
+        if (!isSorted) {
+            setUseForm({ ...useForm, fields: sortedFields });
+        }
+    };
+
+    useEffect(() => {
+        if (useForm && useForm.fields?.length > 0) {
+            sortFields();
+        }
+    }, [useForm]);
 
     useEffect(() => {
         fetchUsers();
@@ -81,203 +104,223 @@ export const DynamicForm: React.FC<Props> = ({
     };
 
     return (
-        <form onSubmit={preview ? (e) => e.preventDefault() : handleSubmit}>
-            <div className="d-flex align-items-center form_header">
-                <h4 className="fw-bold mb-0 me-2">{form.title}</h4>
+        <>
+            {useForm ? (
+                <form onSubmit={preview ? (e) => e.preventDefault() : handleSubmit}>
+                    <div className="d-flex align-items-center form_header">
+                        <h4 className="fw-bold mb-0 me-2">{useForm.title}</h4>
 
-                <button
-                    type="button"
-                    className="btn p-0 bg-transparent border-0 align-middle"
-                    onClick={toggleFavorite}
-                    disabled={loading}
-                    aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
-                >
-                    {favorite ? <FaStar /> : <FaRegStar />}
-                </button>
-            </div>
-            <p className="text-muted">{form.description}</p>
+                        <button
+                            type="button"
+                            className="btn p-0 bg-transparent border-0 align-middle"
+                            onClick={toggleFavorite}
+                            disabled={loading}
+                            aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
+                        >
+                            {favorite ? <FaStar /> : <FaRegStar />}
+                        </button>
+                    </div>
+                    <p className="text-muted">{useForm.description}</p>
 
-            {form.fields.map((field, index) => (
-                <div key={index} className="mb-3">
-                    {field.type === "TEXT" && (
-                        <>
-                            <label className="form-label">
-                                {field.label}{" "}
-                                {field.required && <span className="text-danger">*</span>}
-                            </label>
-                            <input
-                                type="text"
-                                className="form-control"
-                                value={formData[field.id] || ""}
-                                disabled={preview}
-                                onChange={(e) => handleChange(field.id, e.target.value)}
-                            />
-                        </>
-                    )}
-
-                    {field.type === "TEXTAREA" && (
-                        <>
-                            <label className="form-label">
-                                {field.label}{" "}
-                                {field.required && <span className="text-danger">*</span>}
-                            </label>
-                            <textarea
-                                className="form-control"
-                                disabled={preview}
-                                onChange={(e) => handleChange(field.id, e.target.value)}
-                            />
-                        </>
-                    )}
-
-                    {field.type === "DATE" && (
-                        <>
-                            <label className="form-label">
-                                {field.label}{" "}
-                                {field.required && <span className="text-danger">*</span>}
-                            </label>
-                            <input
-                                type="date"
-                                className="form-control"
-                                disabled={preview}
-                                onChange={(e) => handleChange(field.id, e.target.value)}
-                            />
-                        </>
-                    )}
-
-                    {field.type === "NUMBER" && (
-                        <NumberInput
-                            value={formData[field.id] || ""}
-                            label={field.label}
-                            required={field.required}
-                            disabled={preview}
-                            onChange={(value) => handleChange(field.id, value)}
-                        />
-                    )}
-
-                    {field.type === "SELECT" && (
-                        <SelectInput
-                            value={formData[field.id] || ""}
-                            label={field.label}
-                            required={field.required}
-                            options={field.options || []}
-                            disabled={false}
-                            onChange={(value) => handleChange(field.id, value)}
-                        />
-                    )}
-
-                    {field.type === "DEPARTMENT_SELECT" && (
-                        <SelectDepartment
-                            value={formData[field.id] || ""}
-                            required={field.required}
-                            disabled={false}
-                            onChange={(value) => handleChange(field.id, value)}
-                        />
-                    )}
-
-                    {field.type === "USER_DEPARTMENT_SELECT" && (
-                        <SelectDepartment
-                            value={formData[field.id] || ""}
-                            required={field.required}
-                            disabled={false}
-                            onChange={(value) => handleChange(field.id, value)}
-                            scope="user"
-                        />
-                    )}
-
-                    {field.type === "CHECKBOX" && (
-                        <div>
-                            {field.options?.map((opt) => (
-                                <div key={opt.value} className="form-check">
+                    {useForm.fields.map((field, index) => (
+                        <div key={index} className="mb-3">
+                            {(field.type === "TEXT" || field.type === "EMAIL") && (
+                                <>
+                                    <label className="form-label">
+                                        {field.label}{" "}
+                                        {field.required && <span className="text-danger">*</span>}
+                                    </label>
                                     <input
-                                        className="form-check-input"
-                                        type="checkbox"
+                                        type={field.type === "EMAIL" ? "email" : "text"}
+                                        className="form-control"
+                                        value={formData[field.id] || ""}
                                         disabled={preview}
                                         onChange={(e) => handleChange(field.id, e.target.value)}
                                     />
-                                    <label className="form-check-label">{opt.label}</label>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                                </>
+                            )}
 
-                    {field.type === "RADIO" && (
-                        <div>
-                            {field.options?.map((opt) => (
-                                <div key={opt.value} className="form-check">
-                                    <input
-                                        className="form-check-input"
-                                        type="radio"
+                            {field.type === "TEXTAREA" && (
+                                <>
+                                    <label className="form-label">
+                                        {field.label}{" "}
+                                        {field.required && <span className="text-danger">*</span>}
+                                    </label>
+                                    <textarea
+                                        className="form-control"
+                                        value={formData[field.id] || ""}
                                         disabled={preview}
                                         onChange={(e) => handleChange(field.id, e.target.value)}
                                     />
-                                    <label className="form-check-label">{opt.label}</label>
+                                </>
+                            )}
+
+                            {field.type === "DATE" && (
+                                <>
+                                    <label className="form-label">
+                                        {field.label}{" "}
+                                        {field.required && <span className="text-danger">*</span>}
+                                    </label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        disabled={preview}
+                                        onChange={(e) => handleChange(field.id, e.target.value)}
+                                    />
+                                </>
+                            )}
+
+                            {field.type === "NUMBER" && (
+                                <NumberInput
+                                    value={formData[field.id] || ""}
+                                    label={field.label}
+                                    required={field.required}
+                                    disabled={preview}
+                                    onChange={(value) => handleChange(field.id, value)}
+                                />
+                            )}
+
+                            {field.type === "SELECT" && (
+                                <SelectInput
+                                    value={formData[field.id] || ""}
+                                    label={field.label}
+                                    required={field.required}
+                                    options={field.options || []}
+                                    disabled={false}
+                                    onChange={(value) => handleChange(field.id, value)}
+                                />
+                            )}
+
+                            {field.type === "DEPARTMENT_SELECT" && (
+                                <SelectDepartment
+                                    value={formData[field.id] || ""}
+                                    required={field.required}
+                                    disabled={false}
+                                    onChange={(value) => handleChange(field.id, value)}
+                                />
+                            )}
+
+                            {field.type === "USER_DEPARTMENT_SELECT" && (
+                                <SelectDepartment
+                                    value={formData[field.id] || ""}
+                                    required={field.required}
+                                    disabled={false}
+                                    onChange={(value) => handleChange(field.id, value)}
+                                    scope="user"
+                                />
+                            )}
+
+                            {field.type === "CHECKBOX" && (
+                                <div>
+                                    {field.options?.map((opt) => (
+                                        <div key={opt.value} className="form-check">
+                                            <input
+                                                className="form-check-input"
+                                                type="checkbox"
+                                                checked={formData[field.id]?.includes(opt.value)}
+                                                disabled={preview}
+                                                onChange={(e) => {
+                                                    const existing = formData[field.id] || [];
+                                                    const updated = e.target.checked
+                                                        ? [...existing, opt.value]
+                                                        : existing.filter((v: any) => v !== opt.value);
+                                                    handleChange(field.id, updated);
+                                                }}
+                                            />
+                                            <label className="form-check-label">{opt.label}</label>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
+                            )}
+
+                            {field.type === "RADIO" && (
+                                <div>
+                                    {field.options?.map((opt) => (
+                                        <div key={opt.value} className="form-check">
+                                            <input
+                                                className="form-check-input"
+                                                type="radio"
+                                                disabled={preview}
+                                                onChange={(e) => {
+                                                    const existing = formData[field.id] || [];
+                                                    const updated = e.target.checked
+                                                        ? [...existing, opt.value]
+                                                        : existing.filter((v: any) => v !== opt.value);
+                                                    handleChange(field.id, updated);
+                                                }}
+                                            />
+                                            <label className="form-check-label">{opt.label}</label>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {(field.type === "FILE" || field.type === "FILE_MULTIPLE") && (
+                                <AttachmentUploadInput
+                                    label={field.label}
+                                    required={field.required}
+                                    disabled={false}
+                                    onChange={(value) => handleChange(field.id, value)}
+                                    multiple={field.type === "FILE_MULTIPLE" ? true : false}
+                                />
+                            )}
                         </div>
-                    )}
+                    ))}
+                    <div className="mt-4">
+                        <div className="mb-3 form-check">
+                            <input
+                                type="checkbox"
+                                className="form-check-input"
+                                id="receiveEmail"
+                                checked={properties.receiveEmail}
+                                onChange={(e) => handlePropertiesChange("receiveEmail", e.target.checked)}
+                            />
+                            <label className="form-check-label" htmlFor="receiveEmail">
+                                Receber notificação por e-mail
+                            </label>
+                        </div>
 
-                    {(field.type === "FILE" || field.type === "FILE_MULTIPLE") && (
-                        <AttachmentUploadInput
-                            label={field.label}
-                            required={field.required}
-                            disabled={false}
-                            onChange={(value) => handleChange(field.id, value)}
-                            multiple={field.type === "FILE_MULTIPLE" ? true : false}
-                        />
-                    )}
-                </div>
-            ))}
-            <div className="mt-4">
-                <div className="mb-3 form-check">
-                    <input
-                        type="checkbox"
-                        className="form-check-input"
-                        id="receiveEmail"
-                        checked={properties.receiveEmail}
-                        onChange={(e) => handlePropertiesChange("receiveEmail", e.target.checked)}
-                    />
-                    <label className="form-check-label" htmlFor="receiveEmail">
-                        Receber notificação por e-mail
-                    </label>
-                </div>
+                        <div className="mb-3">
+                            <label htmlFor="urgencySelect" className="form-label">
+                                Urgência
+                            </label>
+                            <select
+                                id="urgencySelect"
+                                className="form-select"
+                                value={properties.urgency}
+                                onChange={(e) => handlePropertiesChange("urgency", e.target.value)}
+                            >
+                                <option value="BAIXA">Baixa</option>
+                                <option value="MEDIA">Média</option>
+                                <option value="ALTA">Alta</option>
+                            </select>
+                        </div>
 
-                <div className="mb-3">
-                    <label htmlFor="urgencySelect" className="form-label">
-                        Urgência
-                    </label>
-                    <select
-                        id="urgencySelect"
-                        className="form-select"
-                        value={properties.urgency}
-                        onChange={(e) => handlePropertiesChange("urgency", e.target.value)}
-                    >
-                        <option value="BAIXA">Baixa</option>
-                        <option value="MEDIA">Média</option>
-                        <option value="ALTA">Alta</option>
-                    </select>
-                </div>
-
-                <div className="mb-3">
-                    <label htmlFor="observersSelect" className="form-label">
-                        Observadores
-                    </label>
-                    <Select<OptionType, true>
-                        id="observersSelect"
-                        isMulti
-                        options={options}
-                        value={selectedOptions}
-                        onChange={(selected) => {
-                            setSelectedOptions(selected);
-                            const ids = selected.map((opt) => opt.value);
-                            handlePropertiesChange("observers", ids);
-                        }}
-                        placeholder="Selecione os observadores"
-                    />
-                </div>
-            </div>
-            <button type="submit" className="btn btn-primary" disabled={preview}>
-                Enviar
-            </button>
-        </form>
+                        <div className="mb-3">
+                            <label htmlFor="observersSelect" className="form-label">
+                                Observadores
+                            </label>
+                            <Select<OptionType, true>
+                                id="observersSelect"
+                                isMulti
+                                options={options}
+                                value={selectedOptions}
+                                onChange={(selected) => {
+                                    setSelectedOptions(selected);
+                                    const ids = selected.map((opt) => opt.value);
+                                    handlePropertiesChange("observers", ids);
+                                }}
+                                placeholder="Selecione os observadores"
+                            />
+                        </div>
+                    </div>
+                    <button type="submit" className="btn btn-primary" disabled={preview}>
+                        Enviar
+                    </button>
+                </form>
+            ) : (
+                <h4>Formulário inválido</h4>
+            )}
+        </>
     );
 };

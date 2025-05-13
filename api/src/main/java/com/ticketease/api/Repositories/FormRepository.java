@@ -16,11 +16,11 @@ public interface FormRepository extends JpaRepository<Form, Long> {
 	List<Form> findByTicketCategoryId(@Param("category_id") Long categoryId);
 
 	@Query("""
-   SELECT f
-   FROM   Form f
-   WHERE  LOWER(f.title)          LIKE LOWER(CONCAT('%', :value, '%'))
-      OR  LOWER(f.description)    LIKE LOWER(CONCAT('%', :value, '%'))
-      OR  LOWER(f.department.name)LIKE LOWER(CONCAT('%', :value, '%'))
-""")
+			   SELECT f
+			   FROM   Form f
+			   WHERE  LOWER(f.title)          LIKE LOWER(CONCAT('%', :value, '%'))
+			      OR  LOWER(f.description)    LIKE LOWER(CONCAT('%', :value, '%'))
+			      OR  LOWER(f.department.name)LIKE LOWER(CONCAT('%', :value, '%'))
+			""")
 	List<Form> findByValue(@Param("value") String value);
 }

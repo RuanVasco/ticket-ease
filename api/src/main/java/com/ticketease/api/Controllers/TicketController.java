@@ -91,25 +91,21 @@ public class TicketController {
 
 		boolean hasGlobalPermission = user.hasPermission("MANAGE_TICKET", null);
 
-        Set<Department> departments = user.getRoleBindings().stream()
-            .map(UserRoleDepartment::getDepartment)
-            .filter(Objects::nonNull)
-            .filter(dep -> user.hasPermission("MANAGE_TICKET", dep))
-            .collect(Collectors.toSet());
+		Set<Department> departments = user.getRoleBindings().stream().map(UserRoleDepartment::getDepartment)
+				.filter(Objects::nonNull).filter(dep -> user.hasPermission("MANAGE_TICKET", dep))
+				.collect(Collectors.toSet());
 
-        if (!hasGlobalPermission && departments.isEmpty()) {
-            return ResponseEntity.ok(Page.empty(pageable));
-        }
+		if (!hasGlobalPermission && departments.isEmpty()) {
+			return ResponseEntity.ok(Page.empty(pageable));
+		}
 
 		List<Ticket> allTickets = ticketService.getTicketsByRelatedUser(user);
 
-		List<Ticket> filtered = allTickets.stream()
-            .filter(ticket -> {
-                Department ticketDep = ticket.getDepartment();
-                return (hasGlobalPermission || departments.contains(ticketDep))
-                    && (status == null || ticket.getStatus() == status);
-            })
-            .toList();
+		List<Ticket> filtered = allTickets.stream().filter(ticket -> {
+			Department ticketDep = ticket.getDepartment();
+			return (hasGlobalPermission || departments.contains(ticketDep))
+					&& (status == null || ticket.getStatus() == status);
+		}).toList();
 
 		List<Ticket> sorted = ticketService.sortInMemory(filtered, pageable.getSort());
 
@@ -117,11 +113,8 @@ public class TicketController {
 		int end = Math.min(start + pageable.getPageSize(), sorted.size());
 		List<Ticket> pageContent = (start >= sorted.size()) ? List.of() : sorted.subList(start, end);
 
-		Page<TicketResponseDTO> resultPage = new PageImpl<>(
-			pageContent.stream().map(TicketResponseDTO::from).toList(),
-			pageable,
-			sorted.size()
-		);
+		Page<TicketResponseDTO> resultPage = new PageImpl<>(pageContent.stream().map(TicketResponseDTO::from).toList(),
+				pageable, sorted.size());
 
 		return ResponseEntity.ok(resultPage);
 	}

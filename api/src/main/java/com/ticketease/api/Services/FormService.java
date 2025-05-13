@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 public class FormService {
 
 	private final FormRepository formRepository;
-	private final FormFieldRepository fieldRepository;
 
 	public List<Form> getAllForms() {
 		return formRepository.findAll();

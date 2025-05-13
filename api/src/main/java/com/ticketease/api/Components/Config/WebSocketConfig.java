@@ -24,7 +24,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 	private final WebSocketAuthChannelInterceptor webSocketAuthChannelInterceptor;
 
-    @Value("${cors.allowed-origins:http://localhost:5173}")
+	@Value("${cors.allowed-origins:http://localhost:5173}")
 	private String corsOrigins;
 
 	public WebSocketConfig(WebSocketAuthChannelInterceptor webSocketAuthChannelInterceptor) {
@@ -33,7 +33,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
-        String[] origins = corsOrigins.split(",");
+		String[] origins = corsOrigins.split(",");
 		registry.addEndpoint("/ws").setAllowedOrigins(origins);
 	}
 

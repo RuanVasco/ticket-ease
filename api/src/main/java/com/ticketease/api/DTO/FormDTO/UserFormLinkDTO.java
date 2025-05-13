@@ -15,8 +15,6 @@ public record UserFormLinkDTO(FormResponseDTO form, LocalDateTime accessedAt) {
 	}
 
 	public static UserFormLinkDTO fromEntity(Form form) {
-		return new UserFormLinkDTO(
-			FormResponseDTO.from(form), null
-		);
+		return new UserFormLinkDTO(FormResponseDTO.from(form), null);
 	}
 }
