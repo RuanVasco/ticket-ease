@@ -1,3 +1,5 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4ddbf049baea4621bccd58d3dd8b9436)](https://app.codacy.com/gh/RuanVasco/ticket-ease/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+
 # 📌 Project - TicketEase
 
 TicketEase is a **ticket management system** designed to streamline issue tracking, real-time chat communication, and permission control.
