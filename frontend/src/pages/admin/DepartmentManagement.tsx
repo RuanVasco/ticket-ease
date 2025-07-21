@@ -7,6 +7,7 @@ import Table from "../../components/Table";
 import { usePermissions } from "../../context/PermissionsContext";
 import { Department } from "../../types/Department";
 import { Unit } from "../../types/Unit";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -17,6 +18,7 @@ const columns = [
 ];
 
 const DepartmentManagement: React.FC = () => {
+    const navigate = useNavigate();
     const [filterText, setFilterText] = useState<string>("");
     const [modeModal, setModeModal] = useState<string>("");
     const [modalTitle, setModalTitle] = useState<string>("");
@@ -199,6 +201,7 @@ const DepartmentManagement: React.FC = () => {
                     pageSize={pageSize}
                     canCreate={canCreate}
                     canDelete={canDelete}
+                    onBack={() => { navigate("/admin") }}
                 />
                 <Table
                     columns={columns}

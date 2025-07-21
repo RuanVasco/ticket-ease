@@ -1,9 +1,8 @@
-import "../assets/styles/action_bar.css";
 import axios from "axios";
 import React, { useState, ChangeEvent, FormEvent } from "react";
-import { FaPlus, FaMinus } from "react-icons/fa6";
-
-import ItemsPerPage from "./ItemsPerPage";
+import { FaPlus, FaMinus, FaArrowLeft } from "react-icons/fa6";
+import "../assets/styles/components/_action_bar.scss";
+import ItemsPerPage from "./Common/ItemsPerPage";
 
 interface ActionBarProps {
     modalTargetId?: string;
@@ -17,6 +16,7 @@ interface ActionBarProps {
     pageSize: number;
     canCreate?: boolean;
     canDelete?: boolean;
+    onBack?: () => void | null;
 }
 
 const ActionBar: React.FC<ActionBarProps> = ({
@@ -31,6 +31,7 @@ const ActionBar: React.FC<ActionBarProps> = ({
     pageSize,
     canCreate = false,
     canDelete = false,
+    onBack = null
 }) => {
     const [items, setItems] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
@@ -69,7 +70,16 @@ const ActionBar: React.FC<ActionBarProps> = ({
     return (
         <div>
             <div className="mt-4 mb-3 row">
-                <div className="col"></div>
+                <div className="col-2">
+                    {onBack && (
+                        <button
+                            className="btn_common"
+                            onClick={onBack}
+                        >
+                            <FaArrowLeft /> Voltar
+                        </button>
+                    )}
+                </div>
                 <div className="d-flex justify-content-center col">
                     <div className="d-flex align-items-center">
                         {canCreate && (
@@ -95,14 +105,14 @@ const ActionBar: React.FC<ActionBarProps> = ({
                             </button>
                         )}
                         <input
-                            className="form-control"
+                            className="input_text rounded"
                             placeholder="Filtrar"
                             value={filterText}
                             onChange={onFilterChange}
                         />
                     </div>
                 </div>
-                <div className="col text-end mt-auto">
+                <div className="col-2 text-end mt-auto">
                     <ItemsPerPage onPageSizeChange={onPageSizeChange} pageSize={pageSize} />
                 </div>
             </div>
@@ -143,7 +153,7 @@ const ActionBar: React.FC<ActionBarProps> = ({
                     </div>
                 </div>
             </div>
-        </div >
+        </div>
     );
 };
 

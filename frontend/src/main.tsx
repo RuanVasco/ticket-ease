@@ -5,8 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App.tsx";
 import { AuthProvider } from "./context/AuthContext";
 import { WebSocketProvider } from "./context/WebSocketContext";
-import "./assets/styles/global.css";
-import { ThemeProvider } from "./context/ThemeContext";
+import './assets/styles/main.scss';
 import { PermissionsProvider } from "./context/PermissionsContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
@@ -15,9 +14,7 @@ createRoot(document.getElementById("root")!).render(
             <AuthProvider>
                 <WebSocketProvider>
                     <PermissionsProvider>
-                        <ThemeProvider>
-                            <App />
-                        </ThemeProvider>
+                        <App />
                     </PermissionsProvider>
                 </WebSocketProvider>
             </AuthProvider>

@@ -1,3 +1,5 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4ddbf049baea4621bccd58d3dd8b9436)](https://app.codacy.com/gh/RuanVasco/ticket-ease/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+
 # 📌 Project - TicketEase
 
 TicketEase is a **ticket management system** designed to streamline issue tracking, real-time chat communication, and permission control.
@@ -5,37 +7,55 @@ TicketEase is a **ticket management system** designed to streamline issue tracki
 ---
 
 ## 🛠️ Technologies Used
-Frontend
 
-    ⚡ React + Vite – Fast and modern frontend development.
-    🎨 Bootstrap + Custom CSS – For UI styling and responsive design.
-    🏗 TypeScript – Strongly typed JavaScript for better maintainability.
-    🔄 React Context API + Hooks – State management and reusable logic.
-    🔗 React Router – Enables single-page application (SPA) navigation.
+### Frontend
 
-Backend
+- ⚡ **React + Vite** – Fast and modern frontend development.
+- 🎨 **Bootstrap + Custom CSS** – For UI styling and responsive design.
+- 🏗 **TypeScript** – Strongly typed JavaScript for better maintainability.
+- 🔄 **React Context API + Hooks** – State management and reusable logic.
+- 🔗 **React Router** – Enables single-page application (SPA) navigation.
 
-    🏢 Spring Boot – Robust Java backend for handling API requests.
-    🔐 JWT Authentication – Secure login with role-based access control.
-    📩 Spring WebSocket – Real-time communication for chat and notifications.
-    🌐 RESTful API – API endpoints for frontend communication.
+### Backend
 
-Other Technologies
+- 🏢 **Spring Boot** – Robust Java backend for handling API requests.
+- 🔐 **JWT Authentication** – Secure login with role-based access control.
+- 📩 **Spring WebSocket** – Real-time communication for chat and notifications.
+- 🌐 **RESTful API** – API endpoints for frontend communication.
 
-    🚀 WebSocket (STOMP) – Real-time chat and notifications.
-    📡 Axios – HTTP requests for API communication.
-    📝 ESLint + Prettier – Code formatting and linting for clean development.
+### Other Technologies
+
+- 🚀 **WebSocket (STOMP)** – Real-time chat and notifications.
+- 📡 **Axios** – HTTP requests for API communication.
+- 📝 **ESLint + Prettier** – Code formatting and linting for clean development.
+- 🐳 **Docker + Docker Compose** – Containerized full stack setup.
+- 🐘 **PostgreSQL** – Database containerized with Docker.
 
 ---
 
 ## 🚀 Implementation
 
-### 🔧 Environment Setup
+### 🐳 Docker Setup
 
-1️⃣ **Create a `.env.local` file inside the `/frontend/` directory.**  
-2️⃣ **Add the required environment variables** as shown in the example below:
+To run the full application stack using Docker:
+
+#### 1️⃣ Create a `.env` file in the root directory:
 
 ```ini
-VITE_API_BASE_URL=http://localhost:8080
-VITE_WS_URL=ws://localhost:8080/ws
+# Backend
+CORS_ALLOWED_ORIGINS=http://localhost:5173
+SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/ticketease
+SPRING_DATASOURCE_USERNAME=postgres
+SPRING_DATASOURCE_PASSWORD=postgres
 
+# Frontend (used at build time)
+VITE_API_BASE_URL=http://api:8080
+VITE_WS_URL=ws://api:8080/ws
+
+```
+
+#### 2️⃣ Start the system:
+
+```
+docker-compose up --build
+```

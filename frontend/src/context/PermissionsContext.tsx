@@ -17,7 +17,7 @@ interface PermissionsContextType {
 const PermissionsContext = createContext<PermissionsContextType | undefined>(undefined);
 
 export const PermissionsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { checkAuth } = useAuth();
+    const { checkAuth, logout } = useAuth();
     const [permissions, setPermissions] = useState<Permission[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -51,6 +51,7 @@ export const PermissionsProvider: React.FC<{ children: React.ReactNode }> = ({ c
             setPermissions(res.data);
             sessionStorage.setItem("permissions", JSON.stringify(res.data));
         } catch (error) {
+            logout();
             console.error("Erro ao buscar permissões:", error);
         } finally {
             setLoading(false);

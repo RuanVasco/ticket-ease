@@ -1,0 +1,35 @@
+@use "../variables" as var;
+
+.div_main_content {
+	min-height: 60vh;
+	& form {
+		color: var.$color-white;
+		background-color: var.$color-primary;
+	}
+
+	label {
+		font-size: var.$font-size-lg;
+		margin-bottom: 5px;
+	}
+
+	input {
+		background-color: var.$color-white;
+		border: 1px solid var.$color-primary;
+		color: var.$color-primary;
+		border-radius: 8px;
+		padding: 0 1rem;
+		height: 40px;
+		font-size: var.$font-size-base;
+		outline: none;
+		transition: all 0.2s ease-in-out;
+		display: block;
+
+		&::placeholder {
+			color: var.$color-primary;
+		}
+
+		&:focus {
+			background-color: var.$color-light-gray;
+		}
+	}
+}

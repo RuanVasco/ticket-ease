@@ -5,4 +5,5 @@ export interface FormField {
 	required: boolean;
 	placeholder?: string;
 	options?: { value: string; label: string }[];
+	position: number;
 }

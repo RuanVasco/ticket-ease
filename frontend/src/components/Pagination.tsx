@@ -1,4 +1,4 @@
-import "../assets/styles/pagination.css";
+import "../assets/styles/components/_pagination.scss";
 
 interface PaginationProps {
     currentPage: number;
@@ -10,11 +10,10 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
     const pages = [...Array(totalPages).keys()];
 
     return (
-        <div className="d-flex flex-column align-items-center justify-content-end">
-            <ul className="pagination">
-                <li className="page-item">
+        <div className="d-flex justify-content-center align-items-center">
+            <ul className="nav_pagination">
+                <li>
                     <button
-                        className="page-link"
                         onClick={() => onPageChange(Math.max(0, currentPage - 1))}
                         disabled={currentPage === 0}
                     >
@@ -24,16 +23,15 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
                 {pages.map((page) => (
                     <li
                         key={page}
-                        className={`page-item ${page === currentPage ? "active-page" : ""}`}
+                        className={`${page === currentPage ? "active_page" : ""}`}
                     >
-                        <button className="page-link" onClick={() => onPageChange(page)}>
+                        <button onClick={() => onPageChange(page)}>
                             {page + 1}
                         </button>
                     </li>
                 ))}
-                <li className="page-item">
+                <li>
                     <button
-                        className="page-link"
                         onClick={() => onPageChange(Math.min(totalPages - 1, currentPage + 1))}
                         disabled={currentPage === totalPages - 1}
                     >

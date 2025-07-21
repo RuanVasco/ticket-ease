@@ -1,0 +1,148 @@
+@use "../variables";
+
+.header {
+	background-color: variables.$color-primary;
+
+	&,
+	* {
+		user-select: none;
+		-webkit-user-drag: none;
+	}
+
+	& * {
+		color: variables.$color-white;
+		font-size: variables.$font-size-lg;
+	}
+}
+
+.menu-scroll {
+	overflow-x: auto;
+	white-space: nowrap;
+	gap: 1rem;
+}
+
+.header_brand {
+	height: 40px;
+}
+
+.header_link {
+	text-decoration: none;
+	padding: 7px 12px;
+	border-radius: 8px;
+
+	&_active {
+		background-color: variables.$color-secondary;
+		padding: 7px 12px;
+		border-radius: 8px;
+	}
+
+	&:hover {
+		background-color: variables.$color-tertiary;
+	}
+}
+
+.header_divider {
+	width: 2px;
+	height: 80%;
+	background-color: variables.$color-white;
+}
+
+.notification_wrapper {
+	position: relative;
+	display: inline-block;
+}
+
+.notification_badge {
+	position: absolute;
+	top: -5px;
+	right: -5px;
+	background-color: variables.$color-red;
+	border-radius: 50%;
+	font-size: variables.$font-size-xs;
+	padding: 2px 6px;
+	width: 22px;
+	height: 22px;
+}
+
+.notification_dropdown {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	background-color: variables.$color-white;
+	color: variables.$color-secondary;
+	border-radius: 8px;
+	z-index: 999;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	min-width: 350px;
+
+	& ul {
+		list-style: none;
+		margin: 0;
+		padding: 0 20px 15px 20px;
+		overflow-y: auto;
+		max-height: 400px;
+	}
+
+	& li {
+		padding: 10px 0;
+		border-bottom: 1px solid variables.$color-secondary;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	& li * {
+		color: variables.$color-secondary;
+	}
+
+	& li.unread {
+		font-weight: bold;
+	}
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: variables.$color-tertiary;
+	}
+}
+
+.notification_content {
+	text-align: left;
+	display: flex;
+	flex-direction: column;
+
+	& * {
+		font-size: variables.$font-size-base;
+	}
+}
+
+.dropdown_header {
+	position: sticky;
+	background-color: variables.$color-secondary;
+	top: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: start;
+	padding: 10px 0 10px 20px;
+	border-radius: 8px 8px 0 0;
+}
+
+.dropdown-header span:first-of-type {
+	font-weight: bold;
+}
+
+.mark-as-readed-btn:hover {
+	cursor: pointer;
+}
+
+.modal_user_settings {
+	background-color: variables.$color-white;
+	color: variables.$color-secondary;
+
+	* {
+		color: variables.$color-secondary !important;
+	}
+}

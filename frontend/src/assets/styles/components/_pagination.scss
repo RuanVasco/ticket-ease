@@ -1,0 +1,59 @@
+@use "../variables" as var;
+
+.nav_pagination {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin: 20px 0;
+	list-style: none;
+	padding: 0;
+	background-color: var.$color-primary;
+	// border: 1px solid var.$color-secondary;
+	border-radius: 8px;
+
+	& li {
+		margin: 0;
+
+		& button {
+			border: none;
+			background: none;
+			color: var.$color-white;
+			padding: 0.6rem 1rem;
+			cursor: pointer;
+			transition:
+				background-color 0.2s,
+				color 0.2s;
+			background-color: var.$color-primary;
+
+			&:hover {
+				background-color: var.$color-tertiary;
+				color: var.$color-white;
+			}
+
+			&:disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+			}
+		}
+
+		& > .active_page > button {
+			background-color: var.$color-secondary;
+			color: var.$color-white;
+		}
+	}
+
+	li:first-child button {
+		border-top-left-radius: 8px;
+		border-bottom-left-radius: 8px;
+	}
+
+	li:last-child button {
+		border-top-right-radius: 8px;
+		border-bottom-right-radius: 8px;
+	}
+}
+
+.active_page button {
+	background-color: var.$color-secondary !important;
+	color: var.$color-white !important;
+}

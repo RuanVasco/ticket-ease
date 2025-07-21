@@ -3,3 +3,11 @@
 .idea
 data
 *.db
+.env
+docker-compose.override.yml
+
+
+.DS_Store
+Thumbs.db
+
+*.log

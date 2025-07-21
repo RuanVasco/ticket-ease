@@ -1,0 +1,15 @@
+@use "../variables" as var;
+
+.btn-massive-actions {
+	color: var.$color-white;
+	background-color: var.$color-primary;
+
+	&:hover {
+		background-color: var.$color-secondary;
+		color: var.$color-white;
+	}
+
+	&:active {
+		background-color: var.$color-secondary;
+	}
+}

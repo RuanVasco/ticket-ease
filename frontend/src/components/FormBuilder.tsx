@@ -1,9 +1,17 @@
 import { useEffect, useState } from "react";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { FormField } from "../types/FormField";
 import { Form } from "../types/Form";
 import { TicketCategory } from "../types/TicketCategory";
 import axiosInstance from "./AxiosConfig";
-import { FaArrowRotateRight, FaFloppyDisk, FaMinus, FaPencil, FaPlus } from "react-icons/fa6";
+import {
+    FaArrowRotateRight,
+    FaFloppyDisk,
+    FaMinus,
+    FaPencil,
+    FaPlus,
+    FaXmark,
+} from "react-icons/fa6";
 import { fetchCategories } from "../services/TicketCategoryService";
 import { toast } from "react-toastify";
 import { User } from "../types/User";
@@ -11,6 +19,7 @@ import OptionEditor from "./Fields/OptionEditor";
 import Select from "react-select";
 import { Modal } from "bootstrap";
 import { ApprovalModeEnum } from "../enums/ApprovalModeEnum";
+import { v4 as uuidv4 } from "uuid";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -30,18 +39,18 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
     const [selectedApprovers, setSelectedApprovers] = useState<User[]>([]);
     const [approvalMode, setApprovalMode] = useState<"AND" | "OR">("AND");
     const [newField, setNewField] = useState<FormField>({
-        id: "",
+        id: uuidv4(),
         label: "",
         type: fieldTypes[0] || "TEXT",
         required: false,
         placeholder: "",
         options: [],
+        position: form.fields.length,
     });
 
     useEffect(() => {
         loadFieldTypes();
         loadCategories();
-
     }, []);
 
     useEffect(() => {
@@ -74,7 +83,9 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
 
     const loadApprovers = async (categoryId: number) => {
         try {
-            const res = await axiosInstance.get(`${API_BASE_URL}/ticket-category/${categoryId}/approvers`);
+            const res = await axiosInstance.get(
+                `${API_BASE_URL}/ticket-category/${categoryId}/approvers`
+            );
             if (res.status === 200) {
                 setApprovers(res.data);
             }
@@ -111,7 +122,7 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
     };
 
     const updateNewField = (updated: Partial<FormField>) => {
-        setNewField(prev => ({ ...prev, ...updated }));
+        setNewField((prev) => ({ ...prev, ...updated }));
     };
 
     const handleNewFieldAllowedTypesChange = (selected: any) => {
@@ -120,6 +131,8 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
     };
 
     const handleSubmit = async () => {
+        const isUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
         if (!form.ticketCategory?.id) {
             alert("Selecione uma categoria.");
             return;
@@ -131,7 +144,9 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
             ticketCategoryId: form.ticketCategory.id,
             approvers: selectedApprovers.map((v) => v.id),
             approvalMode: approvalMode,
-            fields: form.fields,
+            fields: form.fields.map(({ id, ...rest }) =>
+                isUUID(id) ? rest : { id, ...rest }
+            ),
         };
         try {
             let res;
@@ -172,16 +187,13 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
     const handleAddField = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (modalMode === "edit" && editIndex !== null) {
-            const newFields = [...form.fields];
-            newFields[editIndex] = newField;
-            setForm({ ...form, fields: newFields });
-        } else {
-            setForm((prev) => ({
-                ...prev,
-                fields: [...prev.fields, newField],
-            }));
-        }
+        const updatedFields = modalMode === "edit" && editIndex !== null
+            ? form.fields.map((f, i) => (i === editIndex ? newField : f))
+            : [...form.fields, newField];
+
+        const sortedFields = [...updatedFields].sort((f1, f2) => f1.position - f2.position);
+
+        setForm({ ...form, fields: sortedFields });
 
         const modalElement = document.getElementById("modal-field");
         if (modalElement) {
@@ -195,12 +207,13 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
 
         if (mode === "create") {
             setNewField({
-                id: "",
+                id: uuidv4(),
                 label: "",
                 type: fieldTypes[0] || "TEXT",
                 required: false,
                 placeholder: "",
                 options: [],
+                position: form.fields.length,
             });
             setEditIndex(null);
         } else if (mode === "edit" && typeof index === "number") {
@@ -213,6 +226,27 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
             const modalInstance = new Modal(modalElement);
             modalInstance.show();
         }
+    };
+
+    const handleDragEnd = (result: DropResult) => {
+        if (!result.destination) return;
+
+        const updatedFields = Array.from(form.fields);
+
+        const [movedItem] = updatedFields.splice(result.source.index, 1);
+
+        if (!movedItem) {
+            console.warn(`Field at index ${result.source.index} not found.`);
+            return;
+        }
+
+        updatedFields.splice(result.destination.index, 0, movedItem);
+
+        updatedFields.forEach((field, index) => {
+            field.position = index;
+        });
+
+        setForm({ ...form, fields: updatedFields });
     };
 
     return (
@@ -238,7 +272,9 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
                                     <input
                                         className="form-control"
                                         value={newField.label}
-                                        onChange={(e) => setNewField({ ...newField, label: e.target.value })}
+                                        onChange={(e) =>
+                                            setNewField({ ...newField, label: e.target.value })
+                                        }
                                         required
                                     />
                                 </div>
@@ -258,7 +294,9 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
                                         }}
                                     >
                                         {fieldTypes.map((type) => (
-                                            <option key={type} value={type}>{type}</option>
+                                            <option key={type} value={type}>
+                                                {type}
+                                            </option>
                                         ))}
                                     </select>
                                 </div>
@@ -266,7 +304,9 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
                                     newField.type === "CHECKBOX" ||
                                     newField.type === "RADIO") && (
                                         <div className="mb-2">
-                                            <label className="form-label">Opções (separadas por vírgula)</label>
+                                            <label className="form-label">
+                                                Opções (separadas por vírgula)
+                                            </label>
                                             <OptionEditor
                                                 value={newField.options}
                                                 onChange={(options) => updateNewField({ options })}
@@ -274,41 +314,65 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
                                         </div>
                                     )}
 
-                                {(newField.type === "FILE" || newField.type === "FILE_MULTIPLE") && (
-                                    <div className="mb-3">
-                                        <label className="form-label">Tipos de arquivos permitidos</label>
-                                        <Select
-                                            className="form-select"
-                                            isMulti={newField.type === "FILE_MULTIPLE"}
-                                            value={newField.options}
-                                            onChange={(selected) => handleNewFieldAllowedTypesChange(selected)}
-                                            options={[
-                                                { value: 'image/*', label: 'Imagens (jpg, png, gif)' },
-                                                { value: 'application/pdf', label: 'PDF (.pdf)' },
-                                                { value: 'application/msword', label: 'Word (.doc)' },
-                                                { value: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', label: 'Word (.docx)' },
-                                                { value: 'application/vnd.ms-excel', label: 'Excel (.xls)' },
-                                                { value: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', label: 'Excel (.xlsx)' },
-                                                { value: 'text/plain', label: 'Texto (.txt)' },
-                                            ]}
-                                        />
-                                    </div>
-                                )}
+                                {(newField.type === "FILE" ||
+                                    newField.type === "FILE_MULTIPLE") && (
+                                        <div className="mb-3">
+                                            <label className="form-label">
+                                                Tipos de arquivos permitidos
+                                            </label>
+                                            <Select
+                                                className="form-select"
+                                                isMulti={newField.type === "FILE_MULTIPLE"}
+                                                value={newField.options}
+                                                onChange={(selected) =>
+                                                    handleNewFieldAllowedTypesChange(selected)
+                                                }
+                                                options={[
+                                                    {
+                                                        value: "image/*",
+                                                        label: "Imagens (jpg, png, gif)",
+                                                    },
+                                                    { value: "application/pdf", label: "PDF (.pdf)" },
+                                                    {
+                                                        value: "application/msword",
+                                                        label: "Word (.doc)",
+                                                    },
+                                                    {
+                                                        value: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                                        label: "Word (.docx)",
+                                                    },
+                                                    {
+                                                        value: "application/vnd.ms-excel",
+                                                        label: "Excel (.xls)",
+                                                    },
+                                                    {
+                                                        value: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                                        label: "Excel (.xlsx)",
+                                                    },
+                                                    { value: "text/plain", label: "Texto (.txt)" },
+                                                ]}
+                                            />
+                                        </div>
+                                    )}
 
                                 <div className="form-check mb-2">
                                     <input
-                                        disabled={newField.type === "FILE" || newField.type === "FILE_MULTIPLE"}
+                                        disabled={
+                                            newField.type === "FILE" ||
+                                            newField.type === "FILE_MULTIPLE"
+                                        }
                                         type="checkbox"
                                         className="form-check-input"
                                         id={`required`}
                                         checked={newField.required}
-                                        onChange={(e) => updateNewField({ required: e.target.checked })}
+                                        onChange={(e) =>
+                                            updateNewField({ required: e.target.checked })
+                                        }
                                     />
                                     <label className="form-check-label" htmlFor={`required`}>
                                         Obrigatório
                                     </label>
                                 </div>
-
                             </div>
                             <div className="modal-footer">
                                 <button type="submit" className="btn btn-primary">
@@ -394,8 +458,8 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
                             label: `${v.name} (${v.email})`,
                         }))}
                     onChange={(options) => {
-                        const selected = options.map((opt) =>
-                            approvers.find((v) => v.id === opt.value)!
+                        const selected = options.map(
+                            (opt) => approvers.find((v) => v.id === opt.value)!
                         );
                         setSelectedApprovers(selected);
                     }}
@@ -416,66 +480,102 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
             </div>
             <div className="mt-2">
                 <span>Campos</span>
-                <ul className="list-group mt-2">
-                    {form.fields.map((field, index) => (
-                        <li key={index} className="list-group-item">
-                            <div>
-                                {field.label} - {field.type}
-                                <button
-                                    type="button"
-                                    className="btn btn-sm ms-4 me-2 btn-secondary"
-                                    onClick={() => openModal("edit", index)}
-                                >
-                                    <FaPencil />
-                                </button>
-                                <button
-                                    type="button"
-                                    className="btn btn-danger btn-sm"
-                                    onClick={() => removeField(index)}
-                                >
-                                    <FaMinus />
-                                </button>
-                            </div>
-                            {field.options && field.options?.length > 0 && (
-                                <ul>
-                                    {field.options.map((option, idx) => (
-                                        <li key={idx}>{option.label}</li>
+                <DragDropContext onDragEnd={handleDragEnd}>
+                    <Droppable droppableId="fields-list">
+                        {(provided) => (
+                            <ul
+                                className="list-group mt-2"
+                                {...provided.droppableProps}
+                                ref={provided.innerRef}
+                            >
+                                {[...form.fields]
+                                    .sort((f1, f2) => f1.position - f2.position)
+                                    .map((field, index) => (
+                                        <Draggable key={field.id} draggableId={String(field.id)} index={index}>
+                                            {(provided) => (
+                                                <li
+                                                    key={index}
+                                                    className="list-group-item"
+                                                    ref={provided.innerRef}
+                                                    {...provided.draggableProps}
+                                                >
+                                                    <div className="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <div>
+                                                                {field.label} - {field.type}
+                                                                <button
+                                                                    type="button"
+                                                                    className="btn btn-sm ms-4 me-2 btn-secondary"
+                                                                    onClick={() => openModal("edit", index)}
+                                                                >
+                                                                    <FaPencil />
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    className="btn btn-danger btn-sm"
+                                                                    onClick={() => removeField(index)}
+                                                                >
+                                                                    <FaMinus />
+                                                                </button>
+                                                            </div>
+                                                            {field.options && field.options?.length > 0 && (
+                                                                <ul>
+                                                                    {field.options.map((option, idx) => (
+                                                                        <li key={idx}>{option.label}</li>
+                                                                    ))}
+                                                                </ul>
+                                                            )}
+                                                            <div className="form-check">
+                                                                <input
+                                                                    disabled
+                                                                    type="checkbox"
+                                                                    className="form-check-input"
+                                                                    id={`required_${index}`}
+                                                                    checked={field.required}
+                                                                    onChange={(e) =>
+                                                                        updateField(index, { required: e.target.checked })
+                                                                    }
+                                                                />
+                                                                <label className="form-check-label" htmlFor={`required_${index}`}>
+                                                                    Obrigatório
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        <div
+                                                            {...provided.dragHandleProps}
+                                                            style={{ cursor: "grab" }}
+                                                            className="text-muted"
+                                                            title="Arraste para reordenar"
+                                                        >
+                                                            ☰
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            )}
+                                        </Draggable>
                                     ))}
-                                </ul>
-                            )}
-                            <div className="form-check">
-                                <input
-                                    disabled
-                                    type="checkbox"
-                                    className="form-check-input"
-                                    id={`required_${index}`}
-                                    checked={field.required}
-                                    onChange={(e) => updateField(index, { required: e.target.checked })}
-                                />
-                                <label className="form-check-label" htmlFor={`required_${index}`}>
-                                    Obrigatório
-                                </label>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-                <button className="btn btn-secondary mt-2" onClick={() => openModal("create")}>
+                                {provided.placeholder}
+                            </ul>
+                        )}
+                    </Droppable>
+                </DragDropContext>
+                <button className="btn_common mt-2" onClick={() => openModal("create")}>
                     <FaPlus /> Adicionar Campo
                 </button>
             </div>
             <div className="mt-2">
                 {screenType === "create" ? (
-                    <button className="btn btn-primary me-2" onClick={handleSubmit}>
+                    <button className="btn_success me-2" onClick={handleSubmit}>
                         <FaFloppyDisk /> Salvar
                     </button>
                 ) : (
-                    <button className="btn btn-primary me-2" onClick={handleSubmit}>
+                    <button className="btn_success me-2" onClick={handleSubmit}>
                         <FaArrowRotateRight /> Atualizar
                     </button>
                 )}
 
-                <button className="btn btn-danger" onClick={() => setScreenType("view")}>
-                    Cancelar
+                <button className="btn_error" onClick={() => setScreenType("view")}>
+                    <FaXmark /> Cancelar
                 </button>
             </div>
         </div>

@@ -16,7 +16,6 @@ import UserManagement from "./pages/admin/UserManagement";
 import CreateTicket from "./pages/CreateTicket";
 import Login from "./pages/Login";
 import ManageTickets from "./pages/ManageTickets";
-import TicketDetails from "./pages/TicketDetails";
 import ViewTickets from "./pages/ViewTickets";
 import FormManagement from "./pages/admin/FormManagement";
 
@@ -42,9 +41,10 @@ function App() {
                 <Route element={<MainLayout />}>
                     <Route path="/" element={canOpenTicket ? <CreateTicket /> : <></>} />
                     <Route path="/tickets" element={<ViewTickets />} />
-                    <Route path="/ticket/:id" element={<TicketDetails />} />
                     {canManageTicket && (
-                        <Route path="/gerenciar-tickets" element={<ManageTickets />} />
+                        <>
+                            <Route path="/gerenciar-tickets" element={<ManageTickets />} />
+                        </>
                     )}
                     {isAdmin && (
                         <>

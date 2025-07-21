@@ -13,6 +13,7 @@ import { User } from "../../types/User";
 import { toast } from "react-toastify";
 import { closeModal } from "../../components/Util/CloseModal";
 import { ApprovalModeEnum } from "../../enums/ApprovalModeEnum";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -25,6 +26,7 @@ const columns = [
 ];
 
 const FormManagement: React.FC = () => {
+    const navigate = useNavigate();
     const [filterText, setFilterText] = useState<string>("");
     const [data, setData] = useState<Form[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(0);
@@ -113,7 +115,7 @@ const FormManagement: React.FC = () => {
 
     return (
         <main>
-            <div className="container">
+            <div className="container-xxl">
                 {screenType === "view" ? (
                     <ActionBar
                         delEntityEndPoint={`${API_BASE_URL}/departments`}
@@ -126,11 +128,12 @@ const FormManagement: React.FC = () => {
                         pageSize={pageSize}
                         canCreate={true}
                         canDelete={false}
+                        onBack={() => { navigate("/admin") }}
                     />
                 ) : (
-                    <div className="d-flex justify-content-center mt-4 mb-3">
+                    <div className="mt-4 mb-3 container-xxl">
                         <button
-                            className="btn btn-go-back"
+                            className="btn_common"
                             onClick={() => {
                                 setScreenType("view");
                             }}
@@ -141,7 +144,7 @@ const FormManagement: React.FC = () => {
                 )}
             </div>
             {screenType === "view" ? (
-                <div className="container">
+                <div className="container-xxl">
                     <Table
                         columns={columns}
                         data={data}
@@ -161,8 +164,8 @@ const FormManagement: React.FC = () => {
                     />
                 </div>
             ) : (
-                <div className="row">
-                    <div className="ps-4 col-7" style={{ height: "80vh", overflowY: "auto" }}>
+                <div className="row container-fluid ">
+                    <div className="col-7 pb-5" style={{ height: "80vh", overflowY: "auto" }}>
                         <FormBuilder
                             screenType={screenType}
                             setScreenType={setScreenType}
@@ -170,7 +173,7 @@ const FormManagement: React.FC = () => {
                             setForm={setForm}
                         />
                     </div>
-                    <div className="pe-4 col-5" style={{ height: "80vh", overflowY: "auto" }}>
+                    <div className="col-5" style={{ height: "80vh", overflowY: "auto" }}>
                         <FormPreview form={form} />
                     </div>
                 </div>

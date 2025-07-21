@@ -8,12 +8,14 @@ import { usePermissions } from "../../context/PermissionsContext";
 import { Cargo } from "../../types/Cargo";
 import { toast } from "react-toastify";
 import { closeModal } from "../../components/Util/CloseModal";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 const columns = [{ value: "name", label: "Nome" }];
 
 const CargoManagement: React.FC = () => {
+    const navigate = useNavigate();
     const [filterText, setFilterText] = useState<string>("");
     const [modeModal, setModeModal] = useState<string>("");
     const [modalTitle, setModalTitle] = useState<string>("");
@@ -166,6 +168,7 @@ const CargoManagement: React.FC = () => {
                     pageSize={pageSize}
                     canCreate={canCreate}
                     canDelete={canDelete}
+                    onBack={() => { navigate("/admin") }}
                 />
 
                 <Table

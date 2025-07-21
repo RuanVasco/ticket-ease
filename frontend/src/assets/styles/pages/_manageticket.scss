@@ -1,0 +1,23 @@
+@use "../variables" as var;
+
+.sidebar {
+	background-color: var.$color-secondary;
+	min-height: 93vh;
+
+	button {
+		color: var.$color-white;
+		border: none;
+		background: transparent;
+		border-radius: 8px;
+		width: 100%;
+		padding: 0.75rem 1rem;
+		text-align: left;
+
+		&.active,
+		&:focus,
+		&:hover {
+			color: var.$color-white;
+			background-color: var.$color-tertiary;
+		}
+	}
+}

@@ -6,7 +6,6 @@ import SelectInput from "./SelectInput";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 interface SelectInputProps {
-    label: string;
     required?: boolean;
     disabled?: boolean;
     value: string;
@@ -16,7 +15,6 @@ interface SelectInputProps {
 
 const SelectDepartment: React.FC<SelectInputProps> = ({
     value,
-    label,
     required = false,
     disabled = false,
     onChange,
@@ -58,7 +56,7 @@ const SelectDepartment: React.FC<SelectInputProps> = ({
     return (
         <SelectInput
             value={value || ""}
-            label={label}
+            label={"Selecione um departamento"}
             required={required}
             options={options}
             disabled={disabled}
