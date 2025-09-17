@@ -2,13 +2,15 @@ package com.ticketease.api.Controllers;
 
 import com.ticketease.api.DTO.User.CompleteUserDTO;
 import com.ticketease.api.DTO.User.UserDTO;
+import com.ticketease.api.DTO.UserPreferenceDTO.UserPreferenceResponseDTO;
 import com.ticketease.api.DTO.UserRoleDepartmentDTO;
-import com.ticketease.api.Entities.*;
+import com.ticketease.api.Entities.Department;
+import com.ticketease.api.Entities.Role;
+import com.ticketease.api.Entities.User;
+import com.ticketease.api.Entities.UserRoleDepartment;
 import com.ticketease.api.Repositories.*;
 import com.ticketease.api.Services.CustomUserDetailsService;
 import jakarta.transaction.Transactional;
-import java.util.*;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,29 +20,26 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("users")
 public class UserController {
 
+	private final UserRoleDepartmentRepository userRoleDepartmentRepository;
 	@Autowired
 	private UserRepository userRepository;
-
 	@Autowired
 	private CustomUserDetailsService userService;
-
 	@Autowired
 	private CargoRepository cargoRepository;
-
 	@Autowired
 	private DepartmentRepository departmentRepository;
-
 	@Autowired
 	private RoleRepository roleRepository;
-
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-
-	private final UserRoleDepartmentRepository userRoleDepartmentRepository;
 
 	public UserController(UserRoleDepartmentRepository userRoleDepartmentRepository) {
 		this.userRoleDepartmentRepository = userRoleDepartmentRepository;
@@ -56,17 +55,17 @@ public class UserController {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 		boolean allDepartmentsNull = user.getRoleBindings().stream()
-				.allMatch(binding -> binding.getDepartment() == null);
+			.allMatch(binding -> binding.getDepartment() == null);
 
 		if (allDepartmentsNull) {
 			return ResponseEntity.noContent().build();
 		}
 
 		Set<Department> departments = user.getRoleBindings().stream().map(UserRoleDepartment::getDepartment)
-				.filter(Objects::nonNull).collect(Collectors.toSet());
+			.filter(Objects::nonNull).collect(Collectors.toSet());
 
 		List<Department> sortedDepartments = departments.stream().sorted(Comparator.comparing(Department::getId))
-				.toList();
+			.toList();
 
 		return ResponseEntity.ok(sortedDepartments);
 	}
@@ -111,7 +110,7 @@ public class UserController {
 		User sender = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		if (!sender.hasPermission("EDIT_USER", null)) {
 			return new ResponseEntity<>("Acesso negado. Você não tem permissão para editar usuários.",
-					HttpStatus.FORBIDDEN);
+				HttpStatus.FORBIDDEN);
 		}
 
 		Optional<User> optionalUser = userRepository.findById(userID);
@@ -169,7 +168,7 @@ public class UserController {
 		User sender = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		if (!sender.hasPermission("CREATE_USER", null)) {
 			return new ResponseEntity<>("Acesso negado. Você não tem permissão para criar usuários.",
-					HttpStatus.FORBIDDEN);
+				HttpStatus.FORBIDDEN);
 		}
 
 		if (userRepository.existsByEmail(signUpDto.email())) {
@@ -208,5 +207,16 @@ public class UserController {
 		}
 
 		return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
+	}
+
+	@GetMapping("/{userId}/preferences")
+	public ResponseEntity<UserPreferenceResponseDTO> userPreferences(@PathVariable Long userID) {
+		Optional<User> optionalUser = userRepository.findById(userID);
+		if (optionalUser.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+
+		User user = optionalUser.get();
+		return ResponseEntity.ok(UserPreferenceResponseDTO.from(user));
 	}
 }
