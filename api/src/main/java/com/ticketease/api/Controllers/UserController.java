@@ -10,7 +10,9 @@ import com.ticketease.api.Entities.User;
 import com.ticketease.api.Entities.UserRoleDepartment;
 import com.ticketease.api.Repositories.*;
 import com.ticketease.api.Services.CustomUserDetailsService;
+import com.ticketease.api.Services.UserPreferenceService;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,9 +27,11 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("users")
+@RequiredArgsConstructor
 public class UserController {
 
 	private final UserRoleDepartmentRepository userRoleDepartmentRepository;
+	private final UserPreferenceService userPreferenceService;
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired
@@ -40,10 +44,6 @@ public class UserController {
 	private RoleRepository roleRepository;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-
-	public UserController(UserRoleDepartmentRepository userRoleDepartmentRepository) {
-		this.userRoleDepartmentRepository = userRoleDepartmentRepository;
-	}
 
 	@GetMapping
 	public ResponseEntity<?> getAll() {
@@ -210,13 +210,8 @@ public class UserController {
 	}
 
 	@GetMapping("/{userId}/preferences")
-	public ResponseEntity<UserPreferenceResponseDTO> userPreferences(@PathVariable Long userID) {
-		Optional<User> optionalUser = userRepository.findById(userID);
-		if (optionalUser.isEmpty()) {
-			return ResponseEntity.notFound().build();
-		}
-
-		User user = optionalUser.get();
-		return ResponseEntity.ok(UserPreferenceResponseDTO.from(user));
+	public ResponseEntity<List<UserPreferenceResponseDTO>> getUserPreferences(@PathVariable Long userId) {
+		List<UserPreferenceResponseDTO> responseDTO = userPreferenceService.getPreferencesByUserId(userId);
+		return ResponseEntity.ok(responseDTO);
 	}
 }

@@ -1,12 +1,17 @@
 package com.ticketease.api.DTO.UserPreferenceDTO;
 
-import com.ticketease.api.DTO.User.UserResponseDTO;
-import com.ticketease.api.Entities.User;
+import com.ticketease.api.Entities.UserPreference;
 
 public record UserPreferenceResponseDTO(
-	UserResponseDTO userResponseDTO
+	Long id,
+	String key,
+	String value
 ) {
-	public static UserPreferenceResponseDTO from(User user) {
-		return new UserPreferenceResponseDTO(UserResponseDTO.from(user));
+	public static UserPreferenceResponseDTO from(UserPreference userPreference) {
+		return new UserPreferenceResponseDTO(
+			userPreference.getId(),
+			userPreference.getKey(),
+			userPreference.getValue()
+		);
 	}
 }
