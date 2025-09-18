@@ -85,13 +85,7 @@ public class UserController {
 	@Transactional
 	@DeleteMapping("/{userID}")
 	public ResponseEntity<?> deleteUser(@PathVariable Long userID) {
-		Optional<User> optionalUser = userRepository.findById(userID);
-
-		if (optionalUser.isEmpty()) {
-			return ResponseEntity.notFound().build();
-		}
-
-		User user = optionalUser.get();
+		User user = userService.findUserById(userID);
 
 		user.getRoleBindings().clear();
 		userRepository.save(user);
@@ -113,12 +107,7 @@ public class UserController {
 				HttpStatus.FORBIDDEN);
 		}
 
-		Optional<User> optionalUser = userRepository.findById(userID);
-		if (optionalUser.isEmpty()) {
-			return ResponseEntity.notFound().build();
-		}
-
-		User user = optionalUser.get();
+		User user = userService.findUserById(userID);
 
 		userRoleDepartmentRepository.deleteByUser(user);
 		userRoleDepartmentRepository.flush();
