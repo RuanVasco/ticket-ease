@@ -37,11 +37,9 @@ public class DataInitializer implements CommandLineRunner {
 	@Transactional
 	public void run(String... args) {
 		if (userRepository.count() == 0) {
-			// Roles
 			Role roleAdmin = roleRepository.findByName("ADMIN").orElseGet(() -> roleRepository.save(new Role("ADMIN")));
 			Role roleUser = roleRepository.findByName("USER").orElseGet(() -> roleRepository.save(new Role("USER")));
 
-			// Unidade
 			Unit matriz = unitRepository.findByName("Matriz").orElseGet(() -> {
 				Unit u = new Unit();
 				u.setName("Matriz");
@@ -49,7 +47,6 @@ public class DataInitializer implements CommandLineRunner {
 				return unitRepository.save(u);
 			});
 
-			// Departamentos
 			Department TI = departmentRepository.findByName("TI").orElseGet(() -> {
 				Department d = new Department();
 				d.setName("TI");
@@ -66,7 +63,6 @@ public class DataInitializer implements CommandLineRunner {
 				return departmentRepository.save(d);
 			});
 
-			// Permissões
 			List<Permission> allPermissions = new ArrayList<>();
 
 			Permission permissionCreateCargo = new Permission();
@@ -174,14 +170,12 @@ public class DataInitializer implements CommandLineRunner {
 			permissionDeleteProfile.setDescription("Permite deletar perfis");
 			allPermissions.add(permissionDeleteProfile);
 
-			// Salvar permissões evitando duplicação
 			List<Permission> savedPermissions = new ArrayList<>();
 			for (Permission p : allPermissions) {
 				permissionRepository.findByName(p.getName()).ifPresentOrElse(savedPermissions::add,
 						() -> savedPermissions.add(permissionRepository.save(p)));
 			}
 
-			// Permissões por perfil
 			roleAdmin.setPermissions(new HashSet<>(savedPermissions));
 
 			Set<Permission> userPermissions = new HashSet<>();
@@ -189,13 +183,11 @@ public class DataInitializer implements CommandLineRunner {
 			userPermissions.add(findByName(savedPermissions, "CREATE_TICKET"));
 			roleUser.setPermissions(userPermissions);
 
-			// Categoria de ticket (sempre cria, sem verificar)
 			TicketCategory ticketCategory = new TicketCategory();
 			ticketCategory.setName("Infraestrutura");
 			ticketCategory.setDepartment(TI);
 			ticketCategoryRepository.save(ticketCategory);
 
-			// Usuário admin
 			User admin = new User();
 			admin.setPassword("admin", passwordEncoder);
 			admin.setName("Administrador");
@@ -204,7 +196,6 @@ public class DataInitializer implements CommandLineRunner {
 			userRoleDepartmentRepository.save(new UserRoleDepartment(admin, roleAdmin, null));
 			System.out.println("Usuário admin criado.");
 
-			// Usuário comum
 			User commonUser = new User();
 			commonUser.setPassword("user", passwordEncoder);
 			commonUser.setName("Usuário Comum");

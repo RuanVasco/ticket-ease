@@ -52,6 +52,7 @@ const TicketApproval = () => {
             });
 
             if (res.status === 200) {
+                console.log(res.data.content);
                 setTickets(res.data.content);
                 setTotalPages(res.data.totalPages);
                 setTotalItems(res.data.totalElements);

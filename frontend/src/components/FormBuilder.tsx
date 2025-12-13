@@ -445,7 +445,6 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ screenType, setScreenType, fo
                 <label className="form-label">Validadores</label>
                 <Select
                     isMulti
-                    className="form-select"
                     isDisabled={!form.ticketCategory.id}
                     options={approvers.map((v) => ({
                         value: v.id,
