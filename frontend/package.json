@@ -12,7 +12,7 @@
     "dependencies": {
         "@hello-pangea/dnd": "^18.0.1",
         "@stomp/stompjs": "^7.0.1",
-        "axios": "^1.13.5",
+        "axios": "^1.15.0",
         "bootstrap": "^5.3.3",
         "imask": "^7.6.1",
         "jwt-decode": "^4.0.0",
@@ -43,6 +43,6 @@
         "prettier": "^3.5.3",
         "typescript": "~5.7.2",
         "typescript-eslint": "^8.24.1",
-        "vite": "^7.1.11"
+        "vite": "^7.3.2"
     }
 }
